@@ -1,4 +1,7 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
+import { aboutUs, avans, companies, cookiePolicy, history, partners, privacyPolicy, termsOfService } from '@/routes';
+</script>
 
 <template>
     <footer class="bg-gray-700 text-gray-300">
@@ -7,9 +10,9 @@
                 <!-- Left Section -->
                 <div class="mb-10 md:mb-0 md:w-1/3">
                     <div class="mb-4 flex items-center space-x-3">
-                        <span class="text-xl font-semibold text-white">EindejaarsBBQ</span>
+                        <span class="text-xl font-semibold text-white">ATIx Bedrijvendag</span>
                     </div>
-                    <p class="mb-6 text-gray-400">De beste barbecue van het schooljaar, .</p>
+                    <p class="mb-6 text-gray-400">The one and only student internship fair for Engineering</p>
                     <div class="flex space-x-4">
                         <a href="#" class="hover:text-white" aria-label="Facebook">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -49,44 +52,44 @@
                 <!-- Middle/Right Sections -->
                 <div class="grid grid-cols-2 gap-8 md:w-2/3 md:grid-cols-4">
                     <div>
-                        <h3 class="mb-4 font-semibold text-white">Product</h3>
+                        <h3 class="mb-4 font-semibold text-white">Evenementen</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
-                            <li><a href="#" class="hover:text-white">Features</a></li>
-                            <li><a href="#" class="hover:text-white">Pricing</a></li>
-                            <li><a href="#" class="hover:text-white">Integrations</a></li>
-                            <li><a href="#" class="hover:text-white">Demo</a></li>
+                            <li><Link :href="companies()" class="hover:border-b-2 hover:border-white hover:text-white">19 oktober 2025</Link></li>
+                            <li><Link :href="companies()" class="hover:border-b-2 hover:border-white hover:text-white">Pricing</Link></li>
+                            <li><Link :href="companies()" class="hover:border-b-2 hover:border-white hover:text-white">Integrations</Link></li>
+                            <li><Link :href="companies()" class="hover:border-b-2 hover:border-white hover:text-white">Demo</Link></li>
                         </ul>
                     </div>
                     <div>
-                        <h3 class="mb-4 font-semibold text-white">Company</h3>
+                        <h3 class="mb-4 font-semibold text-white">Bedrijvendag</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
-                            <li><a href="#" class="hover:text-white">About Us</a></li>
-                            <li><a href="#" class="hover:text-white">Careers</a></li>
-                            <li><a href="#" class="hover:text-white">Press</a></li>
-                            <li><a href="#" class="hover:text-white">Blog</a></li>
+                            <li><Link :href="aboutUs()" class="hover:border-b-2 hover:border-white hover:text-white">Over Ons</Link></li>
+                            <li><Link :href="avans()" class="hover:border-b-2 hover:border-white hover:text-white">Avans Hogeschool</Link></li>
                         </ul>
                     </div>
                     <div>
-                        <h3 class="mb-4 font-semibold text-white">Resources</h3>
+                        <h3 class="mb-4 font-semibold text-white">Navigatie</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
-                            <li><a href="#" class="hover:text-white">Help Center</a></li>
-                            <li><a href="#" class="hover:text-white">Community</a></li>
-                            <li><a href="#" class="hover:text-white">Tutorials</a></li>
-                            <li><a href="#" class="hover:text-white">Webinars</a></li>
+                            <li><Link :href="companies()" class="hover:border-b-2 hover:border-white hover:text-white">Bedrijven</Link></li>
+                            <li><Link :href="partners()" class="hover:border-b-2 hover:border-white hover:text-white">Partners</Link></li>
+                            <li><Link :href="history()" class="hover:border-b-2 hover:border-white hover:text-white">Geschiedenis</Link></li>
                         </ul>
                     </div>
                     <div>
                         <h3 class="mb-4 font-semibold text-white">Legal</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
-                            <li><a href="#" class="hover:text-white">Privacy Policy</a></li>
-                            <li><a href="#" class="hover:text-white">Terms of Service</a></li>
-                            <li><a href="#" class="hover:text-white">Cookie Policy</a></li>
-                            <li><a href="#" class="hover:text-white">Security</a></li>
+                            <li><Link :href="privacyPolicy()" class="hover:border-b-2 hover:border-white hover:text-white">Privacy Policy</Link></li>
+                            <li>
+                                <Link :href="termsOfService()" class="hover:border-b-2 hover:border-white hover:text-white">Terms of Service</Link>
+                            </li>
+                            <li><Link :href="cookiePolicy()" class="hover:border-b-2 hover:border-white hover:text-white">Cookie Policy</Link></li>
                         </ul>
                     </div>
                 </div>
             </div>
-            <div class="mt-10 border-t border-gray-700 pt-6 text-center text-sm text-gray-500">&copy; 2025 EindejaarsBBQ. All rights reserved.</div>
+            <div class="mt-10 border-t border-gray-700 pt-6 text-center text-sm text-gray-500">
+                &copy; 2025 ATIx Bedrijvendag. All rights reserved.
+            </div>
         </div>
     </footer>
 </template>

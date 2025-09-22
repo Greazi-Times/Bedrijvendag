@@ -19,7 +19,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     <Head title="Companies" />
 
     <AppHeader class="sticky top-0 z-50 bg-primary/8 backdrop-blur supports-[backdrop-filter]:bg-primary/8 dark:bg-[#161615]/80" />
-    <header class="text-foreground p-6">HISTORY PAGE</header>
+    <header class="text-foreground p-6">COMPANY PAGE</header>
 
     <AppFooter />
 

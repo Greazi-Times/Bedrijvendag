@@ -11,10 +11,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import UserMenuContent from '@/components/UserMenuContent.vue';
 import { getInitials } from '@/composables/useInitials';
 import { toUrl, urlIsActive } from '@/lib/utils';
-import { dashboard, home, login } from '@/routes';
+import { home, companies, contact, aboutUs, history, partners } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
 import { InertiaLinkProps, Link, usePage } from '@inertiajs/vue3';
-import { Github, LayoutGrid, Menu, Search } from 'lucide-vue-next';
+import { Github, Menu } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -37,16 +37,31 @@ const activeItemStyles = computed(
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
+        title: 'Companies',
+        href: companies(),
+    },
+    {
+        title: 'Partners',
+        href: partners(),
+    },
+    {
+        title: 'History',
+        href: history(),
+    },
+    {
+        title: 'About Us',
+        href: aboutUs(),
+    },
+    {
+        title: 'Contact',
+        href: contact(),
     },
 ];
 
 const rightNavItems: NavItem[] = [
     {
         title: 'Repository',
-        href: 'https://github.com/Greazi-Times/EindejaarsBBQ',
+        href: 'https://github.com/Greazi-Times/Bedrijvendag',
         icon: Github,
     },
 ];
@@ -55,7 +70,7 @@ const rightNavItems: NavItem[] = [
 <template>
     <div>
         <div class="border-b border-sidebar-border/80">
-            <div class="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
+            <div class="relative mx-auto flex h-20 items-center px-4 md:max-w-7xl">
                 <!-- Mobile Menu -->
                 <div class="lg:hidden">
                     <Sheet>
@@ -100,17 +115,21 @@ const rightNavItems: NavItem[] = [
                     </Sheet>
                 </div>
 
-                <Link :href="home()" class="flex items-center gap-x-2">
+                <Link :href="home()" class="relative z-10 flex items-center gap-x-2">
                     <AppLogo />
                 </Link>
 
                 <!-- Desktop Menu -->
-                <div class="hidden h-full lg:flex lg:flex-1">
+                <div class="hidden h-full lg:absolute lg:inset-x-0 lg:flex lg:justify-center">
                     <NavigationMenu class="ml-10 flex h-full items-stretch">
                         <NavigationMenuList class="flex h-full items-stretch space-x-2">
                             <NavigationMenuItem v-for="(item, index) in mainNavItems" :key="index" class="relative flex h-full items-center">
                                 <Link
-                                    :class="[navigationMenuTriggerStyle(), activeItemStyles(item.href), 'h-9 cursor-pointer px-3 hover:bg-primary/70 hover:text-accent-foreground rounded-md transition-colors']"
+                                    :class="[
+                                        navigationMenuTriggerStyle(),
+                                        activeItemStyles(item.href),
+                                        'h-9 cursor-pointer rounded-md px-3 transition-colors hover:bg-primary/70 hover:text-accent-foreground',
+                                    ]"
                                     :href="item.href"
                                 >
                                     <component v-if="item.icon" :is="item.icon" class="mr-2 h-4 w-4" />
@@ -118,7 +137,7 @@ const rightNavItems: NavItem[] = [
                                 </Link>
                                 <div
                                     v-if="isCurrentRoute(item.href)"
-                                    class="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"
+                                    class="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"
                                 ></div>
                             </NavigationMenuItem>
                         </NavigationMenuList>
@@ -154,35 +173,26 @@ const rightNavItems: NavItem[] = [
 
                     <DropdownMenu v-if="auth && auth.user">
                         <DropdownMenuTrigger :as-child="true">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                class="relative size-10 w-auto rounded-full p-1 hover:ring-2 hover:ring-primary"
-                            >
+                            <Button variant="ghost" size="icon" class="relative size-10 w-auto rounded-full p-1 hover:ring-2 hover:ring-primary">
                                 <Avatar class="size-8 overflow-hidden rounded-full">
                                     <AvatarImage v-if="auth && auth.user && auth.user.avatar" :src="auth.user.avatar" :alt="auth.user.name" />
-                                    <AvatarFallback class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white">
+                                    <AvatarFallback class="rounded-lg bg-muted-foreground/50 font-semibold text-foreground">
                                         {{ getInitials(auth.user?.name) }}
                                     </AvatarFallback>
                                 </Avatar>
-                                <span class="ml-2 hidden md:inline-block max-w-[160px] truncate text-sm font-medium">{{ auth.user.name }}</span>
+                                <span class="ml-2 hidden max-w-[160px] truncate text-sm font-medium md:inline-block">{{ auth.user.name }}</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" class="w-56">
                             <UserMenuContent :user="auth.user" />
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <template v-else>
-                        <Link :href="login()" class="rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/80">
-                            Sign in
-                        </Link>
-                    </template>
                 </div>
             </div>
         </div>
 
         <div v-if="props.breadcrumbs.length > 1" class="flex w-full border-b border-sidebar-border/70">
-            <div class="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl">
+            <div class="mx-auto flex h-12 w-full items-center justify-start px-4 text-accent-foreground md:max-w-7xl">
                 <Breadcrumbs :breadcrumbs="breadcrumbs" />
             </div>
         </div>
