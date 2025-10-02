@@ -7,9 +7,9 @@ Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
-Route::get('geschiedenis', function () {
-    return Inertia::render('History');
-})->name('history');
+Route::get('editions', function () {
+    return Inertia::render('Editions');
+})->name('editions');
 
 Route::get('bedrijven', function () {
     return Inertia::render('Companies');

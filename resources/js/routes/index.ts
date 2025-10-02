@@ -212,68 +212,68 @@ home.form = homeForm
 
 /**
 * @see routes/web.php:10
-* @route '/geschiedenis'
+* @route '/editions'
 */
-export const history = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
-    url: history.url(options),
+export const editions = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: editions.url(options),
     method: 'get',
 })
 
-history.definition = {
+editions.definition = {
     methods: ["get","head"],
-    url: '/geschiedenis',
+    url: '/editions',
 } satisfies RouteDefinition<["get","head"]>
 
 /**
 * @see routes/web.php:10
-* @route '/geschiedenis'
+* @route '/editions'
 */
-history.url = (options?: RouteQueryOptions) => {
-    return history.definition.url + queryParams(options)
+editions.url = (options?: RouteQueryOptions) => {
+    return editions.definition.url + queryParams(options)
 }
 
 /**
 * @see routes/web.php:10
-* @route '/geschiedenis'
+* @route '/editions'
 */
-history.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
-    url: history.url(options),
+editions.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: editions.url(options),
     method: 'get',
 })
 
 /**
 * @see routes/web.php:10
-* @route '/geschiedenis'
+* @route '/editions'
 */
-history.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
-    url: history.url(options),
+editions.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: editions.url(options),
     method: 'head',
 })
 
 /**
 * @see routes/web.php:10
-* @route '/geschiedenis'
+* @route '/editions'
 */
-const historyForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: history.url(options),
+const editionsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: editions.url(options),
     method: 'get',
 })
 
 /**
 * @see routes/web.php:10
-* @route '/geschiedenis'
+* @route '/editions'
 */
-historyForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: history.url(options),
+editionsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: editions.url(options),
     method: 'get',
 })
 
 /**
 * @see routes/web.php:10
-* @route '/geschiedenis'
+* @route '/editions'
 */
-historyForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: history.url({
+editionsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: editions.url({
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',
             ...(options?.query ?? options?.mergeQuery ?? {}),
@@ -282,7 +282,7 @@ historyForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
     method: 'get',
 })
 
-history.form = historyForm
+editions.form = editionsForm
 
 /**
 * @see routes/web.php:14
