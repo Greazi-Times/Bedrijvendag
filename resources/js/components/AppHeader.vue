@@ -70,7 +70,7 @@ const rightNavItems: NavItem[] = [
 
 <template>
     <div>
-        <div class="border-b border-sidebar-border/80">
+        <div class="border-b border-sidebar-border/80 bg-background">
             <div class="relative mx-auto flex h-20 items-center px-4 md:max-w-7xl">
                 <!-- Mobile Menu -->
                 <div class="lg:hidden">
@@ -83,7 +83,7 @@ const rightNavItems: NavItem[] = [
                         <SheetContent side="left" class="w-[300px] p-6">
                             <SheetTitle class="sr-only">Navigation Menu</SheetTitle>
                             <SheetHeader class="flex justify-start text-left">
-                                <AppLogoIcon class="size-6 fill-current text-black dark:text-white" />
+                                <AppLogoIcon class="size-6 fill-current text-foreground" />
                             </SheetHeader>
                             <div class="flex h-full flex-1 flex-col justify-between space-y-4 py-6">
                                 <nav class="-mx-3 space-y-1">
@@ -91,7 +91,7 @@ const rightNavItems: NavItem[] = [
                                         v-for="item in mainNavItems"
                                         :key="item.title"
                                         :href="item.href"
-                                        class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent"
+                                        class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-primary hover:text-white"
                                         :class="activeItemStyles(item.href)"
                                     >
                                         <component v-if="item.icon" :is="item.icon" class="h-5 w-5" />
@@ -129,7 +129,7 @@ const rightNavItems: NavItem[] = [
                                     :class="[
                                         navigationMenuTriggerStyle(),
                                         activeItemStyles(item.href),
-                                        'h-9 cursor-pointer rounded-md px-3 transition-colors hover:bg-primary/70 hover:text-accent-foreground',
+                                        'h-9 cursor-pointer rounded-md px-3 transition-colors hover:bg-primary hover:text-white',
                                     ]"
                                     :href="item.href"
                                 >
