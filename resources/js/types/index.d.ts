@@ -34,4 +34,42 @@ export interface User {
     updated_at: string;
 }
 
+export interface Partner {
+    name: string;
+    logo: string;
+    href: string;
+    visible: boolean;
+}
+
+export interface Company {
+    name: string;
+    description: string[];
+    educations: string[];
+    logo: string;
+    href: string;
+    visible: boolean;
+}
+
+export interface Edition {
+    name: string;
+    description: string;
+    image: string;
+    date: string;
+    href: string;
+}
+
+export interface PreviousEvent {
+    title: string;
+    description: string;
+    date: string;
+    image: string;
+    href: string;
+}
+
+export interface OurValues {
+    icon: LucideIcon;
+    title: string;
+    description: string;
+}
+
 export type BreadcrumbItemType = BreadcrumbItem;
