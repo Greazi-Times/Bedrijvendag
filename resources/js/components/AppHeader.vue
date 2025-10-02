@@ -11,11 +11,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import UserMenuContent from '@/components/UserMenuContent.vue';
 import { getInitials } from '@/composables/useInitials';
 import { toUrl, urlIsActive } from '@/lib/utils';
-import { home, companies, contact, aboutUs, history, partners } from '@/routes';
+import { home, companies, contact, aboutUs, editions, partners } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
 import { InertiaLinkProps, Link, usePage } from '@inertiajs/vue3';
 import { Github, Menu } from 'lucide-vue-next';
 import { computed } from 'vue';
+import AppearanceTabs from '@/components/AppearanceTabs.vue';
 
 interface Props {
     breadcrumbs?: BreadcrumbItem[];
@@ -37,7 +38,7 @@ const activeItemStyles = computed(
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Companies',
+        title: 'Bedrijven',
         href: companies(),
     },
     {
@@ -45,11 +46,11 @@ const mainNavItems: NavItem[] = [
         href: partners(),
     },
     {
-        title: 'History',
-        href: history(),
+        title: 'Edities',
+        href: editions(),
     },
     {
-        title: 'About Us',
+        title: 'Over Ons',
         href: aboutUs(),
     },
     {
