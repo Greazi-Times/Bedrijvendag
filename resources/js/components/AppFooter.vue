@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { aboutUs, avans, companies, cookiePolicy, history, partners, privacyPolicy, termsOfService } from '@/routes';
+import { aboutUs, avans, companies, contact, cookiePolicy, editions, partners, privacyPolicy, termsOfService } from '@/routes';
 </script>
 
 <template>
@@ -64,7 +64,8 @@ import { aboutUs, avans, companies, cookiePolicy, history, partners, privacyPoli
                         <h3 class="mb-4 font-semibold text-white">Bedrijvendag</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
                             <li><Link :href="aboutUs()" class="hover:border-b-2 hover:border-white hover:text-white">Over Ons</Link></li>
-                            <li><Link :href="avans()" class="hover:border-b-2 hover:border-white hover:text-white">Avans Hogeschool</Link></li>
+                            <li><a href="https://avans.nl" target="_blank" rel="noopener" class="hover:border-b-2 hover:border-white hover:text-white">Avans Hogeschool</a></li>
+                            <li><Link :href="contact()" class="hover:border-b-2 hover:border-white hover:text-white">Contact</Link></li>
                         </ul>
                     </div>
                     <div>
@@ -72,16 +73,14 @@ import { aboutUs, avans, companies, cookiePolicy, history, partners, privacyPoli
                         <ul class="space-y-2 text-sm text-gray-400">
                             <li><Link :href="companies()" class="hover:border-b-2 hover:border-white hover:text-white">Bedrijven</Link></li>
                             <li><Link :href="partners()" class="hover:border-b-2 hover:border-white hover:text-white">Partners</Link></li>
-                            <li><Link :href="history()" class="hover:border-b-2 hover:border-white hover:text-white">Geschiedenis</Link></li>
+                            <li><Link :href="editions()" class="hover:border-b-2 hover:border-white hover:text-white">Edities</Link></li>
                         </ul>
                     </div>
                     <div>
                         <h3 class="mb-4 font-semibold text-white">Legal</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
                             <li><Link :href="privacyPolicy()" class="hover:border-b-2 hover:border-white hover:text-white">Privacy Policy</Link></li>
-                            <li>
-                                <Link :href="termsOfService()" class="hover:border-b-2 hover:border-white hover:text-white">Terms of Service</Link>
-                            </li>
+                            <li><Link :href="termsOfService()" class="hover:border-b-2 hover:border-white hover:text-white">Terms of Service</Link></li>
                             <li><Link :href="cookiePolicy()" class="hover:border-b-2 hover:border-white hover:text-white">Cookie Policy</Link></li>
                         </ul>
                     </div>
