@@ -215,9 +215,9 @@ const ourValues: OurValues[] = [
         <div class="mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-16 px-6 lg:flex-row">
             <!-- Left text and countdown placeholder -->
             <div class="min-w-5/8 flex-1 text-center text-primary-foreground lg:text-left">
-                <h2 class="mb-4 text-3xl font-extrabold">Nu Aanmelden</h2>
+                <h2 class="mb-4 text-3xl font-extrabold">Aanmelden Afsluitende Borrel</h2>
                 <p class="mb-6 text-lg opacity-90">
-                    Schrijf je in als bedrijf en ontmoet gemotiveerde studenten die op zoek zijn naar een stageplaats!
+                    Schrijf je zelf in voor de afsluitende borrel na de bedrijvendag, vergroot je netwerk en geniet van een hapje en een drankje!
                 </p>
                 <p class="mb-2 text-lg font-bold">
                     Nog maar:
@@ -236,7 +236,7 @@ const ourValues: OurValues[] = [
                 <h3 class="mb-2 text-xl font-bold">Inschrijven</h3>
                 <p class="mb-6 text-gray-500">Het is tijd om deel te nemen</p>
                 <Form class="mb-6 space-y-4">
-                    <Input type="text" placeholder="Bedrijfsnaam" />
+                    <Input type="text" placeholder="Naam" />
                     <Input type="email" placeholder="E-mail" />
                     <Button size="lg" variant="secondary" class="text-md w-full font-bold">Versturen</Button>
                 </Form>
