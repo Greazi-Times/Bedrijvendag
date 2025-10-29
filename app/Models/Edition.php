@@ -18,6 +18,6 @@ class Edition extends Model
     ];
 
     protected $casts = [
-        'date' => 'date',
+        'date' => 'datetime',
     ];
 }
