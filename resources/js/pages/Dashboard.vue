@@ -108,10 +108,10 @@ watch(
                     { key: 'sector', label: 'Sectors', options: allSectors },
                 ]"
                 :row-actions="[
-                    { label: 'View', route: (row) => `/dashboard/companies/${row.id}` },
-                    { label: 'Edit', route: (row) => `/dashboard/companies/${row.id}/edit` },
+                    { label: 'View', route: (row) => `/dashboard/company/${row.id}` },
+                    { label: 'Edit', route: (row) => `/dashboard/company/${row.id}/edit` },
                 ]"
-                add-route="/dashboard/companies/create"
+                add-route="/dashboard/company/create"
             />
         </div>
     </AppLayout>
