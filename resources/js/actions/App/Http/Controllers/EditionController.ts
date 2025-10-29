@@ -2,7 +2,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFo
 /**
 * @see \App\Http\Controllers\EditionController::index
 * @see app/Http/Controllers/EditionController.php:11
-* @route '/dashboard/editions'
+* @route '/editions'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: index.url(options),
@@ -11,13 +11,13 @@ export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 index.definition = {
     methods: ["get","head"],
-    url: '/dashboard/editions',
+    url: '/editions',
 } satisfies RouteDefinition<["get","head"]>
 
 /**
 * @see \App\Http\Controllers\EditionController::index
 * @see app/Http/Controllers/EditionController.php:11
-* @route '/dashboard/editions'
+* @route '/editions'
 */
 index.url = (options?: RouteQueryOptions) => {
     return index.definition.url + queryParams(options)
@@ -26,7 +26,7 @@ index.url = (options?: RouteQueryOptions) => {
 /**
 * @see \App\Http\Controllers\EditionController::index
 * @see app/Http/Controllers/EditionController.php:11
-* @route '/dashboard/editions'
+* @route '/editions'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: index.url(options),
@@ -36,7 +36,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 /**
 * @see \App\Http\Controllers\EditionController::index
 * @see app/Http/Controllers/EditionController.php:11
-* @route '/dashboard/editions'
+* @route '/editions'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: index.url(options),
@@ -46,7 +46,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 /**
 * @see \App\Http\Controllers\EditionController::index
 * @see app/Http/Controllers/EditionController.php:11
-* @route '/dashboard/editions'
+* @route '/editions'
 */
 const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: index.url(options),
@@ -56,7 +56,7 @@ const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 /**
 * @see \App\Http\Controllers\EditionController::index
 * @see app/Http/Controllers/EditionController.php:11
-* @route '/dashboard/editions'
+* @route '/editions'
 */
 indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: index.url(options),
@@ -66,7 +66,7 @@ indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 /**
 * @see \App\Http\Controllers\EditionController::index
 * @see app/Http/Controllers/EditionController.php:11
-* @route '/dashboard/editions'
+* @route '/editions'
 */
 indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: index.url({
@@ -81,9 +81,90 @@ indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 index.form = indexForm
 
 /**
-* @see \App\Http\Controllers\EditionController::create
+* @see \App\Http\Controllers\EditionController::index2
 * @see app/Http/Controllers/EditionController.php:20
-* @route '/dashboard/editions/create'
+* @route '/dashboard/editions'
+*/
+export const index2 = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: index2.url(options),
+    method: 'get',
+})
+
+index2.definition = {
+    methods: ["get","head"],
+    url: '/dashboard/editions',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\EditionController::index2
+* @see app/Http/Controllers/EditionController.php:20
+* @route '/dashboard/editions'
+*/
+index2.url = (options?: RouteQueryOptions) => {
+    return index2.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\EditionController::index2
+* @see app/Http/Controllers/EditionController.php:20
+* @route '/dashboard/editions'
+*/
+index2.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: index2.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\EditionController::index2
+* @see app/Http/Controllers/EditionController.php:20
+* @route '/dashboard/editions'
+*/
+index2.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: index2.url(options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\EditionController::index2
+* @see app/Http/Controllers/EditionController.php:20
+* @route '/dashboard/editions'
+*/
+const index2Form = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: index2.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\EditionController::index2
+* @see app/Http/Controllers/EditionController.php:20
+* @route '/dashboard/editions'
+*/
+index2Form.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: index2.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\EditionController::index2
+* @see app/Http/Controllers/EditionController.php:20
+* @route '/dashboard/editions'
+*/
+index2Form.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: index2.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+index2.form = index2Form
+
+/**
+* @see \App\Http\Controllers\EditionController::create
+* @see app/Http/Controllers/EditionController.php:29
+* @route '/dashboard/edition/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: create.url(options),
@@ -92,13 +173,13 @@ export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => (
 
 create.definition = {
     methods: ["get","head"],
-    url: '/dashboard/editions/create',
+    url: '/dashboard/edition/create',
 } satisfies RouteDefinition<["get","head"]>
 
 /**
 * @see \App\Http\Controllers\EditionController::create
-* @see app/Http/Controllers/EditionController.php:20
-* @route '/dashboard/editions/create'
+* @see app/Http/Controllers/EditionController.php:29
+* @route '/dashboard/edition/create'
 */
 create.url = (options?: RouteQueryOptions) => {
     return create.definition.url + queryParams(options)
@@ -106,8 +187,8 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\EditionController::create
-* @see app/Http/Controllers/EditionController.php:20
-* @route '/dashboard/editions/create'
+* @see app/Http/Controllers/EditionController.php:29
+* @route '/dashboard/edition/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: create.url(options),
@@ -116,8 +197,8 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EditionController::create
-* @see app/Http/Controllers/EditionController.php:20
-* @route '/dashboard/editions/create'
+* @see app/Http/Controllers/EditionController.php:29
+* @route '/dashboard/edition/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: create.url(options),
@@ -126,8 +207,8 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\EditionController::create
-* @see app/Http/Controllers/EditionController.php:20
-* @route '/dashboard/editions/create'
+* @see app/Http/Controllers/EditionController.php:29
+* @route '/dashboard/edition/create'
 */
 const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: create.url(options),
@@ -136,8 +217,8 @@ const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 
 /**
 * @see \App\Http\Controllers\EditionController::create
-* @see app/Http/Controllers/EditionController.php:20
-* @route '/dashboard/editions/create'
+* @see app/Http/Controllers/EditionController.php:29
+* @route '/dashboard/edition/create'
 */
 createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: create.url(options),
@@ -146,8 +227,8 @@ createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EditionController::create
-* @see app/Http/Controllers/EditionController.php:20
-* @route '/dashboard/editions/create'
+* @see app/Http/Controllers/EditionController.php:29
+* @route '/dashboard/edition/create'
 */
 createForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: create.url({
@@ -163,8 +244,8 @@ create.form = createForm
 
 /**
 * @see \App\Http\Controllers\EditionController::store
-* @see app/Http/Controllers/EditionController.php:25
-* @route '/dashboard/editions/store'
+* @see app/Http/Controllers/EditionController.php:34
+* @route '/dashboard/edition/store'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
@@ -173,13 +254,13 @@ export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => (
 
 store.definition = {
     methods: ["post"],
-    url: '/dashboard/editions/store',
+    url: '/dashboard/edition/store',
 } satisfies RouteDefinition<["post"]>
 
 /**
 * @see \App\Http\Controllers\EditionController::store
-* @see app/Http/Controllers/EditionController.php:25
-* @route '/dashboard/editions/store'
+* @see app/Http/Controllers/EditionController.php:34
+* @route '/dashboard/edition/store'
 */
 store.url = (options?: RouteQueryOptions) => {
     return store.definition.url + queryParams(options)
@@ -187,8 +268,8 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\EditionController::store
-* @see app/Http/Controllers/EditionController.php:25
-* @route '/dashboard/editions/store'
+* @see app/Http/Controllers/EditionController.php:34
+* @route '/dashboard/edition/store'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
@@ -197,8 +278,8 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\EditionController::store
-* @see app/Http/Controllers/EditionController.php:25
-* @route '/dashboard/editions/store'
+* @see app/Http/Controllers/EditionController.php:34
+* @route '/dashboard/edition/store'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: store.url(options),
@@ -207,8 +288,8 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\EditionController::store
-* @see app/Http/Controllers/EditionController.php:25
-* @route '/dashboard/editions/store'
+* @see app/Http/Controllers/EditionController.php:34
+* @route '/dashboard/edition/store'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: store.url(options),
@@ -219,8 +300,8 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\EditionController::show
-* @see app/Http/Controllers/EditionController.php:45
-* @route '/dashboard/editions/{edition}'
+* @see app/Http/Controllers/EditionController.php:61
+* @route '/dashboard/edition/{edition}'
 */
 export const show = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
@@ -229,13 +310,13 @@ export const show = (args: { edition: number | { id: number } } | [edition: numb
 
 show.definition = {
     methods: ["get","head"],
-    url: '/dashboard/editions/{edition}',
+    url: '/dashboard/edition/{edition}',
 } satisfies RouteDefinition<["get","head"]>
 
 /**
 * @see \App\Http\Controllers\EditionController::show
-* @see app/Http/Controllers/EditionController.php:45
-* @route '/dashboard/editions/{edition}'
+* @see app/Http/Controllers/EditionController.php:61
+* @route '/dashboard/edition/{edition}'
 */
 show.url = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
@@ -267,8 +348,8 @@ show.url = (args: { edition: number | { id: number } } | [edition: number | { id
 
 /**
 * @see \App\Http\Controllers\EditionController::show
-* @see app/Http/Controllers/EditionController.php:45
-* @route '/dashboard/editions/{edition}'
+* @see app/Http/Controllers/EditionController.php:61
+* @route '/dashboard/edition/{edition}'
 */
 show.get = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
@@ -277,8 +358,8 @@ show.get = (args: { edition: number | { id: number } } | [edition: number | { id
 
 /**
 * @see \App\Http\Controllers\EditionController::show
-* @see app/Http/Controllers/EditionController.php:45
-* @route '/dashboard/editions/{edition}'
+* @see app/Http/Controllers/EditionController.php:61
+* @route '/dashboard/edition/{edition}'
 */
 show.head = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
@@ -287,8 +368,8 @@ show.head = (args: { edition: number | { id: number } } | [edition: number | { i
 
 /**
 * @see \App\Http\Controllers\EditionController::show
-* @see app/Http/Controllers/EditionController.php:45
-* @route '/dashboard/editions/{edition}'
+* @see app/Http/Controllers/EditionController.php:61
+* @route '/dashboard/edition/{edition}'
 */
 const showForm = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
@@ -297,8 +378,8 @@ const showForm = (args: { edition: number | { id: number } } | [edition: number 
 
 /**
 * @see \App\Http\Controllers\EditionController::show
-* @see app/Http/Controllers/EditionController.php:45
-* @route '/dashboard/editions/{edition}'
+* @see app/Http/Controllers/EditionController.php:61
+* @route '/dashboard/edition/{edition}'
 */
 showForm.get = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
@@ -307,8 +388,8 @@ showForm.get = (args: { edition: number | { id: number } } | [edition: number | 
 
 /**
 * @see \App\Http\Controllers\EditionController::show
-* @see app/Http/Controllers/EditionController.php:45
-* @route '/dashboard/editions/{edition}'
+* @see app/Http/Controllers/EditionController.php:61
+* @route '/dashboard/edition/{edition}'
 */
 showForm.head = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, {
@@ -324,8 +405,8 @@ show.form = showForm
 
 /**
 * @see \App\Http\Controllers\EditionController::edit
-* @see app/Http/Controllers/EditionController.php:52
-* @route '/dashboard/editions/{edition}/edit'
+* @see app/Http/Controllers/EditionController.php:68
+* @route '/dashboard/edition/{edition}/edit'
 */
 export const edit = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
@@ -334,13 +415,13 @@ export const edit = (args: { edition: number | { id: number } } | [edition: numb
 
 edit.definition = {
     methods: ["get","head"],
-    url: '/dashboard/editions/{edition}/edit',
+    url: '/dashboard/edition/{edition}/edit',
 } satisfies RouteDefinition<["get","head"]>
 
 /**
 * @see \App\Http\Controllers\EditionController::edit
-* @see app/Http/Controllers/EditionController.php:52
-* @route '/dashboard/editions/{edition}/edit'
+* @see app/Http/Controllers/EditionController.php:68
+* @route '/dashboard/edition/{edition}/edit'
 */
 edit.url = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
@@ -372,8 +453,8 @@ edit.url = (args: { edition: number | { id: number } } | [edition: number | { id
 
 /**
 * @see \App\Http\Controllers\EditionController::edit
-* @see app/Http/Controllers/EditionController.php:52
-* @route '/dashboard/editions/{edition}/edit'
+* @see app/Http/Controllers/EditionController.php:68
+* @route '/dashboard/edition/{edition}/edit'
 */
 edit.get = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
@@ -382,8 +463,8 @@ edit.get = (args: { edition: number | { id: number } } | [edition: number | { id
 
 /**
 * @see \App\Http\Controllers\EditionController::edit
-* @see app/Http/Controllers/EditionController.php:52
-* @route '/dashboard/editions/{edition}/edit'
+* @see app/Http/Controllers/EditionController.php:68
+* @route '/dashboard/edition/{edition}/edit'
 */
 edit.head = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: edit.url(args, options),
@@ -392,8 +473,8 @@ edit.head = (args: { edition: number | { id: number } } | [edition: number | { i
 
 /**
 * @see \App\Http\Controllers\EditionController::edit
-* @see app/Http/Controllers/EditionController.php:52
-* @route '/dashboard/editions/{edition}/edit'
+* @see app/Http/Controllers/EditionController.php:68
+* @route '/dashboard/edition/{edition}/edit'
 */
 const editForm = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: edit.url(args, options),
@@ -402,8 +483,8 @@ const editForm = (args: { edition: number | { id: number } } | [edition: number 
 
 /**
 * @see \App\Http\Controllers\EditionController::edit
-* @see app/Http/Controllers/EditionController.php:52
-* @route '/dashboard/editions/{edition}/edit'
+* @see app/Http/Controllers/EditionController.php:68
+* @route '/dashboard/edition/{edition}/edit'
 */
 editForm.get = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: edit.url(args, options),
@@ -412,8 +493,8 @@ editForm.get = (args: { edition: number | { id: number } } | [edition: number | 
 
 /**
 * @see \App\Http\Controllers\EditionController::edit
-* @see app/Http/Controllers/EditionController.php:52
-* @route '/dashboard/editions/{edition}/edit'
+* @see app/Http/Controllers/EditionController.php:68
+* @route '/dashboard/edition/{edition}/edit'
 */
 editForm.head = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: edit.url(args, {
@@ -427,6 +508,96 @@ editForm.head = (args: { edition: number | { id: number } } | [edition: number |
 
 edit.form = editForm
 
-const EditionController = { index, create, store, show, edit }
+/**
+* @see \App\Http\Controllers\EditionController::update
+* @see app/Http/Controllers/EditionController.php:75
+* @route '/dashboard/edition/{edition}/update'
+*/
+export const update = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+    url: update.url(args, options),
+    method: 'put',
+})
+
+update.definition = {
+    methods: ["put"],
+    url: '/dashboard/edition/{edition}/update',
+} satisfies RouteDefinition<["put"]>
+
+/**
+* @see \App\Http\Controllers\EditionController::update
+* @see app/Http/Controllers/EditionController.php:75
+* @route '/dashboard/edition/{edition}/update'
+*/
+update.url = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { edition: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { edition: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            edition: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        edition: typeof args.edition === 'object'
+        ? args.edition.id
+        : args.edition,
+    }
+
+    return update.definition.url
+            .replace('{edition}', parsedArgs.edition.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\EditionController::update
+* @see app/Http/Controllers/EditionController.php:75
+* @route '/dashboard/edition/{edition}/update'
+*/
+update.put = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+    url: update.url(args, options),
+    method: 'put',
+})
+
+/**
+* @see \App\Http\Controllers\EditionController::update
+* @see app/Http/Controllers/EditionController.php:75
+* @route '/dashboard/edition/{edition}/update'
+*/
+const updateForm = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: update.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PUT',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\EditionController::update
+* @see app/Http/Controllers/EditionController.php:75
+* @route '/dashboard/edition/{edition}/update'
+*/
+updateForm.put = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: update.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PUT',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+update.form = updateForm
+
+const EditionController = { index, index2, create, store, show, edit, update }
 
 export default EditionController

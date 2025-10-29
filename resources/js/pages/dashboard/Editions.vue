@@ -42,10 +42,10 @@ const breadcrumbs: BreadcrumbItem[] = [
           { key: 'thumbnail_path', label: 'Thumbnail' },
         ]"
         :row-actions="[
-          { label: 'View', route: (row) => `/dashboard/editions/${row.id}` },
-          { label: 'Edit', route: (row) => `/dashboard/editions/${row.id}/edit` },
+          { label: 'View', route: (row) => `/dashboard/edition/${row.id}` },
+          { label: 'Edit', route: (row) => `/dashboard/edition/${row.id}/edit` },
         ]"
-        add-route="/dashboard/editions/create"
+        add-route="/dashboard/edition/create"
       >
         <template #thumbnail_path="{ row }">
           <img

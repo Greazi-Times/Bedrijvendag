@@ -54,9 +54,9 @@ export interface Company {
 export interface Edition {
     name: string;
     description: string;
-    image: string;
     date: string;
-    href: string;
+    images: string;
+    thumbnail: string;
 }
 
 export interface PreviousEvent {

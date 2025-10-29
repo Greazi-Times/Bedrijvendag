@@ -12,6 +12,15 @@ class EditionController extends Controller
     {
         $editions = Edition::all();
 
+        return Inertia::render('Editions', [
+            'editions' => $editions,
+        ]);
+    }
+
+    public function index2()
+    {
+        $editions = Edition::all();
+
         return Inertia::render('dashboard/Editions', [
             'editions' => $editions,
         ]);
@@ -28,7 +37,7 @@ class EditionController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'date' => 'required|date',
-            'images' => 'required|url',
+            'images' => 'nullable|url',
             'thumbnail' => 'required|image|max:2048',
         ]);
 
@@ -36,6 +45,13 @@ class EditionController extends Controller
             $path = $request->file('thumbnail')->store('thumbnails', 'public');
             $validated['thumbnail'] = '/storage/' . $path;
         }
+
+        $description = str_replace(["\r\n", "\r"], "\n", $validated['description']);
+
+        $description = preg_replace("/\n{2,}/", "<br><br>", $description);
+        $description = preg_replace("/(?<!<br>)\n(?!<br>)/", "<br>", $description);
+
+        $validated['description'] = $description;
 
         Edition::create($validated);
 
@@ -58,22 +74,45 @@ class EditionController extends Controller
 
     public function update(Request $request, Edition $edition)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-            'images' => 'nullable|url',
-            'thumbnail' => 'nullable|image|max:2048',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'sometimes|string|max:255',
+                'description' => 'sometimes|nullable|string',
+                'date' => 'sometimes|date',
+                'images' => 'sometimes|nullable|url',
+                'thumbnail' => 'sometimes|nullable|image|max:2048',
+            ]);
 
-        if ($request->hasFile('thumbnail')) {
-            $path = $request->file('thumbnail')->store('thumbnails', 'public');
-            $validated['thumbnail'] = '/storage/' . $path;
+            if ($request->hasFile('thumbnail')) {
+                $path = $request->file('thumbnail')->store('thumbnails', 'public');
+                $validated['thumbnail'] = '/storage/' . $path;
+            }
+
+            if (isset($validated['description'])) {
+                $description = str_replace(["\r\n", "\r"], "\n", $validated['description']);
+                $description = preg_replace("/\n{2,}/", "<br><br>", $description);
+                $description = preg_replace("/(?<!<br>)\n(?!<br>)/", "<br>", $description);
+                $validated['description'] = $description;
+            }
+
+            if (empty($validated)) {
+                return back()->with('error', 'No data was provided to update.');
+            }
+
+            $edition->update($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Edition updated successfully!',
+                'edition' => $edition->fresh(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating the edition.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $edition->update($validated);
-
-        return redirect()->route('dashEditions')->with('success', 'Edition updated successfully!');
     }
 
     public function destroy(Edition $edition)

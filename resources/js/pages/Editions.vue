@@ -1,32 +1,37 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import AppHeader from '@/components/AppHeader.vue';
 import AppFooter from '@/components/AppFooter.vue';
 import type { Edition } from '@/types';
+import { marked } from 'marked';
 
-const editions: Edition[] = [
-    {
-        name: '2de Editie 2025',
-        description: 'De tweede editie van de ATIx Bedrijvendag vindt plaats op woensdag 19 november 2025. Bereid je voor op een dag vol inspirerende gesprekken, waardevolle connecties en spannende mogelijkheden voor jouw toekomst.',
-        image: '/images/editie-2.jpg',
-        date: 'Woensdag 19 november 2025',
-        href: 'https://sv-motus.nl/',
-    },
-    {
-        name: '1ste Editie 2025',
-        description: 'Deze editie is helaas door omstandigheden geanuleerd, maar we kijken ernaar uit je te verwelkomen op onze volgende editie in november 2025!',
-        image: '/images/editie-1.jpg',
-        date: 'Geannuleerd',
-        href: 'https://sv-motus.nl/',
-    },
-    {
-        name: '2de Editie 2024',
-        description: 'De tweede editie van de ATIx Bedrijvendag vond plaats op woensdag 20 november 2024. Het was een dag vol inspirerende gesprekken, waardevolle connecties en spannende mogelijkheden voor de toekomst van vele studenten.',
-        image: '/images/editie-3.jpg',
-        date: 'Geen idee weet jij het?',
-        href: 'https://sv-motus.nl/',
-    },
-];
+const { props } = usePage();
+const editions = (props.editions as Edition[]).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('nl-NL', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    });
+};
+
+const renderMarkdown = (text: string) => {
+    if (!text) return '';
+
+    // Replace Windows-style newlines
+    const normalized = text.replace(/\r\n/g, '\n');
+
+    // Ensure Markdown treats double newlines as paragraph breaks
+    // and single newlines as line breaks
+    const html = marked.parse(normalized, {
+        breaks: true, // convert single \n to <br>
+    });
+
+    return html;
+};
 </script>
 
 <template>
@@ -41,19 +46,19 @@ const editions: Edition[] = [
 
     <!-- Edities -->
     <section>
-      <div class="mx-auto grid max-w-7xl gap-20 px-6 py-12 sm:grid-cols-2 lg:grid-cols-2">
-        <div v-for="edition in editions" :key="edition.name" class="overflow-hidden rounded-lg bg-white shadow flex flex-col">
-          <img class="w-full aspect-[4/3] object-cover" :src="edition.image" :alt="edition.name" />
-          <div class="flex-1 bg-blue-50 p-4">
-            <h2 class="text-lg font-semibold">{{ edition.name }}</h2>
-            <p class="mt-1 text-gray-600">{{ edition.description }}</p>
-          </div>
-          <div class="flex items-center justify-between border-t bg-white px-4 py-3">
-            <span class="text-sm text-gray-500">{{ edition.date }}</span>
-            <a :href="edition.href" class="rounded bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600">Meer Lezen</a>
-          </div>
+        <div class="mx-auto grid max-w-7xl gap-20 px-6 py-12 sm:grid-cols-2 lg:grid-cols-2">
+            <div v-for="edition in editions" :key="edition.name" class="overflow-hidden rounded-lg bg-white shadow flex flex-col">
+                <img class="w-full aspect-[4/3] object-cover" :src="edition.thumbnail" :alt="edition.name" />
+                <div class="flex-1 bg-blue-50 p-4">
+                    <h2 class="text-lg font-semibold">{{ edition.name }}</h2>
+                    <div class="mt-1 text-gray-600 prose prose-sm max-w-none" v-html="renderMarkdown(edition.description)"></div>
+                </div>
+                <div class="flex items-center justify-between border-t bg-white px-4 py-3">
+                    <span class="text-sm text-gray-500">{{ formatDate(edition.date) }}</span>
+                    <a :href="edition.images" class="rounded bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600">Bekijk Afbeeldingen</a>
+                </div>
+            </div>
         </div>
-      </div>
     </section>
 
     <AppFooter />
