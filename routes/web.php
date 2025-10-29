@@ -10,9 +10,7 @@ Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
-Route::get('editions', function () {
-    return Inertia::render('Editions');
-})->name('editions');
+Route::get('editions', [EditionController::class, 'index'])->name('editions');
 
 Route::get('bedrijven', function () {
     return Inertia::render('Companies');
@@ -37,17 +35,18 @@ Route::middleware(['auth', 'verified', 'editorOrAdmin'])
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
         // Company routes
-        Route::get('/companies/create', [CompanyController::class, 'create'])->name('createCompany');
-        Route::post('/companies/store', [CompanyController::class, 'store'])->name('storeCompany');
-        Route::get('/companies/{id}', [CompanyController::class, 'show'])->name('showCompany');
-        Route::get('/companies/{id}/edit', [CompanyController::class, 'edit'])->name('editCompany');
+        Route::get('/company/create', [CompanyController::class, 'create'])->name('createCompany');
+        Route::post('/company/store', [CompanyController::class, 'store'])->name('storeCompany');
+        Route::get('/company/{id}', [CompanyController::class, 'show'])->name('showCompany');
+        Route::get('/company/{id}/edit', [CompanyController::class, 'edit'])->name('editCompany');
 
         // Edition routes
-        Route::get('/editions', [EditionController::class, 'index'])->name('dashEditions');
-        Route::get('/editions/create', [EditionController::class, 'create'])->name('createEdition');
-        Route::post('/editions/store', [EditionController::class, 'store'])->name('storeEdition');
-        Route::get('/editions/{edition}', [EditionController::class, 'show'])->name('showEdition');
-        Route::get('/editions/{edition}/edit', [EditionController::class, 'edit'])->name('editEdition');
+        Route::get('/editions', [EditionController::class, 'index2'])->name('dashEditions');
+        Route::get('/edition/create', [EditionController::class, 'create'])->name('createEdition');
+        Route::post('/edition/store', [EditionController::class, 'store'])->name('storeEdition');
+        Route::get('/edition/{edition}', [EditionController::class, 'show'])->name('showEdition');
+        Route::get('/edition/{edition}/edit', [EditionController::class, 'edit'])->name('editEdition');
+        Route::put('/edition/{edition}/update', [EditionController::class, 'update'])->name('updateEdition');
     });
 
 Route::get('privacy-policy', function () {
