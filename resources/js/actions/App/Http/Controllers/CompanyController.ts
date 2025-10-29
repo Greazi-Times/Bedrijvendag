@@ -2,7 +2,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFo
 /**
 * @see \App\Http\Controllers\CompanyController::create
 * @see app/Http/Controllers/CompanyController.php:20
-* @route '/dashboard/companies/create'
+* @route '/dashboard/company/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: create.url(options),
@@ -11,13 +11,13 @@ export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => (
 
 create.definition = {
     methods: ["get","head"],
-    url: '/dashboard/companies/create',
+    url: '/dashboard/company/create',
 } satisfies RouteDefinition<["get","head"]>
 
 /**
 * @see \App\Http\Controllers\CompanyController::create
 * @see app/Http/Controllers/CompanyController.php:20
-* @route '/dashboard/companies/create'
+* @route '/dashboard/company/create'
 */
 create.url = (options?: RouteQueryOptions) => {
     return create.definition.url + queryParams(options)
@@ -26,7 +26,7 @@ create.url = (options?: RouteQueryOptions) => {
 /**
 * @see \App\Http\Controllers\CompanyController::create
 * @see app/Http/Controllers/CompanyController.php:20
-* @route '/dashboard/companies/create'
+* @route '/dashboard/company/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: create.url(options),
@@ -36,7 +36,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 /**
 * @see \App\Http\Controllers\CompanyController::create
 * @see app/Http/Controllers/CompanyController.php:20
-* @route '/dashboard/companies/create'
+* @route '/dashboard/company/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: create.url(options),
@@ -46,7 +46,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 /**
 * @see \App\Http\Controllers\CompanyController::create
 * @see app/Http/Controllers/CompanyController.php:20
-* @route '/dashboard/companies/create'
+* @route '/dashboard/company/create'
 */
 const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: create.url(options),
@@ -56,7 +56,7 @@ const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 /**
 * @see \App\Http\Controllers\CompanyController::create
 * @see app/Http/Controllers/CompanyController.php:20
-* @route '/dashboard/companies/create'
+* @route '/dashboard/company/create'
 */
 createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: create.url(options),
@@ -66,7 +66,7 @@ createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 /**
 * @see \App\Http\Controllers\CompanyController::create
 * @see app/Http/Controllers/CompanyController.php:20
-* @route '/dashboard/companies/create'
+* @route '/dashboard/company/create'
 */
 createForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: create.url({
@@ -83,7 +83,7 @@ create.form = createForm
 /**
 * @see \App\Http\Controllers\CompanyController::store
 * @see app/Http/Controllers/CompanyController.php:25
-* @route '/dashboard/companies/store'
+* @route '/dashboard/company/store'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
@@ -92,13 +92,13 @@ export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => (
 
 store.definition = {
     methods: ["post"],
-    url: '/dashboard/companies/store',
+    url: '/dashboard/company/store',
 } satisfies RouteDefinition<["post"]>
 
 /**
 * @see \App\Http\Controllers\CompanyController::store
 * @see app/Http/Controllers/CompanyController.php:25
-* @route '/dashboard/companies/store'
+* @route '/dashboard/company/store'
 */
 store.url = (options?: RouteQueryOptions) => {
     return store.definition.url + queryParams(options)
@@ -107,7 +107,7 @@ store.url = (options?: RouteQueryOptions) => {
 /**
 * @see \App\Http\Controllers\CompanyController::store
 * @see app/Http/Controllers/CompanyController.php:25
-* @route '/dashboard/companies/store'
+* @route '/dashboard/company/store'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
@@ -117,7 +117,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 /**
 * @see \App\Http\Controllers\CompanyController::store
 * @see app/Http/Controllers/CompanyController.php:25
-* @route '/dashboard/companies/store'
+* @route '/dashboard/company/store'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: store.url(options),
@@ -127,7 +127,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 /**
 * @see \App\Http\Controllers\CompanyController::store
 * @see app/Http/Controllers/CompanyController.php:25
-* @route '/dashboard/companies/store'
+* @route '/dashboard/company/store'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: store.url(options),
@@ -139,7 +139,7 @@ store.form = storeForm
 /**
 * @see \App\Http\Controllers\CompanyController::show
 * @see app/Http/Controllers/CompanyController.php:53
-* @route '/dashboard/companies/{id}'
+* @route '/dashboard/company/{id}'
 */
 export const show = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
@@ -148,13 +148,13 @@ export const show = (args: { id: string | number } | [id: string | number ] | st
 
 show.definition = {
     methods: ["get","head"],
-    url: '/dashboard/companies/{id}',
+    url: '/dashboard/company/{id}',
 } satisfies RouteDefinition<["get","head"]>
 
 /**
 * @see \App\Http\Controllers\CompanyController::show
 * @see app/Http/Controllers/CompanyController.php:53
-* @route '/dashboard/companies/{id}'
+* @route '/dashboard/company/{id}'
 */
 show.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
@@ -181,7 +181,7 @@ show.url = (args: { id: string | number } | [id: string | number ] | string | nu
 /**
 * @see \App\Http\Controllers\CompanyController::show
 * @see app/Http/Controllers/CompanyController.php:53
-* @route '/dashboard/companies/{id}'
+* @route '/dashboard/company/{id}'
 */
 show.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
@@ -191,7 +191,7 @@ show.get = (args: { id: string | number } | [id: string | number ] | string | nu
 /**
 * @see \App\Http\Controllers\CompanyController::show
 * @see app/Http/Controllers/CompanyController.php:53
-* @route '/dashboard/companies/{id}'
+* @route '/dashboard/company/{id}'
 */
 show.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
@@ -201,7 +201,7 @@ show.head = (args: { id: string | number } | [id: string | number ] | string | n
 /**
 * @see \App\Http\Controllers\CompanyController::show
 * @see app/Http/Controllers/CompanyController.php:53
-* @route '/dashboard/companies/{id}'
+* @route '/dashboard/company/{id}'
 */
 const showForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
@@ -211,7 +211,7 @@ const showForm = (args: { id: string | number } | [id: string | number ] | strin
 /**
 * @see \App\Http\Controllers\CompanyController::show
 * @see app/Http/Controllers/CompanyController.php:53
-* @route '/dashboard/companies/{id}'
+* @route '/dashboard/company/{id}'
 */
 showForm.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
@@ -221,7 +221,7 @@ showForm.get = (args: { id: string | number } | [id: string | number ] | string 
 /**
 * @see \App\Http\Controllers\CompanyController::show
 * @see app/Http/Controllers/CompanyController.php:53
-* @route '/dashboard/companies/{id}'
+* @route '/dashboard/company/{id}'
 */
 showForm.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, {
@@ -238,7 +238,7 @@ show.form = showForm
 /**
 * @see \App\Http\Controllers\CompanyController::edit
 * @see app/Http/Controllers/CompanyController.php:61
-* @route '/dashboard/companies/{id}/edit'
+* @route '/dashboard/company/{id}/edit'
 */
 export const edit = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
@@ -247,13 +247,13 @@ export const edit = (args: { id: string | number } | [id: string | number ] | st
 
 edit.definition = {
     methods: ["get","head"],
-    url: '/dashboard/companies/{id}/edit',
+    url: '/dashboard/company/{id}/edit',
 } satisfies RouteDefinition<["get","head"]>
 
 /**
 * @see \App\Http\Controllers\CompanyController::edit
 * @see app/Http/Controllers/CompanyController.php:61
-* @route '/dashboard/companies/{id}/edit'
+* @route '/dashboard/company/{id}/edit'
 */
 edit.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
@@ -280,7 +280,7 @@ edit.url = (args: { id: string | number } | [id: string | number ] | string | nu
 /**
 * @see \App\Http\Controllers\CompanyController::edit
 * @see app/Http/Controllers/CompanyController.php:61
-* @route '/dashboard/companies/{id}/edit'
+* @route '/dashboard/company/{id}/edit'
 */
 edit.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
@@ -290,7 +290,7 @@ edit.get = (args: { id: string | number } | [id: string | number ] | string | nu
 /**
 * @see \App\Http\Controllers\CompanyController::edit
 * @see app/Http/Controllers/CompanyController.php:61
-* @route '/dashboard/companies/{id}/edit'
+* @route '/dashboard/company/{id}/edit'
 */
 edit.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: edit.url(args, options),
@@ -300,7 +300,7 @@ edit.head = (args: { id: string | number } | [id: string | number ] | string | n
 /**
 * @see \App\Http\Controllers\CompanyController::edit
 * @see app/Http/Controllers/CompanyController.php:61
-* @route '/dashboard/companies/{id}/edit'
+* @route '/dashboard/company/{id}/edit'
 */
 const editForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: edit.url(args, options),
@@ -310,7 +310,7 @@ const editForm = (args: { id: string | number } | [id: string | number ] | strin
 /**
 * @see \App\Http\Controllers\CompanyController::edit
 * @see app/Http/Controllers/CompanyController.php:61
-* @route '/dashboard/companies/{id}/edit'
+* @route '/dashboard/company/{id}/edit'
 */
 editForm.get = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: edit.url(args, options),
@@ -320,7 +320,7 @@ editForm.get = (args: { id: string | number } | [id: string | number ] | string 
 /**
 * @see \App\Http\Controllers\CompanyController::edit
 * @see app/Http/Controllers/CompanyController.php:61
-* @route '/dashboard/companies/{id}/edit'
+* @route '/dashboard/company/{id}/edit'
 */
 editForm.head = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: edit.url(args, {
