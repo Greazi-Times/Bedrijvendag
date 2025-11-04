@@ -1,0 +1,1 @@
+import{d as e}from"./app-BB1wLqHH.js";import{_ as n}from"./_plugin-vue_export-helper-DlAUqK2U.js";const o=e({name:"Companies"});function t(r,s,a,p,c,m){return null}const i=n(o,[["render",t]]);export{i as default};

@@ -42,6 +42,7 @@ import { Mail, MapPin, Phone } from 'lucide-vue-next';
                             </div>
                         </div>
                         <!-- Map Placeholder -->
+                        <!-- Disables for now, can be enabled when map is ready
                         <div class="mt-4 overflow-hidden rounded-xl border border-gray-300 shadow-lg dark:border-gray-700">
                             <div
                                 class="flex h-64 w-full items-center justify-center bg-gray-100 text-xl font-semibold text-gray-500 dark:bg-gray-800"
@@ -49,13 +50,14 @@ import { Mail, MapPin, Phone } from 'lucide-vue-next';
                                 Map Placeholder
                             </div>
                         </div>
+                        -->
                     </div>
                 </div>
             </div>
             <!-- Right: Contact Form -->
             <div class="flex w-full items-center justify-center">
                 <div class="max-h-content flex w-full flex-col justify-center rounded-xl bg-accent p-8 shadow-lg dark:bg-gray-800">
-                    <form action="/contact" method="POST">
+                    <form action="/contact/send" method="POST">
                         <div class="mb-4">
                             <label for="name"> Naam <span class="text-red-500">*</span> </label>
                             <input

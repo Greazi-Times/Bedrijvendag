@@ -7,37 +7,37 @@ import { OurValues } from '@/types';
 import { editions } from '@/routes';
 
 const ourValues: OurValues[] = [
-    {
-        title: 'Laagdrempelig',
-        description: 'Een toegankelijke en informele sfeer waar studenten zich op hun gemak voelen om in contact te komen met bedrijven',
-        icon: ChevronsDown,
-    },
-    {
-        title: 'Toekomstgericht',
-        description: 'Focus op het verbinden van studenten met bedrijven die stageplaatsen en carrièremogelijkheden bieden',
-        icon: BookMarked,
-    },
-    {
-        title: 'Borrelen',
-        description: 'Sluit de dag af met een gezellige borrel en netwerk in een informele setting',
-        icon: Wine,
-    },
+{
+    title: 'Laagdrempelig',
+    description: 'Een toegankelijke en informele sfeer waar studenten zich op hun gemak voelen om in contact te komen met bedrijven',
+    icon: ChevronsDown,
+},
+{
+    title: 'Toekomstgericht',
+    description: 'Focus op het verbinden van studenten met bedrijven die stageplaatsen en carrièremogelijkheden bieden',
+    icon: BookMarked,
+},
+{
+    title: 'Borrelen',
+    description: 'Sluit de dag af met een gezellige borrel en netwerken in een informele setting',
+    icon: Wine,
+},
 
-    {
-        title: 'Netwerken',
-        description: 'Breid je netwerk uit en leg waardevolle contacten voor je toekomstige carrière',
-        icon: Network,
-    },
-    {
-        title: 'Inspirerend',
-        description: 'Laat je inspireren door de verhalen en ervaringen van professionals uit het veld',
-        icon: Mic,
-    },
-    {
-        title: 'Samenwerking',
-        description: 'Werk samen met medestudenten en professionals om nieuwe kansen te ontdekken',
-        icon: Handshake,
-    },
+{
+    title: 'Netwerken',
+    description: 'Breid je netwerk uit en leg waardevolle contacten voor je toekomstige carrière',
+    icon: Network,
+},
+{
+    title: 'Inspirerend',
+    description: 'Laat je inspireren door de verhalen en ervaringen van professionals uit het veld',
+    icon: Mic,
+},
+{
+    title: 'Samenwerking',
+    description: 'Werk samen met medestudenten en professionals om nieuwe kansen te ontdekken',
+    icon: Handshake,
+},
 ];
 </script>
 
@@ -64,7 +64,7 @@ const ourValues: OurValues[] = [
                 </p>
                 <p class="mb-4 font-medium">
                     Het doel van de bedrijvendagen is om studenten te helpen bij het vinden van stageplaatsen en om kennis te maken met bedrijven uit
-                    verschillende sectoren. Bedrijven presenteren zich op stands en bieden informatie over hun organisatie, activiteiten en
+                    verschillende sectoren. Bedrijven presenteren zich en bieden informatie over hun organisatie, activiteiten en
                     mogelijkheden voor studenten.
                 </p>
                 <p class="mb-4 font-medium">

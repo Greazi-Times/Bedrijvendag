@@ -4,7 +4,9 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted } from 'vue';
+import { router } from '@inertiajs/vue3';
+import axios from 'axios';
 
 const { companyStats, borrelCount, userCount, companies } = defineProps<{
     companyStats: { visible: number; hidden: number };
@@ -12,6 +14,19 @@ const { companyStats, borrelCount, userCount, companies } = defineProps<{
     userCount: { total: number; admin: number };
     companies: Array<{ id: number; name: string; visible: boolean; editions: Array<string>; sectors: Array<string> }>;
 }>();
+
+const totalEnrollments = ref<number>(borrelCount);
+
+const fetchTotalEnrollments = async () => {
+  try {
+    const response = await axios.get('/borrel-enrollments/total');
+    totalEnrollments.value = response.data.total;
+  } catch (error) {
+    console.error('Failed to fetch total enrollments:', error);
+  }
+};
+
+onMounted(fetchTotalEnrollments);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -38,6 +53,14 @@ watch(
     allSectors,
     (vals) => {
         selectedSectors.value = new Set(vals);
+    },
+    { immediate: true },
+);
+
+watch(
+    () => companies,
+    (val) => {
+        console.log('📦 Companies data received:', val);
     },
     { immediate: true },
 );
@@ -73,8 +96,8 @@ watch(
                 >
                     <h2 class="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">Borrel Aanmeldingen</h2>
                     <div class="min-w-1/3 px-6 py-4 text-center">
-                        <p class="text-2xl font-bold">{{ borrelCount }}</p>
-                        <p class="text-sm">Aanmeldingen</p>
+                        <p class="text-2xl font-bold">{{ totalEnrollments }}</p>
+                        <p class="text-sm">Totaal Ingeschreven Studenten</p>
                     </div>
                 </div>
                 <div
@@ -110,6 +133,15 @@ watch(
                 :row-actions="[
                     { label: 'View', route: (row) => `/dashboard/company/${row.id}` },
                     { label: 'Edit', route: (row) => `/dashboard/company/${row.id}/edit` },
+                    {
+                        label: 'Delete',
+                        route: (row) => {
+                            router.visit(`/dashboard/company/${row.id}/remove`, {
+                                method: 'put',
+                                preserveScroll: true,
+                            });
+                        },
+                    },
                 ]"
                 add-route="/dashboard/company/create"
             />
