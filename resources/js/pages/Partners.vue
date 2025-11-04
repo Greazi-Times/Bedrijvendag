@@ -42,16 +42,16 @@ const partners: Partner[] = [
         visible: true,
     },
     {
-        name: "Avans Hogeschool",
-        logo: "/images/partners/avans.png",
-        href: "https://avans.nl/",
+        name: "Maximus",
+        logo: "/images/partners/maximus.png",
+        href: "https://svmaximus.nl/",
         visible: true,
     },
     {
         name: "Avans Hogeschool",
         logo: "/images/partners/avans.png",
         href: "https://avans.nl/",
-        visible: false,
+        visible: true,
     },
 ];
 </script>

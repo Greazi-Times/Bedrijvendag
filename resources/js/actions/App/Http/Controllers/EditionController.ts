@@ -598,6 +598,96 @@ updateForm.put = (args: { edition: number | { id: number } } | [edition: number 
 
 update.form = updateForm
 
-const EditionController = { index, index2, create, store, show, edit, update }
+/**
+* @see \App\Http\Controllers\EditionController::destroy
+* @see app/Http/Controllers/EditionController.php:118
+* @route '/dashboard/edition/{edition}/remove'
+*/
+export const destroy = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+    url: destroy.url(args, options),
+    method: 'put',
+})
+
+destroy.definition = {
+    methods: ["put"],
+    url: '/dashboard/edition/{edition}/remove',
+} satisfies RouteDefinition<["put"]>
+
+/**
+* @see \App\Http\Controllers\EditionController::destroy
+* @see app/Http/Controllers/EditionController.php:118
+* @route '/dashboard/edition/{edition}/remove'
+*/
+destroy.url = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { edition: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { edition: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            edition: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        edition: typeof args.edition === 'object'
+        ? args.edition.id
+        : args.edition,
+    }
+
+    return destroy.definition.url
+            .replace('{edition}', parsedArgs.edition.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\EditionController::destroy
+* @see app/Http/Controllers/EditionController.php:118
+* @route '/dashboard/edition/{edition}/remove'
+*/
+destroy.put = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+    url: destroy.url(args, options),
+    method: 'put',
+})
+
+/**
+* @see \App\Http\Controllers\EditionController::destroy
+* @see app/Http/Controllers/EditionController.php:118
+* @route '/dashboard/edition/{edition}/remove'
+*/
+const destroyForm = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: destroy.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PUT',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\EditionController::destroy
+* @see app/Http/Controllers/EditionController.php:118
+* @route '/dashboard/edition/{edition}/remove'
+*/
+destroyForm.put = (args: { edition: number | { id: number } } | [edition: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: destroy.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PUT',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+destroy.form = destroyForm
+
+const EditionController = { index, index2, create, store, show, edit, update, destroy }
 
 export default EditionController

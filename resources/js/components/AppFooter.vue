@@ -1,6 +1,46 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { aboutUs, avans, companies, contact, cookiePolicy, editions, partners, privacyPolicy, termsOfService } from '@/routes';
+import { aboutUs, companies, contact, cookiePolicy, editions, partners, privacyPolicy, termsOfService } from '@/routes';
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+
+const page = usePage();
+
+// Normalize editions coming from shared props or page props.
+const allEditions = computed(() => {
+    // Try multiple locations where the data could be provided
+    // e.g., via Inertia::share(['editions' => ...]) or directly from the page.
+    // Fallback to empty array if not present.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const p: any = page.props ?? {};
+    const raw =
+        p.editions ??
+        (p.shared && p.shared.editions) ??
+        (p.layout && p.layout.editions) ??
+        [];
+
+    if (!Array.isArray(raw)) return [];
+
+    // Normalize to array of objects with { id?, name }
+    if (raw.length > 0) {
+        if (typeof raw[0] === 'string') {
+            return raw.map((name: string, idx: number) => ({ id: idx, name }));
+        }
+        if (typeof raw[0] === 'object') {
+            // Ensure each item at least has a name
+            return raw
+                .filter((it: unknown) => it && typeof (it as any).name === 'string')
+                .map((it: any) => ({ id: it.id ?? it.value ?? it.name, name: it.name }));
+        }
+    }
+    return [];
+});
+
+// Show the last 4 items (assuming the incoming order is from oldest->newest)
+const recentEditions = computed(() => {
+    const list = allEditions.value;
+    return list.slice(-4).reverse();
+});
 </script>
 
 <template>
@@ -18,12 +58,14 @@ import { aboutUs, avans, companies, contact, cookiePolicy, editions, partners, p
                 <div class="grid grid-cols-2 gap-8 md:w-2/3 md:grid-cols-4">
                     <div>
                         <h3 class="mb-4 font-semibold text-white">Evenementen</h3>
-                        <ul class="space-y-2 text-sm text-gray-400">
-                            <li><Link :href="companies()" class="hover:border-b-2 hover:border-white hover:text-white">19 oktober 2025</Link></li>
-                            <li><Link :href="companies()" class="hover:border-b-2 hover:border-white hover:text-white">Pricing</Link></li>
-                            <li><Link :href="companies()" class="hover:border-b-2 hover:border-white hover:text-white">Integrations</Link></li>
-                            <li><Link :href="companies()" class="hover:border-b-2 hover:border-white hover:text-white">Demo</Link></li>
+                        <ul v-if="recentEditions.length" class="space-y-2 text-sm text-gray-400">
+                            <li v-for="edition in recentEditions" :key="edition.id">
+                                <Link :href="editions()" class="hover:border-b-2 hover:border-white hover:text-white">
+                                    {{ edition.name }}
+                                </Link>
+                            </li>
                         </ul>
+                        <p v-else class="text-sm text-gray-400/70">Nog geen edities beschikbaar.</p>
                     </div>
                     <div>
                         <h3 class="mb-4 font-semibold text-white">Bedrijvendag</h3>

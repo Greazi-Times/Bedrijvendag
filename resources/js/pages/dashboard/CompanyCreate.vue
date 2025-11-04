@@ -13,8 +13,10 @@ const form = useForm({
     logo: null as File | null,
 });
 
-const editionsOptions = ['2025.1', '2025.2', '2026.1', '2026.2'];
-const sectorOptions = ['Engineering', 'ICT', 'Finance', 'Marketing'];
+const props = defineProps<{
+    editionsOptions: string[];
+    sectorOptions: string[];
+}>();
 
 const onFileChange = (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -65,7 +67,7 @@ const submit = () => {
                     <div>
                         <label class="block text-sm font-medium">Editions</label>
                         <div class="mt-2 flex flex-wrap gap-2">
-                            <label v-for="ed in editionsOptions" :key="ed" class="flex items-center gap-2">
+                            <label v-for="ed in props.editionsOptions" :key="ed" class="flex items-center gap-2">
                                 <input type="checkbox" :value="ed" v-model="form.editions" />
                                 {{ ed }}
                             </label>
@@ -76,7 +78,7 @@ const submit = () => {
                     <div>
                         <label class="block text-sm font-medium">Sectors</label>
                         <div class="mt-2 flex flex-wrap gap-2">
-                            <label v-for="s in sectorOptions" :key="s" class="flex items-center gap-2 capitalize">
+                            <label v-for="s in props.sectorOptions" :key="s" class="flex items-center gap-2 capitalize">
                                 <input type="checkbox" :value="s" v-model="form.sectors" />
                                 {{ s }}
                             </label>

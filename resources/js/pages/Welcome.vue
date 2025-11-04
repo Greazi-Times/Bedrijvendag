@@ -1,14 +1,19 @@
 <script setup lang="ts">
+import { marked } from 'marked';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { aboutUs, editions } from '@/routes';
+import { aboutUs } from '@/routes';
 import { Form, Head, Link } from '@inertiajs/vue3';
 import { BookMarked, ChevronsDown, Compass, DoorOpen, Handshake, Mic, Network, Users, Wine } from 'lucide-vue-next';
-import type { OurValues, PreviousEvent } from '@/types';
+import type { OurValues } from '@/types';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useForm } from '@inertiajs/vue3';
+import { route } from 'ziggy-js';
+
+const props = defineProps<{ editions: any[] }>();
 
 const countdown = ref({ weken: 0, dagen: 0, uur: 0 });
 const totalDays = ref(0);
@@ -34,30 +39,6 @@ const update = () => {
 
 onMounted(() => { update(); timer = setInterval(update, 1000); });
 onUnmounted(() => clearInterval(timer));
-
-const previousEvents: PreviousEvent[] = [
-    {
-        title: '2de Editie 2025',
-        description: 'De komende bedrijvendag',
-        date: '19 november 2025',
-        image: 'images/editie-2.jpg',
-        href: 'string',
-    },
-    {
-        title: '1st Editie 2025',
-        description: 'Geanuleerd wegens omstandigheden',
-        date: '12 november 2024',
-        image: '/images/editie-1.jpg',
-        href: 'string',
-    },
-    {
-        title: '2de Editie 2024',
-        description: 'Begin schooljaar 2024-2025',
-        date: '12 november 2024',
-        image: '/images/editie-3.jpg',
-        href: 'string',
-    },
-];
 
 const ourValues: OurValues[] = [
     {
@@ -92,6 +73,15 @@ const ourValues: OurValues[] = [
         icon: Handshake,
     },
 ];
+
+const form = useForm({
+    name: '',
+    email: '',
+});
+
+const submit = () => {
+    form.post('/borrel-enrollment');
+};
 </script>
 
 <template>
@@ -128,7 +118,7 @@ const ourValues: OurValues[] = [
                 </Link>
                 <Link
                     class="inline-flex items-center justify-center rounded-md bg-secondary px-6 py-3 text-sm font-semibold text-secondary-foreground hover:bg-secondary/75"
-                    :href="editions()"
+                    href="/editions"
                 >
                     VORIGE EDITIES
                 </Link>
@@ -147,9 +137,9 @@ const ourValues: OurValues[] = [
                     <div>
                         <CardTitle class="mt-0 text-2xl">Contact</CardTitle>
                         <CardContent class="p-0"
-                            >Spreek studenten van Mechatronica, Werktuigbouwkunde, (Technisch) Informatica, Elektrotechniek, Business IT &
-                            Management</CardContent
-                        >
+                        >Spreek studenten van Mechatronica, Werktuigbouwkunde, (Technisch) Informatica, Elektrotechniek, Business IT &
+                            Management, Technische Bedrijfskunde en Industrial Engineering & Management
+                        </CardContent>
                     </div>
                 </CardHeader>
             </Card>
@@ -159,9 +149,9 @@ const ourValues: OurValues[] = [
                 <CardHeader class="flex flex-row items-center gap-4">
                     <Compass class="size-12 flex-shrink-0" />
                     <div>
-                        <CardTitle class="mt-0 text-2xl">Orienteren</CardTitle>
+                        <CardTitle class="mt-0 text-2xl">Oriënteren</CardTitle>
                         <CardContent class="p-0">
-                            Orienteer bij bedrijven van jouw opleiding en neem de volgende stap in het zoeken van een stageplaats
+                            Oriënteer bij bedrijven van jouw opleiding en neem de volgende stap in het zoeken van een stageplaats
                         </CardContent>
                     </div>
                 </CardHeader>
@@ -185,25 +175,26 @@ const ourValues: OurValues[] = [
     <!-- Previous editions -->
     <div class="mx-auto mt-24 mb-24 w-3/4 text-center">
         <div>
-            <h2 class="mb-2 text-3xl font-extrabold">Voorgaande Edities</h2>
-            <p class="text-lg text-muted-foreground">Bekijk al onze voorgaande edities</p>
+            <h2 class="mb-2 text-3xl font-extrabold">Laatste Edities</h2>
+            <p class="text-lg text-muted-foreground">Bekijk de drie meest recente edities</p>
         </div>
         <div class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <template v-for="(item, index) in previousEvents" :key="index">
+            <template v-for="(item, index) in props.editions" :key="index">
                 <div class="flex flex-col overflow-hidden rounded-lg bg-blue-100/50 shadow">
-                    <img :src="item.image" alt="Event image" class="aspect-[16/16] w-full object-cover object-top" />
+                    <img
+                        v-if="item.thumbnail"
+                        :src="item.thumbnail"
+                        alt="Event image"
+                        class="aspect-[16/16] w-full object-cover object-top"
+                    />
                     <div class="flex-1 p-6">
-                        <h3 class="mb-2 text-lg font-semibold">{{ item.title }}</h3>
-                        <p class="text-sm text-muted-foreground">{{ item.description }}</p>
+                        <h3 class="mb-2 text-lg font-semibold">{{ item.name }}</h3>
+                        <p class="text-sm text-muted-foreground" v-html="marked.parse(item.description)" />
                     </div>
-                    <div class="flex items-center justify-between border-t bg-gray-50 px-6 py-4">
-                        <span class="text-sm text-muted-foreground">{{ item.date }}</span>
-                        <Link
-                            :href="item.href"
-                            class="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/75"
-                        >
-                            Meer Lezen
-                        </Link>
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-t bg-gray-50 px-6 py-4">
+              <span class="text-sm text-muted-foreground">
+                {{ new Date(item.date).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }) }}
+              </span>
                     </div>
                 </div>
             </template>
@@ -217,7 +208,7 @@ const ourValues: OurValues[] = [
             <div class="min-w-5/8 flex-1 text-center text-primary-foreground lg:text-left">
                 <h2 class="mb-4 text-3xl font-extrabold">Aanmelden Afsluitende Borrel</h2>
                 <p class="mb-6 text-lg opacity-90">
-                    Schrijf je zelf in voor de afsluitende borrel na de bedrijvendag, vergroot je netwerk en geniet van een hapje en een drankje!
+                    Schrijf je zelf als student in voor de afsluitende borrel na de bedrijvendag, vergroot je netwerk en geniet van een hapje en een drankje!
                 </p>
                 <p class="mb-2 text-lg font-bold">
                     Nog maar:
@@ -233,19 +224,43 @@ const ourValues: OurValues[] = [
             </div>
             <!-- Form box -->
             <div class="w-full max-w-md rounded-lg bg-white p-8 shadow">
-                <h3 class="mb-2 text-xl font-bold">Inschrijven</h3>
+                <h3 class="mb-2 text-xl font-bold">Inschrijven Studenten</h3>
                 <p class="mb-6 text-gray-500">Het is tijd om deel te nemen</p>
-                <Form class="mb-6 space-y-4">
-                    <Input type="text" placeholder="Naam" />
-                    <Input type="email" placeholder="E-mail" />
-                    <Button size="lg" variant="secondary" class="text-md w-full font-bold">Versturen</Button>
-                </Form>
+                <form @submit.prevent="submit" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium">Naam</label>
+                        <input
+                            v-model="form.name"
+                            type="text"
+                            required
+                            class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50"
+                            placeholder="Voor- en achternaam"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium">E-mail</label>
+                        <input
+                            v-model="form.email"
+                            type="email"
+                            required
+                            class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50"
+                            placeholder="naam@student.avans.nl"
+                        />
+                    </div>
+
+                    <div class="flex justify-end">
+                        <Button type="submit" :disabled="form.processing" size="lg" variant="secondary" class="text-md font-bold">
+                            Versturen
+                        </Button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <section class="mx-auto mb-24 w-10/16 text-center">
-        <h2 class="mb-12 text-3xl font-extrabold">Onze Waardens</h2>
+        <h2 class="mb-12 text-3xl font-extrabold">Onze Waarden</h2>
         <div class="grid grid-cols-1 gap-12 text-left md:grid-cols-2 lg:grid-cols-3">
             <template v-for="(value, idx) in ourValues" :key="idx">
                 <div>

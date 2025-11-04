@@ -9,10 +9,6 @@ class BorrelEnrollment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id'];
+    protected $fillable = ['name', 'email'];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
 }
