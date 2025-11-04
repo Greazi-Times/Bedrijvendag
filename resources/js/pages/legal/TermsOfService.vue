@@ -1,0 +1,99 @@
+<script lang="ts">
+import { defineComponent } from 'vue';
+import AppHeader from '@/components/AppHeader.vue';
+import AppFooter from '@/components/AppFooter.vue';
+
+export default defineComponent({
+    name: 'TermsOfService',
+    components: { AppFooter, AppHeader },
+});
+</script>
+
+<template>
+    <AppHeader class="sticky top-0 z-50" />
+    <section class="mx-auto max-w-4xl px-6 py-12 text-gray-800">
+        <h1 class="mb-6 text-3xl font-bold">Terms of Service</h1>
+        <p class="mb-4">
+            These Terms of Service (“Terms”) govern your use of the website <strong>https://atixbedrijvendag.nl</strong> (“Website”) operated by ATIx
+            Bedrijvendag (“we”, “our”, or “us”). By accessing or using this Website, you agree to be bound by these Terms. If you do not agree, please
+            do not use the Website.
+        </p>
+
+        <h2 class="mt-8 mb-3 text-2xl font-semibold">1. General Information</h2>
+        <p class="mb-4">ATIx Bedrijvendag is located at:</p>
+        <p class="mb-4">
+            ATIx Bedrijvendag<br />
+            Lovensdijkstraat 61, Breda, 4818 AJ, The Netherlands<br />
+            Email: <a href="mailto:info@atixbedrijvendag.nl" class="text-blue-600 underline">info@atixbedrijvendag.nl</a>
+        </p>
+
+        <h2 class="mt-8 mb-3 text-2xl font-semibold">2. Use of the Website</h2>
+        <p class="mb-4">
+            You may use this Website for informational and participation purposes related to the ATIx Bedrijvendag event. You agree not to use the
+            Website for any unlawful or unauthorized purpose.
+        </p>
+        <ul class="mb-4 ml-6 list-disc">
+            <li>Do not attempt to gain unauthorized access to our systems.</li>
+            <li>Do not upload or distribute content that violates intellectual property rights, privacy, or applicable law.</li>
+            <li>Do not use the Website in a manner that could damage, disable, or impair our services.</li>
+        </ul>
+
+        <h2 class="mt-8 mb-3 text-2xl font-semibold">3. Account Registration</h2>
+        <p class="mb-4">
+            Certain features may require you to create an account. You are responsible for maintaining the confidentiality of your login credentials
+            and for all activities that occur under your account.
+        </p>
+        <p class="mb-4">
+            We reserve the right to suspend or terminate accounts that violate these Terms or are used for abusive or fraudulent purposes.
+        </p>
+
+        <h2 class="mt-8 mb-3 text-2xl font-semibold">4. Event Participation</h2>
+        <p class="mb-4">
+            Companies and participants who register for the ATIx Bedrijvendag agree to provide accurate and truthful information. We may use submitted
+            company descriptions, logos, and media for promotional purposes related to the event.
+        </p>
+
+        <h2 class="mt-8 mb-3 text-2xl font-semibold">5. Intellectual Property</h2>
+        <p class="mb-4">
+            All content on this Website, including but not limited to text, graphics, logos, images, and software, is the property of ATIx
+            Bedrijvendag or its partners unless otherwise stated. You may not reproduce, distribute, or modify any material without prior written
+            permission.
+        </p>
+
+        <h2 class="mt-8 mb-3 text-2xl font-semibold">6. Privacy and Data Protection</h2>
+        <p class="mb-4">
+            Your use of the Website is also governed by our <a href="/privacy-policy" class="text-blue-600 underline">Privacy Policy</a>, which
+            outlines how we collect, use, and protect your personal data.
+        </p>
+
+        <h2 class="mt-8 mb-3 text-2xl font-semibold">7. Liability Disclaimer</h2>
+        <p class="mb-4">
+            While we strive to ensure the accuracy of the information provided, ATIx Bedrijvendag does not guarantee the completeness or reliability
+            of any content on the Website. We are not liable for any direct or indirect damages resulting from your use of or inability to use the
+            Website.
+        </p>
+
+        <h2 class="mt-8 mb-3 text-2xl font-semibold">8. External Links</h2>
+        <p class="mb-4">
+            Our Website may contain links to external websites. We are not responsible for the content or practices of such third-party sites and
+            encourage you to review their terms and policies.
+        </p>
+
+        <h2 class="mt-8 mb-3 text-2xl font-semibold">9. Changes to These Terms</h2>
+        <p class="mb-4">
+            We may update these Terms from time to time. The latest version will always be available on this page. Continued use of the Website after
+            changes take effect constitutes your acceptance of the revised Terms.
+        </p>
+
+        <h2 class="mt-8 mb-3 text-2xl font-semibold">10. Governing Law</h2>
+        <p class="mb-4">
+            These Terms are governed by and construed in accordance with the laws of the Netherlands. Any disputes shall be resolved exclusively by
+            the competent courts in Breda, the Netherlands.
+        </p>
+
+        <p class="mt-8 text-gray-600 italic">Last updated: November 2025</p>
+    </section>
+    <AppFooter />
+</template>
+
+<style scoped></style>
