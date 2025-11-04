@@ -1,43 +1,56 @@
 <script setup lang="ts">
-import { marked } from 'marked';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { aboutUs } from '@/routes';
-import { Form, Head, Link } from '@inertiajs/vue3';
-import { BookMarked, ChevronsDown, Compass, DoorOpen, Handshake, Mic, Network, Users, Wine } from 'lucide-vue-next';
 import type { OurValues } from '@/types';
-import { ref, onMounted, onUnmounted } from 'vue';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { useForm } from '@inertiajs/vue3';
-import { route } from 'ziggy-js';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { BookMarked, ChevronsDown, Compass, DoorOpen, Handshake, Mic, Network, Users, Wine } from 'lucide-vue-next';
+import { marked } from 'marked';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const props = defineProps<{ editions: any[] }>();
 
-const countdown = ref({ weken: 0, dagen: 0, uur: 0 });
+const countdown = ref({ weken: 0, dagen: 0, uur: 0, minuten: 0, seconden: 0 });
 const totalDays = ref(0);
+const finished = ref(false);
 const target = new Date('2025-11-12T23:59:59').getTime();
 let timer: number;
 
 const update = () => {
     const d = target - Date.now();
     if (d <= 0) {
-        countdown.value = { weken: 0, dagen: 0, uur: 0 };
+        countdown.value = { weken: 0, dagen: 0, uur: 0, minuten: 0, seconden: 0 };
         totalDays.value = 0;
+        finished.value = true;
         clearInterval(timer);
         return;
     }
+
+    finished.value = false;
+
     const td = Math.floor(d / 864e5);
+    const weeks = Math.floor(td / 7);
+    const days = td % 7;
+    const hours = Math.floor((d % 864e5) / 36e5);
+    const minutes = Math.floor((d % 36e5) / 6e4);
+    const seconds = Math.floor((d % 6e4) / 1000);
+
     countdown.value = {
-        weken: Math.floor(td / 7),
-        dagen: td % 7,
-        uur: Math.floor((d % 864e5) / 36e5),
+        weken: weeks,
+        dagen: days,
+        uur: hours,
+        minuten: minutes,
+        seconden: seconds,
     };
     totalDays.value = td;
 };
 
-onMounted(() => { update(); timer = setInterval(update, 1000); });
+onMounted(() => {
+    update();
+    timer = setInterval(update, 1000);
+});
 onUnmounted(() => clearInterval(timer));
 
 const ourValues: OurValues[] = [
@@ -137,8 +150,8 @@ const submit = () => {
                     <div>
                         <CardTitle class="mt-0 text-2xl">Contact</CardTitle>
                         <CardContent class="p-0"
-                        >Spreek studenten van Mechatronica, Werktuigbouwkunde, (Technisch) Informatica, Elektrotechniek, Business IT &
-                            Management, Technische Bedrijfskunde en Industrial Engineering & Management
+                            >Spreek studenten van Mechatronica, Werktuigbouwkunde, (Technisch) Informatica, Elektrotechniek, Business IT & Management,
+                            Technische Bedrijfskunde en Industrial Engineering & Management
                         </CardContent>
                     </div>
                 </CardHeader>
@@ -181,20 +194,17 @@ const submit = () => {
         <div class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <template v-for="(item, index) in props.editions" :key="index">
                 <div class="flex flex-col overflow-hidden rounded-lg bg-blue-100/50 shadow">
-                    <img
-                        v-if="item.thumbnail"
-                        :src="item.thumbnail"
-                        alt="Event image"
-                        class="aspect-[16/16] w-full object-cover object-top"
-                    />
+                    <img v-if="item.thumbnail" :src="item.thumbnail" alt="Event image" class="aspect-[16/16] w-full object-cover object-top" />
                     <div class="flex-1 p-6">
                         <h3 class="mb-2 text-lg font-semibold">{{ item.name }}</h3>
                         <p class="text-sm text-muted-foreground" v-html="marked.parse(item.description)" />
                     </div>
                     <div class="flex flex-wrap items-center justify-between gap-2 border-t bg-gray-50 px-6 py-4">
-              <span class="text-sm text-muted-foreground">
-                {{ new Date(item.date).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }) }}
-              </span>
+                        <span class="text-sm text-muted-foreground">
+                            {{
+                                new Date(item.date).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })
+                            }}
+                        </span>
                     </div>
                 </div>
             </template>
@@ -208,17 +218,62 @@ const submit = () => {
             <div class="min-w-5/8 flex-1 text-center text-primary-foreground lg:text-left">
                 <h2 class="mb-4 text-3xl font-extrabold">Aanmelden Afsluitende Borrel</h2>
                 <p class="mb-6 text-lg opacity-90">
-                    Schrijf je zelf als student in voor de afsluitende borrel na de bedrijvendag, vergroot je netwerk en geniet van een hapje en een drankje!
+                    Schrijf je zelf als student in voor de afsluitende borrel na de bedrijvendag, vergroot je netwerk en geniet van een hapje en een
+                    drankje!
                 </p>
-                <p class="mb-2 text-lg font-bold">
-                    Nog maar:
-                </p>
-                <div class="flex justify-center gap-4 lg:justify-start">
-                    <template v-for="(value, label) in countdown" :key="label">
-                        <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
-                            <p class="text-2xl font-bold">{{ value }}</p>
-                            <p class="text-sm">{{ label.charAt(0).toUpperCase() + label.slice(1) }}</p>
+                <p class="mb-2 text-lg font-bold">Nog maar:</p>
+                <div class="flex justify-center gap-4 lg:justify-start w-full">
+                    <template v-if="finished">
+                        <div class="w-full rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
+                            <p class="text-2xl font-bold">Happy Connecting!</p>
                         </div>
+                    </template>
+
+                    <template v-else>
+                        <template v-if="countdown.weken > 0">
+                            <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
+                                <p class="text-2xl font-bold">{{ countdown.weken }}</p>
+                                <p class="text-sm">Weken</p>
+                            </div>
+                            <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
+                                <p class="text-2xl font-bold">{{ countdown.dagen }}</p>
+                                <p class="text-sm">Dagen</p>
+                            </div>
+                            <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
+                                <p class="text-2xl font-bold">{{ countdown.uur }}</p>
+                                <p class="text-sm">Uur</p>
+                            </div>
+                        </template>
+
+                        <template v-else-if="countdown.dagen > 0">
+                            <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
+                                <p class="text-2xl font-bold">{{ countdown.dagen }}</p>
+                                <p class="text-sm">Dagen</p>
+                            </div>
+                            <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
+                                <p class="text-2xl font-bold">{{ countdown.uur }}</p>
+                                <p class="text-sm">Uur</p>
+                            </div>
+                            <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
+                                <p class="text-2xl font-bold">{{ countdown.minuten }}</p>
+                                <p class="text-sm">Minuten</p>
+                            </div>
+                        </template>
+
+                        <template v-else>
+                            <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
+                                <p class="text-2xl font-bold">{{ countdown.uur }}</p>
+                                <p class="text-sm">Uur</p>
+                            </div>
+                            <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
+                                <p class="text-2xl font-bold">{{ countdown.minuten }}</p>
+                                <p class="text-sm">Minuten</p>
+                            </div>
+                            <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
+                                <p class="text-2xl font-bold">{{ countdown.seconden }}</p>
+                                <p class="text-sm">Seconden</p>
+                            </div>
+                        </template>
                     </template>
                 </div>
             </div>
@@ -250,9 +305,7 @@ const submit = () => {
                     </div>
 
                     <div class="flex justify-end">
-                        <Button type="submit" :disabled="form.processing" size="lg" variant="secondary" class="text-md font-bold">
-                            Versturen
-                        </Button>
+                        <Button type="submit" :disabled="form.processing" size="lg" variant="secondary" class="text-md font-bold"> Versturen </Button>
                     </div>
                 </form>
             </div>
