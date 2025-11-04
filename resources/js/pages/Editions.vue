@@ -55,7 +55,13 @@ const renderMarkdown = (text: string) => {
                 </div>
                 <div class="flex items-center justify-between border-t bg-white px-4 py-3">
                     <span class="text-sm text-gray-500">{{ formatDate(edition.date) }}</span>
-                    <a :href="edition.images" class="rounded bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600">Bekijk Afbeeldingen</a>
+                    <a
+                        v-if="edition.images && edition.images.trim() !== ''"
+                        :href="edition.images"
+                        class="rounded bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600"
+                    >
+                        Bekijk Afbeeldingen
+                    </a>
                 </div>
             </div>
         </div>

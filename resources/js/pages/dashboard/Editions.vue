@@ -3,6 +3,7 @@ import Table from '@/components/Table.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { type BreadcrumbItem } from '@/types';
+import { router } from '@inertiajs/vue3';
 
 const { editions } = defineProps<{
   editions: Array<{
@@ -44,6 +45,15 @@ const breadcrumbs: BreadcrumbItem[] = [
         :row-actions="[
           { label: 'View', route: (row) => `/dashboard/edition/${row.id}` },
           { label: 'Edit', route: (row) => `/dashboard/edition/${row.id}/edit` },
+          {
+              label: 'Delete',
+              route: (row) => {
+                  router.visit(`/dashboard/edition/${row.id}/remove`, {
+                      method: 'put',
+                      preserveScroll: true,
+                  });
+              },
+          },
         ]"
         add-route="/dashboard/edition/create"
       >

@@ -21,7 +21,21 @@ class DashboardController extends Controller
                 'total' => User::count(),
                 'admin' => User::where('role', 'admin')->count(),
             ],
-            'companies'   => Company::where('visible', true)->get(),
+            'companies' => Company::with(['editions', 'sectors'])
+                ->where('visible', true)
+                ->get()
+                ->map(function ($company) {
+                    return [
+                        'id' => $company->id,
+                        'name' => $company->name,
+                        'href' => $company->href,
+                        'logo' => $company->logo,
+                        'description' => $company->description,
+                        'visible' => $company->visible,
+                        'editions' => $company->editions->pluck('name')->toArray(),
+                        'sectors' => $company->sectors->pluck('name')->toArray(),
+                    ];
+                }),
         ]);
     }
 }
