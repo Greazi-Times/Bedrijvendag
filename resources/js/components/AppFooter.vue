@@ -93,8 +93,8 @@ const recentEditions = computed(() => {
                     </div>
                 </div>
             </div>
-            <div class="mt-10 border-t border-gray-700 pt-6 text-center text-sm text-gray-500">
-                &copy; 2025 ATIx Bedrijvendag. All rights reserved.
+            <div class="mt-10 border-t border-gray-700 pt-6 text-center text-gray-400">
+                &copy; 2025 Geazi. All rights reserved. Made with ♥ by Greazi.
             </div>
         </div>
     </footer>
