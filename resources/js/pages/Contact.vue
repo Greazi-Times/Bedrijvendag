@@ -31,7 +31,7 @@ import { Mail, MapPin, Phone } from 'lucide-vue-next';
                             <div class="flex items-center space-x-4">
                                 <component :is="Phone" class="size-7 text-primary" :stroke-width="1.5" />
                                 <div>
-                                    <div class="font-medium text-foreground">+31 6 12345678</div>
+                                    <div class="font-medium text-foreground">088-5258600</div>
                                 </div>
                             </div>
                             <div class="flex items-center space-x-4">
