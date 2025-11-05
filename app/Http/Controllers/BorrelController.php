@@ -9,14 +9,18 @@ class BorrelController extends Controller
 {
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'email', 'max:255'],
+            ]);
 
-        BorrelEnrollment::create($validated);
+            BorrelEnrollment::create($validated);
 
-        return redirect()->back()->with('success', 'Bedankt voor je inschrijving!');
+            return back()->with('success', 'Bedankt voor je inschrijving!');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Er is iets misgegaan. Probeer het later opnieuw.');
+        }
     }
 
     public function totalEnrollments()
