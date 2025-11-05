@@ -76,6 +76,13 @@ class CompanyController extends Controller
         }
 
         $data['visible'] = true;
+        $description = str_replace(["\r\n", "\r"], "\n", $data['description']);
+
+        $description = preg_replace("/\n{2,}/", "<br><br>", $description);
+        $description = preg_replace("/(?<!<br>)\n(?!<br>)/", "<br>", $description);
+
+        $data['description'] = $description;
+
 
         $company = Company::create($data);
 
@@ -139,6 +146,13 @@ class CompanyController extends Controller
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('logos', 'public');
             $data['logo'] = '/storage/' . $path;
+        }
+
+        if (isset($data['description'])) {
+            $description = str_replace(["\r\n", "\r"], "\n", $data['description']);
+            $description = preg_replace("/\n{2,}/", "<br><br>", $description);
+            $description = preg_replace("/(?<!<br>)\n(?!<br>)/", "<br>", $description);
+            $data['description'] = $description;
         }
 
         $company->update($data);
