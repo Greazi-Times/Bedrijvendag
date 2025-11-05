@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { storeCompany } from '@/routes';
 import { Head, useForm } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue';
 
 const form = useForm({
     name: '',
@@ -17,6 +18,61 @@ const props = defineProps<{
     editionsOptions: string[];
     sectorOptions: string[];
 }>();
+
+const textareaRef = ref<HTMLTextAreaElement | null>(null);
+
+const applyFormatting = (format: 'bold' | 'italic' | 'underline') => {
+    if (!textareaRef.value) return;
+
+    const textarea = textareaRef.value;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = form.description.substring(start, end);
+
+    let formattedText = '';
+    switch (format) {
+        case 'bold':
+            formattedText = `**${selectedText || 'bold text'}**`;
+            break;
+        case 'italic':
+            formattedText = `*${selectedText || 'italic text'}*`;
+            break;
+        case 'underline':
+            formattedText = `<u>${selectedText || 'underlined text'}</u>`;
+            break;
+    }
+
+    form.description =
+        form.description.substring(0, start) +
+        formattedText +
+        form.description.substring(end);
+
+    nextTick(() => {
+        const pos = start + formattedText.length;
+        textarea.setSelectionRange(pos, pos);
+        textarea.focus();
+    });
+};
+
+const handleKeydown = (event: KeyboardEvent) => {
+    if ((event.ctrlKey || event.metaKey) && !event.shiftKey) {
+        if (event.key.toLowerCase() === 'b') {
+            event.preventDefault();
+            applyFormatting('bold');
+        } else if (event.key.toLowerCase() === 'i') {
+            event.preventDefault();
+            applyFormatting('italic');
+        }
+    }
+};
+
+onMounted(() => {
+    window.addEventListener('keydown', handleKeydown);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('keydown', handleKeydown);
+});
 
 const onFileChange = (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -50,7 +106,12 @@ const submit = () => {
                     <!-- Description -->
                     <div>
                         <label class="block text-sm font-medium">Description</label>
-                        <textarea v-model="form.description" rows="6"
+                        <div class="mb-2 flex gap-2">
+                            <button type="button" @click="applyFormatting('bold')" class="rounded border border-gray-300 bg-gray-100 px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600" title="Bold (Ctrl/Cmd+B)">B</button>
+                            <button type="button" @click="applyFormatting('italic')" class="rounded border border-gray-300 bg-gray-100 px-2 py-1 text-sm font-semibold italic text-gray-700 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600" title="Italic (Ctrl/Cmd+I)">I</button>
+                            <button type="button" @click="applyFormatting('underline')" class="rounded border border-gray-300 bg-gray-100 px-2 py-1 text-sm font-semibold underline text-gray-700 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600" title="Underline">&nbsp;U&nbsp;</button>
+                        </div>
+                        <textarea v-model="form.description" ref="textareaRef" rows="6"
                                   class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50"
                                   placeholder="Company description with multiple lines..."></textarea>
                     </div>

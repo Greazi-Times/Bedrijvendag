@@ -4,6 +4,7 @@ import AppHeader from '@/components/AppHeader.vue';
 import { Company } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import { marked } from 'marked';
 
 const props = defineProps<{
     companies: Company[];
@@ -94,7 +95,7 @@ const toggleSector = (sector: string) => {
                     </div>
                     <div class="border-t p-4">
                         <h3 class="mb-2 text-lg font-semibold">{{ company.name }}</h3>
-                        <p class="line-clamp-3 text-sm text-gray-600">{{ company.description[0] }}</p>
+                        <div class="line-clamp-3 text-sm text-gray-600" v-html="marked(company.description[0])"></div>
                         <div class="mt-4 flex justify-end">
                             <button @click="selectedCompany = company" class="rounded bg-primary px-4 py-2 text-white hover:bg-primary/90">
                                 Meer Lezen
@@ -116,9 +117,7 @@ const toggleSector = (sector: string) => {
                     <h2 class="mb-4 text-2xl font-bold">{{ selectedCompany.name }}</h2>
                 </div>
                 <div class="space-y-3">
-                    <p v-for="(desc, i) in selectedCompany.description" :key="i" class="text-gray-700 dark:text-gray-300">
-                        {{ desc }}
-                    </p>
+                    <div v-for="(desc, i) in selectedCompany.description" :key="i" v-html="marked(desc)" class="text-gray-700 dark:text-gray-300"></div>
                 </div>
                 <div class="mt-6">
                     <h3 class="font-semibold">Opleidingen:</h3>
