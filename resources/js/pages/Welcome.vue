@@ -92,8 +92,21 @@ const form = useForm({
     email: '',
 });
 
+const showMessage = ref<{ type: 'success' | 'error'; text: string } | null>(null);
+
 const submit = () => {
-    form.post('/borrel-enrollment');
+    form.post('/borrel-enrollment', {
+        preserveScroll: true,
+        onSuccess: () => {
+            showMessage.value = { type: 'success', text: 'Bedankt voor je inschrijving!' };
+            form.reset();
+            setTimeout(() => (showMessage.value = null), 10000);
+        },
+        onError: () => {
+            showMessage.value = { type: 'error', text: 'Er is iets misgegaan. Probeer het opnieuw.' };
+            setTimeout(() => (showMessage.value = null), 10000);
+        },
+    });
 };
 </script>
 
@@ -277,37 +290,54 @@ const submit = () => {
                     </template>
                 </div>
             </div>
-            <!-- Form box -->
-            <div class="w-full max-w-md rounded-lg bg-white p-8 shadow">
-                <h3 class="mb-2 text-xl font-bold">Inschrijven Studenten</h3>
-                <p class="mb-6 text-gray-500">Het is tijd om deel te nemen</p>
-                <form @submit.prevent="submit" class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-medium">Naam</label>
-                        <input
-                            v-model="form.name"
-                            type="text"
-                            required
-                            class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50"
-                            placeholder="Voor- en achternaam"
-                        />
+            <!-- Form or success/error message -->
+            <div class="w-full max-w-md rounded-lg bg-white p-8 shadow text-center">
+                <template v-if="showMessage">
+                    <div
+                        :class="[
+                            'rounded-md p-6 font-semibold',
+                            showMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        ]"
+                    >
+                        {{ showMessage.text }}
                     </div>
+                </template>
 
-                    <div>
-                        <label class="block text-sm font-medium">E-mail</label>
-                        <input
-                            v-model="form.email"
-                            type="email"
-                            required
-                            class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50"
-                            placeholder="naam@student.avans.nl"
-                        />
-                    </div>
+                <template v-else>
+                    <h3 class="mb-2 text-xl font-bold">Inschrijven Studenten</h3>
+                    <p class="mb-6 text-gray-500">Het is tijd om deel te nemen</p>
+                    <form @submit.prevent="submit" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium">Naam</label>
+                            <input
+                                v-model="form.name"
+                                type="text"
+                                required
+                                class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50"
+                                placeholder="Voor- en achternaam"
+                            />
+                            <span v-if="form.errors.name" class="text-sm text-red-500">{{ form.errors.name }}</span>
+                        </div>
 
-                    <div class="flex justify-end">
-                        <Button type="submit" :disabled="form.processing" size="lg" variant="secondary" class="text-md font-bold"> Versturen </Button>
-                    </div>
-                </form>
+                        <div>
+                            <label class="block text-sm font-medium">E-mail</label>
+                            <input
+                                v-model="form.email"
+                                type="email"
+                                required
+                                class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50"
+                                placeholder="naam@student.avans.nl"
+                            />
+                            <span v-if="form.errors.email" class="text-sm text-red-500">{{ form.errors.email }}</span>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <Button type="submit" :disabled="form.processing" size="lg" variant="secondary" class="text-md font-bold">
+                                Versturen
+                            </Button>
+                        </div>
+                    </form>
+                </template>
             </div>
         </div>
     </div>
