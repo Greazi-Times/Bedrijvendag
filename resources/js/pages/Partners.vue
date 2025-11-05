@@ -64,7 +64,7 @@ const partners: Partner[] = [
         <h1 class="text-6xl font-bold">Partners</h1>
         <span class="mt-2 block h-1 w-1/4 bg-primary"></span>
         <p class="mb-8 max-w-2xl pt-10 text-center text-gray-600">
-            Dankzij de onderstaande partners kunnen wij elk jaar een succesvolle ATIx Bedrijvendag organiseren.
+            Dankzij onderstaande partners kunnen wij elk jaar een succesvolle ATIx Bedrijvendag organiseren.
         </p>
     </header>
 
