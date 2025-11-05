@@ -15,7 +15,7 @@ const props = defineProps<{ editions: any[] }>();
 const countdown = ref({ weken: 0, dagen: 0, uur: 0, minuten: 0, seconden: 0 });
 const totalDays = ref(0);
 const finished = ref(false);
-const target = new Date('2025-11-12T23:59:59').getTime();
+const target = new Date('2025-11-19T13:00:00').getTime();
 let timer: number;
 
 const update = () => {
