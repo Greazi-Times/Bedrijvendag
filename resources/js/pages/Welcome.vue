@@ -150,7 +150,7 @@ const submit = () => {
                     <div>
                         <CardTitle class="mt-0 text-2xl">Contact</CardTitle>
                         <CardContent class="p-0"
-                            >Spreek studenten van Mechatronica, Werktuigbouwkunde, (Technisch) Informatica, Elektrotechniek, Business IT & Management,
+                            >Spreek studenten van Mechatronica, Werktuigbouwkunde, (Technische) Informatica, Elektrotechniek, Business IT & Management,
                             Technische Bedrijfskunde en Industrial Engineering & Management
                         </CardContent>
                     </div>
@@ -222,7 +222,7 @@ const submit = () => {
                     is er niets beter dan ontspannen en verder netwerken tijdens onze gezellige borrel.
                 </p>
                 <p class="mb-2 text-lg font-bold">Nog maar:</p>
-                <div class="flex justify-center gap-4 lg:justify-start w-full"> 
+                <div class="flex justify-center gap-4 lg:justify-start w-full">
                     <template v-if="finished">
                         <div class="w-full rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
                             <p class="text-2xl font-bold">Happy Connecting!</p>
