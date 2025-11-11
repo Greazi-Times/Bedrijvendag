@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { aboutUs, companies, contact, cookiePolicy, editions, partners, privacyPolicy, termsOfService } from '@/routes';
+import { aboutUs, companies, contact, cookiePolicy, dashboard, editions, login, partners, privacyPolicy, termsOfService } from '@/routes';
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { Button } from '@/components/ui/button';
 
 const page = usePage();
 
@@ -13,11 +14,7 @@ const allEditions = computed(() => {
     // Fallback to empty array if not present.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const p: any = page.props ?? {};
-    const raw =
-        p.editions ??
-        (p.shared && p.shared.editions) ??
-        (p.layout && p.layout.editions) ??
-        [];
+    const raw = p.editions ?? (p.shared && p.shared.editions) ?? (p.layout && p.layout.editions) ?? [];
 
     if (!Array.isArray(raw)) return [];
 
@@ -71,7 +68,11 @@ const recentEditions = computed(() => {
                         <h3 class="mb-4 font-semibold text-white">Bedrijvendag</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
                             <li><Link :href="aboutUs()" class="hover:border-b-2 hover:border-white hover:text-white">Over Ons</Link></li>
-                            <li><a href="https://avans.nl" target="_blank" rel="noopener" class="hover:border-b-2 hover:border-white hover:text-white">Avans Hogeschool</a></li>
+                            <li>
+                                <a href="https://avans.nl" target="_blank" rel="noopener" class="hover:border-b-2 hover:border-white hover:text-white"
+                                    >Avans Hogeschool</a
+                                >
+                            </li>
                             <li><Link :href="contact()" class="hover:border-b-2 hover:border-white hover:text-white">Contact</Link></li>
                         </ul>
                     </div>
@@ -87,10 +88,20 @@ const recentEditions = computed(() => {
                         <h3 class="mb-4 font-semibold text-white">Legal</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
                             <li><Link :href="privacyPolicy()" class="hover:border-b-2 hover:border-white hover:text-white">Privacy Policy</Link></li>
-                            <li><Link :href="termsOfService()" class="hover:border-b-2 hover:border-white hover:text-white">Terms of Service</Link></li>
+                            <li>
+                                <Link :href="termsOfService()" class="hover:border-b-2 hover:border-white hover:text-white">Terms of Service</Link>
+                            </li>
                             <li><Link :href="cookiePolicy()" class="hover:border-b-2 hover:border-white hover:text-white">Cookie Policy</Link></li>
                         </ul>
                     </div>
+                </div>
+                <div>
+                    <Link
+                        class="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/75"
+                        :href="login()"
+                    >
+                        Dashboard
+                    </Link>
                 </div>
             </div>
             <div class="mt-10 border-t border-gray-700 pt-6 text-center text-gray-400">
