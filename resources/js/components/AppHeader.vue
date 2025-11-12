@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import UserMenuContent from '@/components/UserMenuContent.vue';
 import { getInitials } from '@/composables/useInitials';
 import { toUrl, urlIsActive } from '@/lib/utils';
-import { home, companies, contact, aboutUs, editions, partners } from '@/routes';
+import { home, companies, contact, aboutUs, editions, partners, plattegrond } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
 import { InertiaLinkProps, Link, usePage } from '@inertiajs/vue3';
 import { Github, Menu } from 'lucide-vue-next';
@@ -37,6 +37,10 @@ const activeItemStyles = computed(
 );
 
 const mainNavItems: NavItem[] = [
+    {
+        title: 'Plattegrond',
+        href: plattegrond(),
+    },
     {
         title: 'Bedrijven',
         href: companies(),
@@ -136,10 +140,7 @@ const rightNavItems: NavItem[] = [
                                     <component v-if="item.icon" :is="item.icon" class="mr-2 h-4 w-4" />
                                     {{ item.title }}
                                 </Link>
-                                <div
-                                    v-if="isCurrentRoute(item.href)"
-                                    class="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"
-                                ></div>
+                                <div v-if="isCurrentRoute(item.href)" class="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"></div>
                             </NavigationMenuItem>
                         </NavigationMenuList>
                     </NavigationMenu>
