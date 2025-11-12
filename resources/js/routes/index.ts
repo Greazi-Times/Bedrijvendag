@@ -1868,6 +1868,258 @@ removeEditionForm.put = (args: { edition: number | { id: number } } | [edition: 
 removeEdition.form = removeEditionForm
 
 /**
+* @see \App\Http\Controllers\StandController::dashStands
+* @see app/Http/Controllers/StandController.php:12
+* @route '/dashboard/stands'
+*/
+export const dashStands = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: dashStands.url(options),
+    method: 'get',
+})
+
+dashStands.definition = {
+    methods: ["get","head"],
+    url: '/dashboard/stands',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\StandController::dashStands
+* @see app/Http/Controllers/StandController.php:12
+* @route '/dashboard/stands'
+*/
+dashStands.url = (options?: RouteQueryOptions) => {
+    return dashStands.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\StandController::dashStands
+* @see app/Http/Controllers/StandController.php:12
+* @route '/dashboard/stands'
+*/
+dashStands.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: dashStands.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\StandController::dashStands
+* @see app/Http/Controllers/StandController.php:12
+* @route '/dashboard/stands'
+*/
+dashStands.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: dashStands.url(options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\StandController::dashStands
+* @see app/Http/Controllers/StandController.php:12
+* @route '/dashboard/stands'
+*/
+const dashStandsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: dashStands.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\StandController::dashStands
+* @see app/Http/Controllers/StandController.php:12
+* @route '/dashboard/stands'
+*/
+dashStandsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: dashStands.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\StandController::dashStands
+* @see app/Http/Controllers/StandController.php:12
+* @route '/dashboard/stands'
+*/
+dashStandsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: dashStands.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+dashStands.form = dashStandsForm
+
+/**
+* @see \App\Http\Controllers\StandController::updateStands
+* @see app/Http/Controllers/StandController.php:61
+* @route '/dashboard/stands/{stand}'
+*/
+export const updateStands = (args: { stand: number | { id: number } } | [stand: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: updateStands.url(args, options),
+    method: 'patch',
+})
+
+updateStands.definition = {
+    methods: ["patch"],
+    url: '/dashboard/stands/{stand}',
+} satisfies RouteDefinition<["patch"]>
+
+/**
+* @see \App\Http\Controllers\StandController::updateStands
+* @see app/Http/Controllers/StandController.php:61
+* @route '/dashboard/stands/{stand}'
+*/
+updateStands.url = (args: { stand: number | { id: number } } | [stand: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { stand: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { stand: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            stand: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        stand: typeof args.stand === 'object'
+        ? args.stand.id
+        : args.stand,
+    }
+
+    return updateStands.definition.url
+            .replace('{stand}', parsedArgs.stand.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\StandController::updateStands
+* @see app/Http/Controllers/StandController.php:61
+* @route '/dashboard/stands/{stand}'
+*/
+updateStands.patch = (args: { stand: number | { id: number } } | [stand: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: updateStands.url(args, options),
+    method: 'patch',
+})
+
+/**
+* @see \App\Http\Controllers\StandController::updateStands
+* @see app/Http/Controllers/StandController.php:61
+* @route '/dashboard/stands/{stand}'
+*/
+const updateStandsForm = (args: { stand: number | { id: number } } | [stand: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: updateStands.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PATCH',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\StandController::updateStands
+* @see app/Http/Controllers/StandController.php:61
+* @route '/dashboard/stands/{stand}'
+*/
+updateStandsForm.patch = (args: { stand: number | { id: number } } | [stand: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: updateStands.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PATCH',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+updateStands.form = updateStandsForm
+
+/**
+* @see \App\Http\Controllers\StandController::plattegrond
+* @see app/Http/Controllers/StandController.php:39
+* @route '/plattegrond'
+*/
+export const plattegrond = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: plattegrond.url(options),
+    method: 'get',
+})
+
+plattegrond.definition = {
+    methods: ["get","head"],
+    url: '/plattegrond',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\StandController::plattegrond
+* @see app/Http/Controllers/StandController.php:39
+* @route '/plattegrond'
+*/
+plattegrond.url = (options?: RouteQueryOptions) => {
+    return plattegrond.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\StandController::plattegrond
+* @see app/Http/Controllers/StandController.php:39
+* @route '/plattegrond'
+*/
+plattegrond.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: plattegrond.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\StandController::plattegrond
+* @see app/Http/Controllers/StandController.php:39
+* @route '/plattegrond'
+*/
+plattegrond.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: plattegrond.url(options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\StandController::plattegrond
+* @see app/Http/Controllers/StandController.php:39
+* @route '/plattegrond'
+*/
+const plattegrondForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: plattegrond.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\StandController::plattegrond
+* @see app/Http/Controllers/StandController.php:39
+* @route '/plattegrond'
+*/
+plattegrondForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: plattegrond.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\StandController::plattegrond
+* @see app/Http/Controllers/StandController.php:39
+* @route '/plattegrond'
+*/
+plattegrondForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: plattegrond.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+plattegrond.form = plattegrondForm
+
+/**
 * @see [serialized-closure]:2
 * @route '/privacy-policy'
 */

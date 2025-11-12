@@ -4,6 +4,7 @@ import EditionController from './EditionController'
 import CompanyController from './CompanyController'
 import BorrelController from './BorrelController'
 import DashboardController from './DashboardController'
+import StandController from './StandController'
 import Settings from './Settings'
 
 const Controllers = {
@@ -13,6 +14,7 @@ const Controllers = {
     CompanyController: Object.assign(CompanyController, CompanyController),
     BorrelController: Object.assign(BorrelController, BorrelController),
     DashboardController: Object.assign(DashboardController, DashboardController),
+    StandController: Object.assign(StandController, StandController),
     Settings: Object.assign(Settings, Settings),
 }
 
