@@ -149,6 +149,15 @@ const submit = () => {
                     VORIGE EDITIES
                 </Link>
             </div>
+            <div class="mt-10">
+                <!-- New button here that shakes for the map at /plattegrond -->
+                <Link
+                    href="/plattegrond"
+                    class="animate-shake inline-flex items-center justify-center rounded-md bg-green-600 px-6 py-3 text-sm font-semibold text-white hover:bg-green-700"
+                >
+                    BEKIJK DE PLATTEGROND
+                </Link>
+            </div>
         </div>
     </header>
 
@@ -163,8 +172,8 @@ const submit = () => {
                     <div>
                         <CardTitle class="mt-0 text-2xl">Contact</CardTitle>
                         <CardContent class="p-0"
-                            >Spreek studenten van Mechatronica, Werktuigbouwkunde, (Technische) Informatica, Elektrotechniek, Business IT & Management,
-                            Technische Bedrijfskunde en Industrial Engineering & Management
+                            >Spreek studenten van Mechatronica, Werktuigbouwkunde, (Technische) Informatica, Elektrotechniek, Business IT &
+                            Management, Technische Bedrijfskunde en Industrial Engineering & Management
                         </CardContent>
                     </div>
                 </CardHeader>
@@ -231,11 +240,11 @@ const submit = () => {
             <div class="min-w-5/8 flex-1 text-center text-primary-foreground lg:text-left">
                 <h2 class="mb-4 text-3xl font-extrabold">Aanmelden Afsluitende Borrel</h2>
                 <p class="mb-6 text-lg opacity-90">
-                    Schrijf je als student in voor de ATIx Bedrijvendag en krijg toegang tot de afsluitende borrel! Na een dag vol inspiratie en netwerken
-                    is er niets beter dan ontspannen en verder netwerken tijdens onze gezellige borrel.
+                    Schrijf je als student in voor de ATIx Bedrijvendag en krijg toegang tot de afsluitende borrel! Na een dag vol inspiratie en
+                    netwerken is er niets beter dan ontspannen en verder netwerken tijdens onze gezellige borrel.
                 </p>
                 <p class="mb-2 text-lg font-bold">Nog maar:</p>
-                <div class="flex justify-center gap-4 lg:justify-start w-full">
+                <div class="flex w-full justify-center gap-4 lg:justify-start">
                     <template v-if="finished">
                         <div class="w-full rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
                             <p class="text-2xl font-bold">Happy Connecting!</p>
@@ -291,12 +300,12 @@ const submit = () => {
                 </div>
             </div>
             <!-- Form or success/error message -->
-            <div class="w-full max-w-md rounded-lg bg-white p-8 shadow text-center">
+            <div class="w-full max-w-md rounded-lg bg-white p-8 text-center shadow">
                 <template v-if="showMessage">
                     <div
                         :class="[
                             'rounded-md p-6 font-semibold',
-                            showMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            showMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800',
                         ]"
                     >
                         {{ showMessage.text }}
@@ -361,3 +370,32 @@ const submit = () => {
 
     <AppFooter />
 </template>
+
+<style scoped>
+@keyframes shake {
+    0%,
+    10% {
+        transform: rotate(0deg);
+    }
+    15% {
+        transform: rotate(-5deg);
+    }
+    20% {
+        transform: rotate(5deg);
+    }
+    25% {
+        transform: rotate(-5deg);
+    }
+    30% {
+        transform: rotate(5deg);
+    }
+    35%,
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.animate-shake {
+    animation: shake 2s infinite ease-in-out;
+}
+</style>

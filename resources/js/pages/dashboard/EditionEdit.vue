@@ -71,13 +71,11 @@ const submit = async () => {
         fd.append('thumbnail', form.thumbnail);
     }
 
-    console.log('Submitting FormData with changed fields only...');
     for (const [k, v] of fd.entries()) {
-        console.log('FD ->', k, v);
     }
 
     try {
-        const response = await axios.post(
+        await axios.post(
             `/dashboard/edition/${props.edition.id}/update`,
             fd,
             {
@@ -88,10 +86,8 @@ const submit = async () => {
             },
         );
 
-        console.log('Laravel response:', response.data);
         alert('Edition updated successfully!');
     } catch (err: any) {
-        console.error('Update failed:', err?.response?.data || err);
         alert('Update failed. Check console / laravel.log.');
     }
 };

@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\BorrelController;
+//use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EditionController;
+use App\Http\Controllers\StandController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,7 +21,7 @@ Route::get('partners', function () { return Inertia::render('Partners'); })->nam
 Route::get('over-ons', function () { return Inertia::render('AboutUs'); })->name('about-us');
 
 Route::get('contact', function () { return Inertia::render('Contact'); })->name('contact');
-Route::post('/contact/send', [ContactController::class, 'send'])->name('contact.send');
+//Route::post('/contact/send', [ContactController::class, 'send'])->name('contactSend');
 
 Route::post('/borrel-enrollment', [BorrelController::class, 'store'])->name('storeBorrel');
 
@@ -45,7 +47,13 @@ Route::middleware(['auth', 'verified', 'editorOrAdmin'])
         Route::put('/edition/{edition}/update', [EditionController::class, 'update'])->name('updateEdition');
         Route::put('/edition/{edition}/remove', [EditionController::class, 'destroy'])->name('removeEdition');
 
+        // Stand routes
+        Route::get('/stands', [StandController::class, 'index'])->name('dashStands');
+        Route::patch('/stands/{stand}', [StandController::class, 'update'])->name('updateStands');
+
     });
+
+Route::get('plattegrond', [StandController::class, 'view'])->name('plattegrond');
 
 Route::get('privacy-policy', function () {
     return Inertia::render('legal/PrivacyPolicy');
