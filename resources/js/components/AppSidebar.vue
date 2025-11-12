@@ -3,7 +3,7 @@ import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { createCompany, dashboard, dashEditions, home } from '@/routes';
+import { dashboard, dashEditions, home } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { Github, LayoutGrid, Book, Users } from 'lucide-vue-next';
@@ -25,10 +25,10 @@ const editionItems: NavItem[] = [
   },
 ];
 
-const userItems: NavItem[] = [
+const standItems: NavItem[] = [
   {
-    title: 'Manage Users',
-    href: '/dashboard/users',
+    title: 'Stands',
+    href: '/dashboard/stands',
     icon: Users,
   },
 ];
@@ -59,7 +59,7 @@ const footerNavItems: NavItem[] = [
         <SidebarContent class="space-y-6">
             <NavMain :items="mainNavItems" label="Dashboard" />
             <NavMain :items="editionItems" label="Editions" />
-            <NavMain :items="userItems" label="Users" />
+            <NavMain :items="standItems" label="Stands" />
         </SidebarContent>
 
         <SidebarFooter>
