@@ -7,9 +7,31 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, usePage } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
+
+// Keep usePage untyped (or cast to any) to avoid requiring the full PageProps shape
+const page = usePage() as any;
+const showModal = ref(false);
+
+// use optional chaining so the watcher source doesn't throw if props/value is undefined initially
+watch(
+    () => page?.props?.value?.flash ?? page?.props?.flash,
+    (flash) => {
+        const f = flash;
+        if (f && (f.status || f.message || f.success || f.registered)) {
+            showModal.value = true;
+        }
+    },
+    { immediate: true }
+);
+
+function closeModal() {
+    showModal.value = false;
+}
 </script>
+
 
 <template>
     <AuthBase title="Create an account" description="Enter your details below to create your account">
@@ -54,7 +76,7 @@ import { LoaderCircle } from 'lucide-vue-next';
                     <InputError :message="errors.password_confirmation" />
                 </div>
 
-                <Button type="submit" class="mt-2 w-full" tabindex="5" :disabled="processing" data-test="register-user-button">
+                <Button type="submit" class="mt-2 w-full" :tabindex="5" :disabled="processing" data-test="register-user-button">
                     <LoaderCircle v-if="processing" class="h-4 w-4 animate-spin" />
                     Create account
                 </Button>
@@ -65,5 +87,19 @@ import { LoaderCircle } from 'lucide-vue-next';
                 <TextLink :href="login()" class="underline underline-offset-4" :tabindex="6">Log in</TextLink>
             </div>
         </Form>
+
+        <!-- Confirmation modal shown when backend sets a flash message after registration -->
+        <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+                <h3 class="text-lg font-semibold">Account created</h3>
+                <p class="mt-2 text-sm">
+                    Your account has been created. An administrator will activate and confirm your account. You will be notified by email once activated.
+                </p>
+                <div class="mt-4 flex justify-end gap-3">
+                    <Button type="button" @click="closeModal">Close</Button>
+                    <TextLink :href="login()" class="underline" :tabindex="0">Go to login</TextLink>
+                </div>
+            </div>
+        </div>
     </AuthBase>
 </template>
