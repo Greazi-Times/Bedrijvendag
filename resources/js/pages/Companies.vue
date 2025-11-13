@@ -132,7 +132,11 @@ onBeforeUnmount(() => {
         <!-- Modal -->
         <div v-if="selectedCompany" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
             <div class="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white p-6 text-foreground shadow-lg dark:bg-gray-900">
-                <button @click="selectedCompany = null" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">
+                <button
+                    @click="selectedCompany = null"
+                    aria-label="Close"
+                    class="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-700 text-lg shadow-sm transition-colors duration-150 hover:bg-red-500 hover:text-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                >
                     ✕
                 </button>
                 <div class="flex flex-col items-center">
