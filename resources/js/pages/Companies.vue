@@ -3,7 +3,7 @@ import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { Company } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import { marked } from 'marked';
 
 const props = defineProps<{
@@ -44,6 +44,21 @@ const toggleSector = (sector: string) => {
         selectedSectors.value.push(sector);
     }
 };
+
+// Close modal on Escape key
+function onKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape' && selectedCompany.value) {
+        selectedCompany.value = null;
+    }
+}
+
+onMounted(() => {
+    window.addEventListener('keydown', onKeydown);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('keydown', onKeydown);
+});
 </script>
 
 <template>
