@@ -7,7 +7,7 @@ import { computed, ref } from 'vue';
 import { marked } from 'marked';
 
 const props = defineProps<{
-    companies: Company[];
+    companies: (Company & { stand_display?: string | null })[];
 }>();
 
 const selectedCompany = ref<Company | null>(null);
@@ -90,8 +90,16 @@ const toggleSector = (sector: string) => {
         <div class="mx-auto grid w-3/4 grid-cols-1 gap-20 p-6 md:grid-cols-2">
             <div v-for="company in filteredCompanies" :key="company.name" class="flex items-center justify-center">
                 <div class="w-full overflow-hidden rounded-lg bg-white shadow transition hover:shadow-lg">
-                    <div class="flex items-center justify-center bg-blue-500/20 p-6">
+                    <!-- make image container relative to position the small circle -->
+                    <div class="relative flex items-center justify-center bg-blue-500/20 p-6">
                         <img :src="company.logo" :alt="company.name" class="h-24 object-contain" />
+                        <div
+                            v-if="company.stand_display"
+                            class="absolute bottom-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold"
+                            aria-hidden="true"
+                        >
+                            {{ company.stand_display }}
+                        </div>
                     </div>
                     <div class="border-t p-4">
                         <h3 class="mb-2 text-lg font-semibold">{{ company.name }}</h3>

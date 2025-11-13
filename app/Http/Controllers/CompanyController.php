@@ -27,22 +27,35 @@ class CompanyController extends Controller
 
     public function publicIndex()
     {
-        $companies = Company::where('visible', true)
+        $companiesCollection = Company::where('visible', true)
             ->with(['editions:id,name', 'sectors:id,name'])
-            ->get()
-            ->map(function ($company) {
-                return [
-                    'id' => $company->id,
-                    'name' => $company->name,
-                    'description' => is_array($company->description)
-                        ? $company->description
-                        : [$company->description],
-                    'logo' => $company->logo,
-                    'href' => $company->href,
-                    'educations' => $company->sectors->pluck('name')->toArray(),
-                    'visible' => $company->visible,
-                ];
-            });
+            ->get();
+
+        // Load stands for these companies and key by company_id
+        $stands = \App\Models\Stand::whereIn('company_id', $companiesCollection->pluck('id'))->get()->keyBy('company_id');
+
+        $companies = $companiesCollection->map(function ($company) use ($stands) {
+            $stand = $stands->get($company->id);
+            $standDisplay = null;
+            if ($stand) {
+                $standDisplay = $stand->id >= 100
+                    ? 'P' . ($stand->id - 99)
+                    : (string) $stand->id;
+            }
+
+            return [
+                'id' => $company->id,
+                'name' => $company->name,
+                'description' => is_array($company->description)
+                    ? $company->description
+                    : [$company->description],
+                'logo' => $company->logo,
+                'href' => $company->href,
+                'educations' => $company->sectors->pluck('name')->toArray(),
+                'visible' => $company->visible,
+                'stand_display' => $standDisplay,
+            ];
+        });
 
         return inertia('Companies', [
             'companies' => $companies,

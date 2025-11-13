@@ -82,7 +82,7 @@ publicIndex.form = publicIndexForm
 
 /**
 * @see \App\Http\Controllers\CompanyController::create
-* @see app/Http/Controllers/CompanyController.php:52
+* @see app/Http/Controllers/CompanyController.php:65
 * @route '/dashboard/company/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -97,7 +97,7 @@ create.definition = {
 
 /**
 * @see \App\Http\Controllers\CompanyController::create
-* @see app/Http/Controllers/CompanyController.php:52
+* @see app/Http/Controllers/CompanyController.php:65
 * @route '/dashboard/company/create'
 */
 create.url = (options?: RouteQueryOptions) => {
@@ -106,7 +106,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\CompanyController::create
-* @see app/Http/Controllers/CompanyController.php:52
+* @see app/Http/Controllers/CompanyController.php:65
 * @route '/dashboard/company/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -116,7 +116,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\CompanyController::create
-* @see app/Http/Controllers/CompanyController.php:52
+* @see app/Http/Controllers/CompanyController.php:65
 * @route '/dashboard/company/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -126,7 +126,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\CompanyController::create
-* @see app/Http/Controllers/CompanyController.php:52
+* @see app/Http/Controllers/CompanyController.php:65
 * @route '/dashboard/company/create'
 */
 const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -136,7 +136,7 @@ const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 
 /**
 * @see \App\Http\Controllers\CompanyController::create
-* @see app/Http/Controllers/CompanyController.php:52
+* @see app/Http/Controllers/CompanyController.php:65
 * @route '/dashboard/company/create'
 */
 createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -146,7 +146,7 @@ createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\CompanyController::create
-* @see app/Http/Controllers/CompanyController.php:52
+* @see app/Http/Controllers/CompanyController.php:65
 * @route '/dashboard/company/create'
 */
 createForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -163,7 +163,7 @@ create.form = createForm
 
 /**
 * @see \App\Http\Controllers\CompanyController::store
-* @see app/Http/Controllers/CompanyController.php:60
+* @see app/Http/Controllers/CompanyController.php:73
 * @route '/dashboard/company/store'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -178,7 +178,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\CompanyController::store
-* @see app/Http/Controllers/CompanyController.php:60
+* @see app/Http/Controllers/CompanyController.php:73
 * @route '/dashboard/company/store'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -187,7 +187,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\CompanyController::store
-* @see app/Http/Controllers/CompanyController.php:60
+* @see app/Http/Controllers/CompanyController.php:73
 * @route '/dashboard/company/store'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -197,7 +197,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\CompanyController::store
-* @see app/Http/Controllers/CompanyController.php:60
+* @see app/Http/Controllers/CompanyController.php:73
 * @route '/dashboard/company/store'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -207,7 +207,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\CompanyController::store
-* @see app/Http/Controllers/CompanyController.php:60
+* @see app/Http/Controllers/CompanyController.php:73
 * @route '/dashboard/company/store'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -219,7 +219,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\CompanyController::show
-* @see app/Http/Controllers/CompanyController.php:102
+* @see app/Http/Controllers/CompanyController.php:115
 * @route '/dashboard/company/{company}'
 */
 export const show = (args: { company: string | number } | [company: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -234,7 +234,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\CompanyController::show
-* @see app/Http/Controllers/CompanyController.php:102
+* @see app/Http/Controllers/CompanyController.php:115
 * @route '/dashboard/company/{company}'
 */
 show.url = (args: { company: string | number } | [company: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -261,7 +261,7 @@ show.url = (args: { company: string | number } | [company: string | number ] | s
 
 /**
 * @see \App\Http\Controllers\CompanyController::show
-* @see app/Http/Controllers/CompanyController.php:102
+* @see app/Http/Controllers/CompanyController.php:115
 * @route '/dashboard/company/{company}'
 */
 show.get = (args: { company: string | number } | [company: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -271,7 +271,7 @@ show.get = (args: { company: string | number } | [company: string | number ] | s
 
 /**
 * @see \App\Http\Controllers\CompanyController::show
-* @see app/Http/Controllers/CompanyController.php:102
+* @see app/Http/Controllers/CompanyController.php:115
 * @route '/dashboard/company/{company}'
 */
 show.head = (args: { company: string | number } | [company: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -281,7 +281,7 @@ show.head = (args: { company: string | number } | [company: string | number ] | 
 
 /**
 * @see \App\Http\Controllers\CompanyController::show
-* @see app/Http/Controllers/CompanyController.php:102
+* @see app/Http/Controllers/CompanyController.php:115
 * @route '/dashboard/company/{company}'
 */
 const showForm = (args: { company: string | number } | [company: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -291,7 +291,7 @@ const showForm = (args: { company: string | number } | [company: string | number
 
 /**
 * @see \App\Http\Controllers\CompanyController::show
-* @see app/Http/Controllers/CompanyController.php:102
+* @see app/Http/Controllers/CompanyController.php:115
 * @route '/dashboard/company/{company}'
 */
 showForm.get = (args: { company: string | number } | [company: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -301,7 +301,7 @@ showForm.get = (args: { company: string | number } | [company: string | number ]
 
 /**
 * @see \App\Http\Controllers\CompanyController::show
-* @see app/Http/Controllers/CompanyController.php:102
+* @see app/Http/Controllers/CompanyController.php:115
 * @route '/dashboard/company/{company}'
 */
 showForm.head = (args: { company: string | number } | [company: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -318,7 +318,7 @@ show.form = showForm
 
 /**
 * @see \App\Http\Controllers\CompanyController::edit
-* @see app/Http/Controllers/CompanyController.php:112
+* @see app/Http/Controllers/CompanyController.php:125
 * @route '/dashboard/company/{company}/edit'
 */
 export const edit = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -333,7 +333,7 @@ edit.definition = {
 
 /**
 * @see \App\Http\Controllers\CompanyController::edit
-* @see app/Http/Controllers/CompanyController.php:112
+* @see app/Http/Controllers/CompanyController.php:125
 * @route '/dashboard/company/{company}/edit'
 */
 edit.url = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -366,7 +366,7 @@ edit.url = (args: { company: number | { id: number } } | [company: number | { id
 
 /**
 * @see \App\Http\Controllers\CompanyController::edit
-* @see app/Http/Controllers/CompanyController.php:112
+* @see app/Http/Controllers/CompanyController.php:125
 * @route '/dashboard/company/{company}/edit'
 */
 edit.get = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -376,7 +376,7 @@ edit.get = (args: { company: number | { id: number } } | [company: number | { id
 
 /**
 * @see \App\Http\Controllers\CompanyController::edit
-* @see app/Http/Controllers/CompanyController.php:112
+* @see app/Http/Controllers/CompanyController.php:125
 * @route '/dashboard/company/{company}/edit'
 */
 edit.head = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -386,7 +386,7 @@ edit.head = (args: { company: number | { id: number } } | [company: number | { i
 
 /**
 * @see \App\Http\Controllers\CompanyController::edit
-* @see app/Http/Controllers/CompanyController.php:112
+* @see app/Http/Controllers/CompanyController.php:125
 * @route '/dashboard/company/{company}/edit'
 */
 const editForm = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -396,7 +396,7 @@ const editForm = (args: { company: number | { id: number } } | [company: number 
 
 /**
 * @see \App\Http\Controllers\CompanyController::edit
-* @see app/Http/Controllers/CompanyController.php:112
+* @see app/Http/Controllers/CompanyController.php:125
 * @route '/dashboard/company/{company}/edit'
 */
 editForm.get = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -406,7 +406,7 @@ editForm.get = (args: { company: number | { id: number } } | [company: number | 
 
 /**
 * @see \App\Http\Controllers\CompanyController::edit
-* @see app/Http/Controllers/CompanyController.php:112
+* @see app/Http/Controllers/CompanyController.php:125
 * @route '/dashboard/company/{company}/edit'
 */
 editForm.head = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -423,7 +423,7 @@ edit.form = editForm
 
 /**
 * @see \App\Http\Controllers\CompanyController::update
-* @see app/Http/Controllers/CompanyController.php:132
+* @see app/Http/Controllers/CompanyController.php:145
 * @route '/dashboard/company/{company}/update'
 */
 export const update = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -438,7 +438,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\CompanyController::update
-* @see app/Http/Controllers/CompanyController.php:132
+* @see app/Http/Controllers/CompanyController.php:145
 * @route '/dashboard/company/{company}/update'
 */
 update.url = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -471,7 +471,7 @@ update.url = (args: { company: number | { id: number } } | [company: number | { 
 
 /**
 * @see \App\Http\Controllers\CompanyController::update
-* @see app/Http/Controllers/CompanyController.php:132
+* @see app/Http/Controllers/CompanyController.php:145
 * @route '/dashboard/company/{company}/update'
 */
 update.put = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -481,7 +481,7 @@ update.put = (args: { company: number | { id: number } } | [company: number | { 
 
 /**
 * @see \App\Http\Controllers\CompanyController::update
-* @see app/Http/Controllers/CompanyController.php:132
+* @see app/Http/Controllers/CompanyController.php:145
 * @route '/dashboard/company/{company}/update'
 */
 const updateForm = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -496,7 +496,7 @@ const updateForm = (args: { company: number | { id: number } } | [company: numbe
 
 /**
 * @see \App\Http\Controllers\CompanyController::update
-* @see app/Http/Controllers/CompanyController.php:132
+* @see app/Http/Controllers/CompanyController.php:145
 * @route '/dashboard/company/{company}/update'
 */
 updateForm.put = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -513,7 +513,7 @@ update.form = updateForm
 
 /**
 * @see \App\Http\Controllers\CompanyController::destroy
-* @see app/Http/Controllers/CompanyController.php:172
+* @see app/Http/Controllers/CompanyController.php:185
 * @route '/dashboard/company/{company}/remove'
 */
 export const destroy = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -528,7 +528,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\CompanyController::destroy
-* @see app/Http/Controllers/CompanyController.php:172
+* @see app/Http/Controllers/CompanyController.php:185
 * @route '/dashboard/company/{company}/remove'
 */
 destroy.url = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -561,7 +561,7 @@ destroy.url = (args: { company: number | { id: number } } | [company: number | {
 
 /**
 * @see \App\Http\Controllers\CompanyController::destroy
-* @see app/Http/Controllers/CompanyController.php:172
+* @see app/Http/Controllers/CompanyController.php:185
 * @route '/dashboard/company/{company}/remove'
 */
 destroy.put = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -571,7 +571,7 @@ destroy.put = (args: { company: number | { id: number } } | [company: number | {
 
 /**
 * @see \App\Http\Controllers\CompanyController::destroy
-* @see app/Http/Controllers/CompanyController.php:172
+* @see app/Http/Controllers/CompanyController.php:185
 * @route '/dashboard/company/{company}/remove'
 */
 const destroyForm = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -586,7 +586,7 @@ const destroyForm = (args: { company: number | { id: number } } | [company: numb
 
 /**
 * @see \App\Http\Controllers\CompanyController::destroy
-* @see app/Http/Controllers/CompanyController.php:172
+* @see app/Http/Controllers/CompanyController.php:185
 * @route '/dashboard/company/{company}/remove'
 */
 destroyForm.put = (args: { company: number | { id: number } } | [company: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
