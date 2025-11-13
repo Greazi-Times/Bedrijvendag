@@ -37,7 +37,9 @@ const { stands } = defineProps<{
                     <tbody>
                         <tr v-for="stand in stands" :key="stand.id" class="border-b hover:bg-gray-50 dark:hover:bg-neutral-800">
                             <td class="p-2 font-medium">{{ stand.display_id }}</td>
-                            <td class="p-2">{{ stand.company_name || 'Geen bedrijf' }}</td>
+                            <td class="p-2" :class="(stand.company_name && stand.company_name.trim()) ? '' : 'text-secondary'">
+                              {{ (stand.company_name && stand.company_name.trim()) ? stand.company_name : 'Nader te bepalen' }}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
