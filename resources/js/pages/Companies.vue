@@ -121,8 +121,20 @@ const toggleSector = (sector: string) => {
                     ✕
                 </button>
                 <div class="flex flex-col items-center">
-                    <img :src="selectedCompany.logo" :alt="selectedCompany.name" class="mb-4 h-24 object-contain" />
-                    <h2 class="mb-4 text-2xl font-bold">{{ selectedCompany.name }}</h2>
+                    <div class="relative">
+                        <img :src="selectedCompany.logo" :alt="selectedCompany.name" class="mb-4 h-24 object-contain" />
+                        <!-- modal badge: small circle near image if stand exists -->
+                        <div
+                            v-if="selectedCompany.stand_display"
+                            class="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold"
+                            aria-hidden="true"
+                        >
+                            {{ selectedCompany.stand_display }}
+                        </div>
+                    </div>
+                    <h2 class="mb-4 text-2xl font-bold flex items-center">
+                        {{ selectedCompany.name }}
+                    </h2>
                 </div>
                 <div class="space-y-3">
                     <div v-for="(desc, i) in selectedCompany.description" :key="i" v-html="marked(desc)" class="text-gray-700 dark:text-gray-300"></div>
