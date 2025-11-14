@@ -82,6 +82,7 @@ class StandPdfController extends Controller
         if (! is_dir(dirname($path))) {
             mkdir(dirname($path), 0775, true);
         }
+        putenv("CHROME_CRASHPAD_HANDLER=/bin/true");
 
         Browsershot::html($html)
             ->setChromePath('/usr/bin/google-chrome-stable')
@@ -91,10 +92,6 @@ class StandPdfController extends Controller
                 'no-sandbox',
                 'disable-gpu',
                 'disable-dev-shm-usage',
-                'disable-crash-reporter',
-                'no-crashpad',
-                'disable-extensions',
-                'disable-software-rasterizer',
                 'disable-setuid-sandbox',
                 'user-data-dir=/tmp/chrome-data'
             ])
