@@ -83,22 +83,14 @@ class StandPdfController extends Controller
             mkdir(dirname($path), 0775, true);
         }
 
-        Browsershot::html($html)
-            ->setChromePath('/opt/chromium/chrome-linux/chrome')
-            ->setEnvironmentVariable('HOME', '/tmp')
-            ->setOption('args', [
-                '--no-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--user-data-dir=/tmp/chrome-data',
-                '--single-process',
-                '--no-zygote'
-            ])
-            ->format('A4')
-            ->margins(10, 10, 10, 10)
-            ->showBackground()
-            ->save($path);
+        $pdf = \PDF::loadHTML($html)
+            ->setPaper('a4')
+            ->setOption('margin-top', '10mm')
+            ->setOption('margin-right', '10mm')
+            ->setOption('margin-bottom', '10mm')
+            ->setOption('margin-left', '10mm')
+            ->setOption('enable-local-file-access', true);
 
-        return response()->download($path, 'stands.pdf')->deleteFileAfterSend(true);
+        return $pdf->inline('stands.pdf');
     }
 }
