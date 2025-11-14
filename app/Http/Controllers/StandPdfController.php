@@ -84,7 +84,7 @@ class StandPdfController extends Controller
         }
 
         Browsershot::html($html)
-            ->setChromePath('/opt/chromium/chrome-linux/chrome')
+            ->setChromePath('/usr/bin/google-chrome-stable')
             ->setNodeBinary('/usr/bin/node')
             ->setNpmBinary('/usr/bin/npm')
             ->addChromiumArguments([
