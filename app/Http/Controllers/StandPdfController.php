@@ -86,13 +86,13 @@ class StandPdfController extends Controller
         Browsershot::html($html)
             ->setChromePath('/opt/chromium/chrome-linux/chrome')
             ->setEnvironmentVariable('HOME', '/tmp')
-            ->addChromiumArguments([
+            ->setOption('args', [
                 '--no-sandbox',
                 '--disable-dev-shm-usage',
                 '--disable-gpu',
                 '--user-data-dir=/tmp/chrome-data',
                 '--single-process',
-                '--no-zygote',
+                '--no-zygote'
             ])
             ->format('A4')
             ->margins(10, 10, 10, 10)
