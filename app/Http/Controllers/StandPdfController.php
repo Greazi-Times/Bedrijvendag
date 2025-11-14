@@ -68,13 +68,41 @@ class StandPdfController extends Controller
             return view('pdf.stands', [
                 'stands'      => $stands,
                 'sectorSlots' => $sectorSlots,
+                'companyLogo' => null,
+                'companyName' => null,
+                'standNumber' => null,
+                'eventLogo'   => public_path('img/bedrijvendag-footer.png'),
+                'sectors'     => [],
             ]);
         }
 
-        $html = view('pdf.stands', [
-            'stands'      => $stands,
-            'sectorSlots' => $sectorSlots,
-        ])->render();
+        $standPages = [];
+
+        foreach ($stands as $stand) {
+            $company = $stand->company;
+            $companyLogo = $company && $company->logo_path
+                ? public_path('storage/' . $company->logo_path)
+                : null;
+
+            $companyName = $company ? $company->name : '';
+            $standNumber = $stand->number;
+
+            $assignedSectors = $company
+                ? $company->sectors->pluck('name')->toArray()
+                : [];
+
+            $standPages[] = view('pdf.stands', [
+                'stands'      => [$stand],
+                'sectorSlots' => $sectorSlots,
+                'companyLogo' => $companyLogo,
+                'companyName' => $companyName,
+                'standNumber' => $standNumber,
+                'eventLogo'   => public_path('img/bedrijvendag-footer.png'),
+                'sectors'     => $assignedSectors,
+            ])->render();
+        }
+
+        $html = implode('<div class="page-break"></div>', $standPages);
 
         $fileName = 'stands-' . now()->format('Ymd-His') . '.pdf';
         $path = storage_path('app/tmp/' . $fileName);

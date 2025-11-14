@@ -125,10 +125,15 @@
 
 <!-- Sectors -->
 <div class="sectors">
-    @foreach($sectors as $sector)
-        <div class="sector-item" style="background: {{ $sector['color'] ?? '#ffffff' }};">
+    @foreach($sectorSlots as $slot)
+        @php
+            $isActive = in_array($slot['name'], $sectors);
+            $bgColor = $isActive ? $slot['color'] : '#ffffff';
+        @endphp
+
+        <div class="sector-item" style="background: {{ $bgColor }};">
             <div class="sector-label">
-                {{ $sector['name'] }}
+                {{ $slot['name'] }}
             </div>
         </div>
     @endforeach
