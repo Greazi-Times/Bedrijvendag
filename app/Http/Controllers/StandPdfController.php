@@ -85,6 +85,7 @@ class StandPdfController extends Controller
 
         Browsershot::html($html)
             ->setChromePath('/usr/bin/google-chrome')
+            ->setEnvironmentVariable('HOME', '/tmp')
             ->addChromiumArguments([
                 '--no-sandbox',
                 '--disable-dev-shm-usage',
