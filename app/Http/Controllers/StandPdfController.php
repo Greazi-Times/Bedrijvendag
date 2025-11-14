@@ -88,13 +88,15 @@ class StandPdfController extends Controller
             ->setNodeBinary('/usr/bin/node')
             ->setNpmBinary('/usr/bin/npm')
             ->addChromiumArguments([
-                '--no-sandbox',
-                '--disable-gpu',
-                '--headless',
-                '--disable-dev-shm-usage',
-                '--single-process',
-                '--no-zygote',
-                '--user-data-dir=/tmp/chrome-data'
+                'no-sandbox',
+                'disable-gpu',
+                'disable-dev-shm-usage',
+                'disable-crash-reporter',
+                'no-crashpad',
+                'disable-extensions',
+                'disable-software-rasterizer',
+                'disable-setuid-sandbox',
+                'user-data-dir=/tmp/chrome-data'
             ])
             ->setEnvironmentVariable('HOME', '/tmp')
             ->format('A4')
