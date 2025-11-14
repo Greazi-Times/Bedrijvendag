@@ -93,12 +93,12 @@ class StandPdfController extends Controller
             ->margins(10, 10, 10, 10)
             ->showBackground()
             ->addChromiumArguments([
-                '--no-sandbox',
-                '--disable-gpu',
-                '--disable-dev-shm-usage',
-                '--single-process',
-                '--disable-setuid-sandbox',
-                '--user-data-dir=/var/www/bedrijvendag/storage/tmp/chrome-user-data'
+                'no-sandbox',
+                'disable-gpu',
+                'disable-dev-shm-usage',
+                'single-process',
+                'disable-setuid-sandbox',
+                'user-data-dir=/var/www/bedrijvendag/storage/tmp/chrome-user-data'
             ])
             ->save($path);
 
