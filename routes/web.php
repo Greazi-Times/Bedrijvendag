@@ -4,6 +4,7 @@ use App\Http\Controllers\BorrelController;
 //use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EditionController;
 use App\Http\Controllers\StandController;
+use App\Http\Controllers\StandPdfController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -50,6 +51,7 @@ Route::middleware(['auth', 'verified', 'editorOrAdmin'])
         // Stand routes
         Route::get('/stands', [StandController::class, 'index'])->name('dashStands');
         Route::patch('/stands/{stand}', [StandController::class, 'update'])->name('updateStands');
+        Route::get('/stands/pdf', [StandPdfController::class, 'downloadAll'])->name('createStandPDF');
 
     });
 

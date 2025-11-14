@@ -5,6 +5,7 @@ import CompanyController from './CompanyController'
 import BorrelController from './BorrelController'
 import DashboardController from './DashboardController'
 import StandController from './StandController'
+import StandPdfController from './StandPdfController'
 import Settings from './Settings'
 
 const Controllers = {
@@ -15,6 +16,7 @@ const Controllers = {
     BorrelController: Object.assign(BorrelController, BorrelController),
     DashboardController: Object.assign(DashboardController, DashboardController),
     StandController: Object.assign(StandController, StandController),
+    StandPdfController: Object.assign(StandPdfController, StandPdfController),
     Settings: Object.assign(Settings, Settings),
 }
 

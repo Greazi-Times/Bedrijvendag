@@ -6,7 +6,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard, dashEditions, home } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { Github, LayoutGrid, Book, Users } from 'lucide-vue-next';
+import { Book, Github, LayoutGrid, Paperclip, Pin, Users } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -18,19 +18,19 @@ const mainNavItems: NavItem[] = [
 ];
 
 const editionItems: NavItem[] = [
-  {
-    title: 'Manage Editions',
-    href: dashEditions(),
-    icon: Book,
-  },
+    {
+        title: 'Manage Editions',
+        href: dashEditions(),
+        icon: Book,
+    },
 ];
 
 const standItems: NavItem[] = [
-  {
-    title: 'Stands',
-    href: '/dashboard/stands',
-    icon: Users,
-  },
+    {
+        title: 'Stands',
+        href: '/dashboard/stands',
+        icon: Pin,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
@@ -60,6 +60,16 @@ const footerNavItems: NavItem[] = [
             <NavMain :items="mainNavItems" label="Dashboard" />
             <NavMain :items="editionItems" label="Editions" />
             <NavMain :items="standItems" label="Stands" />
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton as-child>
+                        <a href="/dashboard/stands/pdf" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2">
+                            <Paperclip class="w-4 h-4" />
+                            <span>Create PDF</span>
+                        </a>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
         </SidebarContent>
 
         <SidebarFooter>

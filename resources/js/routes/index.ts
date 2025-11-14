@@ -2039,6 +2039,87 @@ updateStandsForm.patch = (args: { stand: number | { id: number } } | [stand: num
 updateStands.form = updateStandsForm
 
 /**
+* @see \App\Http\Controllers\StandPdfController::createStandPDF
+* @see app/Http/Controllers/StandPdfController.php:13
+* @route '/dashboard/stands/pdf'
+*/
+export const createStandPDF = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: createStandPDF.url(options),
+    method: 'get',
+})
+
+createStandPDF.definition = {
+    methods: ["get","head"],
+    url: '/dashboard/stands/pdf',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\StandPdfController::createStandPDF
+* @see app/Http/Controllers/StandPdfController.php:13
+* @route '/dashboard/stands/pdf'
+*/
+createStandPDF.url = (options?: RouteQueryOptions) => {
+    return createStandPDF.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\StandPdfController::createStandPDF
+* @see app/Http/Controllers/StandPdfController.php:13
+* @route '/dashboard/stands/pdf'
+*/
+createStandPDF.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: createStandPDF.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\StandPdfController::createStandPDF
+* @see app/Http/Controllers/StandPdfController.php:13
+* @route '/dashboard/stands/pdf'
+*/
+createStandPDF.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: createStandPDF.url(options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\StandPdfController::createStandPDF
+* @see app/Http/Controllers/StandPdfController.php:13
+* @route '/dashboard/stands/pdf'
+*/
+const createStandPDFForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: createStandPDF.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\StandPdfController::createStandPDF
+* @see app/Http/Controllers/StandPdfController.php:13
+* @route '/dashboard/stands/pdf'
+*/
+createStandPDFForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: createStandPDF.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\StandPdfController::createStandPDF
+* @see app/Http/Controllers/StandPdfController.php:13
+* @route '/dashboard/stands/pdf'
+*/
+createStandPDFForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: createStandPDF.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+createStandPDF.form = createStandPDFForm
+
+/**
 * @see \App\Http\Controllers\StandController::plattegrond
 * @see app/Http/Controllers/StandController.php:39
 * @route '/plattegrond'
