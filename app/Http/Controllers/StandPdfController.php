@@ -82,7 +82,10 @@ class StandPdfController extends Controller
         if (! is_dir(dirname($path))) {
             mkdir(dirname($path), 0775, true);
         }
-        putenv("CHROME_CRASHPAD_HANDLER=/bin/true");
+
+
+        putenv('HOME=/var/www/bedrijvendag');
+        putenv('CHROME_CRASHPAD_HANDLER=/bin/true');
 
         Browsershot::html($html)
             ->setChromePath('/usr/bin/google-chrome-stable')
@@ -90,12 +93,12 @@ class StandPdfController extends Controller
             ->margins(10, 10, 10, 10)
             ->showBackground()
             ->addChromiumArguments([
-                'no-sandbox',
-                'disable-gpu',
-                'disable-dev-shm-usage',
-                'single-process',
-                'disable-setuid-sandbox',
-                'user-data-dir=/tmp/chrome-profile'
+                '--no-sandbox',
+                '--disable-gpu',
+                '--disable-dev-shm-usage',
+                '--single-process',
+                '--disable-setuid-sandbox',
+                '--user-data-dir=/var/www/bedrijvendag/storage/tmp/chrome-user-data'
             ])
             ->save($path);
 
