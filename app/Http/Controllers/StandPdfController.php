@@ -68,41 +68,13 @@ class StandPdfController extends Controller
             return view('pdf.stands', [
                 'stands'      => $stands,
                 'sectorSlots' => $sectorSlots,
-                'companyLogo' => null,
-                'companyName' => null,
-                'standNumber' => null,
-                'eventLogo'   => public_path('img/bedrijvendag-footer.png'),
-                'sectors'     => [],
             ]);
         }
 
-        $standPages = [];
-
-        foreach ($stands as $stand) {
-            $company = $stand->company;
-            $companyLogo = $company && $company->logo_path
-                ? public_path('storage/' . $company->logo_path)
-                : null;
-
-            $companyName = $company ? $company->name : '';
-            $standNumber = $stand->number;
-
-            $assignedSectors = $company
-                ? $company->sectors->pluck('name')->toArray()
-                : [];
-
-            $standPages[] = view('pdf.stands', [
-                'stands'      => [$stand],
-                'sectorSlots' => $sectorSlots,
-                'companyLogo' => $companyLogo,
-                'companyName' => $companyName,
-                'standNumber' => $standNumber,
-                'eventLogo'   => public_path('img/bedrijvendag-footer.png'),
-                'sectors'     => $assignedSectors,
-            ])->render();
-        }
-
-        $html = implode('<div class="page-break"></div>', $standPages);
+        $html = view('pdf.stands', [
+            'stands'      => $stands,
+            'sectorSlots' => $sectorSlots,
+        ])->render();
 
         $fileName = 'stands-' . now()->format('Ymd-His') . '.pdf';
         $path = storage_path('app/tmp/' . $fileName);
@@ -111,14 +83,25 @@ class StandPdfController extends Controller
             mkdir(dirname($path), 0775, true);
         }
 
-        $pdf = \PDF::loadHTML($html)
-            ->setPaper('a4')
-            ->setOption('margin-top', '10mm')
-            ->setOption('margin-right', '10mm')
-            ->setOption('margin-bottom', '10mm')
-            ->setOption('margin-left', '10mm')
-            ->setOption('enable-local-file-access', true);
+        Browsershot::html($html)
+            ->setChromePath('/opt/chromium/chrome-linux/chrome')
+            ->setNodeBinary('/usr/bin/node')
+            ->setNpmBinary('/usr/bin/npm')
+            ->addChromiumArguments([
+                '--no-sandbox',
+                '--disable-gpu',
+                '--headless',
+                '--disable-dev-shm-usage',
+                '--single-process',
+                '--no-zygote',
+                '--user-data-dir=/tmp/chrome-data'
+            ])
+            ->setEnvironmentVariable('HOME', '/tmp')
+            ->format('A4')
+            ->margins(10, 10, 10, 10)
+            ->showBackground()
+            ->save($path);
 
-        return $pdf->inline('stands.pdf');
+        return response()->download($path, 'stands.pdf')->deleteFileAfterSend(true);
     }
 }

@@ -1,154 +1,254 @@
-<html>
+<!DOCTYPE html>
+<html lang="nl">
 <head>
     <meta charset="utf-8">
+    <title>Stands</title>
     <style>
-
         @page {
+            size: A4 portrait;
             margin: 10mm;
         }
 
+        * {
+
+        }
+
         body {
-            font-family: sans-serif;
-            position: relative;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #ffffff;
         }
 
-        /* Header Logo (company) */
-        .company-logo {
-            position: absolute;
-            top: 20mm;
-            left: 20mm;
-            max-height: 20mm;
-            max-width: 30mm;
+        .stand-page {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            page-break-after: always;
         }
 
-        /* Header Stand Number Circle */
-        .stand-number-top {
-            position: absolute;
-            top: 20mm;
-            right: 20mm;
-            width: 20mm;
-            height: 20mm;
-            border-radius: 50%;
-            background: #c4c4c4;
-            color: black;
+        .stand-inner {
+            border: none;
+            border-radius: 4mm;
+            padding: 4mm 6mm; /* reduce top/bottom */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 10mm;
-            font-weight: bold;
+            justify-content: space-between;
+            margin-bottom: 10mm;
         }
 
-        /* Centered company name */
+        .company-logo-top {
+            width: 30mm;
+            height: 18mm;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .company-logo-top img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
         .company-name {
-            position: absolute;
-            top: 30mm; /* halfway of 20mm circle */
-            left: 0;
-            width: 100%;
+            flex: 1;
             text-align: center;
-            font-size: 12mm;
-            font-weight: bold;
-            transform: translateY(-50%);
-        }
-
-        /* Sector Wrapper */
-        .sectors {
-            position: absolute;
-            top: 60mm;
-            left: 20mm;
-            width: calc(100% - 40mm);
-        }
-
-        /* Each sector */
-        .sector-item {
-            height: 23mm;
-            margin-bottom: 6mm;
-            border-radius: 3mm;
-            display: table;
-            width: 100%;
-        }
-
-        .sector-label {
-            display: table-cell;
-            vertical-align: middle;
-            text-align: center;
-            font-size: 6mm;
-            padding: 0 5mm;
-        }
-
-        /* Footer */
-        .stand-number-bottom {
-            position: absolute;
-            bottom: 20mm;
-            left: 20mm;
-            width: 20mm;
-            height: 20mm;
-            border-radius: 50%;
-            background: #c4c4c4;
+            font-size: 20pt;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10mm;
-            font-weight: bold;
         }
 
-        .footer-event-logo {
-            position: absolute;
-            bottom: 20mm;
-            left: 50%;
-            transform: translateX(-50%);
-            max-height: 18mm;
+        .stand-badge-top {
+            width: 20mm;
+            height: 20mm;
+            border-radius: 50%;
+            background-color: #F39C12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25pt;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
         }
 
-        .footer-company-logo {
-            position: absolute;
-            bottom: 20mm;
-            right: 20mm;
-            max-height: 18mm;
-            max-width: 30mm;
+        .sectors {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 4mm;
+            margin: 0; /* <-- IMPORTANT */
+        }
+
+        .sector-slot {
+            height: 23mm;
+            border-radius: 5mm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20pt;
+            font-weight: 1000;
+            color: #FFFFFF;
+            text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+        }
+
+        .sector-mechatronica {
+            background-color: #FFAE66; /* softer tone */
+        }
+
+        .sector-werktuigbouwkunde {
+            background-color: #66FF66; /* softer tone */
+        }
+
+        .sector-ict {
+            background-color: #3F5F87; /* softer tone */
+        }
+
+        .sector-elektrotechniek {
+            background-color: #99FFFF; /* softer tone */
+        }
+
+        .sector-bitm {
+            background-color: #C266FF; /* softer tone */
+        }
+
+        .sector-tbk {
+            background-color: #664DFF; /* softer tone */
+        }
+
+        .sector-industrial {
+            background-color: #FF6666; /* softer tone */
+        }
+
+        .sector-missing {
+            background-color: #FFFFFF;
+            border: 1px solid #FFFFFF;
+            color: transparent;
+        }
+
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10mm;
+        }
+
+        .stand-badge-bottom {
+            width: 20mm;
+            height: 20mm;
+            border-radius: 50%;
+            background-color: #F39C12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25pt;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .footer-center-logo {
+            height: 90%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-center-logo img {
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .company-logo-bottom {
+            width: 30mm;
+            height: 18mm;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .company-logo-bottom img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
     </style>
-
 </head>
 <body>
 
+@foreach($stands as $stand)
+    @php
+        $company = $stand->company;
+        $companyLogo = $company && $company->logo_path ? public_path('storage/' . $company->logo_path) : null;
+        $staticLogo = public_path('images/bedrijvendag-logo.png');
 
-<!-- Header logos + stand number -->
-@if($companyLogo)
-    <img src="{{ $companyLogo }}" class="company-logo">
-@endif
+        // Pre-calc which DB sector names the company has for quick lookups
+        $companySectorNames = $company ? $company->sectors->pluck('name')->all() : [];
+    @endphp
 
-<div class="stand-number-top">{{ $standNumber }}</div>
+    <div class="stand-page">
+        <div class="stand-inner">
+            <div class="header">
+                <div class="company-logo-top">
+                    @if($companyLogo && file_exists($companyLogo))
+                        <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
+                    @endif
+                </div>
 
-<div class="company-name">
-    {{ $companyName }}
-</div>
+                <div class="company-name">
+                    {{ $company?->name ?? 'Geen bedrijf' }}
+                </div>
 
-<!-- Sectors -->
-<div class="sectors">
-    @foreach($sectorSlots as $slot)
-        @php
-            $isActive = in_array($slot['name'] ?? '', $sectors);
-            $bgColor = $isActive ? ($slot['color'] ?? '#ffffff') : '#ffffff';
-        @endphp
+                <div class="stand-badge-top">
+                    {{ $stand->number }}
+                </div>
+            </div>
 
-        <div class="sector-item" style="background: {{ $bgColor }};">
-            <div class="sector-label">
-                {{ $slot['name'] ?? '' }}
+            <div class="sectors">
+                @foreach($sectorSlots as $slot)
+                    @php
+                        $hasSector = in_array($slot['db_name'], $companySectorNames, true);
+                        $classes = 'sector-slot ' . ($hasSector ? $slot['class'] : 'sector-missing');
+                    @endphp
+                    <div class="{{ $classes }}">
+                        @if($hasSector)
+                            {{ $slot['label'] }}
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="footer">
+                <div class="stand-badge-bottom">
+                    {{ $stand->number }}
+                </div>
+
+                <div class="footer-center-logo">
+                    @if($staticLogo && file_exists($staticLogo))
+                        <img src="{{ $staticLogo }}" alt="ATIx Bedrijvendag">
+                    @endif
+                </div>
+
+                <div class="company-logo-bottom">
+                    @if($companyLogo && file_exists($companyLogo))
+                        <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
+                    @endif
+                </div>
             </div>
         </div>
-    @endforeach
-</div>
-
-<!-- Footer -->
-<div class="stand-number-bottom">{{ $standNumber }}</div>
-
-@if($eventLogo)
-    <img src="{{ $eventLogo }}" class="footer-event-logo">
-@endif
-
-@if($companyLogo)
-    <img src="{{ $companyLogo }}" class="footer-company-logo">
-@endif
+    </div>
+@endforeach
 
 </body>
 </html>
