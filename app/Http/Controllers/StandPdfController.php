@@ -86,19 +86,17 @@ class StandPdfController extends Controller
 
         Browsershot::html($html)
             ->setChromePath('/usr/bin/google-chrome-stable')
-            ->setNodeBinary('/usr/bin/node')
-            ->setNpmBinary('/usr/bin/npm')
+            ->format('A4')
+            ->margins(10, 10, 10, 10)
+            ->showBackground()
             ->addChromiumArguments([
                 'no-sandbox',
                 'disable-gpu',
                 'disable-dev-shm-usage',
+                'single-process',
                 'disable-setuid-sandbox',
-                'user-data-dir=/tmp/chrome-data'
+                'user-data-dir=/tmp/chrome-profile'
             ])
-            ->setEnvironmentVariable('HOME', '/tmp')
-            ->format('A4')
-            ->margins(10, 10, 10, 10)
-            ->showBackground()
             ->save($path);
 
         return response()->download($path, 'stands.pdf')->deleteFileAfterSend(true);
