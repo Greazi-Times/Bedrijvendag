@@ -51,8 +51,8 @@
 
         .company-logo-top {
             width: 30mm;
-            height: 18mm;
-            min-height: 18mm;
+            height: 22mm;
+            min-height: 22mm;
             display: flex;
             align-items: center;
             justify-content: flex-start;
@@ -140,6 +140,7 @@
 
         .sector-elektrotechniek {
             background-color: #99FFFF; /* softer tone */
+            color: #000000;
         }
 
         .sector-bitm {
@@ -204,8 +205,8 @@
 
         .company-logo-bottom {
             width: 30mm;
-            height: 18mm;
-            min-height: 18mm;
+            height: 22mm;
+            min-height: 22mm;
             display: flex;
             align-items: center;
             justify-content: flex-end;
