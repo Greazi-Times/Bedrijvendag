@@ -86,26 +86,29 @@
 
         .sectors {
             position: absolute;
-            top: 35mm;   /* header height (25mm) + 10mm spacing */
-            bottom: 35mm; /* footer height (25mm) + 10mm spacing */
+            top: 35mm;      /* header height (25mm) + 10mm spacing */
+            bottom: 35mm;   /* footer height (25mm) + 10mm spacing */
             left: 0;
             right: 0;
+
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            gap: 4mm;
+            justify-content: space-between; /* ensures full-page vertical fill */
+            align-items: center;
         }
 
         .sector-slot {
-            height: 23mm;
-            border-radius: 5mm;
+            flex: 1;                 /* allow equal distribution */
             display: flex;
             align-items: center;
             justify-content: center;
+            max-height: 23mm;        /* prevent oversized blocks */
+            border-radius: 5mm;
             font-size: 20pt;
             font-weight: 1000;
             color: #FFFFFF;
             text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+            width: 90%;              /* keeps width visually consistent */
         }
 
         .sector-mechatronica {
