@@ -224,7 +224,7 @@
         $company = $stand->company;
         $companyLogo = null;
         if ($company && $company->fileName) {
-            $storagePath = storage_path('storage/logos/' . $company->fileName);
+            $storagePath = storage_path('storage/logos/' . $path->fileName);
             if (file_exists($storagePath)) {
                 $companyLogo = $storagePath;
             }
@@ -237,7 +237,9 @@
 
     @if(request()->has('debugpaths'))
         <pre style="font-size:10pt; color:#000;">
-            File name: {{ $company?->fileName ?? 'N/A' }}
+File name: {{ $company->fileName ?? 'N/A' }}
+File name: {{ $fileName ?? 'N/A' }}
+File name: {{ $path ?? 'N/A' }}
 Company Logo Path: {{ $companyLogo }}
 Exists: {{ file_exists($companyLogo) ? 'YES' : 'NO' }}
 Static Logo Path: {{ $staticLogo }}
