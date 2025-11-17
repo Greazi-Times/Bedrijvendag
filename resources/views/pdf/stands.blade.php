@@ -140,7 +140,7 @@
 
         .sector-elektrotechniek {
             background-color: #99FFFF; /* softer tone */
-            color: #323232;
+            color: #616161;
         }
 
         .sector-bitm {
