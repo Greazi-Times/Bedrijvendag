@@ -95,8 +95,8 @@
             top: 53mm;      /* header (33mm) + spacing (13mm) */
             left: 0;
             right: 0;
-            height: 318mm;
-            min-height: 318mm;
+            height: 280mm;
+            min-height: 280mm;
             display: flex;
             flex-direction: column;
             align-items: center;
