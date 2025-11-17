@@ -140,7 +140,7 @@
 
         .sector-elektrotechniek {
             background-color: #99FFFF; /* softer tone */
-            color: #000000;
+            color: #1a2a3a;
             text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
         }
 
