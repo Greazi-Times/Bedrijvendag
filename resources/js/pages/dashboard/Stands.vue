@@ -7,6 +7,7 @@ import { computed, ref, watch } from 'vue';
 const { stands, companies } = defineProps<{
     stands: Array<{
         id: number;
+        display_id?: string | number;
         company_id: number | null;
         company_name: string | null;
     }>;
@@ -63,9 +64,13 @@ function cancelEditing() {
     editingStandId.value = null;
 }
 
-function selectCompany(companyId: number, companyName: string) {
+function isCompanyAssigned(companyId: number) {
+    return stands.some((s) => s.company_id === companyId);
+}
+
+function selectCompany(companyId: number | null, companyName: string | null) {
     selectedCompanyId.value = companyId;
-    companySearch.value = companyName;
+    companySearch.value = companyName ?? '';
     if (editingStandId.value !== null) {
         const standId = editingStandId.value;
         router.patch(
@@ -74,18 +79,27 @@ function selectCompany(companyId: number, companyName: string) {
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    // Remove the company from any other stands that currently have it
-                    stands.forEach((s) => {
-                        if (s.company_id === companyId && s.id !== standId) {
-                            s.company_id = null;
-                            s.company_name = null;
-                        }
-                    });
+                    // Only remove the company from other stands when assigning a real company
+                    if (companyId !== null) {
+                        stands.forEach((s) => {
+                            if (s.company_id === companyId && s.id !== standId) {
+                                s.company_id = null;
+                                s.company_name = null;
+                            }
+                        });
+                    }
                     const stand = stands.find((s) => s.id === standId);
-                    const company = companies.find((c) => c.id === companyId);
-                    if (stand && company) {
-                        stand.company_id = company.id;
-                        stand.company_name = company.name;
+                    if (stand) {
+                        if (companyId === null) {
+                            stand.company_id = null;
+                            stand.company_name = null;
+                        } else {
+                            const company = companies.find((c) => c.id === companyId);
+                            if (company) {
+                                stand.company_id = company.id;
+                                stand.company_name = company.name;
+                            }
+                        }
                     }
                     editingStandId.value = null;
                     companySearch.value = '';
@@ -148,16 +162,33 @@ function selectCompany(companyId: number, companyName: string) {
                                         class="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded border border-gray-300 bg-white shadow-lg"
                                     >
                                         <li
-                                            v-for="company in filteredCompanies"
+                                            :class="[
+                                                'cursor-pointer px-2 py-1 hover:bg-blue-500 hover:text-white',
+                                                selectedCompanyId === null ? 'font-medium text-secondary' : 'text-black',
+                                            ]"
+                                            @click.prevent="selectCompany(null, null)"
+                                        >
+                                            No Company
+                                        </li>
+
+                                        <li
+                                            v-for="company in selectedCompanyId !== null ? companies : filteredCompanies"
                                             :key="company.id"
-                                            class="cursor-pointer px-2 py-1 hover:bg-blue-500 hover:text-white"
+                                            :class="[
+                                                'cursor-pointer px-2 py-1 hover:bg-blue-500 hover:text-white',
+                                                selectedCompanyId === company.id
+                                                    ? 'font-medium text-secondary'
+                                                    : isCompanyAssigned(company.id)
+                                                      ? 'text-black'
+                                                      : 'font-medium text-primary',
+                                            ]"
                                             @click.prevent="selectCompany(company.id, company.name)"
                                         >
                                             {{ company.name }}
                                         </li>
                                     </ul>
                                     <p
-                                        v-if="filteredCompanies.length === 0"
+                                        v-else
                                         class="absolute z-10 mt-1 w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-500"
                                     >
                                         No companies found.
