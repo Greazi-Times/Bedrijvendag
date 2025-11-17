@@ -20,7 +20,7 @@ const { stands } = defineProps<{
     <section class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8 items-stretch">
         <!-- Map -->
         <div class="lg:col-span-3 flex justify-center items-center border rounded-lg p-4 bg-white dark:bg-neutral-900 shadow-sm h-full">
-            <img src="/images/map.jpg" alt="Plattegrond" class="max-w-full h-auto rounded-md aspect-[4/3] object-contain" />
+            <img src="/images/map-2.jpg" alt="Plattegrond" class="max-w-full h-auto rounded-md aspect-[4/3] object-contain" />
         </div>
 
         <!-- Table -->
