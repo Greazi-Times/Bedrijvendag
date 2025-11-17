@@ -24,7 +24,7 @@
             display: block;
             page-break-after: always;
             position: relative;
-            height: 277mm; /* A4 (297mm) minus 2 x 10mm page margins */
+            height: 400mm; /* A4 (297mm) minus 2 x 10mm page margins */
             min-height: 277mm;
         }
 
@@ -173,7 +173,7 @@
 
         .stand-badge-bottom {
             width: 20mm;
-            height: 100mm;
+            height: 20mm;
             min-height: 20mm;
             border-radius: 50%;
             background-color: #F39C12;
