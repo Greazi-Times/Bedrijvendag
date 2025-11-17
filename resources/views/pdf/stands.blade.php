@@ -25,6 +25,7 @@
             page-break-after: always;
             position: relative;
             height: 277mm; /* A4 (297mm) minus 2 x 10mm page margins */
+            min-height: 277mm;
         }
 
         .stand-inner {
@@ -32,6 +33,7 @@
             border-radius: 4mm;
             padding: 0;
             height: 277mm; /* match stand-page height so absolute children align correctly */
+            min-height: 277mm;
             position: relative;
         }
 
@@ -41,6 +43,7 @@
             left: 0;
             right: 0;
             height: 25mm;
+            min-height: 25mm;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -49,6 +52,7 @@
         .company-logo-top {
             width: 30mm;
             height: 18mm;
+            min-height: 18mm;
             display: flex;
             align-items: center;
             justify-content: flex-start;
@@ -73,6 +77,7 @@
         .stand-badge-top {
             width: 20mm;
             height: 20mm;
+            min-height: 20mm;
             border-radius: 50%;
             background-color: #F39C12;
             display: flex;
@@ -91,6 +96,7 @@
             left: 0;
             right: 0;
             height: 207mm;  /* exact calculated */
+            min-height: 207mm;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -100,6 +106,7 @@
         .sector-slot {
             width: 90%;
             height: 18mm;                   /* exact height */
+            min-height: 18mm;
             margin-bottom: 5.625mm;         /* exact spacing */
             border-radius: 5mm;
 
@@ -158,6 +165,7 @@
             left: 0;
             right: 0;
             height: 25mm;
+            min-height: 25mm;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -166,6 +174,7 @@
         .stand-badge-bottom {
             width: 20mm;
             height: 20mm;
+            min-height: 20mm;
             border-radius: 50%;
             background-color: #F39C12;
             display: flex;
@@ -179,6 +188,7 @@
 
         .footer-center-logo {
             height: 90%;
+            min-height: 90%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -186,12 +196,14 @@
 
         .footer-center-logo img {
             max-height: 100%;
+            min-height: 100%;
             object-fit: contain;
         }
 
         .company-logo-bottom {
             width: 30mm;
             height: 18mm;
+            min-height: 18mm;
             display: flex;
             align-items: center;
             justify-content: flex-end;
@@ -200,6 +212,7 @@
         .company-logo-bottom img {
             max-width: 100%;
             max-height: 100%;
+            min-height: 100%;
             object-fit: contain;
         }
     </style>
