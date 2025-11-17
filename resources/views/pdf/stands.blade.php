@@ -95,8 +95,8 @@
             top: 35mm;      /* header (25mm) + spacing (10mm) */
             left: 0;
             right: 0;
-            height: 207mm;  /* exact calculated */
-            min-height: 207mm;
+            height: 300mm;  /* exact calculated */
+            min-height: 300mm;
             display: flex;
             flex-direction: column;
             align-items: center;
