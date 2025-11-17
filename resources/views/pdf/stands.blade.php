@@ -24,16 +24,16 @@
             display: block;
             page-break-after: always;
             position: relative;
-            height: 270mm; /* A4 (297mm) minus 2 x 10mm page margins */
-            min-height: 277mm;
+            height: 285mm;
+            min-height: 285mm;
         }
 
         .stand-inner {
             border: none;
             border-radius: 4mm;
             padding: 0;
-            height: 277mm; /* match stand-page height so absolute children align correctly */
-            min-height: 277mm;
+            height: 285mm;
+            min-height: 285mm;
             position: relative;
         }
 
@@ -95,8 +95,8 @@
             top: 35mm;      /* header (25mm) + spacing (10mm) */
             left: 0;
             right: 0;
-            height: 300mm;  /* exact calculated */
-            min-height: 300mm;
+            height: 215mm;
+            min-height: 215mm;
             display: flex;
             flex-direction: column;
             align-items: center;
