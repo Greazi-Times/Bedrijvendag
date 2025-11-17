@@ -225,6 +225,7 @@
     @php
         $company = $stand->company;
 
+        $logoPath = $company->logo;
         $companyLogo = '/var/www/bedrijvendag/public/' . ltrim($logoPath, '/');
 
         $staticLogo = public_path('images/bedrijvendag-logo.png');
