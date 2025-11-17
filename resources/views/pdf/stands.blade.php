@@ -84,29 +84,38 @@
             text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
         }
 
+        /* Middle section between header and footer */
         .sectors {
             position: absolute;
-            top: 35mm;      /* header height (25mm) + 10mm spacing */
-            bottom: 35mm;   /* footer height (25mm) + 10mm spacing */
+            top: 35mm;      /* header (25mm) + spacing (10mm) */
             left: 0;
             right: 0;
-
+            height: 207mm;  /* exact calculated */
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* evenly distribute in the available height */
             align-items: center;
         }
 
+        /* Sector bars */
         .sector-slot {
+            width: 90%;
+            height: 18mm;                   /* exact height */
+            margin-bottom: 5.625mm;         /* exact spacing */
+            border-radius: 5mm;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 5mm;
+
             font-size: 20pt;
-            font-weight: 1000;
+            font-weight: 900;
             color: #FFFFFF;
             text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
-            width: 90%;
+        }
+
+        /* Remove spacing below the last sector */
+        .sector-slot:last-child {
+            margin-bottom: 0;
         }
 
         .sector-mechatronica {
