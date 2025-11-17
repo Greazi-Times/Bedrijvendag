@@ -118,6 +118,7 @@
             font-weight: 900;
             color: #FFFFFF;
             text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
         }
 
         /* Remove spacing below the last sector */
@@ -223,15 +224,7 @@
     @php
         $company = $stand->company;
 
-        $companyLogo = null;
-        if ($company && !empty($company->file_name)) {
-            $logoFileName = $company->file_name;
-            $storagePath = storage_path('app/public/logos/' . $logoFileName);
-
-            if (file_exists($storagePath)) {
-                $companyLogo = $storagePath;
-            }
-        }
+        $companyLogo = $company->logo;
 
         $staticLogo = public_path('images/bedrijvendag-logo.png');
 
@@ -239,23 +232,12 @@
         $companySectorNames = $company ? $company->sectors->pluck('name')->all() : [];
     @endphp
 
-    @if(request()->has('debugpaths'))
-        <pre style="font-size:10pt; color:#000;">
-Company logo DB field (file_name): {{ $company->logo ?? 'N/A' }}
-Company Logo Path: {{ $companyLogo }}
-Exists: {{ file_exists($companyLogo) ? 'YES' : 'NO' }}
-Static Logo Path: {{ $staticLogo }}
-Exists: {{ file_exists($staticLogo) ? 'YES' : 'NO' }}
-Storage Dir: {{ public_path('storage/logos') }}
-        </pre>
-    @endif
-
     <div class="stand-page">
         <div class="stand-inner">
             <div class="header">
                 <div class="company-logo-top">
                     @if($companyLogo && file_exists($companyLogo))
-                        <img src="file://{{ $companyLogo }}" alt="Bedrijfslogo">
+                        <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
                     @endif
                 </div>
 
@@ -295,7 +277,7 @@ Storage Dir: {{ public_path('storage/logos') }}
 
                 <div class="company-logo-bottom">
                     @if($companyLogo && file_exists($companyLogo))
-                        <img src="file://{{ $companyLogo }}" alt="Bedrijfslogo">
+                        <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
                     @endif
                 </div>
             </div>
