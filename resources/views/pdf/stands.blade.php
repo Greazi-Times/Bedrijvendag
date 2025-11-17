@@ -92,7 +92,7 @@
         /* Middle section between header and footer */
         .sectors {
             position: absolute;
-            top: 43mm;      /* header (33mm) + spacing (13mm) */
+            top: 43mm; /* header (33mm) + spacing (13mm) */
             left: 0;
             right: 0;
             height: 265mm;
@@ -105,9 +105,9 @@
         /* Sector bars */
         .sector-slot {
             width: 90%;
-            height: 30mm;                   /* exact height */
+            height: 30mm; /* exact height */
             min-height: 18mm;
-            margin-bottom: 9mm;         /* exact spacing */
+            margin-bottom: 9mm; /* exact spacing */
             border-radius: 5mm;
 
             display: flex;
@@ -222,7 +222,7 @@
 @foreach($stands as $stand)
     @php
         $company = $stand->company;
-        $companyLogo = $company && $company->logo_path ? public_path('storage/logos/' . $company->logo_path) : null;
+        $companyLogo = $company && $company->fileName ? public_path('storage/logos/' . $company->fileName) : null;
         $staticLogo = public_path('images/bedrijvendag-logo.png');
 
         // Pre-calc which DB sector names the company has for quick lookups
