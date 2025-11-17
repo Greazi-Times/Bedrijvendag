@@ -222,7 +222,13 @@
 @foreach($stands as $stand)
     @php
         $company = $stand->company;
-        $companyLogo = $company && $company->fileName ? public_path('storage/logos/' . $company->fileName) : null;
+        $companyLogo = null;
+        if ($company && $company->fileName) {
+            $storagePath = storage_path('app/public/logos/' . $company->fileName);
+            if (file_exists($storagePath)) {
+                $companyLogo = $storagePath;
+            }
+        }
         $staticLogo = public_path('images/bedrijvendag-logo.png');
 
         // Pre-calc which DB sector names the company has for quick lookups
