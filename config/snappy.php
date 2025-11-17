@@ -37,7 +37,14 @@ return [
         'enabled' => true,
         'binary'  => env('WKHTML_PDF_BINARY', '/usr/bin/wkhtmltopdf'),
         'timeout' => false,
-        'options' => [],
+        'options' => [
+            'page-size' => 'A4',
+            'encoding' => 'UTF-8',
+            'margin-top' => '10mm',
+            'margin-bottom' => '10mm',
+            'margin-left' => '10mm',
+            'margin-right' => '10mm',
+        ],
         'env'     => [],
     ],
 
