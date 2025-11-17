@@ -24,14 +24,14 @@
             display: block;
             page-break-after: always;
             position: relative;
-            min-height: 100%;
+            height: 277mm; /* A4 (297mm) minus 2 x 10mm page margins */
         }
 
         .stand-inner {
             border: none;
             border-radius: 4mm;
             padding: 0;
-            min-height: 100%;
+            height: 277mm; /* match stand-page height so absolute children align correctly */
             position: relative;
         }
 
@@ -93,12 +93,11 @@
 
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* ensures full-page vertical fill */
+            justify-content: space-between; /* evenly distribute in the available height */
             align-items: center;
         }
 
         .sector-slot {
-            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -108,7 +107,6 @@
             color: #FFFFFF;
             text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
             width: 90%;
-            margin: 4mm 0;
         }
 
         .sector-mechatronica {
