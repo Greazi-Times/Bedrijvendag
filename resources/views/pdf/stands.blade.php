@@ -241,7 +241,7 @@
 
     @if(request()->has('debugpaths'))
         <pre style="font-size:10pt; color:#000;">
-Company logo DB field (file_name): {{ $company->file_name ?? 'N/A' }}
+Company logo DB field (file_name): {{ $company->logo ?? 'N/A' }}
 Company Logo Path: {{ $companyLogo }}
 Exists: {{ file_exists($companyLogo) ? 'YES' : 'NO' }}
 Static Logo Path: {{ $staticLogo }}
