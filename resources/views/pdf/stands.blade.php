@@ -21,28 +21,29 @@
         }
 
         .stand-page {
-            width: 100%;
-            min-height: 100%;
-            display: flex;
-            flex-direction: column;
+            display: block;
             page-break-after: always;
+            height: 277mm; /* A4 height minus margins */
+            position: relative;
         }
 
         .stand-inner {
             border: none;
             border-radius: 4mm;
             padding: 0;
-            display: flex;
-            flex-direction: column;
             height: 100%;
+            position: relative;
         }
 
         .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 25mm;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 25mm;
-            padding-bottom: 10mm;
         }
 
         .company-logo-top {
@@ -84,7 +85,11 @@
         }
 
         .sectors {
-            flex: 1;
+            position: absolute;
+            top: 35mm;   /* header height (25mm) + 10mm spacing */
+            bottom: 35mm; /* footer height (25mm) + 10mm spacing */
+            left: 0;
+            right: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -138,11 +143,14 @@
         }
 
         .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 25mm;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 25mm;
-            padding-top: 10mm;
         }
 
         .stand-badge-bottom {
