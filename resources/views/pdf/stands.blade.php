@@ -24,16 +24,16 @@
             display: block;
             page-break-after: always;
             position: relative;
-            height: 330mm;
-            min-height: 330mm;
+            height: 450mm;
+            min-height: 450mm;
         }
 
         .stand-inner {
             border: none;
             border-radius: 4mm;
             padding: 0;
-            height: 330mm;
-            min-height: 330mm;
+            height: 450mm;
+            min-height: 450mm;
             position: relative;
         }
 
@@ -95,8 +95,8 @@
             top: 53mm;      /* header (33mm) + spacing (13mm) */
             left: 0;
             right: 0;
-            height: 379mm;
-            min-height: 379mm;
+            height: 318mm;
+            min-height: 318mm;
             display: flex;
             flex-direction: column;
             align-items: center;
