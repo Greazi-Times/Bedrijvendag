@@ -233,6 +233,17 @@
         $companySectorNames = $company ? $company->sectors->pluck('name')->all() : [];
     @endphp
 
+    @if(request()->has('debugpaths'))
+        <pre style="font-size:10pt; color:#000;">
+Company logo DB field (file_name): {{ $company->logo ?? 'N/A' }}
+Company Logo Path: {{ $companyLogo }}
+Exists: {{ file_exists($companyLogo) ? 'YES' : 'NO' }}
+Static Logo Path: {{ $staticLogo }}
+Exists: {{ file_exists($staticLogo) ? 'YES' : 'NO' }}
+Storage Dir: {{ public_path('storage/logos') }}
+        </pre>
+    @endif
+
     <div class="stand-page">
         <div class="stand-inner">
             <div class="header">
