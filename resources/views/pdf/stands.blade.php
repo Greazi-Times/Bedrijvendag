@@ -83,8 +83,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 25pt;
-            font-weight: 800;
+            font-size: 32pt;
+            font-weight: 1000;
             color: #ffffff;
             text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
         }
