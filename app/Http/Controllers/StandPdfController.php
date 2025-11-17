@@ -93,6 +93,8 @@ class StandPdfController extends Controller
             ->setOption('print-media-type', true)
             ->setOption('header-spacing', 0)
             ->setOption('footer-spacing', 0)
+            ->setOption('no-outline', true)
+            ->setOption('zoom', '1.0')
             ->save($path);
 
         return response()->download($path, 'stands.pdf')->deleteFileAfterSend(true);
