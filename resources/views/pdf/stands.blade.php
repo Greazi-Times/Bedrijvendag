@@ -105,9 +105,9 @@
         /* Sector bars */
         .sector-slot {
             width: 90%;
-            height: 24mm;                   /* exact height */
+            height: 30mm;                   /* exact height */
             min-height: 18mm;
-            margin-bottom: 7.35mm;         /* exact spacing */
+            margin-bottom: 9mm;         /* exact spacing */
             border-radius: 5mm;
 
             display: flex;
