@@ -1,286 +1,98 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html>
 <head>
-    <meta charset="utf-8">
-    <title>Stands</title>
+    <meta charset="UTF-8" />
     <style>
         @page {
             size: A4 portrait;
-            margin: 10mm;
-        }
-
-        * {
-
+            margin: 0;
         }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background-color: #ffffff;
+            font-family: sans-serif;
         }
 
-        .stand-page {
-            display: block;
-            page-break-after: always;
+        /* Full page container (A4 = 297mm height) */
+        .page {
+            width: 210mm;
+            height: 297mm;
             position: relative;
-            height: 285mm;
-            min-height: 285mm;
+            background: #f0f0f0;
         }
 
-        .stand-inner {
-            border: none;
-            border-radius: 4mm;
-            padding: 0;
-            height: 285mm;
-            min-height: 285mm;
-            position: relative;
+        /* Block we measure — intended to be EXACTLY 277mm */
+        .calibration-block {
+            position: absolute;
+            top: 10mm;
+            left: 0;
+            width: 210mm;
+            height: 277mm;
+            background: rgba(0, 128, 255, 0.2);
+            border: 1mm solid #0077cc;
+            box-sizing: border-box;
         }
 
-        .header {
+        /* Header marker (25mm) */
+        .header-marker {
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
+            width: 210mm;
             height: 25mm;
-            min-height: 25mm;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            background: rgba(0, 255, 0, 0.2);
+            border-bottom: 0.5mm dashed #00aa00;
+            box-sizing: border-box;
         }
 
-        .company-logo-top {
-            width: 30mm;
-            height: 18mm;
-            min-height: 18mm;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-        }
-
-        .company-logo-top img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .company-name {
-            flex: 1;
-            text-align: center;
-            font-size: 20pt;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .stand-badge-top {
-            width: 20mm;
-            height: 20mm;
-            min-height: 20mm;
-            border-radius: 50%;
-            background-color: #F39C12;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 25pt;
-            font-weight: 800;
-            color: #ffffff;
-            text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
-        }
-
-        /* Middle section between header and footer */
-        .sectors {
-            position: absolute;
-            top: 35mm;      /* header (25mm) + spacing (10mm) */
-            left: 0;
-            right: 0;
-            height: 215mm;
-            min-height: 215mm;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Sector bars */
-        .sector-slot {
-            width: 90%;
-            height: 18mm;                   /* exact height */
-            min-height: 18mm;
-            margin-bottom: 5.625mm;         /* exact spacing */
-            border-radius: 5mm;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 20pt;
-            font-weight: 900;
-            color: #FFFFFF;
-            text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
-        }
-
-        /* Remove spacing below the last sector */
-        .sector-slot:last-child {
-            margin-bottom: 0;
-        }
-
-        .sector-mechatronica {
-            background-color: #FFAE66; /* softer tone */
-        }
-
-        .sector-werktuigbouwkunde {
-            background-color: #66FF66; /* softer tone */
-        }
-
-        .sector-ict {
-            background-color: #3F5F87; /* softer tone */
-        }
-
-        .sector-elektrotechniek {
-            background-color: #99FFFF; /* softer tone */
-        }
-
-        .sector-bitm {
-            background-color: #C266FF; /* softer tone */
-        }
-
-        .sector-tbk {
-            background-color: #664DFF; /* softer tone */
-        }
-
-        .sector-industrial {
-            background-color: #FF6666; /* softer tone */
-        }
-
-        .sector-missing {
-            background-color: #FFFFFF;
-            border: 1px solid #FFFFFF;
-            color: transparent;
-        }
-
-        .footer {
+        /* Footer marker (25mm) */
+        .footer-marker {
             position: absolute;
             bottom: 0;
             left: 0;
-            right: 0;
+            width: 210mm;
             height: 25mm;
-            min-height: 25mm;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            background: rgba(255, 0, 0, 0.2);
+            border-top: 0.5mm dashed #aa0000;
+            box-sizing: border-box;
         }
 
-        .stand-badge-bottom {
-            width: 20mm;
-            height: 20mm;
-            min-height: 20mm;
-            border-radius: 50%;
-            background-color: #F39C12;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 25pt;
-            font-weight: 800;
-            color: #ffffff;
-            text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+        /* Text labels */
+        .label {
+            position: absolute;
+            left: 5mm;
+            font-size: 14pt;
+            font-weight: bold;
         }
 
-        .footer-center-logo {
-            height: 90%;
-            min-height: 90%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .label.header {
+            top: 5mm;
         }
 
-        .footer-center-logo img {
-            max-height: 100%;
-            min-height: 100%;
-            object-fit: contain;
+        .label.footer {
+            bottom: 5mm;
         }
 
-        .company-logo-bottom {
-            width: 30mm;
-            height: 18mm;
-            min-height: 18mm;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-
-        .company-logo-bottom img {
-            max-width: 100%;
-            max-height: 100%;
-            min-height: 100%;
-            object-fit: contain;
+        .label.block {
+            top: 140mm;
         }
     </style>
 </head>
 <body>
 
-@foreach($stands as $stand)
-    @php
-        $company = $stand->company;
-        $companyLogo = $company && $company->logo_path ? public_path('storage/logos/' . $company->logo_path) : null;
-        $staticLogo = public_path('images/bedrijvendag-logo.png');
+<div class="page">
 
-        // Pre-calc which DB sector names the company has for quick lookups
-        $companySectorNames = $company ? $company->sectors->pluck('name')->all() : [];
-    @endphp
+    <div class="header-marker"></div>
+    <div class="footer-marker"></div>
 
-    <div class="stand-page">
-        <div class="stand-inner">
-            <div class="header">
-                <div class="company-logo-top">
-                    @if($companyLogo && file_exists($companyLogo))
-                        <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
-                    @endif
-                </div>
+    <div class="calibration-block"></div>
 
-                <div class="company-name">
-                    {{ $company?->name ?? 'Geen bedrijf' }}
-                </div>
+    <div class="label header">Header: expected 25mm</div>
+    <div class="label footer">Footer: expected 25mm</div>
+    <div class="label block">Calibration Block: expected 277mm</div>
 
-                <div class="stand-badge-top">
-                    {{ $stand->number }}
-                </div>
-            </div>
-
-            <div class="sectors">
-                @foreach($sectorSlots as $slot)
-                    @php
-                        $hasSector = in_array($slot['db_name'], $companySectorNames, true);
-                        $classes = 'sector-slot ' . ($hasSector ? $slot['class'] : 'sector-missing');
-                    @endphp
-                    <div class="{{ $classes }}">
-                        @if($hasSector)
-                            {{ $slot['label'] }}
-                        @endif
-                    </div>
-                @endforeach
-            </div>
-
-            <div class="footer">
-                <div class="stand-badge-bottom">
-                    {{ $stand->number }}
-                </div>
-
-                <div class="footer-center-logo">
-                    @if($staticLogo && file_exists($staticLogo))
-                        <img src="{{ $staticLogo }}" alt="ATIx Bedrijvendag">
-                    @endif
-                </div>
-
-                <div class="company-logo-bottom">
-                    @if($companyLogo && file_exists($companyLogo))
-                        <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-@endforeach
+</div>
 
 </body>
 </html>
