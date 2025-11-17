@@ -173,7 +173,7 @@
 
         .stand-badge-bottom {
             width: 20mm;
-            height: 20mm;
+            height: 100mm;
             min-height: 20mm;
             border-radius: 50%;
             background-color: #F39C12;
