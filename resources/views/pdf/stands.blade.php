@@ -89,13 +89,14 @@
             text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
         }
 
+        /* Middle section between header and footer */
         .sectors {
             position: absolute;
-            top: 46mm;      /* header 33mm + spacing 13mm */
+            top: 46mm;      /* header (33mm) + spacing (13mm) */
             left: 0;
             right: 0;
-            height: 198mm;   /* corrected for A4 usable height */
-            min-height: 198mm;
+            height: 327mm;
+            min-height: 327mm;
             display: flex;
             flex-direction: column;
             align-items: center;
