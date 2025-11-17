@@ -24,16 +24,16 @@
             display: block;
             page-break-after: always;
             position: relative;
-            height: 390mm;
-            min-height: 390mm;
+            height: 380mm;
+            min-height: 380mm;
         }
 
         .stand-inner {
             border: none;
             border-radius: 4mm;
             padding: 0;
-            height: 390mm;
-            min-height: 390mm;
+            height: 380mm;
+            min-height: 380mm;
             position: relative;
         }
 
@@ -92,11 +92,11 @@
         /* Middle section between header and footer */
         .sectors {
             position: absolute;
-            top: 53mm;      /* header (33mm) + spacing (13mm) */
+            top: 43mm;      /* header (33mm) + spacing (13mm) */
             left: 0;
             right: 0;
-            height: 275mm;
-            min-height: 275mm;
+            height: 265mm;
+            min-height: 265mm;
             display: flex;
             flex-direction: column;
             align-items: center;
