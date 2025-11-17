@@ -6,7 +6,7 @@ use App\Models\Stand;
 use App\Models\Sector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Spatie\Browsershot\Browsershot;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class StandPdfController extends Controller
 {
@@ -71,11 +71,6 @@ class StandPdfController extends Controller
             ]);
         }
 
-        $html = view('pdf.stands', [
-            'stands'      => $stands,
-            'sectorSlots' => $sectorSlots,
-        ])->render();
-
         $fileName = 'stands-' . now()->format('Ymd-His') . '.pdf';
         $path = storage_path('app/tmp/' . $fileName);
 
@@ -83,25 +78,17 @@ class StandPdfController extends Controller
             mkdir(dirname($path), 0775, true);
         }
 
-
-        putenv('HOME=/var/www/bedrijvendag');
-        putenv('CHROME_CRASHPAD_HANDLER=/bin/true');
-
-        Browsershot::html($html)
-            ->setChromePath('/usr/bin/google-chrome-stable')
-            ->format('A4')
-            ->margins(10, 10, 10, 10)
-            ->showBackground()
-            ->addChromiumArguments([
-                'no-sandbox',
-                'disable-gpu',
-                'disable-dev-shm-usage',
-                'disable-software-rasterizer',
-                'disable-features=UseOzonePlatform',
-                'disable-setuid-sandbox',
-                'single-process',
-                'user-data-dir=/var/www/bedrijvendag/storage/tmp/chrome-user-data'
-            ])
+        SnappyPdf::loadView('pdf.stands', [
+            'stands'      => $stands,
+            'sectorSlots' => $sectorSlots,
+        ])
+            ->setOption('enable-local-file-access', true)
+            ->setOption('encoding', 'UTF-8')
+            ->setOption('page-size', 'A4')
+            ->setOption('margin-top', '10mm')
+            ->setOption('margin-right', '10mm')
+            ->setOption('margin-bottom', '10mm')
+            ->setOption('margin-left', '10mm')
             ->save($path);
 
         return response()->download($path, 'stands.pdf')->deleteFileAfterSend(true);
