@@ -23,15 +23,15 @@
         .stand-page {
             display: block;
             page-break-after: always;
-            height: 277mm; /* A4 height minus margins */
             position: relative;
+            min-height: 100%;
         }
 
         .stand-inner {
             border: none;
             border-radius: 4mm;
             padding: 0;
-            height: 100%;
+            min-height: 100%;
             position: relative;
         }
 
@@ -98,17 +98,17 @@
         }
 
         .sector-slot {
-            flex: 1;                 /* allow equal distribution */
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            max-height: 23mm;        /* prevent oversized blocks */
             border-radius: 5mm;
             font-size: 20pt;
             font-weight: 1000;
             color: #FFFFFF;
             text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
-            width: 90%;              /* keeps width visually consistent */
+            width: 90%;
+            margin: 4mm 0;
         }
 
         .sector-mechatronica {
