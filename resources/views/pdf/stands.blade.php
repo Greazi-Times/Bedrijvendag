@@ -114,7 +114,7 @@
             align-items: center;
             justify-content: center;
 
-            font-size: 20pt;
+            font-size: 32pt;
             font-weight: 900;
             color: #FFFFFF;
             text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
@@ -228,6 +228,16 @@
         // Pre-calc which DB sector names the company has for quick lookups
         $companySectorNames = $company ? $company->sectors->pluck('name')->all() : [];
     @endphp
+
+    @if(request()->has('debugpaths'))
+        <pre style="font-size:10pt; color:#000;">
+Company Logo Path: {{ $companyLogo }}
+Exists: {{ file_exists($companyLogo) ? 'YES' : 'NO' }}
+Static Logo Path: {{ $staticLogo }}
+Exists: {{ file_exists($staticLogo) ? 'YES' : 'NO' }}
+Storage Dir: {{ public_path('storage/logos') }}
+        </pre>
+    @endif
 
     <div class="stand-page">
         <div class="stand-inner">
