@@ -234,7 +234,7 @@
             <div class="header">
                 <div class="company-logo-top">
                     @if($companyLogo && file_exists($companyLogo))
-                        <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
+                        <img src="file://{{ $companyLogo }}" alt="Bedrijfslogo">
                     @endif
                 </div>
 
@@ -274,7 +274,7 @@
 
                 <div class="company-logo-bottom">
                     @if($companyLogo && file_exists($companyLogo))
-                        <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
+                        <img src="file://{{ $companyLogo }}" alt="Bedrijfslogo">
                     @endif
                 </div>
             </div>
