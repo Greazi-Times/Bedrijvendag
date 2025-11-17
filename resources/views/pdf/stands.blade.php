@@ -22,7 +22,7 @@
 
         .stand-page {
             width: 100%;
-            height: 100%;
+            min-height: 100%;
             display: flex;
             flex-direction: column;
             page-break-after: always;
@@ -31,17 +31,18 @@
         .stand-inner {
             border: none;
             border-radius: 4mm;
-            padding: 4mm 6mm; /* reduce top/bottom */
-            height: 100%;
+            padding: 0;
             display: flex;
             flex-direction: column;
+            height: 100%;
         }
 
         .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 10mm;
+            height: 25mm;
+            padding-bottom: 10mm;
         }
 
         .company-logo-top {
@@ -83,12 +84,11 @@
         }
 
         .sectors {
-            flex-grow: 1;
+            flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
+            justify-content: center;
             gap: 4mm;
-            margin: 0; /* <-- IMPORTANT */
         }
 
         .sector-slot {
@@ -141,7 +141,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: 10mm;
+            height: 25mm;
+            padding-top: 10mm;
         }
 
         .stand-badge-bottom {
