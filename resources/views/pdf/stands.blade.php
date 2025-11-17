@@ -24,7 +24,7 @@
             display: block;
             page-break-after: always;
             position: relative;
-            height: 400mm; /* A4 (297mm) minus 2 x 10mm page margins */
+            height: 220mm; /* A4 (297mm) minus 2 x 10mm page margins */
             min-height: 277mm;
         }
 
