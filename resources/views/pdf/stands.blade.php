@@ -24,16 +24,16 @@
             display: block;
             page-break-after: always;
             position: relative;
-            height: 320mm;
-            min-height: 320mm;
+            height: 340mm;
+            min-height: 340mm;
         }
 
         .stand-inner {
             border: none;
             border-radius: 4mm;
             padding: 0;
-            height: 320mm;
-            min-height: 320mm;
+            height: 340mm;
+            min-height: 340mm;
             position: relative;
         }
 
