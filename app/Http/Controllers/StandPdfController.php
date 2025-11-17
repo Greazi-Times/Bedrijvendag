@@ -96,8 +96,10 @@ class StandPdfController extends Controller
                 'no-sandbox',
                 'disable-gpu',
                 'disable-dev-shm-usage',
-                'single-process',
+                'disable-software-rasterizer',
+                'disable-features=UseOzonePlatform',
                 'disable-setuid-sandbox',
+                'single-process',
                 'user-data-dir=/var/www/bedrijvendag/storage/tmp/chrome-user-data'
             ])
             ->save($path);
