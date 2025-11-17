@@ -158,6 +158,7 @@
             background-color: #FFFFFF;
             border: 1px solid #FFFFFF;
             color: transparent;
+            box-shadow: none;
         }
 
         .footer {
