@@ -122,7 +122,7 @@ function selectCompany(companyId: number | null, companyName: string | null) {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 gap-4 overflow-x-auto rounded-xl p-4">
             <div class="sticky top-0 w-3/4 overflow-auto">
-                <img src="/images/map-2.jpg" alt="Stands Map" class="max-h-[90vh] w-full rounded border object-contain" />
+                <img src="/images/map-3.jpg" alt="Stands Map" class="max-h-[90vh] w-full rounded border object-contain" />
             </div>
             <div class="max-h-[90vh] w-1/4 overflow-y-scroll rounded border">
                 <table class="min-w-full divide-y divide-gray-200 rounded-lg border border-gray-300">
