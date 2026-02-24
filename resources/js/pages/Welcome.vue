@@ -255,11 +255,21 @@ const submit = () => {
                         <template v-if="countdown.weken > 0">
                             <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
                                 <p class="text-2xl font-bold">{{ countdown.weken }}</p>
-                                <p class="text-sm">Weken</p>
+                                <template v-if="countdown.weken > 1">
+                                    <p class="text-sm">Weken</p>
+                                </template>
+                                <template v-else>
+                                    <p class="text-sm">Week</p>
+                                </template>
                             </div>
                             <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
                                 <p class="text-2xl font-bold">{{ countdown.dagen }}</p>
-                                <p class="text-sm">Dagen</p>
+                                <template v-if="countdown.dagen > 1">
+                                    <p class="text-sm">Dagen</p>
+                                </template>
+                                <template v-else>
+                                    <p class="text-sm">Dag</p>
+                                </template>
                             </div>
                             <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
                                 <p class="text-2xl font-bold">{{ countdown.uur }}</p>
@@ -270,7 +280,12 @@ const submit = () => {
                         <template v-else-if="countdown.dagen > 0">
                             <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
                                 <p class="text-2xl font-bold">{{ countdown.dagen }}</p>
-                                <p class="text-sm">Dagen</p>
+                                <template v-if="countdown.dagen > 1">
+                                    <p class="text-sm">Dagen</p>
+                                </template>
+                                <template v-else>
+                                    <p class="text-sm">Dag</p>
+                                </template>
                             </div>
                             <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
                                 <p class="text-2xl font-bold">{{ countdown.uur }}</p>
@@ -278,7 +293,12 @@ const submit = () => {
                             </div>
                             <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
                                 <p class="text-2xl font-bold">{{ countdown.minuten }}</p>
-                                <p class="text-sm">Minuten</p>
+                                <template v-if="countdown.minuten > 1">
+                                    <p class="text-sm">Minuten</p>
+                                </template>
+                                <template v-else>
+                                    <p class="text-sm">Minuut</p>
+                                </template>
                             </div>
                         </template>
 
@@ -289,11 +309,21 @@ const submit = () => {
                             </div>
                             <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
                                 <p class="text-2xl font-bold">{{ countdown.minuten }}</p>
-                                <p class="text-sm">Minuten</p>
+                                <template v-if="countdown.minuten > 1">
+                                    <p class="text-sm">Minuten</p>
+                                </template>
+                                <template v-else>
+                                    <p class="text-sm">Minuut</p>
+                                </template>
                             </div>
                             <div class="min-w-1/3 rounded-md border-1 border-background bg-primary-foreground/10 px-6 py-4 text-center">
                                 <p class="text-2xl font-bold">{{ countdown.seconden }}</p>
-                                <p class="text-sm">Seconden</p>
+                                <template v-if="countdown.seconden > 1">
+                                    <p class="text-sm">Seconden</p>
+                                </template>
+                                <template v-else>
+                                    <p class="text-sm">Seconde</p>
+                                </template>
                             </div>
                         </template>
                     </template>
