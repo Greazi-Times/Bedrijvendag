@@ -152,10 +152,10 @@ const submit = () => {
             <div class="mt-10">
                 <!-- New button here that shakes for the map at /plattegrond -->
                 <Link
-                    href="/plattegrond"
+                    href="#borrel"
                     class="animate-shake inline-flex items-center justify-center rounded-md bg-green-600 px-6 py-3 text-sm font-semibold text-white hover:bg-green-700"
                 >
-                    BEKIJK DE PLATTEGROND
+                    AANMELDEN BORREL
                 </Link>
             </div>
         </div>
@@ -234,7 +234,7 @@ const submit = () => {
     </div>
 
     <!-- Call to enroll -->
-    <div class="mx-auto mb-24 w-full bg-primary py-16">
+    <div id="borrel" class="mx-auto mb-24 w-full bg-primary py-16">
         <div class="mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-16 px-6 lg:flex-row">
             <!-- Left text and countdown placeholder -->
             <div class="min-w-5/8 flex-1 text-center text-primary-foreground lg:text-left">
