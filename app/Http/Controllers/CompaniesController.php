@@ -51,7 +51,7 @@ class CompaniesController extends Controller
             return [
                 'id' => $company->id,
                 'name' => $company->name,
-                'logo_url' => Storage::url($logoUrl),
+                'logo_url' => Storage::url($company->logo_path),
                 'website_url' => $company->website_url,
                 'booth' => $company->pivot?->stand_number, // from company_event.stand_number
                 'description' => is_array($company->description) ? implode(' ', array_filter($company->description)) : $company->description,
