@@ -31,6 +31,28 @@ const props = defineProps<{
     companies: Company[];
 }>();
 
+const sortedCompanies = computed(() => {
+    const toNum = (v: Company['stand_number']) => {
+        if (v === null || v === undefined) return null;
+        if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+        const s = String(v).trim();
+        if (!s) return null;
+        const n = Number(s.replace(',', '.'));
+        return Number.isFinite(n) ? n : null;
+    };
+
+    return [...props.companies].sort((a, b) => {
+        const an = toNum(a.stand_number);
+        const bn = toNum(b.stand_number);
+
+        if (an === null && bn === null) return a.name.localeCompare(b.name);
+        if (an === null) return 1;
+        if (bn === null) return -1;
+        if (an !== bn) return an - bn;
+        return a.name.localeCompare(b.name);
+    });
+});
+
 const hasMap = computed(() => !!props.event.map_url);
 
 const selectedCompany = ref<Company | null>(null);
@@ -134,9 +156,9 @@ function formatDateRange(start: string | null, end: string | null) {
                                 <span class="text-xs text-muted-foreground">{{ companies.length }}</span>
                             </div>
 
-                            <div v-if="companies.length" class="mt-4 space-y-3">
+                            <div v-if="companies.length" class="mt-4 max-h-[22rem] space-y-3 overflow-y-auto pr-1">
                                 <button
-                                    v-for="c in companies"
+                                    v-for="c in sortedCompanies"
                                     :key="c.id"
                                     type="button"
                                     class="flex w-full items-center gap-3 rounded-2xl bg-background p-3 text-left shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground"
@@ -152,7 +174,15 @@ function formatDateRange(start: string | null, end: string | null) {
                                     </div>
 
                                     <div class="min-w-0 flex-1">
-                                        <p class="truncate text-sm font-medium">{{ c.name }}</p>
+                                        <div class="flex items-center gap-2">
+                                            <p class="min-w-0 flex-1 truncate text-sm font-medium">{{ c.name }}</p>
+                                            <span
+                                                v-if="c.stand_number"
+                                                class="shrink-0 rounded-full bg-background px-2.5 py-1 text-[11px] font-semibold text-foreground ring-1 ring-border"
+                                            >
+                                                Stand {{ c.stand_number }}
+                                            </span>
+                                        </div>
                                         <p v-if="c.website_url" class="truncate text-xs text-muted-foreground">{{ c.website_url }}</p>
                                     </div>
 
