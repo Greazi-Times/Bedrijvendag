@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import AppHeader from '@/components/AppHeader.vue';
 import AppFooter from '@/components/AppFooter.vue';
 
@@ -55,6 +55,15 @@ const sortedCompanies = computed(() => {
 
 const hasMap = computed(() => !!props.event.map_url);
 
+const mapImgEl = ref<HTMLImageElement | null>(null);
+const mapImageHeight = ref<number>(0);
+let mapResizeObserver: ResizeObserver | null = null;
+
+function updateMapImageHeight() {
+    const h = mapImgEl.value?.clientHeight ?? 0;
+    mapImageHeight.value = h;
+}
+
 const selectedCompany = ref<Company | null>(null);
 const isCompanyModalOpen = computed(() => selectedCompany.value !== null);
 
@@ -72,10 +81,23 @@ function onKeydown(e: KeyboardEvent) {
 
 onMounted(() => {
     window.addEventListener('keydown', onKeydown);
+    nextTick(() => {
+        updateMapImageHeight();
+
+        if (mapImgEl.value && 'ResizeObserver' in window) {
+            mapResizeObserver = new ResizeObserver(() => updateMapImageHeight());
+            mapResizeObserver.observe(mapImgEl.value);
+        }
+
+        window.addEventListener('resize', updateMapImageHeight);
+    });
 });
 
 onBeforeUnmount(() => {
     window.removeEventListener('keydown', onKeydown);
+    window.removeEventListener('resize', updateMapImageHeight);
+    mapResizeObserver?.disconnect();
+    mapResizeObserver = null;
 });
 
 function formatDateRange(start: string | null, end: string | null) {
@@ -144,8 +166,14 @@ function formatDateRange(start: string | null, end: string | null) {
                               <span class="text-xs text-muted-foreground">&nbsp;</span>
                             </div>
 
-                            <div v-if="hasMap" class="mt-4 min-h-0 flex-1 overflow-hidden rounded-2xl ring-1 ring-border">
-                              <img :src="event.map_url ?? ''" alt="Plattegrond" class="h-full w-full object-contain" />
+                            <div v-if="hasMap" class="mt-4 overflow-hidden rounded-2xl ring-1 ring-border">
+                              <img
+                                ref="mapImgEl"
+                                :src="event.map_url ?? ''"
+                                alt="Plattegrond"
+                                class="h-full w-full object-contain"
+                                @load="updateMapImageHeight"
+                              />
                             </div>
 
                             <p v-else class="mt-4 text-sm text-muted-foreground">Geen plattegrond beschikbaar.</p>
@@ -159,7 +187,11 @@ function formatDateRange(start: string | null, end: string | null) {
                                 <span class="text-xs text-muted-foreground">{{ companies.length }}</span>
                             </div>
 
-                            <div v-if="companies.length" class="mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+                            <div
+                              v-if="companies.length"
+                              class="mt-4 space-y-3 overflow-y-auto pr-1"
+                              :style="mapImageHeight ? { height: mapImageHeight + 'px' } : undefined"
+                            >
                                 <button
                                     v-for="c in sortedCompanies"
                                     :key="c.id"
