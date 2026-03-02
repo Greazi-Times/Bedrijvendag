@@ -121,6 +121,7 @@ async function submitNewsletter() {
                             <input
                                 v-model="newsletterEmail"
                                 type="email"
+                                id="newsletter-email"
                                 placeholder="Email adres"
                                 class="w-full rounded-full border border-gray-300 py-3 pr-14 pl-6 text-sm focus:border-primary focus:outline-none dark:border-gray-700 dark:bg-black dark:text-white"
                                 required

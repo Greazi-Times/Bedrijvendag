@@ -191,6 +191,14 @@ const filteredCompanies = computed(() => {
 });
 
 const activeFilterCount = computed(() => selectedEducations.value.length + selectedSectors.value.length);
+
+const scrollToNewsletter = () => {
+    const el = document.getElementById('newsletter-email') as HTMLInputElement | null
+    if (!el) return
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    window.setTimeout(() => el.focus(), 250)
+}
 </script>
 
 <template>
@@ -399,6 +407,13 @@ const activeFilterCount = computed(() => selectedEducations.value.length + selec
                     <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
                         We zijn momenteel bezig met het finaliseren van de lijst met deelnemende bedrijven. Houd deze pagina in de gaten voor updates.
                     </p>
+                    <button
+                        type="button"
+                        class="mt-6 inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                        @click="scrollToNewsletter"
+                    >
+                        Inschrijven voor nieuwsbrief
+                    </button>
                 </template>
                 <template v-else>
                     <h2 class="text-base font-semibold text-foreground">Geen bedrijven gevonden</h2>
