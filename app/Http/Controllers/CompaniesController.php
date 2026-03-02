@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Education;
 use App\Models\Sector;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -50,7 +51,7 @@ class CompaniesController extends Controller
             return [
                 'id' => $company->id,
                 'name' => $company->name,
-                'logo_url' => $logoUrl,
+                'logo_url' => Storage::url($logoUrl),
                 'website_url' => $company->website_url,
                 'booth' => $company->pivot?->stand_number, // from company_event.stand_number
                 'description' => is_array($company->description) ? implode(' ', array_filter($company->description)) : $company->description,

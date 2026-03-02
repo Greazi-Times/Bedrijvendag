@@ -6,6 +6,7 @@ use App\Models\Event;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class EventController extends Controller
@@ -243,7 +244,7 @@ class EventController extends Controller
                         'id' => $company->id,
                         'name' => $company->name ?? '',
                         'website_url' => $company->website_url ?? null,
-                        'logo_url' => $logoUrl,
+                        'logo_url' => Storage::url($logoUrl),
                         'description_html' => $this->asHtmlDescription($company->description ?? null),
                         'sectors' => $sectors,
                         'educations' => $educations,
@@ -262,8 +263,8 @@ class EventController extends Controller
                 'ends_at' => $endsAt ? Carbon::parse($endsAt)->toIso8601String() : null,
                 'location' => $locationColumn ? $event->{$locationColumn} : null,
                 'description_html' => $this->asHtmlDescription($descriptionColumn ? $event->{$descriptionColumn} : null),
-                'header_image_url' => $headerImageUrl,
-                'map_url' => $mapUrl,
+                'header_image_url' => Storage::url($headerImageUrl),
+                'map_url' => Storage::url($mapUrl),
                 'gallery_url' => $galleryUrl,
             ],
             'companies' => $companies,
