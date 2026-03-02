@@ -143,10 +143,10 @@ class EventController extends Controller
                 'location' => $locationColumn ? $event->{$locationColumn} : null,
                 'short_description' => $shortDescriptionColumn ? $event->{$shortDescriptionColumn} : null,
                 'description_html' => $this->asHtmlDescription($descriptionColumn ? $event->{$descriptionColumn} : null),
-                'header_image_url' => $headerImageUrl,
+                'header_image_url' => Storage::url($headerImageUrl),
                 'edition_url' => $editionUrl,
                 'gallery_url' => $galleryUrl,
-                'map_url' => $mapUrl,
+                'map_url' => Storage::url($mapUrl),
             ];
         })->values();
 
