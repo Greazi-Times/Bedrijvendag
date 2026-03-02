@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import AppHeader from '@/components/AppHeader.vue';
 import AppFooter from '@/components/AppFooter.vue';
+import AppHeader from '@/components/AppHeader.vue';
 
 type EventDto = {
     id: number
@@ -507,8 +507,8 @@ const activeFilterCount = computed(() => selectedEducations.value.length + selec
             <div v-if="selectedCompany" class="fixed inset-0 z-[110]" aria-modal="true" role="dialog">
                 <button class="absolute inset-0 bg-black/50" type="button" @click="closeCompany" aria-label="Sluiten"></button>
 
-                <div class="absolute left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-background shadow-2xl ring-1 ring-border">
-                    <div class="flex items-center justify-between gap-4 border-b border-border px-6 py-5">
+                <div class="absolute left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 max-h-[80vh] overflow-hidden rounded-2xl bg-background shadow-2xl ring-1 ring-border flex flex-col">
+                    <div class="shrink-0 flex items-center justify-between gap-4 border-b border-border px-6 py-5">
                         <div class="min-w-0">
                             <div class="text-sm font-semibold text-muted-foreground">Bedrijf</div>
                             <h2 class="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground">
@@ -544,7 +544,7 @@ const activeFilterCount = computed(() => selectedEducations.value.length + selec
                         </button>
                     </div>
 
-                    <div class="max-h-[75vh] overflow-y-auto px-6 py-6">
+                    <div class="flex-1 overflow-y-auto px-6 py-6 overscroll-contain">
                         <div>
                             <div class="text-sm font-semibold text-foreground">Beschrijving</div>
                             <p v-if="selectedCompany.description" class="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
@@ -594,7 +594,7 @@ const activeFilterCount = computed(() => selectedEducations.value.length + selec
                         </div>
                     </div>
 
-                    <div class="border-t border-border px-6 py-4">
+                    <div class="shrink-0 border-t border-border px-6 py-4">
                         <div class="flex items-center justify-between gap-3">
                             <a
                                 v-if="selectedCompany.website_url"

@@ -186,12 +186,12 @@ function formatDateRange(start: string | null, end: string | null) {
         >
             <div class="absolute inset-0 flex items-center justify-center px-4 py-8">
                 <div
-                    class="w-full max-w-3xl overflow-hidden rounded-3xl bg-background shadow-xl ring-1 ring-border"
+                    class="w-full max-w-3xl max-h-[80vh] overflow-hidden rounded-3xl bg-background shadow-xl ring-1 ring-border flex flex-col"
                     role="dialog"
                     aria-modal="true"
                     @click.stop
                 >
-                    <div class="flex items-start justify-between gap-4 border-b border-border px-6 py-5">
+                    <div class="shrink-0 flex items-start justify-between gap-4 border-b border-border px-6 py-5">
                         <div class="min-w-0 flex items-center gap-3">
                             <div class="h-12 w-12 overflow-hidden rounded-2xl bg-accent/20 ring-1 ring-border">
                                 <img
@@ -218,7 +218,7 @@ function formatDateRange(start: string | null, end: string | null) {
                         </button>
                     </div>
 
-                    <div class="px-6 py-6">
+                    <div class="flex-1 overflow-y-auto px-6 py-6 overscroll-contain">
                         <div class="flex flex-wrap gap-2">
                         <span
                             v-for="(s, i) in (selectedCompany?.sectors ?? [])"
