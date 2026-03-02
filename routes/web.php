@@ -12,6 +12,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\PrivacyPolicyController;
 use App\Http\Controllers\TermsOfServiceController;
 use App\Http\Controllers\CookiePolicyController;
+use App\Http\Controllers\NewsletterSubscriptionController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -37,6 +38,9 @@ Route::get('/privacy-policy', PrivacyPolicyController::class)->name('privacy-pol
 
 Route::get('/terms-of-service', TermsOfServiceController::class)->name('terms-of-service');
 Route::get('/cookie-policy', CookiePolicyController::class)->name('cookie-policy');
+
+
+Route::post('/newsletter/subscribe', [NewsletterSubscriptionController::class, 'store']);
 
 Route::post('/borrel-signup', function (Request $request) {
     $eventId = $request->input('event_id');
