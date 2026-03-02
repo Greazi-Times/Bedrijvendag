@@ -136,9 +136,9 @@ function formatDateRange(start: string | null, end: string | null) {
                 </div>
 
                 <!-- Map left, companies right -->
-                <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
-                    <div class="lg:col-span-3">
-                        <div class="rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
+                <div class="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-stretch">
+                    <div class="lg:col-span-3 lg:h-full">
+                        <div class="flex h-full flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
                             <h2 class="text-sm font-medium">Plattegrond</h2>
 
                             <div v-if="hasMap" class="mt-4 overflow-hidden rounded-2xl ring-1 ring-border">
@@ -149,14 +149,14 @@ function formatDateRange(start: string | null, end: string | null) {
                         </div>
                     </div>
 
-                    <aside class="lg:col-span-2">
-                        <div class="rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
+                    <aside class="lg:col-span-2 lg:h-full">
+                        <div class="flex h-full flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
                             <div class="flex items-baseline justify-between">
                                 <h2 class="text-sm font-medium">Bedrijven</h2>
                                 <span class="text-xs text-muted-foreground">{{ companies.length }}</span>
                             </div>
 
-                            <div v-if="companies.length" class="mt-4 max-h-[22rem] space-y-3 overflow-y-auto pr-1">
+                            <div v-if="companies.length" class="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
                                 <button
                                     v-for="c in sortedCompanies"
                                     :key="c.id"
