@@ -118,13 +118,13 @@ class EventController extends Controller
             $headerImageUrl = null;
             if ($headerImageColumn && !empty($event->{$headerImageColumn})) {
                 $path = (string) $event->{$headerImageColumn};
-                $headerImageUrl = str_starts_with($path, 'http') ? $path : asset($path);
+                $headerImageUrl = $path;
             }
 
             $mapUrl = null;
             if ($mapUrlColumn && !empty($event->{$mapUrlColumn})) {
                 $path = (string) $event->{$mapUrlColumn};
-                $mapUrl = str_starts_with($path, 'http') ? $path : asset($path);
+                $mapUrl = $path;
             }
 
             $galleryUrl = null;
@@ -201,13 +201,13 @@ class EventController extends Controller
         $headerImageUrl = null;
         if ($headerImageColumn && !empty($event->{$headerImageColumn})) {
             $path = (string) $event->{$headerImageColumn};
-            $headerImageUrl = str_starts_with($path, 'http') ? $path : asset($path);
+            $headerImageUrl = $path;
         }
 
         $mapUrl = null;
         if ($mapUrlColumn && !empty($event->{$mapUrlColumn})) {
             $path = (string) $event->{$mapUrlColumn};
-            $mapUrl = str_starts_with($path, 'http') ? $path : asset($path);
+            $mapUrl = $path;
         }
 
         $galleryUrl = null;
