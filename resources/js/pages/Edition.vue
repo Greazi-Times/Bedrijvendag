@@ -136,27 +136,30 @@ function formatDateRange(start: string | null, end: string | null) {
                 </div>
 
                 <!-- Map left, companies right -->
-                <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
-                    <div class="lg:col-span-3">
-                        <div class="rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
-                            <h2 class="text-sm font-medium">Plattegrond</h2>
+                <div class="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-stretch">
+                    <div class="lg:col-span-3 lg:h-full">
+                        <div class="flex h-full min-h-0 flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
+                            <div class="flex h-6 items-center justify-between">
+                              <h2 class="text-sm font-medium">Plattegrond</h2>
+                              <span class="text-xs text-muted-foreground">&nbsp;</span>
+                            </div>
 
-                            <div v-if="hasMap" class="mt-4 overflow-hidden rounded-2xl ring-1 ring-border">
-                              <img :src="event.map_url ?? ''" alt="Plattegrond" class="w-full object-contain" />
+                            <div v-if="hasMap" class="mt-4 min-h-0 flex-1 overflow-hidden rounded-2xl ring-1 ring-border">
+                              <img :src="event.map_url ?? ''" alt="Plattegrond" class="h-full w-full object-contain" />
                             </div>
 
                             <p v-else class="mt-4 text-sm text-muted-foreground">Geen plattegrond beschikbaar.</p>
                         </div>
                     </div>
 
-                    <aside class="lg:col-span-2">
-                        <div class="rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
-                            <div class="flex items-baseline justify-between">
+                    <aside class="lg:col-span-2 lg:h-full">
+                        <div class="flex h-full min-h-0 flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
+                            <div class="flex h-6 items-center justify-between">
                                 <h2 class="text-sm font-medium">Bedrijven</h2>
                                 <span class="text-xs text-muted-foreground">{{ companies.length }}</span>
                             </div>
 
-                            <div v-if="companies.length" class="mt-4 max-h-[22rem] space-y-3 overflow-y-auto pr-1">
+                            <div v-if="companies.length" class="mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
                                 <button
                                     v-for="c in sortedCompanies"
                                     :key="c.id"
