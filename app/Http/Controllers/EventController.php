@@ -223,7 +223,6 @@ class EventController extends Controller
                 ->get()
                 ->map(function ($company) {
                     $logoPath = $company->logo_path ?? null;
-                    $logoUrl = $logoPath ? (str_starts_with($logoPath, 'http') ? $logoPath : asset($logoPath)) : null;
 
                     $sectors = [];
                     if (method_exists($company, 'sectors') && $company->relationLoaded('sectors')) {
@@ -244,7 +243,7 @@ class EventController extends Controller
                         'id' => $company->id,
                         'name' => $company->name ?? '',
                         'website_url' => $company->website_url ?? null,
-                        'logo_url' => Storage::url($logoUrl),
+                        'logo_url' => Storage::url($logoPath),
                         'description_html' => $this->asHtmlDescription($company->description ?? null),
                         'sectors' => $sectors,
                         'educations' => $educations,
