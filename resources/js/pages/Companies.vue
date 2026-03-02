@@ -394,8 +394,16 @@ const activeFilterCount = computed(() => selectedEducations.value.length + selec
             </section>
 
             <section v-else class="mx-auto mt-14 max-w-3xl rounded-2xl bg-background p-10 text-center shadow-sm ring-1 ring-border">
-                <h2 class="text-base font-semibold text-foreground">Geen bedrijven gevonden</h2>
-                <p class="mt-2 text-sm text-muted-foreground">Pas je zoekopdracht of filters aan.</p>
+                <template v-if="!(props.companies ?? []).length">
+                    <h2 class="text-base font-semibold text-foreground">We zijn de bedrijvenlijst nog aan het afronden</h2>
+                    <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        We zijn momenteel bezig met het finaliseren van de lijst met deelnemende bedrijven. Houd deze pagina in de gaten voor updates.
+                    </p>
+                </template>
+                <template v-else>
+                    <h2 class="text-base font-semibold text-foreground">Geen bedrijven gevonden</h2>
+                    <p class="mt-2 text-sm text-muted-foreground">Pas je zoekopdracht of filters aan.</p>
+                </template>
             </section>
         </div>
         <Teleport to="body">
