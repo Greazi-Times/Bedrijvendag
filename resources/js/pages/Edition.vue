@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import AppHeader from '@/components/AppHeader.vue';
 import AppFooter from '@/components/AppFooter.vue';
+import AppHeader from '@/components/AppHeader.vue';
 
 interface Company {
     id: number;
@@ -138,11 +138,11 @@ function formatDateRange(start: string | null, end: string | null) {
                 <!-- Map left, companies right -->
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-stretch">
                     <div class="lg:col-span-3 lg:h-full">
-                        <div class="flex h-full flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
+                        <div class="flex h-full min-h-0 flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
                             <h2 class="text-sm font-medium">Plattegrond</h2>
 
-                            <div v-if="hasMap" class="mt-4 overflow-hidden rounded-2xl ring-1 ring-border">
-                              <img :src="event.map_url ?? ''" alt="Plattegrond" class="w-full object-contain" />
+                            <div v-if="hasMap" class="mt-4 aspect-[4/3] overflow-hidden rounded-2xl ring-1 ring-border">
+                              <img :src="event.map_url ?? ''" alt="Plattegrond" class="h-full w-full object-contain" />
                             </div>
 
                             <p v-else class="mt-4 text-sm text-muted-foreground">Geen plattegrond beschikbaar.</p>
@@ -150,13 +150,13 @@ function formatDateRange(start: string | null, end: string | null) {
                     </div>
 
                     <aside class="lg:col-span-2 lg:h-full">
-                        <div class="flex h-full flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
+                        <div class="flex h-full min-h-0 flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
                             <div class="flex items-baseline justify-between">
                                 <h2 class="text-sm font-medium">Bedrijven</h2>
                                 <span class="text-xs text-muted-foreground">{{ companies.length }}</span>
                             </div>
 
-                            <div v-if="companies.length" class="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
+                            <div v-if="companies.length" class="mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
                                 <button
                                     v-for="c in sortedCompanies"
                                     :key="c.id"
