@@ -68,18 +68,16 @@ class DashboardPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            //->authGuard('customers')
+            // ->authGuard('customers')
             ->plugins([
                 PhosphorIcons::make(),
                 BreezyCore::make()
                     ->myProfile(
-                    shouldRegisterUserMenu: true, // Sets the 'account' link in the panel User Menu (default = true)
-                    userMenuLabel: 'My Profile', // Customizes the 'account' link label in the panel User Menu (default = null)
-                    shouldRegisterNavigation: false, // Adds a main navigation item for the My Profile page (default = false)
-                    navigationGroup: 'Settings', // Sets the navigation group for the My Profile page (default = null)
-                    hasAvatars: false, // Enables the avatar upload form component (default = false)
-                    slug: 'my-profile' // Sets the slug for the profile page (default = 'my-profile')
-                ),
+                        shouldRegisterNavigation: true, // Customizes the 'account' link label in the panel User Menu (default = null)
+                        userMenuLabel: 'My Profile', // Sets the navigation group for the My Profile page (default = null)
+                    )->enableTwoFactorAuthentication(
+                        force: true, // force the user to enable 2FA before they can use the application (default = false)
+                    ),
             ]);
     }
 }
