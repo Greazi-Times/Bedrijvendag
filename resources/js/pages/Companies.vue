@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import AppHeader from '@/components/AppHeader.vue';
 import AppFooter from '@/components/AppFooter.vue';
+import AppHeader from '@/components/AppHeader.vue';
 
 type EventDto = {
     id: number
@@ -191,6 +191,14 @@ const filteredCompanies = computed(() => {
 });
 
 const activeFilterCount = computed(() => selectedEducations.value.length + selectedSectors.value.length);
+
+const scrollToNewsletter = () => {
+    const el = document.getElementById('newsletter-email') as HTMLInputElement | null
+    if (!el) return
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    window.setTimeout(() => el.focus(), 250)
+}
 </script>
 
 <template>
@@ -394,8 +402,23 @@ const activeFilterCount = computed(() => selectedEducations.value.length + selec
             </section>
 
             <section v-else class="mx-auto mt-14 max-w-3xl rounded-2xl bg-background p-10 text-center shadow-sm ring-1 ring-border">
-                <h2 class="text-base font-semibold text-foreground">Geen bedrijven gevonden</h2>
-                <p class="mt-2 text-sm text-muted-foreground">Pas je zoekopdracht of filters aan.</p>
+                <template v-if="!(props.companies ?? []).length">
+                    <h2 class="text-base font-semibold text-foreground">We zijn de bedrijvenlijst nog aan het afronden</h2>
+                    <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        We zijn momenteel bezig met het finaliseren van de lijst met deelnemende bedrijven. Houd deze pagina in de gaten voor updates.
+                    </p>
+                    <button
+                        type="button"
+                        class="mt-6 inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                        @click="scrollToNewsletter"
+                    >
+                        Inschrijven voor nieuwsbrief
+                    </button>
+                </template>
+                <template v-else>
+                    <h2 class="text-base font-semibold text-foreground">Geen bedrijven gevonden</h2>
+                    <p class="mt-2 text-sm text-muted-foreground">Pas je zoekopdracht of filters aan.</p>
+                </template>
             </section>
         </div>
         <Teleport to="body">
@@ -507,8 +530,8 @@ const activeFilterCount = computed(() => selectedEducations.value.length + selec
             <div v-if="selectedCompany" class="fixed inset-0 z-[110]" aria-modal="true" role="dialog">
                 <button class="absolute inset-0 bg-black/50" type="button" @click="closeCompany" aria-label="Sluiten"></button>
 
-                <div class="absolute left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-background shadow-2xl ring-1 ring-border">
-                    <div class="flex items-center justify-between gap-4 border-b border-border px-6 py-5">
+                <div class="absolute left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 max-h-[80vh] overflow-hidden rounded-2xl bg-background shadow-2xl ring-1 ring-border flex flex-col">
+                    <div class="shrink-0 flex items-center justify-between gap-4 border-b border-border px-6 py-5">
                         <div class="min-w-0">
                             <div class="text-sm font-semibold text-muted-foreground">Bedrijf</div>
                             <h2 class="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground">
@@ -544,7 +567,7 @@ const activeFilterCount = computed(() => selectedEducations.value.length + selec
                         </button>
                     </div>
 
-                    <div class="max-h-[75vh] overflow-y-auto px-6 py-6">
+                    <div class="flex-1 overflow-y-auto px-6 py-6 overscroll-contain">
                         <div>
                             <div class="text-sm font-semibold text-foreground">Beschrijving</div>
                             <p v-if="selectedCompany.description" class="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
@@ -594,7 +617,7 @@ const activeFilterCount = computed(() => selectedEducations.value.length + selec
                         </div>
                     </div>
 
-                    <div class="border-t border-border px-6 py-4">
+                    <div class="shrink-0 border-t border-border px-6 py-4">
                         <div class="flex items-center justify-between gap-3">
                             <a
                                 v-if="selectedCompany.website_url"
