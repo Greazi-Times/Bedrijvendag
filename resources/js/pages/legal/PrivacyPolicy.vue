@@ -7,6 +7,7 @@ interface Policy {
     updatedAt?: string | null
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<{
     policy: Policy;
 }>();

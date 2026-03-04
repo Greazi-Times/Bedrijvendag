@@ -45,6 +45,7 @@ async function submitNewsletter() {
 
         newsletterEmail.value = ''
         setNewsletterFlash('success', 'Je bent ingeschreven voor de nieuwsbrief.')
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
         setNewsletterFlash('error', 'Inschrijven is niet gelukt. Probeer het opnieuw.')
     }
