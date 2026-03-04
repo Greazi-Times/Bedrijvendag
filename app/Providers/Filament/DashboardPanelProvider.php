@@ -22,6 +22,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Jeffgreco13\FilamentBreezy\BreezyCore;
 
 class DashboardPanelProvider extends PanelProvider
 {
@@ -67,6 +68,16 @@ class DashboardPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->plugin(PhosphorIcons::make());
+            // ->authGuard('customers')
+            ->plugins([
+                PhosphorIcons::make(),
+                BreezyCore::make()
+                    ->myProfile(
+                        shouldRegisterNavigation: true, // Customizes the 'account' link label in the panel User Menu (default = null)
+                        userMenuLabel: 'My Profile', // Sets the navigation group for the My Profile page (default = null)
+                    )->enableTwoFactorAuthentication(
+                        force: true, // force the user to enable 2FA before they can use the application (default = false)
+                    ),
+            ]);
     }
 }

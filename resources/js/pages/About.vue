@@ -2,8 +2,8 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { Users, Building2, Compass, Handshake, Lightbulb, Wine, ArrowRight } from 'lucide-vue-next';
 
-import AppHeader from '@/components/AppHeader.vue';
 import AppFooter from '@/components/AppFooter.vue';
+import AppHeader from '@/components/AppHeader.vue';
 </script>
 
 <template>
@@ -71,7 +71,7 @@ import AppFooter from '@/components/AppFooter.vue';
             <div class="pointer-events-none absolute right-10 -bottom-8 h-20 w-20 rounded-full bg-accent"></div>
 
             <div class="relative overflow-hidden rounded-[999px] shadow-lg ring-1 ring-border">
-              <img src="/images/info-3.jpg" alt="ATIx Bedrijvendag" class="h-[420px] w-full object-cover object-center" />
+              <img src="/images/info-7.jpg" alt="ATIx Bedrijvendag" class="h-[420px] w-full object-cover object-center" />
             </div>
           </div>
         </div>
@@ -92,13 +92,13 @@ import AppFooter from '@/components/AppFooter.vue';
             <div class="flex flex-col gap-6 sm:w-5/12">
               <div class="overflow-hidden rounded-3xl shadow-sm ring-1 ring-border">
                 <div class="aspect-[3/4] w-full">
-                  <img src="/images/info-1.jpg" alt="Sfeer" class="h-full w-full object-cover" />
+                  <img src="/images/info-4.jpg" alt="Sfeer" class="h-full w-full object-cover" />
                 </div>
               </div>
 
               <div class="overflow-hidden rounded-3xl shadow-sm ring-1 ring-border">
                 <div class="aspect-[3/4] w-full">
-                  <img src="/images/info-2.jpg" alt="Studenten" class="h-full w-full object-cover" />
+                  <img src="/images/info-5.jpg" alt="Studenten" class="h-full w-full object-cover" />
                 </div>
               </div>
             </div>
@@ -106,7 +106,7 @@ import AppFooter from '@/components/AppFooter.vue';
             <div class="sm:w-7/12">
               <div class="overflow-hidden rounded-3xl shadow-sm ring-1 ring-border">
                 <div class="aspect-[3/4] w-full">
-                  <img src="/images/info-3.jpg" alt="Bedrijven" class="h-full w-full object-cover object-center" />
+                  <img src="/images/info-6.jpg" alt="Bedrijven" class="h-full w-full object-cover object-center" />
                 </div>
               </div>
             </div>

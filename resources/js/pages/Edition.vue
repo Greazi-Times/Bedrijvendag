@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import AppHeader from '@/components/AppHeader.vue';
 import AppFooter from '@/components/AppFooter.vue';
 
@@ -31,7 +31,38 @@ const props = defineProps<{
     companies: Company[];
 }>();
 
+const sortedCompanies = computed(() => {
+    const toNum = (v: Company['stand_number']) => {
+        if (v === null || v === undefined) return null;
+        if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+        const s = String(v).trim();
+        if (!s) return null;
+        const n = Number(s.replace(',', '.'));
+        return Number.isFinite(n) ? n : null;
+    };
+
+    return [...props.companies].sort((a, b) => {
+        const an = toNum(a.stand_number);
+        const bn = toNum(b.stand_number);
+
+        if (an === null && bn === null) return a.name.localeCompare(b.name);
+        if (an === null) return 1;
+        if (bn === null) return -1;
+        if (an !== bn) return an - bn;
+        return a.name.localeCompare(b.name);
+    });
+});
+
 const hasMap = computed(() => !!props.event.map_url);
+
+const mapImgEl = ref<HTMLImageElement | null>(null);
+const mapImageHeight = ref<number>(0);
+let mapResizeObserver: ResizeObserver | null = null;
+
+function updateMapImageHeight() {
+    const h = mapImgEl.value?.clientHeight ?? 0;
+    mapImageHeight.value = h;
+}
 
 const selectedCompany = ref<Company | null>(null);
 const isCompanyModalOpen = computed(() => selectedCompany.value !== null);
@@ -50,10 +81,23 @@ function onKeydown(e: KeyboardEvent) {
 
 onMounted(() => {
     window.addEventListener('keydown', onKeydown);
+    nextTick(() => {
+        updateMapImageHeight();
+
+        if (mapImgEl.value && 'ResizeObserver' in window) {
+            mapResizeObserver = new ResizeObserver(() => updateMapImageHeight());
+            mapResizeObserver.observe(mapImgEl.value);
+        }
+
+        window.addEventListener('resize', updateMapImageHeight);
+    });
 });
 
 onBeforeUnmount(() => {
     window.removeEventListener('keydown', onKeydown);
+    window.removeEventListener('resize', updateMapImageHeight);
+    mapResizeObserver?.disconnect();
+    mapResizeObserver = null;
 });
 
 function formatDateRange(start: string | null, end: string | null) {
@@ -114,29 +158,42 @@ function formatDateRange(start: string | null, end: string | null) {
                 </div>
 
                 <!-- Map left, companies right -->
-                <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
-                    <div class="lg:col-span-3">
-                        <div class="rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
-                            <h2 class="text-sm font-medium">Plattegrond</h2>
+                <div class="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-stretch">
+                    <div class="lg:col-span-3 lg:h-full">
+                        <div class="flex h-full min-h-0 flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
+                            <div class="flex h-6 items-center justify-between">
+                              <h2 class="text-sm font-medium">Plattegrond</h2>
+                              <span class="text-xs text-muted-foreground">&nbsp;</span>
+                            </div>
 
                             <div v-if="hasMap" class="mt-4 overflow-hidden rounded-2xl ring-1 ring-border">
-                              <img :src="event.map_url ?? ''" alt="Plattegrond" class="w-full object-contain" />
+                              <img
+                                ref="mapImgEl"
+                                :src="event.map_url ?? ''"
+                                alt="Plattegrond"
+                                class="h-full w-full object-contain"
+                                @load="updateMapImageHeight"
+                              />
                             </div>
 
                             <p v-else class="mt-4 text-sm text-muted-foreground">Geen plattegrond beschikbaar.</p>
                         </div>
                     </div>
 
-                    <aside class="lg:col-span-2">
-                        <div class="rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
-                            <div class="flex items-baseline justify-between">
+                    <aside class="lg:col-span-2 lg:h-full">
+                        <div class="flex h-full min-h-0 flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
+                            <div class="flex h-6 items-center justify-between">
                                 <h2 class="text-sm font-medium">Bedrijven</h2>
                                 <span class="text-xs text-muted-foreground">{{ companies.length }}</span>
                             </div>
 
-                            <div v-if="companies.length" class="mt-4 space-y-3">
+                            <div
+                              v-if="companies.length"
+                              class="mt-4 space-y-3 overflow-y-auto pr-1"
+                              :style="mapImageHeight ? { height: mapImageHeight + 'px' } : undefined"
+                            >
                                 <button
-                                    v-for="c in companies"
+                                    v-for="c in sortedCompanies"
                                     :key="c.id"
                                     type="button"
                                     class="flex w-full items-center gap-3 rounded-2xl bg-background p-3 text-left shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground"
@@ -152,7 +209,15 @@ function formatDateRange(start: string | null, end: string | null) {
                                     </div>
 
                                     <div class="min-w-0 flex-1">
-                                        <p class="truncate text-sm font-medium">{{ c.name }}</p>
+                                        <div class="flex items-center gap-2">
+                                            <p class="min-w-0 flex-1 truncate text-sm font-medium">{{ c.name }}</p>
+                                            <span
+                                                v-if="c.stand_number"
+                                                class="shrink-0 rounded-full bg-background px-2.5 py-1 text-[11px] font-semibold text-foreground ring-1 ring-border"
+                                            >
+                                                Stand {{ c.stand_number }}
+                                            </span>
+                                        </div>
                                         <p v-if="c.website_url" class="truncate text-xs text-muted-foreground">{{ c.website_url }}</p>
                                     </div>
 
@@ -186,12 +251,12 @@ function formatDateRange(start: string | null, end: string | null) {
         >
             <div class="absolute inset-0 flex items-center justify-center px-4 py-8">
                 <div
-                    class="w-full max-w-3xl overflow-hidden rounded-3xl bg-background shadow-xl ring-1 ring-border"
+                    class="w-full max-w-3xl max-h-[80vh] overflow-hidden rounded-3xl bg-background shadow-xl ring-1 ring-border flex flex-col"
                     role="dialog"
                     aria-modal="true"
                     @click.stop
                 >
-                    <div class="flex items-start justify-between gap-4 border-b border-border px-6 py-5">
+                    <div class="shrink-0 flex items-start justify-between gap-4 border-b border-border px-6 py-5">
                         <div class="min-w-0 flex items-center gap-3">
                             <div class="h-12 w-12 overflow-hidden rounded-2xl bg-accent/20 ring-1 ring-border">
                                 <img
@@ -218,7 +283,7 @@ function formatDateRange(start: string | null, end: string | null) {
                         </button>
                     </div>
 
-                    <div class="px-6 py-6">
+                    <div class="flex-1 overflow-y-auto px-6 py-6 overscroll-contain">
                         <div class="flex flex-wrap gap-2">
                         <span
                             v-for="(s, i) in (selectedCompany?.sectors ?? [])"

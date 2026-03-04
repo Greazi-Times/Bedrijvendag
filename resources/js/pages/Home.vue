@@ -599,8 +599,8 @@ const triggerBorrelSuccess = () => {
         <div v-if="isVideoOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4" aria-modal="true" role="dialog" @click.self="closeVideo">
             <div class="absolute inset-0 bg-black/60"></div>
 
-            <div class="relative z-[101] w-full max-w-4xl overflow-hidden rounded-2xl bg-background shadow-xl ring-1 ring-border">
-                <div class="flex items-center justify-between gap-4 border-b border-border px-4 py-3">
+            <div class="relative z-[101] w-full max-w-4xl max-h-[80vh] overflow-hidden rounded-2xl bg-background shadow-xl ring-1 ring-border flex flex-col">
+                <div class="shrink-0 flex items-center justify-between gap-4 border-b border-border px-4 py-3">
                     <div class="text-sm font-semibold text-foreground">Video</div>
                     <button
                         type="button"
@@ -612,17 +612,19 @@ const triggerBorrelSuccess = () => {
                     </button>
                 </div>
 
-                <div class="relative aspect-video w-full bg-black">
-                    <iframe
-                        :key="videoInstanceKey"
-                        class="absolute inset-0 h-full w-full"
-                        :src="youtubeEmbedUrl"
-                        title="ATIx Bedrijvendag video"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen
-                        referrerpolicy="strict-origin-when-cross-origin"
-                    ></iframe>
+                <div class="flex-1 overflow-y-auto bg-black overscroll-contain">
+                    <div class="relative aspect-video w-full">
+                        <iframe
+                            :key="videoInstanceKey"
+                            class="h-full w-full"
+                            :src="youtubeEmbedUrl"
+                            title="ATIx Bedrijvendag video"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen
+                            referrerpolicy="strict-origin-when-cross-origin"
+                        ></iframe>
+                    </div>
                 </div>
             </div>
         </div>
