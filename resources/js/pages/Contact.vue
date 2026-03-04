@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { Mail, MapPin, Phone, Send, CheckCircle2, Linkedin, Facebook, Twitter } from 'lucide-vue-next';
+import { Mail, MapPin, Phone, Send, CheckCircle2 } from 'lucide-vue-next';
 import { onBeforeUnmount, ref } from 'vue';
 
 import AppFooter from '@/components/AppFooter.vue';
