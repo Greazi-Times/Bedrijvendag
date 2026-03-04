@@ -1,2 +1,2 @@
 
-Copyright (C) 2025 Greazi
+Copyright (C) 2026 Greazi
