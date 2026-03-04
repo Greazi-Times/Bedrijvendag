@@ -4,14 +4,12 @@ on:
   push:
     branches:
       - develop
-      - main
-      - master
+      - '2.0'
       - workos
   pull_request:
     branches:
       - develop
-      - main
-      - master
+      - '2.0'
       - workos
 
 permissions:
