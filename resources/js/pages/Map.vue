@@ -79,9 +79,6 @@ function clearSelection() {
     selectedStandId.value = null;
 }
 
-function clamp(n: number, min: number, max: number) {
-    return Math.max(min, Math.min(max, n));
-}
 </script>
 
 <template>
