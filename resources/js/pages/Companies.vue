@@ -356,7 +356,7 @@ const sanitizeHtml = (value: string) => {
 
                         <div
                             v-if="company.description"
-                            class="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground"
+                            class="prose prose-sm mt-3 line-clamp-2 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ul:my-0 prose-ol:my-0 prose-li:my-0"
                             v-html="sanitizeHtml(company.description)"
                         ></div>
                         <p v-else class="mt-3 text-sm leading-relaxed text-muted-foreground">Geen beschrijving.</p>
@@ -610,7 +610,7 @@ const sanitizeHtml = (value: string) => {
                             <div class="text-sm font-semibold text-foreground">Beschrijving</div>
                             <div
                                 v-if="selectedCompany.description"
-                                class="mt-2 text-sm leading-relaxed text-muted-foreground"
+                                class="prose prose-sm mt-2 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ul:my-0 prose-ol:my-0 prose-li:my-0"
                                 v-html="sanitizeHtml(selectedCompany.description)"
                             ></div>
                             <p v-else class="mt-2 text-sm text-muted-foreground">Geen beschrijving.</p>
