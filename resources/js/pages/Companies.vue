@@ -199,6 +199,42 @@ const scrollToNewsletter = () => {
     el.scrollIntoView({ behavior: 'smooth', block: 'center' })
     window.setTimeout(() => el.focus(), 250)
 }
+
+const sanitizeHtml = (value: string) => {
+    // Company descriptions are stored as rich text (HTML). We still need to guard against XSS.
+    // Best practice: sanitize server-side too, but this adds a client-side safety net.
+    try {
+        const doc = new DOMParser().parseFromString(String(value ?? ''), 'text/html');
+
+        // Remove dangerous elements
+        doc.querySelectorAll('script, style, iframe, object, embed, link, meta').forEach((el) => el.remove());
+
+        // Remove dangerous attributes and JS URLs
+        const all = doc.body.querySelectorAll('*');
+        for (const el of all) {
+            for (const attr of Array.from(el.attributes)) {
+                const name = attr.name.toLowerCase();
+                const val = (attr.value ?? '').trim().toLowerCase();
+
+                // event handlers like onclick, onerror, etc.
+                if (name.startsWith('on')) {
+                    el.removeAttribute(attr.name);
+                    continue;
+                }
+
+                // javascript: URLs in href/src
+                if ((name === 'href' || name === 'src') && val.startsWith('javascript:')) {
+                    el.removeAttribute(attr.name);
+                    continue;
+                }
+            }
+        }
+
+        return doc.body.innerHTML;
+    } catch {
+        return String(value ?? '');
+    }
+};
 </script>
 
 <template>
@@ -318,9 +354,11 @@ const scrollToNewsletter = () => {
                             {{ company.name }}
                         </h2>
 
-                        <p v-if="company.description" class="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-                            {{ company.description }}
-                        </p>
+                        <div
+                            v-if="company.description"
+                            class="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground"
+                            v-html="sanitizeHtml(company.description)"
+                        ></div>
                         <p v-else class="mt-3 text-sm leading-relaxed text-muted-foreground">Geen beschrijving.</p>
 
                         <div class="mt-5 grid gap-4 sm:grid-cols-2">
@@ -570,9 +608,11 @@ const scrollToNewsletter = () => {
                     <div class="flex-1 overflow-y-auto px-6 py-6 overscroll-contain">
                         <div>
                             <div class="text-sm font-semibold text-foreground">Beschrijving</div>
-                            <p v-if="selectedCompany.description" class="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                                {{ selectedCompany.description }}
-                            </p>
+                            <div
+                                v-if="selectedCompany.description"
+                                class="mt-2 text-sm leading-relaxed text-muted-foreground"
+                                v-html="sanitizeHtml(selectedCompany.description)"
+                            ></div>
                             <p v-else class="mt-2 text-sm text-muted-foreground">Geen beschrijving.</p>
 
                             <div class="mt-6 grid gap-6 sm:grid-cols-2">
