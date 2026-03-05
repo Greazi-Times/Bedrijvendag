@@ -201,11 +201,11 @@ class ManageStands extends Page implements HasForms, HasTable
     Saved. X: <span x-text="x"></span>%, Y: <span x-text="y"></span>%
   </div>
 
-  <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
+  <div class="mx-auto inline-block overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
     <img
       src="' . htmlspecialchars($url, ENT_QUOTES) . '"
       alt="Event map"
-      class="block w-full max-h-[70vh] object-contain cursor-crosshair select-none"
+      class="block h-auto w-auto max-h-[70vh] max-w-full cursor-crosshair select-none"
       draggable="false"
       @click.stop.prevent="click($event)"
     />
