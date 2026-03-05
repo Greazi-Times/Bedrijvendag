@@ -40,12 +40,23 @@ const selectedStandId = ref<Stand['id'] | null>(null);
 const normalizedQuery = computed(() => query.value.trim().toLowerCase());
 
 const filteredStands = computed(() => {
-    if (!normalizedQuery.value) return props.stands;
     const q = normalizedQuery.value;
-    return props.stands.filter((s) => {
-        const code = (s.code ?? '').toString().toLowerCase();
-        const company = (s.company_name ?? '').toString().toLowerCase();
-        return code.includes(q) || company.includes(q);
+
+    const list = !q
+        ? [...props.stands]
+        : props.stands.filter((s) => {
+              const code = (s.code ?? '').toString().toLowerCase();
+              const company = (s.company_name ?? '').toString().toLowerCase();
+              return code.includes(q) || company.includes(q);
+          });
+
+    return list.sort((a, b) => {
+        const aNum = parseInt(String(a.code).replace(/[^0-9]/g, '')) || 0;
+        const bNum = parseInt(String(b.code).replace(/[^0-9]/g, '')) || 0;
+
+        if (aNum !== bNum) return aNum - bNum;
+
+        return String(a.code).localeCompare(String(b.code));
     });
 });
 
