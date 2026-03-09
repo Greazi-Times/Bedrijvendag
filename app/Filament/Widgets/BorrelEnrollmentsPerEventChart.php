@@ -27,7 +27,7 @@ class BorrelEnrollmentsPerEventChart extends ChartWidget
                 [
                     'label' => 'Enrollments',
                     'data' => $events->pluck('borrel_enrollments_count')->all(),
-                    'tension' => 0.4, // makes the line smooth
+                    'tension' => 0.2, // makes the line smooth
                 ],
             ],
             'labels' => $events->map(fn ($e) => $e->name)->all(),
