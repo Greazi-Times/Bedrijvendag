@@ -30,7 +30,9 @@ const props = defineProps<{
     partners: PartnerCard[];
 }>();
 
+
 const isVideoOpen = ref(false);
+const shouldShowBorrelCount = computed(() => props.closingBorrelCount >= 25);
 
 // Replace this with your real YouTube video id later.
 const youtubeVideoId = ref('yMBxJQk7gbg');
@@ -128,6 +130,7 @@ const triggerBorrelSuccess = () => {
         showBorrelSuccess.value = false;
     }, 7000); // 7 seconds
 };
+
 </script>
 
 <template>
@@ -182,7 +185,14 @@ const triggerBorrelSuccess = () => {
                         </div>
                         <div class="inline-flex items-center gap-2">
                             <span class="h-2 w-2 rounded-full bg-secondary"></span>
-                            Borrel aanmeldingen: {{ props.closingBorrelCount }}
+
+                            <template v-if="shouldShowBorrelCount">
+                                Borrel aanmeldingen: {{ props.closingBorrelCount }}
+                            </template>
+
+                            <template v-else>
+                                Schrijf je snel in voor de borrel
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -429,9 +439,18 @@ const triggerBorrelSuccess = () => {
                 <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Meld je aan voor de borrel</h2>
                 <p class="mt-4 text-base leading-relaxed text-muted-foreground">Laat je e-mail achter. Dan sturen we je de details.</p>
 
-                <div class="mt-6 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground ring-1 ring-border">
+                <div
+                    class="mt-6 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground ring-1 ring-border"
+                >
                     <span class="h-2 w-2 rounded-full bg-secondary"></span>
-                    Al aangemeld: {{ props.closingBorrelCount }}
+
+                    <template v-if="shouldShowBorrelCount">
+                        Al aangemeld: {{ props.closingBorrelCount }}
+                    </template>
+
+                    <template v-else>
+                        Meld je nu aan voor de borrel
+                    </template>
                 </div>
             </div>
 
