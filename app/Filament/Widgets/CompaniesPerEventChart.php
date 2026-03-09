@@ -27,7 +27,7 @@ class CompaniesPerEventChart extends ChartWidget
                 [
                     'label' => 'Companies',
                     'data' => $events->pluck('companies_count')->all(),
-                    'tension' => 0.4, // makes the line smooth
+                    'tension' => 0.1, // makes the line smooth
                 ],
             ],
             'labels' => $events->map(fn ($e) => $e->name)->all(),
