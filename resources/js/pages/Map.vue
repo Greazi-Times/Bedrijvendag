@@ -187,7 +187,7 @@ onUnmounted(() => {
                 </div>
             </div>
 
-            <div class="grid gap-6 lg:grid-cols-12">
+            <div class="grid items-stretch gap-6 lg:grid-cols-12">
                 <!-- Map -->
                 <div class="lg:col-span-8">
                     <div
@@ -272,8 +272,8 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Sidebar -->
-                <aside class="lg:col-span-4">
-                    <div class="rounded-2xl border border-stroke bg-white p-4 dark:border-strokedark dark:bg-blacksection">
+                <aside class="lg:col-span-4 lg:h-full">
+                    <div class="flex h-full min-h-0 flex-col rounded-2xl border border-stroke bg-white p-4 dark:border-strokedark dark:bg-blacksection">
                         <div class="flex items-center gap-2">
                             <Search class="h-4 w-4 text-muted-foreground" />
                             <input
@@ -296,7 +296,7 @@ onUnmounted(() => {
                             </button>
                         </div>
 
-                        <div class="mt-4 max-h-[520px] overflow-auto pr-1">
+                        <div class="mt-4 min-h-0 flex-1 overflow-auto pr-1">
                             <div
                                 v-for="stand in filteredStands"
                                 :key="stand.id"
