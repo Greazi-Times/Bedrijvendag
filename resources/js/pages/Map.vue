@@ -312,7 +312,7 @@ onUnmounted(() => {
 
                         <div class="mt-4 min-h-0 flex-1 overflow-auto pr-1">
                             <div
-                                v-for="stand in filteredStands"
+                                v-for="(stand, index) in filteredStands"
                                 :key="stand.id"
                                 class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-2 transition hover:border-stroke hover:bg-gray-50 dark:hover:border-strokedark dark:hover:bg-blacksection/70"
                                 :class="selectedStandId === stand.id ? 'border-stroke bg-gray-50 dark:border-strokedark dark:bg-blacksection/70' : ''"
@@ -322,7 +322,10 @@ onUnmounted(() => {
                                     class="flex min-w-0 flex-1 items-center gap-3 text-left"
                                     @click="selectStand(stand.id)"
                                 >
-                                    <div class="flex h-10 min-w-10 shrink-0 items-center justify-center rounded-full     bg-primary/20 px-2 text-sm font-semibold text-foreground">
+                                    <div
+                                        class="flex h-10 min-w-10 shrink-0 items-center justify-center rounded-full px-2 text-sm font-semibold text-foreground"
+                                        :class="index % 2 === 0 ? 'bg-primary/20' : 'bg-secondary/25'"
+                                    >
                                         {{ stand.code }}
                                     </div>
 
@@ -349,7 +352,10 @@ onUnmounted(() => {
                                 </button>
                                 <button
                                     type="button"
-                                    class="inline-flex items-center justify-center rounded-xl bg-primary/60 px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/80 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                                    class="inline-flex items-center justify-center rounded-xl px-4 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 transition focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                                    :class="index % 2 === 0
+                                        ? 'bg-primary/60 ring-primary/20 hover:bg-primary/80'
+                                        : 'bg-secondary/80 ring-secondary/25 hover:bg-secondary'"
                                     @click.stop="openCompany(stand)"
                                 >
                                     Lees meer
