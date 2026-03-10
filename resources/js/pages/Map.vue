@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { Building2, Search } from 'lucide-vue-next';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
 
@@ -42,6 +42,8 @@ const props = defineProps<{
 const query = ref('');
 const selectedStandId = ref<Stand['id'] | null>(null);
 const selectedCompany = ref<Stand | null>(null);
+const mapImageRef = ref<HTMLImageElement | null>(null);
+const mapImageHeight = ref(0);
 
 const normalizedQuery = computed(() => query.value.trim().toLowerCase());
 
@@ -87,6 +89,10 @@ const selectedStandWithCoords = computed(() => {
 
     return s;
 });
+
+const updateMapImageHeight = () => {
+    mapImageHeight.value = mapImageRef.value?.clientHeight ?? 0;
+};
 
 function selectStand(id: Stand['id']) {
     selectedStandId.value = id;
@@ -143,10 +149,13 @@ const sanitizeHtml = (value: string) => {
 
 onMounted(() => {
     window.addEventListener('keydown', onKeydown);
+    window.addEventListener('resize', updateMapImageHeight);
+    nextTick(updateMapImageHeight);
 });
 
 onUnmounted(() => {
     window.removeEventListener('keydown', onKeydown);
+    window.removeEventListener('resize', updateMapImageHeight);
     document.body.style.overflow = '';
 });
 
@@ -197,10 +206,12 @@ onUnmounted(() => {
                             <!-- zoom layer -->
                             <div class="relative">
                                 <img
+                                    ref="mapImageRef"
                                     :src="map.image_url"
                                     :alt="`${event.title} map`"
                                     class="block h-auto w-full select-none"
                                     draggable="false"
+                                    @load="updateMapImageHeight"
                                 />
 
                                 <!-- Selected stand highlight (large marker) -->
@@ -273,7 +284,10 @@ onUnmounted(() => {
 
                 <!-- Sidebar -->
                 <aside class="lg:col-span-4 lg:h-full">
-                    <div class="flex h-full min-h-0 flex-col rounded-2xl border border-stroke bg-white p-4 dark:border-strokedark dark:bg-blacksection">
+                    <div
+                        class="flex min-h-0 flex-col rounded-2xl border border-stroke bg-white p-4 dark:border-strokedark dark:bg-blacksection"
+                        :style="mapImageHeight > 0 ? { height: `${mapImageHeight}px` } : undefined"
+                    >
                         <div class="flex items-center gap-2">
                             <Search class="h-4 w-4 text-muted-foreground" />
                             <input
