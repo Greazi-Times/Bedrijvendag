@@ -12,7 +12,14 @@ class EventPublicMapController extends Controller
     {
         $event = Event::query()
             ->nextOrLatest()
-            ->with(['companies' => fn ($q) => $q->orderBy('name')])
+            ->with([
+                'companies' => fn ($q) => $q
+                    ->with([
+                        'educations:id,name',
+                        'sectors:id,name',
+                    ])
+                    ->orderBy('name'),
+            ])
             ->firstOrFail();
 
         return Inertia::render('Map', [
@@ -29,6 +36,11 @@ class EventPublicMapController extends Controller
                 'id' => (string) $company->id,
                 'code' => (string) ($company->pivot->stand_number ?? '—'),
                 'company_name' => $company->name,
+                'company_logo' => $company->logo_path ? Storage::url($company->logo_path) : null,
+                'company_description' => $company->description,
+                'company_website_url' => $company->website_url,
+                'company_educations' => $company->educations->pluck('name')->filter()->values()->all(),
+                'company_sectors' => $company->sectors->pluck('name')->filter()->values()->all(),
                 'x_percent' => $company->pivot->x_percent !== null ? (float) $company->pivot->x_percent : null,
                 'y_percent' => $company->pivot->y_percent !== null ? (float) $company->pivot->y_percent : null,
             ])->values(),
