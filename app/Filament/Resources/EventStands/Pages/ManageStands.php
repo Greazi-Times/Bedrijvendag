@@ -30,6 +30,19 @@ class ManageStands extends Page implements HasForms, HasTable
 
     protected string $view = 'filament.resources.event-stands.pages.manage-stands';
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('download_stands_pdf')
+                ->label('Download stands PDF')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('primary')
+                ->visible(fn (): bool => filled($this->selectedEventId))
+                ->url(fn (): string => route('events.stands.pdf', ['event' => $this->selectedEventId]))
+                ->openUrlInNewTab(),
+        ];
+    }
+
     public ?int $selectedEventId = null;
 
     public ?float $markerX = null;
