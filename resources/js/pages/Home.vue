@@ -366,7 +366,7 @@ const triggerBorrelSuccess = () => {
                             Aanmelden borrel
                         </Link>
                         <Link
-                            href="/Users/nowey/Herd/Bedrijvendag2/resources/js/pages/Events"
+                            href="/edities"
                             class="inline-flex items-center justify-center rounded-full bg-white/10 px-7.5 py-3 text-sm font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
                         >
                             Vorige edities
