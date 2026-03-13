@@ -273,7 +273,7 @@ Storage Dir: {{ public_path('storage/logos') }}
         <div class="stand-inner">
             <div class="header">
                 <div class="company-logo-top">
-                    @if($companyLogo && file_exists($companyLogo))
+                    @if($companyLogo)
                         <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
                     @endif
                 </div>
@@ -315,13 +315,13 @@ Storage Dir: {{ public_path('storage/logos') }}
                 </div>
 
                 <div class="footer-center-logo">
-                    @if($staticLogo && file_exists($staticLogo))
+                    @if($staticLogo)
                         <img src="{{ $staticLogo }}" alt="ATIx Bedrijvendag">
                     @endif
                 </div>
 
                 <div class="company-logo-bottom">
-                    @if($companyLogo && file_exists($companyLogo))
+                    @if($companyLogo)
                         <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
                     @endif
                 </div>
