@@ -44,6 +44,7 @@ return [
             'margin-bottom' => '10mm',
             'margin-left' => '10mm',
             'margin-right' => '10mm',
+            'enable-local-file-access' => true,
         ],
         'env'     => [],
     ],
