@@ -32,6 +32,11 @@ class Event extends Model
             ->withTimestamps();
     }
 
+    public function stands(): HasMany
+    {
+        return $this->hasMany(CompanyEvent::class);
+    }
+
     public function borrelEnrollments(): HasMany
     {
         return $this->hasMany(BorrelEnrollment::class);
