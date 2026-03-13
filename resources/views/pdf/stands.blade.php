@@ -240,15 +240,18 @@
             $trimmedLogoPath = ltrim($logoPath, '/');
 
             if (file_exists($logoPath)) {
-                $companyLogo = $logoPath;
+                $companyLogo = 'file://' . $logoPath;
             } elseif (file_exists(public_path($trimmedLogoPath))) {
-                $companyLogo = public_path($trimmedLogoPath);
+                $companyLogo = 'file://' . public_path($trimmedLogoPath);
             } elseif (file_exists(public_path('storage/' . $trimmedLogoPath))) {
-                $companyLogo = public_path('storage/' . $trimmedLogoPath);
+                $companyLogo = 'file://' . public_path('storage/' . $trimmedLogoPath);
             }
         }
 
-        $staticLogo = public_path('images/bedrijvendag-logo.png');
+        $staticLogoPath = public_path('images/bedrijvendag-logo.png');
+        $staticLogo = file_exists($staticLogoPath)
+            ? 'file://' . $staticLogoPath
+            : null;
 
         $educationSlots = $company
             ? $company->educations->pluck('name')->filter()->values()->all()
@@ -259,9 +262,9 @@
         <pre style="font-size:10pt; color:#000;">
 Company logo DB field: {{ $company?->logo_path ?? $company?->logo ?? 'N/A' }}
 Company Logo Path: {{ $companyLogo }}
-Exists: {{ file_exists($companyLogo) ? 'YES' : 'NO' }}
+Exists: {{ $companyLogo ? 'YES' : 'NO' }}
 Static Logo Path: {{ $staticLogo }}
-Exists: {{ file_exists($staticLogo) ? 'YES' : 'NO' }}
+Exists: {{ $staticLogo ? 'YES' : 'NO' }}
 Storage Dir: {{ public_path('storage/logos') }}
         </pre>
     @endif
@@ -295,7 +298,7 @@ Storage Dir: {{ public_path('storage/logos') }}
                             'Business IT & Management' => 'education-bitm',
                             'Technische Bedrijfskunde' => 'education-tbk',
                             'Industrial Engineering & Management' => 'education-industrial',
-                            default => 'education-mechatronica',
+                            default => 'education-missing',
                         };
                     @endphp
                     <div class="{{ $classes }}">
