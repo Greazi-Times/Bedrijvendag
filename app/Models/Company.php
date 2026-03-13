@@ -34,4 +34,9 @@ class Company extends Model
     {
         return $this->belongsToMany(Sector::class);
     }
+
+    public function stands(): HasMany
+    {
+        return $this->hasMany(CompanyEvent::class, 'company_id');
+    }
 }
