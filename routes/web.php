@@ -44,7 +44,7 @@ Route::get('/cookie-policy', CookiePolicyController::class)->name('cookie-policy
 Route::post('/newsletter/subscribe', [NewsletterSubscriptionController::class, 'store']);
 
 Route::get('/events/{event}/stands-pdf', [PdfController::class, 'standsPdf'])
-    ->name('events.stands.pdf');
+    ->name('stands-pdf');
 
 Route::post('/borrel-signup', function (Request $request) {
     $eventId = $request->input('event_id');

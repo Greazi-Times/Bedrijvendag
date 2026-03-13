@@ -38,7 +38,7 @@ class ManageStands extends Page implements HasForms, HasTable
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('primary')
                 ->visible(fn (): bool => filled($this->selectedEventId))
-                ->url(fn (): string => route('events.stands.pdf', ['event' => $this->selectedEventId]))
+                ->url(fn (): string => route('stands-pdf', ['event' => $this->selectedEventId]))
                 ->openUrlInNewTab(),
         ];
     }
