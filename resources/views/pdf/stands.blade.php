@@ -24,19 +24,17 @@
             display: block;
             page-break-after: always;
             position: relative;
-            height: 277mm;
-            min-height: 277mm;
-            overflow: hidden;
+            height: 360mm;
+            min-height: 360mm;
         }
 
         .stand-inner {
             border: none;
             border-radius: 4mm;
             padding: 0;
-            height: 277mm;
-            min-height: 277mm;
+            height: 360mm;
+            min-height: 360mm;
             position: relative;
-            overflow: hidden;
         }
 
         .header {
@@ -94,31 +92,29 @@
         /* Middle section between header and footer */
         .educations {
             position: absolute;
-            top: 40mm;
+            top: 43mm;
             left: 0;
             right: 0;
-            bottom: 40mm;
+            height: 265mm;
+            min-height: 265mm;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
         }
 
         /* Education bars */
         .education-slot {
             width: 90%;
-            height: 24mm;
+            height: 30mm;
             min-height: 18mm;
-            margin-bottom: 6mm;
+            margin-bottom: 9mm;
             border-radius: 5mm;
-            padding: 0 6mm;
 
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
 
-            font-size: 26pt;
+            font-size: 32pt;
             font-weight: 900;
             color: #FFFFFF;
             text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
@@ -249,6 +245,7 @@
         }
 
         $staticLogoPath = public_path('images/bedrijvendag-logo.png');
+
         $staticLogo = file_exists($staticLogoPath)
             ? 'file://' . $staticLogoPath
             : null;
@@ -266,6 +263,7 @@ Exists: {{ $companyLogo ? 'YES' : 'NO' }}
 Static Logo Path: {{ $staticLogo }}
 Exists: {{ $staticLogo ? 'YES' : 'NO' }}
 Storage Dir: {{ public_path('storage/logos') }}
+Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?? '')) ? 'YES' : 'NO' }}
         </pre>
     @endif
 
