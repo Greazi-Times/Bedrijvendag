@@ -24,17 +24,23 @@
             display: block;
             page-break-after: always;
             position: relative;
-            height: 360mm;
-            min-height: 360mm;
+            height: 277mm;
+            min-height: 277mm;
+            overflow: hidden;
+        }
+
+        .stand-page:last-child {
+            page-break-after: auto;
         }
 
         .stand-inner {
             border: none;
             border-radius: 4mm;
             padding: 0;
-            height: 360mm;
-            min-height: 360mm;
+            height: 277mm;
+            min-height: 277mm;
             position: relative;
+            overflow: hidden;
         }
 
         .header {
@@ -42,8 +48,8 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 33mm;
-            min-height: 33mm;
+            height: 28mm;
+            min-height: 28mm;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -91,28 +97,30 @@
 
         .educations {
             position: absolute;
-            top: 43mm;
+            top: 36mm;
             left: 0;
             right: 0;
-            height: 265mm;
-            min-height: 265mm;
+            bottom: 36mm;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: stretch;
+            gap: 6mm;
+            overflow: hidden;
         }
 
         .education-slot {
             width: 90%;
-            height: 30mm;
-            min-height: 18mm;
-            margin-bottom: 9mm;
+            flex: 1 1 auto;
+            min-height: 0;
+            margin-bottom: 0;
             border-radius: 5mm;
 
             display: flex;
             align-items: center;
             justify-content: center;
 
-            font-size: 32pt;
+            font-size: 24pt;
             font-weight: 900;
             color: #FFFFFF;
             text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
@@ -123,10 +131,6 @@
             line-height: 1.1;
             word-break: break-word;
             overflow: hidden;
-        }
-
-        .education-slot:last-child {
-            margin-bottom: 0;
         }
 
         .education-missing {
@@ -141,8 +145,8 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 33mm;
-            min-height: 33mm;
+            height: 28mm;
+            min-height: 28mm;
             display: flex;
             align-items: center;
             justify-content: space-between;
