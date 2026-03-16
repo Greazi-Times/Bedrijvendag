@@ -102,33 +102,35 @@
             right: 0;
             bottom: 36mm;
             display: grid;
-            grid-template-rows: repeat(7, auto); /* let each row size to its content */
-            gap: 8mm; /* use gap for consistent spacing */
+            grid-template-rows: repeat(7, 40mm); /* taller rows for a more prominent look */
+            gap: 18mm; /* larger spacing between blocks to match reference */
             align-items: center;
             justify-items: center;
             align-content: center; /* center the whole column inside the available space */
             overflow: visible;
-            padding: 0 4mm;
+            padding: 0 18mm; /* wider side padding */
         }
 
         .education-slot {
-            width: 88%;
-            min-height: 26mm; /* ensure visually large blocks */
-            border-radius: 6mm;
+            width: 92%;
+            height: 40mm; /* larger visual height */
+            border-radius: 10mm;
 
             display: flex;
             align-items: center;
             justify-content: center;
 
-            font-size: 24pt;
+            font-size: 32pt;
             font-weight: 900;
             color: #FFFFFF;
-            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            /* stronger multi-layer text-shadow + subtle white outline via webkit-text-stroke */
+            -webkit-text-stroke: 2px #ffffff;
+            text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff, 0 10px 18px rgba(0,0,0,0.35);
+            box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
 
             text-align: center;
-            padding: 6mm 6mm; /* give vertical padding so blocks are taller */
-            line-height: 1.05;
+            padding: 0 10mm; /* horizontal padding */
+            line-height: 1;
             word-break: break-word;
             overflow: hidden;
         }
@@ -138,7 +140,7 @@
             border: none;
             color: transparent;
             box-shadow: none;
-            min-height: 12mm; /* keep some spacing where entries are missing */
+            height: 40mm; /* preserve the same height as visible slots */
         }
 
         .footer {
@@ -281,9 +283,11 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
                         $normalizedBackgroundColor = strtoupper($backgroundColor);
 
                         $textColor = '#FFFFFF';
-                        $textShadow = '0 0 12px rgba(0, 0, 0, 0.8)';
+                        // multi-layer text-shadow to simulate a white outline + soft drop shadow (matches CSS)
+                        $textShadow = '-1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff, 0 6px 10px rgba(0,0,0,0.35)';
 
                         if ($normalizedBackgroundColor === '#99FFFF') {
+                            // for very light backgrounds use dark text and a subtle white glow instead
                             $textColor = '#1a2a3a';
                             $textShadow = '0 0 8px rgba(255, 255, 255, 0.8)';
                         }
@@ -292,7 +296,7 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
                     @if($hasEducation)
                         <div
                             class="education-slot"
-                            style="background-color: {{ $backgroundColor }}; color: {{ $textColor }}; text-shadow: {{ $textShadow }};"
+                            style="background: linear-gradient(rgba(255,255,255,0.16), rgba(0,0,0,0.06)), {{ $backgroundColor }}; color: {{ $textColor }}; text-shadow: {{ $textShadow }}; -webkit-text-stroke: 2px #ffffff;"
                         >
                             {{ $education->name }}
                         </div>
