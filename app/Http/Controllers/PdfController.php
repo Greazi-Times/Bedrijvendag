@@ -15,7 +15,14 @@ class PdfController extends Controller
             ->orderBy('stand_number')
             ->get();
 
-        $pdf = SnappyPdf::loadView('pdf.stands', [
+        $fileName = 'stands-'.now()->format('Ymd-His').'.pdf';
+        $path = storage_path('app/tmp/'.$fileName);
+
+        if (! is_dir(dirname($path))) {
+            mkdir(dirname($path), 0775, true);
+        }
+
+        SnappyPdf::loadView('pdf.stands', [
             'event' => $event,
             'stands' => $stands,
         ])->setOption('enable-local-file-access', true)
@@ -30,8 +37,9 @@ class PdfController extends Controller
             ->setOption('header-spacing', 0)
             ->setOption('footer-spacing', 0)
             ->setOption('no-outline', true)
-            ->setOption('zoom', '1.0');
+            ->setOption('zoom', '1.0')
+            ->save($path);
 
-        return $pdf->download('event-stands.pdf');
+        return response()->download($path, 'stands.pdf')->deleteFileAfterSend(true);
     }
 }
