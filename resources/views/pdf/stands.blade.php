@@ -46,13 +46,16 @@
         .header {
             position: absolute;
             top: 0;
-            left: 0;
-            right: 0;
+            /* respect the stand-inner horizontal padding (6mm 8mm) */
+            left: 8mm;
+            right: 8mm;
             height: 28mm;
             min-height: 28mm;
-            display: flex;
+            display: grid;
+            grid-template-columns: 40mm 1fr 40mm; /* left logo, center name, right badge (wider side columns) */
             align-items: center;
-            justify-content: space-between;
+            gap: 8mm;
+            z-index: 20; /* keep header above educations */
         }
 
         .company-logo-top {
@@ -62,42 +65,58 @@
             display: flex;
             align-items: center;
             justify-content: flex-start;
+            justify-self: start; /* pin to the left cell start */
         }
 
         .company-logo-top img {
             max-width: 100%;
-            max-height: 100%;
+            height: 22mm; /* explicit height to keep consistent alignment */
             object-fit: contain;
         }
 
         .company-name {
-            flex: 1;
+            /* absolutely center the company name in the page so it visually aligns with reference */
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
             text-align: center;
-            font-size: 20pt;
+            font-size: 14pt; /* slightly smaller and more compact to match reference */
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: block;
+            padding: 0 4mm;
+            line-height: 1.05;
+            word-break: break-word;
+            max-height: 28mm;
+            z-index: 25; /* above logo and badge */
+            max-width: calc(100% - 96mm); /* leave space for left/right elements (40mm each + gaps) */
+            white-space: normal;
+            /* limit to two lines */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .stand-badge-top {
-            width: 20mm;
-            height: 20mm;
-            min-height: 20mm;
+            width: 30mm;
+            height: 30mm;
+            min-height: 30mm;
             border-radius: 50%;
             background-color: #F39C12;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32pt;
-            font-weight: 1000;
+            font-size: 14pt;
+            font-weight: 800;
             color: #ffffff;
             text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+            justify-self: end; /* pin to the right side of its cell */
         }
 
         .educations {
             position: absolute;
-            top: 36mm;
+            top: 64mm; /* push the education stack further down to avoid overlapping header */
             left: 0;
             right: 0;
             bottom: 36mm;
@@ -146,28 +165,32 @@
         .footer {
             position: absolute;
             bottom: 0;
-            left: 0;
-            right: 0;
+            /* respect the stand-inner horizontal padding */
+            left: 8mm;
+            right: 8mm;
             height: 28mm;
             min-height: 28mm;
-            display: flex;
+            display: grid;
+            grid-template-columns: 30mm 1fr 30mm; /* left badge, center logo, right company logo */
             align-items: center;
-            justify-content: space-between;
+            gap: 6mm;
+            z-index: 20; /* keep footer above educations */
         }
 
         .stand-badge-bottom {
-            width: 20mm;
-            height: 20mm;
-            min-height: 20mm;
+            width: 30mm;
+            height: 30mm;
+            min-height: 30mm;
             border-radius: 50%;
             background-color: #F39C12;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 25pt;
+            font-size: 12pt;
             font-weight: 800;
             color: #ffffff;
             text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+            justify-self: start; /* left cell */
         }
 
         .footer-center-logo {
@@ -176,13 +199,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            justify-self: center;
         }
 
         .footer-center-logo img {
             max-height: 100%;
-            min-height: 100%;
+            height: 22mm;
             object-fit: contain;
         }
+
 
         .company-logo-bottom {
             width: 30mm;
@@ -191,12 +216,12 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
+            justify-self: end; /* right cell */
         }
 
         .company-logo-bottom img {
             max-width: 100%;
-            max-height: 100%;
-            min-height: 100%;
+            height: 22mm; /* explicit height to match top logo */
             object-fit: contain;
         }
     </style>
@@ -243,6 +268,17 @@
                 ->map(fn ($id) => (int) $id)
                 ->all()
             : [];
+
+        // Prepare company display name and an adaptive font-size to avoid overflow
+        $companyName = trim($company?->name ?? 'Geen bedrijf');
+        $companyNameLength = mb_strlen($companyName);
+        if ($companyNameLength <= 30) {
+            $companyNameFont = '14pt';
+        } elseif ($companyNameLength <= 50) {
+            $companyNameFont = '12pt';
+        } else {
+            $companyNameFont = '10pt';
+        }
     @endphp
 
     @if(request()->has('debugpaths'))
@@ -266,8 +302,8 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
                     @endif
                 </div>
 
-                <div class="company-name">
-                    {{ $company?->name ?? 'Geen bedrijf' }}
+                <div class="company-name" title="{{ $companyName }}" style="font-size: {{ $companyNameFont }};">
+                    {{ $companyName }}
                 </div>
 
                 <div class="stand-badge-top">
@@ -301,10 +337,10 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
                             {{ $education->name }}
                         </div>
                     @else
-                        <div class="education-slot education-missing"></div>
+                        <div class="education-missing"></div>
                     @endif
                 @empty
-                    <div class="education-slot education-missing"></div>
+                    <div class="education-missing"></div>
                 @endforelse
             </div>
 
