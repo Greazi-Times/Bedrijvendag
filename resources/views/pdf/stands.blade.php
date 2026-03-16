@@ -10,7 +10,7 @@
         }
 
         * {
-
+            box-sizing: border-box;
         }
 
         body {
@@ -36,7 +36,7 @@
         .stand-inner {
             border: none;
             border-radius: 4mm;
-            padding: 0;
+            padding: 6mm 8mm; /* add some inner spacing so content isn't flush to the page edge */
             height: 277mm;
             min-height: 277mm;
             position: relative;
@@ -102,18 +102,19 @@
             right: 0;
             bottom: 36mm;
             display: grid;
-            grid-template-rows: repeat(7, 1fr);
-            row-gap: 8mm;
-            align-items: stretch;
+            grid-template-rows: repeat(7, auto); /* let each row size to its content */
+            gap: 8mm; /* use gap for consistent spacing */
+            align-items: center;
             justify-items: center;
-            overflow: hidden;
+            align-content: center; /* center the whole column inside the available space */
+            overflow: visible;
+            padding: 0 4mm;
         }
 
         .education-slot {
-            width: 90%;
-            height: 100%;
-            min-height: 0;
-            border-radius: 5mm;
+            width: 88%;
+            min-height: 26mm; /* ensure visually large blocks */
+            border-radius: 6mm;
 
             display: flex;
             align-items: center;
@@ -122,15 +123,14 @@
             font-size: 24pt;
             font-weight: 900;
             color: #FFFFFF;
-            text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
 
             text-align: center;
-            padding: 0 4mm;
-            line-height: 1.1;
+            padding: 6mm 6mm; /* give vertical padding so blocks are taller */
+            line-height: 1.05;
             word-break: break-word;
             overflow: hidden;
-            box-sizing: border-box;
         }
 
         .education-missing {
@@ -138,6 +138,7 @@
             border: none;
             color: transparent;
             box-shadow: none;
+            min-height: 12mm; /* keep some spacing where entries are missing */
         }
 
         .footer {
