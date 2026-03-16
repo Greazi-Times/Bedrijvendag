@@ -117,40 +117,16 @@
             color: #FFFFFF;
             text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
             box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+
+            text-align: center;
+            padding: 0 4mm;
+            line-height: 1.1;
+            word-break: break-word;
+            overflow: hidden;
         }
 
         .education-slot:last-child {
             margin-bottom: 0;
-        }
-
-        .education-mechatronica {
-            background-color: #FFAE66;
-        }
-
-        .education-werktuigbouwkunde {
-            background-color: #66FF66;
-        }
-
-        .education-ict {
-            background-color: #3F5F87;
-        }
-
-        .education-elektrotechniek {
-            background-color: #99FFFF;
-            color: #1a2a3a;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
-        }
-
-        .education-bitm {
-            background-color: #C266FF;
-        }
-
-        .education-tbk {
-            background-color: #664DFF;
-        }
-
-        .education-industrial {
-            background-color: #FF6666;
         }
 
         .education-missing {
@@ -248,8 +224,8 @@
             : null;
 
         $educationSlots = $company
-            ? $company->educations->pluck('name')->filter()->values()->all()
-            : [];
+            ? $company->educations->filter(fn ($education) => filled($education->name))->values()
+            : collect();
     @endphp
 
     @if(request()->has('debugpaths'))
@@ -285,19 +261,22 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
             <div class="educations">
                 @forelse($educationSlots as $education)
                     @php
-                        $classes = 'education-slot ' . match ($education) {
-                            'Mechatronica' => 'education-mechatronica',
-                            'Werktuigbouwkunde' => 'education-werktuigbouwkunde',
-                            'ICT' => 'education-ict',
-                            'Elektrotechniek' => 'education-elektrotechniek',
-                            'Business IT & Management' => 'education-bitm',
-                            'Technische Bedrijfskunde' => 'education-tbk',
-                            'Industrial Engineering & Management' => 'education-industrial',
-                            default => 'education-missing',
-                        };
+                        $backgroundColor = filled($education->color) ? $education->color : '#CCCCCC';
+                        $normalizedBackgroundColor = strtoupper($backgroundColor);
+
+                        $textColor = '#FFFFFF';
+                        $textShadow = '0 0 12px rgba(0, 0, 0, 0.8)';
+
+                        if ($normalizedBackgroundColor === '#99FFFF') {
+                            $textColor = '#1a2a3a';
+                            $textShadow = '0 0 8px rgba(255, 255, 255, 0.8)';
+                        }
                     @endphp
-                    <div class="{{ $classes }}">
-                        {{ $education }}
+                    <div
+                        class="education-slot"
+                        style="background-color: {{ $backgroundColor }}; color: {{ $textColor }}; text-shadow: {{ $textShadow }};"
+                    >
+                        {{ $education->name }}
                     </div>
                 @empty
                     <div class="education-slot education-missing"></div>
