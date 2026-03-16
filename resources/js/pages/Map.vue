@@ -28,6 +28,11 @@ type EventMap = {
     height?: number | null
 }
 
+type FilterOption = {
+    id: number | string
+    name: string
+}
+
 const props = defineProps<{
     event: {
         id: number | string
@@ -37,6 +42,8 @@ const props = defineProps<{
     map: EventMap
     stands: Stand[]
     backHref?: string
+    educations?: FilterOption[]
+    sectors?: FilterOption[]
 }>();
 
 const query = ref('');
@@ -45,27 +52,83 @@ const selectedCompany = ref<Stand | null>(null);
 const mapImageRef = ref<HTMLImageElement | null>(null);
 const mapImageHeight = ref(0);
 
+const selectedEducations = ref<string[]>([]);
+const selectedSectors = ref<string[]>([]);
+
+const isFilterOpen = ref(false);
+const educationFilterQuery = ref('');
+const sectorFilterQuery = ref('');
+
 const normalizedQuery = computed(() => query.value.trim().toLowerCase());
+
+const educationOptions = computed<string[]>(() => {
+    if (props.educations?.length) return props.educations.map((e) => e.name);
+
+    const set = new Set<string>();
+    for (const stand of props.stands) for (const n of stand.company_educations ?? []) set.add(n);
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'nl'));
+});
+
+const sectorOptions = computed<string[]>(() => {
+    if (props.sectors?.length) return props.sectors.map((s) => s.name);
+
+    const set = new Set<string>();
+    for (const stand of props.stands) for (const n of stand.company_sectors ?? []) set.add(n);
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'nl'));
+});
+
+const filteredEducationOptions = computed(() => {
+    const q = educationFilterQuery.value.trim().toLowerCase();
+    if (!q) return educationOptions.value;
+    return educationOptions.value.filter((n) => n.toLowerCase().includes(q));
+});
+
+const filteredSectorOptions = computed(() => {
+    const q = sectorFilterQuery.value.trim().toLowerCase();
+    if (!q) return sectorOptions.value;
+    return sectorOptions.value.filter((n) => n.toLowerCase().includes(q));
+});
 
 const filteredStands = computed(() => {
     const q = normalizedQuery.value;
+    const edu = selectedEducations.value;
+    const sec = selectedSectors.value;
 
-    const list = !q
-        ? [...props.stands]
-        : props.stands.filter((s) => {
-              const code = (s.code ?? '').toString().toLowerCase();
-              const company = (s.company_name ?? '').toString().toLowerCase();
-              return code.includes(q) || company.includes(q);
-          });
+    return [...props.stands]
+        .filter((s) => {
+            if (!q) return true;
 
-    return list.sort((a, b) => {
-        const aNum = parseInt(String(a.code).replace(/[^0-9]/g, '')) || 0;
-        const bNum = parseInt(String(b.code).replace(/[^0-9]/g, '')) || 0;
+            const haystack = [
+                s.code ?? '',
+                s.company_name ?? '',
+                s.company_website_url ?? '',
+                s.company_description ?? '',
+                ...(s.company_educations ?? []),
+                ...(s.company_sectors ?? []),
+            ]
+                .join(' ')
+                .toLowerCase();
 
-        if (aNum !== bNum) return aNum - bNum;
+            return haystack.includes(q);
+        })
+        .filter((s) => {
+            if (!edu.length) return true;
+            const names = s.company_educations ?? [];
+            return edu.some((x) => names.includes(x));
+        })
+        .filter((s) => {
+            if (!sec.length) return true;
+            const names = s.company_sectors ?? [];
+            return sec.some((x) => names.includes(x));
+        })
+        .sort((a, b) => {
+            const aNum = parseInt(String(a.code).replace(/[^0-9]/g, '')) || 0;
+            const bNum = parseInt(String(b.code).replace(/[^0-9]/g, '')) || 0;
 
-        return String(a.code).localeCompare(String(b.code));
-    });
+            if (aNum !== bNum) return aNum - bNum;
+
+            return String(a.code).localeCompare(String(b.code));
+        });
 });
 
 const standsWithCoords = computed(() => {
@@ -94,6 +157,35 @@ const updateMapImageHeight = () => {
     mapImageHeight.value = mapImageRef.value?.clientHeight ?? 0;
 };
 
+const toggle = (arr: string[], value: string) => {
+    const i = arr.indexOf(value);
+    if (i >= 0) arr.splice(i, 1);
+    else arr.push(value);
+};
+
+const clearFilters = () => {
+    selectedEducations.value = [];
+    selectedSectors.value = [];
+};
+
+const openFilters = () => {
+    isFilterOpen.value = true;
+    document.body.style.overflow = 'hidden';
+};
+
+const closeFilters = () => {
+    isFilterOpen.value = false;
+    if (!selectedCompany.value) document.body.style.overflow = '';
+};
+
+const clearAll = () => {
+    clearFilters();
+    educationFilterQuery.value = '';
+    sectorFilterQuery.value = '';
+};
+
+const activeFilterCount = computed(() => selectedEducations.value.length + selectedSectors.value.length);
+
 function selectStand(id: Stand['id']) {
     selectedStandId.value = id;
 }
@@ -109,12 +201,13 @@ const openCompany = (stand: Stand) => {
 
 const closeCompany = () => {
     selectedCompany.value = null;
-    document.body.style.overflow = '';
+    if (!isFilterOpen.value) document.body.style.overflow = '';
 };
 
 const onKeydown = (e: KeyboardEvent) => {
     if (e.key !== 'Escape') return;
-    if (selectedCompany.value) closeCompany();
+    if (selectedCompany.value) return closeCompany();
+    if (isFilterOpen.value) return closeFilters();
 };
 
 const sanitizeHtml = (value: string) => {
@@ -310,6 +403,55 @@ onUnmounted(() => {
                             </button>
                         </div>
 
+                        <div class="mt-3 flex items-center justify-between gap-2">
+                            <div v-if="activeFilterCount" class="text-xs font-semibold text-muted-foreground">
+                                {{ activeFilterCount }} filters actief
+                            </div>
+                            <div v-else></div>
+
+                            <div class="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    class="inline-flex items-center justify-center rounded-xl bg-background px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                                    @click="openFilters"
+                                >
+                                    Filters
+                                    <span v-if="activeFilterCount" class="ml-2 inline-flex min-w-6 items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
+                                        {{ activeFilterCount }}
+                                    </span>
+                                </button>
+
+                                <button
+                                    v-if="activeFilterCount"
+                                    type="button"
+                                    class="inline-flex items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground ring-1 ring-border transition hover:bg-accent/70 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                                    @click="clearAll"
+                                >
+                                    Wissen
+                                </button>
+                            </div>
+                        </div>
+
+                        <div v-if="activeFilterCount" class="mt-4 flex flex-wrap gap-2">
+                            <span
+                                v-for="n in selectedEducations"
+                                :key="'sel-edu-' + n"
+                                class="inline-flex items-center gap-2 rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-700 ring-1 ring-orange-500/30 dark:text-orange-300"
+                            >
+                                {{ n }}
+                                <button type="button" class="text-muted-foreground hover:text-foreground" @click="toggle(selectedEducations, n)">×</button>
+                            </span>
+
+                            <span
+                                v-for="n in selectedSectors"
+                                :key="'sel-sec-' + n"
+                                class="inline-flex items-center gap-2 rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-500/30 dark:text-blue-300"
+                            >
+                                {{ n }}
+                                <button type="button" class="text-muted-foreground hover:text-foreground" @click="toggle(selectedSectors, n)">×</button>
+                            </span>
+                        </div>
+
                         <div class="mt-4 min-h-0 flex-1 overflow-auto pr-1">
                             <div
                                 v-for="(stand, index) in filteredStands"
@@ -481,6 +623,112 @@ onUnmounted(() => {
                                 @click="closeCompany"
                             >
                                 Sluiten
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
+
+
+        <Teleport to="body">
+            <div v-if="isFilterOpen" class="fixed inset-0 z-[100]" aria-modal="true" role="dialog">
+                <button class="absolute inset-0 bg-black/40" type="button" @click="closeFilters" aria-label="Sluiten"></button>
+
+                <div class="absolute right-0 top-0 h-full w-full max-w-md overflow-hidden bg-background shadow-xl ring-1 ring-border">
+                    <div class="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
+                        <div>
+                            <div class="text-sm font-semibold text-foreground">Filters</div>
+                            <div class="mt-1 text-xs text-muted-foreground">Filter op opleiding en sector.</div>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                            @click="closeFilters"
+                            aria-label="Sluiten"
+                        >
+                            ×
+                        </button>
+                    </div>
+
+                    <div class="h-full overflow-y-auto px-5 py-5 pb-28">
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm font-semibold text-foreground">Geselecteerd: {{ activeFilterCount }}</div>
+                            <button
+                                v-if="activeFilterCount"
+                                type="button"
+                                class="text-sm font-semibold text-primary hover:underline"
+                                @click="clearAll"
+                            >
+                                Alles wissen
+                            </button>
+                        </div>
+
+                        <div class="mt-6">
+                            <div class="text-sm font-semibold text-foreground">Opleidingen</div>
+                            <input
+                                v-model="educationFilterQuery"
+                                type="search"
+                                placeholder="Zoek opleiding…"
+                                class="mt-3 h-10 w-full rounded-xl bg-background px-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                            />
+
+                            <div class="mt-4 space-y-2">
+                                <label v-for="name in filteredEducationOptions" :key="'f-edu-' + name" class="flex items-center gap-3 rounded-xl bg-accent/40 px-3 py-2 ring-1 ring-border/70">
+                                    <input
+                                        type="checkbox"
+                                        class="h-4 w-4"
+                                        :checked="selectedEducations.includes(name)"
+                                        @change="toggle(selectedEducations, name)"
+                                    />
+                                    <span class="text-sm font-medium text-foreground">{{ name }}</span>
+                                </label>
+
+                                <div v-if="!filteredEducationOptions.length" class="text-sm text-muted-foreground">Geen resultaten.</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            <div class="text-sm font-semibold text-foreground">Sectoren</div>
+                            <input
+                                v-model="sectorFilterQuery"
+                                type="search"
+                                placeholder="Zoek sector…"
+                                class="mt-3 h-10 w-full rounded-xl bg-background px-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                            />
+
+                            <div class="mt-4 space-y-2">
+                                <label v-for="name in filteredSectorOptions" :key="'f-sec-' + name" class="flex items-center gap-3 rounded-xl bg-accent/40 px-3 py-2 ring-1 ring-border/70">
+                                    <input
+                                        type="checkbox"
+                                        class="h-4 w-4"
+                                        :checked="selectedSectors.includes(name)"
+                                        @change="toggle(selectedSectors, name)"
+                                    />
+                                    <span class="text-sm font-medium text-foreground">{{ name }}</span>
+                                </label>
+
+                                <div v-if="!filteredSectorOptions.length" class="text-sm text-muted-foreground">Geen resultaten.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-0 left-0 right-0 border-t border-border bg-background px-5 py-4">
+                        <div class="flex items-center gap-3">
+                            <button
+                                type="button"
+                                class="inline-flex flex-1 items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                                @click="closeFilters"
+                            >
+                                Toon resultaten
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex items-center justify-center rounded-xl bg-background px-4 py-2.5 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent"
+                                @click="clearAll"
+                            >
+                                Wissen
                             </button>
                         </div>
                     </div>
