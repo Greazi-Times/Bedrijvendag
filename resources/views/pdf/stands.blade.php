@@ -227,9 +227,18 @@
             ? 'file://' . $staticLogoPath
             : null;
 
-        $educationSlots = $company
-            ? $company->educations->filter(fn ($education) => filled($education->name))->values()
-            : collect();
+        $allEducations = \App\Models\Education::query()
+            ->whereNotNull('name')
+            ->orderBy('id')
+            ->get();
+
+        $companyEducationIds = $company
+            ? $company->educations
+                ->filter(fn ($education) => filled($education->name))
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all()
+            : [];
     @endphp
 
     @if(request()->has('debugpaths'))
@@ -263,8 +272,9 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
             </div>
 
             <div class="educations">
-                @forelse($educationSlots as $education)
+                @forelse($allEducations as $education)
                     @php
+                        $hasEducation = in_array((int) $education->id, $companyEducationIds, true);
                         $backgroundColor = filled($education->color) ? $education->color : '#CCCCCC';
                         $normalizedBackgroundColor = strtoupper($backgroundColor);
 
@@ -276,12 +286,17 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
                             $textShadow = '0 0 8px rgba(255, 255, 255, 0.8)';
                         }
                     @endphp
-                    <div
-                        class="education-slot"
-                        style="background-color: {{ $backgroundColor }}; color: {{ $textColor }}; text-shadow: {{ $textShadow }};"
-                    >
-                        {{ $education->name }}
-                    </div>
+
+                    @if($hasEducation)
+                        <div
+                            class="education-slot"
+                            style="background-color: {{ $backgroundColor }}; color: {{ $textColor }}; text-shadow: {{ $textShadow }};"
+                        >
+                            {{ $education->name }}
+                        </div>
+                    @else
+                        <div class="education-slot education-missing"></div>
+                    @endif
                 @empty
                     <div class="education-slot education-missing"></div>
                 @endforelse
