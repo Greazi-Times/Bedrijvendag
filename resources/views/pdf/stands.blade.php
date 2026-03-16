@@ -101,19 +101,18 @@
             left: 0;
             right: 0;
             bottom: 36mm;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: stretch;
-            gap: 6mm;
+            display: grid;
+            grid-template-rows: repeat(7, 1fr);
+            row-gap: 8mm;
+            align-items: stretch;
+            justify-items: center;
             overflow: hidden;
         }
 
         .education-slot {
             width: 90%;
-            flex: 1 1 auto;
+            height: 100%;
             min-height: 0;
-            margin-bottom: 0;
             border-radius: 5mm;
 
             display: flex;
@@ -131,11 +130,12 @@
             line-height: 1.1;
             word-break: break-word;
             overflow: hidden;
+            box-sizing: border-box;
         }
 
         .education-missing {
-            background-color: #FFFFFF;
-            border: 1px solid #FFFFFF;
+            background-color: transparent;
+            border: none;
             color: transparent;
             box-shadow: none;
         }
@@ -230,6 +230,7 @@
         $allEducations = \App\Models\Education::query()
             ->whereNotNull('name')
             ->orderBy('id')
+            ->take(7)
             ->get();
 
         $companyEducationIds = $company
