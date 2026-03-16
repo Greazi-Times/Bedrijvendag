@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Education\Schemas;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Schemas\Schema;
 
 class EducationForm
@@ -20,6 +21,10 @@ class EducationForm
                 TextInput::make('website_url')
                     ->url()
                     ->default(null),
+                ColorPicker::make('color')
+                    ->label('Kleur')
+                    ->hex()
+                    ->required(),
             ]);
     }
 }

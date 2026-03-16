@@ -10,6 +10,7 @@ class Education extends Model
     protected $fillable = [
         'name',
         'description',
+        'color',
         'website_url',
     ];
 
