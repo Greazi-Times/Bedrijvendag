@@ -10,7 +10,7 @@
         }
 
         * {
-            box-sizing: border-box;
+
         }
 
         body {
@@ -89,7 +89,6 @@
             text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
         }
 
-        /* Middle section between header and footer */
         .educations {
             position: absolute;
             top: 43mm;
@@ -102,7 +101,6 @@
             align-items: center;
         }
 
-        /* Education bars */
         .education-slot {
             width: 90%;
             height: 30mm;
@@ -121,39 +119,38 @@
             box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
         }
 
-        /* Remove spacing below the last education */
         .education-slot:last-child {
             margin-bottom: 0;
         }
 
         .education-mechatronica {
-            background-color: #FFAE66; /* softer tone */
+            background-color: #FFAE66;
         }
 
         .education-werktuigbouwkunde {
-            background-color: #66FF66; /* softer tone */
+            background-color: #66FF66;
         }
 
         .education-ict {
-            background-color: #3F5F87; /* softer tone */
+            background-color: #3F5F87;
         }
 
         .education-elektrotechniek {
-            background-color: #99FFFF; /* softer tone */
+            background-color: #99FFFF;
             color: #1a2a3a;
             text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
         }
 
         .education-bitm {
-            background-color: #C266FF; /* softer tone */
+            background-color: #C266FF;
         }
 
         .education-tbk {
-            background-color: #664DFF; /* softer tone */
+            background-color: #664DFF;
         }
 
         .education-industrial {
-            background-color: #FF6666; /* softer tone */
+            background-color: #FF6666;
         }
 
         .education-missing {
