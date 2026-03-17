@@ -49,22 +49,27 @@
             /* span the full content width inside .stand-inner (which already has padding) */
             left: 0;
             right: 0;
-            height: 28mm;
-            min-height: 28mm;
-            display: flex; /* use flex so center column stays centered between equal fixed side widths */
-            align-items: center;
-            gap: 8mm;
+            height: 32mm;
+            min-height: 32mm;
+            /* use table layout so children with display: table-cell align horizontally */
+            display: table;
+            table-layout: fixed;
+            width: 100%;
             z-index: 20; /* keep header above educations */
         }
 
+        /* absolutely position left logo inside header */
         .company-logo-top {
+            position: absolute;
+            left: 8mm; /* inside .stand-inner padding */
+            top: 50%;
+            transform: translateY(-50%);
             width: 40mm; /* fixed column width to match header side spacing */
             height: 22mm;
-            min-height: 22mm;
             display: flex;
             align-items: center;
-            justify-content: flex-start; /* keep logo at left of its fixed column */
-            padding-left: 0; /* ensure logo sits exactly at the left cell start */
+            justify-content: flex-start;
+            padding-left: 0;
         }
 
         .company-logo-top img {
@@ -73,35 +78,36 @@
             object-fit: contain;
         }
 
+        /* center name constrained between side columns (8mm padding + 40mm side) = 48mm offset */
         .company-name {
-            flex: 1 1 auto; /* allow center column to flex between fixed side columns */
+            position: absolute;
+            left: 48mm;
+            right: 48mm;
+            top: 50%;
+            transform: translateY(-50%);
             text-align: center;
             font-size: 14pt; /* slightly smaller and more compact to match reference */
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 0 4mm;
             line-height: 1.05;
             word-break: break-word;
             max-height: 28mm;
             z-index: 25; /* above logo and badge */
-            max-width: 100%;
             white-space: normal;
-            /* limit to two lines */
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
+        /* absolutely position right badge inside header */
         .stand-badge-top {
-            width: 40mm; /* fixed right column width */
+            position: absolute;
+            right: 8mm; /* inside .stand-inner padding */
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40mm; /* fixed column width */
             height: 30mm;
-            min-height: 30mm;
             display: flex;
             align-items: center;
-            justify-content: flex-end; /* push badge to right edge of its fixed column */
+            justify-content: flex-end;
         }
 
         .stand-badge-top > .badge-inner {
@@ -120,7 +126,7 @@
 
         .educations {
             position: absolute;
-            top: 64mm; /* push the education stack further down to avoid overlapping header */
+            top: 68mm; /* push the education stack further down to avoid overlapping header */
             left: 0;
             right: 0;
             bottom: 36mm;
@@ -389,18 +395,20 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
     <div class="stand-page">
         <div class="stand-inner">
             <div class="header">
-                <div class="company-logo-top">
-                    @if($companyLogo)
-                        <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
-                    @endif
-                </div>
+                <div class="header-inner">
+                    <div class="company-logo-top">
+                        @if($companyLogo)
+                            <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
+                        @endif
+                    </div>
 
-                <div class="company-name" title="{{ $companyName }}" style="font-size: {{ $companyNameFont }};">
-                    {{ $companyName }}
-                </div>
+                    <div class="company-name" title="{{ $companyName }}" style="font-size: {{ $companyNameFont }};">
+                        {{ $companyName }}
+                    </div>
 
-                <div class="stand-badge-top">
-                    <div class="badge-inner">{{ $standNumber }}</div>
+                    <div class="stand-badge-top">
+                        <div class="badge-inner">{{ $standNumber }}</div>
+                    </div>
                 </div>
             </div>
 
@@ -432,7 +440,7 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
 
                     {{-- per-row dashed outlines --}}
                     @foreach($educationDebug as $idx => $debug)
-                        @php $rowTopMm = 64 + $idx * (40 + 18); @endphp
+                        @php $rowTopMm = 68 + $idx * (40 + 18); @endphp
                         <div class="debug-row-line" style="top: {{ $rowTopMm }}mm;"></div>
                     @endforeach
                 </div>
@@ -445,7 +453,7 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
                     {{-- per-row overlays positioned inside the educations area --}}
                     @foreach($educationDebug as $idx => $debug)
                         @php
-                            $rowTopMm = 64 + $idx * (40 + 18); // top offset in mm relative to page
+                            $rowTopMm = 68 + $idx * (40 + 18); // top offset in mm relative to page
                         @endphp
                         <div class="debug-row-overlay" style="top: {{ $rowTopMm }}mm; background: {{ $debug['bg'] }}; opacity: 0.18; border: 1px solid rgba(0,0,0,0.15);">
                             <div style="position:absolute; left:6mm; top:4mm; font-size:8pt; color:#000; background:rgba(255,255,255,0.85); padding:2px 4px; border-radius:3px;">#{{ $debug['id'] }} {{ $debug['has'] ? 'HAS' : 'MISS' }}</div>
