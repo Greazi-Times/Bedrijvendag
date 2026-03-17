@@ -45,27 +45,26 @@
 
         .header {
             position: absolute;
-            top: 0;
-            /* respect the stand-inner horizontal padding (6mm 8mm) */
-            left: 8mm;
-            right: 8mm;
+            top: 6mm; /* respect .stand-inner top padding */
+            /* span the full content width inside .stand-inner (which already has padding) */
+            left: 0;
+            right: 0;
             height: 28mm;
             min-height: 28mm;
-            display: grid;
-            grid-template-columns: 40mm 1fr 40mm; /* left logo, center name, right badge (wider side columns) */
+            display: flex; /* use flex so center column stays centered between equal fixed side widths */
             align-items: center;
             gap: 8mm;
             z-index: 20; /* keep header above educations */
         }
 
         .company-logo-top {
-            width: 30mm;
+            width: 40mm; /* fixed column width to match header side spacing */
             height: 22mm;
             min-height: 22mm;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            justify-self: start; /* pin to the left cell start */
+            justify-content: flex-start; /* keep logo at left of its fixed column */
+            padding-left: 0; /* ensure logo sits exactly at the left cell start */
         }
 
         .company-logo-top img {
@@ -75,21 +74,19 @@
         }
 
         .company-name {
-            /* absolutely center the company name in the page so it visually aligns with reference */
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
+            flex: 1 1 auto; /* allow center column to flex between fixed side columns */
             text-align: center;
             font-size: 14pt; /* slightly smaller and more compact to match reference */
             font-weight: 700;
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 0 4mm;
             line-height: 1.05;
             word-break: break-word;
             max-height: 28mm;
             z-index: 25; /* above logo and badge */
-            max-width: calc(100% - 96mm); /* leave space for left/right elements (40mm each + gaps) */
+            max-width: 100%;
             white-space: normal;
             /* limit to two lines */
             display: -webkit-box;
@@ -99,9 +96,17 @@
         }
 
         .stand-badge-top {
-            width: 30mm;
+            width: 40mm; /* fixed right column width */
             height: 30mm;
             min-height: 30mm;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; /* push badge to right edge of its fixed column */
+        }
+
+        .stand-badge-top > .badge-inner {
+            width: 30mm;
+            height: 30mm;
             border-radius: 50%;
             background-color: #F39C12;
             display: flex;
@@ -111,7 +116,6 @@
             font-weight: 800;
             color: #ffffff;
             text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
-            justify-self: end; /* pin to the right side of its cell */
         }
 
         .educations {
@@ -164,10 +168,10 @@
 
         .footer {
             position: absolute;
-            bottom: 0;
-            /* respect the stand-inner horizontal padding */
-            left: 8mm;
-            right: 8mm;
+            bottom: 6mm; /* respect .stand-inner bottom padding */
+            /* span the full content width inside .stand-inner (which already has padding) */
+            left: 0;
+            right: 0;
             height: 28mm;
             min-height: 28mm;
             display: grid;
@@ -396,7 +400,7 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
                 </div>
 
                 <div class="stand-badge-top">
-                    {{ $standNumber }}
+                    <div class="badge-inner">{{ $standNumber }}</div>
                 </div>
             </div>
 
@@ -422,8 +426,8 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
             @if($dbgMode === 'lines')
                 <div class="debug-overlay">
                     {{-- header/footer outlines only --}}
-                    <div class="debug-border" style="top:0; left:8mm; right:8mm; height:28mm; border-color: rgba(0,128,0,0.6);"></div>
-                    <div class="debug-border" style="bottom:0; left:8mm; right:8mm; height:28mm; border-color: rgba(0,128,128,0.6);"></div>
+                            <div class="debug-border" style="top:0; left:0; right:0; height:28mm; border-color: rgba(0,128,0,0.6);"></div>
+                            <div class="debug-border" style="bottom:0; left:0; right:0; height:28mm; border-color: rgba(0,128,128,0.6);"></div>
                     <div class="debug-center-line"></div>
 
                     {{-- per-row dashed outlines --}}
@@ -435,8 +439,8 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
             @elseif(request()->has('debuglayout'))
                 <div class="debug-overlay">
                     {{-- header/f footer bounds --}}
-                    <div class="debug-border" style="top:0; left:8mm; right:8mm; height:28mm; border-color: rgba(0,128,0,0.6);"></div>
-                    <div class="debug-border" style="bottom:0; left:8mm; right:8mm; height:28mm; border-color: rgba(0,128,128,0.6);"></div>
+                    <div class="debug-border" style="top:0; left:0; right:0; height:28mm; border-color: rgba(0,128,0,0.6);"></div>
+                    <div class="debug-border" style="bottom:0; left:0; right:0; height:28mm; border-color: rgba(0,128,128,0.6);"></div>
 
                     {{-- per-row overlays positioned inside the educations area --}}
                     @foreach($educationDebug as $idx => $debug)
