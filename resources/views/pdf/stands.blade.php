@@ -267,6 +267,29 @@
             box-shadow: none;
             z-index: 9980;
         }
+        /* Lines-only debug helpers (no fill, only outlines) */
+        .debug-row-line {
+            position: absolute;
+            left: 18mm;
+            right: 18mm;
+            height: 40mm;
+            border-radius: 10mm;
+            border: 2px dashed rgba(0,0,0,0.35);
+            background: transparent;
+            pointer-events: none;
+            z-index: 9997;
+        }
+
+        .debug-center-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            border-left: 1px dashed rgba(200,0,0,0.6);
+            z-index: 9999;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -395,7 +418,21 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
                 @endforeach
             </div>
 
-            @if(request()->has('debuglayout'))
+            @php $dbgMode = request()->get('debuglayout'); @endphp
+            @if($dbgMode === 'lines')
+                <div class="debug-overlay">
+                    {{-- header/footer outlines only --}}
+                    <div class="debug-border" style="top:0; left:8mm; right:8mm; height:28mm; border-color: rgba(0,128,0,0.6);"></div>
+                    <div class="debug-border" style="bottom:0; left:8mm; right:8mm; height:28mm; border-color: rgba(0,128,128,0.6);"></div>
+                    <div class="debug-center-line"></div>
+
+                    {{-- per-row dashed outlines --}}
+                    @foreach($educationDebug as $idx => $debug)
+                        @php $rowTopMm = 64 + $idx * (40 + 18); @endphp
+                        <div class="debug-row-line" style="top: {{ $rowTopMm }}mm;"></div>
+                    @endforeach
+                </div>
+            @elseif(request()->has('debuglayout'))
                 <div class="debug-overlay">
                     {{-- header/f footer bounds --}}
                     <div class="debug-border" style="top:0; left:8mm; right:8mm; height:28mm; border-color: rgba(0,128,0,0.6);"></div>
