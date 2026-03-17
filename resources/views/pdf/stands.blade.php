@@ -224,6 +224,49 @@
             height: 22mm; /* explicit height to match top logo */
             object-fit: contain;
         }
+
+        /* Debug helpers (visible only with ?debuglayout) */
+        .debug-overlay {
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .debug-border {
+            position: absolute;
+            border: 1px dashed rgba(255,0,0,0.7);
+            pointer-events: none;
+        }
+
+        .debug-panel {
+            position: absolute;
+            right: 6mm;
+            top: 6mm;
+            background: rgba(255,255,255,0.95);
+            color: #000;
+            font-size: 8pt;
+            padding: 6px;
+            border-radius: 4px;
+            max-width: 80mm;
+            z-index: 10000;
+            pointer-events: auto;
+        }
+
+        .debug-row-overlay {
+            position: absolute;
+            left: 18mm; /* match education side padding */
+            right: 18mm;
+            height: 40mm;
+            border-radius: 10mm;
+            opacity: 0.15;
+            pointer-events: none;
+            box-shadow: none;
+            z-index: 9980;
+        }
     </style>
 </head>
 <body>
@@ -279,6 +322,29 @@
         } else {
             $companyNameFont = '10pt';
         }
+
+        // Build a debug array for educations so we can re-use the computed values
+        $educationDebug = [];
+        foreach ($allEducations as $edu) {
+            $has = in_array((int) $edu->id, $companyEducationIds, true);
+            $bg = filled($edu->color) ? $edu->color : '#CCCCCC';
+            $norm = strtoupper($bg);
+            $tc = '#FFFFFF';
+            $ts = '-1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff, 0 6px 10px rgba(0,0,0,0.35)';
+            if ($norm === '#99FFFF') {
+                $tc = '#1a2a3a';
+                $ts = '0 0 8px rgba(255, 255, 255, 0.8)';
+            }
+            $educationDebug[] = [
+                'id' => $edu->id,
+                'name' => $edu->name,
+                'has' => $has,
+                'bg' => $bg,
+                'norm' => $norm,
+                'tc' => $tc,
+                'ts' => $ts,
+            ];
+        }
     @endphp
 
     @if(request()->has('debugpaths'))
@@ -312,37 +378,50 @@ Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?
             </div>
 
             <div class="educations">
-                @forelse($allEducations as $education)
+                @foreach($educationDebug as $idx => $debug)
                     @php
-                        $hasEducation = in_array((int) $education->id, $companyEducationIds, true);
-                        $backgroundColor = filled($education->color) ? $education->color : '#CCCCCC';
-                        $normalizedBackgroundColor = strtoupper($backgroundColor);
-
-                        $textColor = '#FFFFFF';
-                        // multi-layer text-shadow to simulate a white outline + soft drop shadow (matches CSS)
-                        $textShadow = '-1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff, 0 6px 10px rgba(0,0,0,0.35)';
-
-                        if ($normalizedBackgroundColor === '#99FFFF') {
-                            // for very light backgrounds use dark text and a subtle white glow instead
-                            $textColor = '#1a2a3a';
-                            $textShadow = '0 0 8px rgba(255, 255, 255, 0.8)';
-                        }
+                        $rowTop = $idx * (40 + 18) + 0; /* row height + gap; positioned relative inside .educations container */
                     @endphp
-
-                    @if($hasEducation)
+                    @if($debug['has'])
                         <div
                             class="education-slot"
-                            style="background: linear-gradient(rgba(255,255,255,0.16), rgba(0,0,0,0.06)), {{ $backgroundColor }}; color: {{ $textColor }}; text-shadow: {{ $textShadow }}; -webkit-text-stroke: 2px #ffffff;"
+                            style="background: linear-gradient(rgba(255,255,255,0.16), rgba(0,0,0,0.06)), {{ $debug['bg'] }}; color: {{ $debug['tc'] }}; text-shadow: {{ $debug['ts'] }}; -webkit-text-stroke: 2px #ffffff;"
                         >
-                            {{ $education->name }}
+                            {{ $debug['name'] }}
                         </div>
                     @else
                         <div class="education-missing"></div>
                     @endif
-                @empty
-                    <div class="education-missing"></div>
-                @endforelse
+                @endforeach
             </div>
+
+            @if(request()->has('debuglayout'))
+                <div class="debug-overlay">
+                    {{-- header/f footer bounds --}}
+                    <div class="debug-border" style="top:0; left:8mm; right:8mm; height:28mm; border-color: rgba(0,128,0,0.6);"></div>
+                    <div class="debug-border" style="bottom:0; left:8mm; right:8mm; height:28mm; border-color: rgba(0,128,128,0.6);"></div>
+
+                    {{-- per-row overlays positioned inside the educations area --}}
+                    @foreach($educationDebug as $idx => $debug)
+                        @php
+                            $rowTopMm = 64 + $idx * (40 + 18); // top offset in mm relative to page
+                        @endphp
+                        <div class="debug-row-overlay" style="top: {{ $rowTopMm }}mm; background: {{ $debug['bg'] }}; opacity: 0.18; border: 1px solid rgba(0,0,0,0.15);">
+                            <div style="position:absolute; left:6mm; top:4mm; font-size:8pt; color:#000; background:rgba(255,255,255,0.85); padding:2px 4px; border-radius:3px;">#{{ $debug['id'] }} {{ $debug['has'] ? 'HAS' : 'MISS' }}</div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="debug-panel">
+                    <div><strong>Company</strong>: {{ $companyName }}</div>
+                    <div><strong>Font</strong>: {{ $companyNameFont }}</div>
+                    <div><strong>Stand #</strong>: {{ $standNumber }}</div>
+                    <div><strong>CompanyLogo</strong>: {{ $companyLogo ?? 'N/A' }}</div>
+                    <div><strong>StaticLogo</strong>: {{ $staticLogo ?? 'N/A' }}</div>
+                    <div style="margin-top:6px"><strong>Educations (debug)</strong>:</div>
+                    <pre style="font-size:8pt; max-height:80mm; overflow:auto">{{ json_encode($educationDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
+                </div>
+            @endif
 
             <div class="footer">
                 <div class="stand-badge-bottom">
