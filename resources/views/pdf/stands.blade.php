@@ -13,19 +13,23 @@
             box-sizing: border-box;
         }
 
+        html,
         body {
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background-color: #ffffff;
+            background: #ffffff;
+        }
+
+        body {
+            font-size: 12pt;
         }
 
         .stand-page {
-            display: block;
-            page-break-after: always;
             position: relative;
+            width: 100%;
             height: 277mm;
-            min-height: 277mm;
+            page-break-after: always;
             overflow: hidden;
         }
 
@@ -33,271 +37,259 @@
             page-break-after: auto;
         }
 
-        .stand-inner {
-            border: none;
-            border-radius: 4mm;
-            padding: 6mm 8mm; /* add some inner spacing so content isn't flush to the page edge */
-            height: 277mm;
-            min-height: 277mm;
-            position: relative;
-            overflow: hidden;
-        }
-
         .header {
             position: absolute;
-            top: 6mm; /* respect .stand-inner top padding */
-            /* span the full content width inside .stand-inner (which already has padding) */
+            top: 0;
             left: 0;
             right: 0;
-            height: 32mm;
-            min-height: 32mm;
-            /* use table layout so children with display: table-cell align horizontally */
-            display: table;
-            table-layout: fixed;
-            width: 100%;
-            z-index: 20; /* keep header above educations */
+            height: 30mm;
         }
 
-        /* absolutely position left logo inside header */
         .company-logo-top {
             position: absolute;
-            left: 8mm; /* inside .stand-inner padding */
-            top: 50%;
-            transform: translateY(-50%);
-            width: 40mm; /* fixed column width to match header side spacing */
+            top: 4mm;
+            left: 0;
+            width: 42mm;
             height: 22mm;
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            padding-left: 0;
         }
 
         .company-logo-top img {
             max-width: 100%;
-            height: 22mm; /* explicit height to keep consistent alignment */
+            max-height: 22mm;
             object-fit: contain;
         }
 
-        /* center name constrained between side columns (8mm padding + 40mm side) = 48mm offset */
         .company-name {
             position: absolute;
-            left: 48mm;
-            right: 48mm;
-            top: 50%;
-            transform: translateY(-50%);
-            text-align: center;
-            font-size: 14pt; /* slightly smaller and more compact to match reference */
-            font-weight: 700;
-            padding: 0 4mm;
-            line-height: 1.05;
-            word-break: break-word;
-            max-height: 28mm;
-            z-index: 25; /* above logo and badge */
-            white-space: normal;
+            left: 45mm;
+            top: 4mm;
+            width: 100mm;
+            height: 22mm;
+            display: table;
+            table-layout: fixed;
             overflow: hidden;
         }
 
-        /* absolutely position right badge inside header */
+        .company-name span {
+            display: table-cell;
+            width: 100mm;
+            height: 22mm;
+            vertical-align: middle;
+            text-align: center;
+            font-weight: 700;
+            line-height: 1.1;
+            word-break: break-word;
+            padding-top: 0.5mm;
+        }
+
         .stand-badge-top {
             position: absolute;
-            right: 8mm; /* inside .stand-inner padding */
-            top: 50%;
-            transform: translateY(-50%);
-            width: 40mm; /* fixed column width */
+            top: 0;
+            right: 0;
+            width: 30mm;
             height: 30mm;
             display: flex;
             align-items: center;
             justify-content: flex-end;
         }
 
-        .stand-badge-top > .badge-inner {
+        .badge-circle {
+            position: relative;
             width: 30mm;
             height: 30mm;
             border-radius: 50%;
-            background-color: #F39C12;
+            background: #F39C12;
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14pt;
-            font-weight: 800;
-            color: #ffffff;
-            text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+        }
+
+        .badge-circle span {
+            position: absolute;
+            inset: 0;
+            display: block;
+            width: 30mm;
+            height: 30mm;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 56pt;
+            font-weight: 900;
+            line-height: 30mm;
+            text-align: center;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum" 1, "lnum" 1;
+            padding-top: 1mm;
         }
 
         .educations {
             position: absolute;
-            top: 68mm; /* push the education stack further down to avoid overlapping header */
+            top: 40mm;
             left: 0;
             right: 0;
-            bottom: 36mm;
-            display: grid;
-            grid-template-rows: repeat(7, 40mm); /* taller rows for a more prominent look */
-            gap: 18mm; /* larger spacing between blocks to match reference */
-            align-items: center;
-            justify-items: center;
-            align-content: center; /* center the whole column inside the available space */
-            overflow: visible;
-            padding: 0 18mm; /* wider side padding */
+            height: 189mm;
         }
 
         .education-slot {
-            width: 92%;
-            height: 40mm; /* larger visual height */
+            position: absolute;
+            left: 8mm;
+            width: 174mm;
+            height: 21mm;
             border-radius: 10mm;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 32pt;
-            font-weight: 900;
-            color: #FFFFFF;
-            /* stronger multi-layer text-shadow + subtle white outline via webkit-text-stroke */
-            -webkit-text-stroke: 2px #ffffff;
-            text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff, 0 10px 18px rgba(0,0,0,0.35);
-            box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
-
+            display: table;
+            table-layout: fixed;
             text-align: center;
-            padding: 0 10mm; /* horizontal padding */
+            font-size: 22pt;
+            font-weight: 800;
+            color: #ffffff;
             line-height: 1;
-            word-break: break-word;
             overflow: hidden;
+            box-shadow: 0 3mm 6mm rgba(0, 0, 0, 0.16);
+        }
+
+        .education-slot span {
+            display: table-cell;
+            width: 100%;
+            height: 21mm;
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 8mm;      /* keep side spacing inside text box */
+            padding-top: 0.5mm;  /* small optical adjustment */
         }
 
         .education-missing {
-            background-color: transparent;
-            border: none;
-            color: transparent;
+            position: absolute;
+            left: 8mm;
+            width: 174mm;
+            height: 21mm;
+            border-radius: 10mm;
+            background: transparent;
             box-shadow: none;
-            height: 40mm; /* preserve the same height as visible slots */
         }
 
         .footer {
             position: absolute;
-            bottom: 6mm; /* respect .stand-inner bottom padding */
-            /* span the full content width inside .stand-inner (which already has padding) */
             left: 0;
             right: 0;
-            height: 28mm;
-            min-height: 28mm;
-            display: grid;
-            grid-template-columns: 30mm 1fr 30mm; /* left badge, center logo, right company logo */
-            align-items: center;
-            gap: 6mm;
-            z-index: 20; /* keep footer above educations */
+            bottom: 0;
+            height: 30mm;
         }
 
         .stand-badge-bottom {
-            width: 30mm;
-            height: 30mm;
-            min-height: 30mm;
+            position: absolute;
+            left: 0;
+            top: 2mm;
+            width: 26mm;
+            height: 26mm;
+        }
+
+        .badge-circle-bottom {
+            position: relative;
+            width: 26mm;
+            height: 26mm;
             border-radius: 50%;
-            background-color: #F39C12;
+            background: #F39C12;
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12pt;
-            font-weight: 800;
-            color: #ffffff;
-            text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
-            justify-self: start; /* left cell */
+            overflow: hidden;
+        }
+
+        .badge-circle-bottom span {
+            position: absolute;
+            inset: 0;
+            display: block;
+            width: 26mm;
+            height: 26mm;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 44pt;
+            font-weight: 900;
+            line-height: 26mm;
+            text-align: center;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum" 1, "lnum" 1;
+            padding-top: 1mm;
         }
 
         .footer-center-logo {
-            height: 90%;
-            min-height: 90%;
+            position: absolute;
+            left: 69mm;
+            top: 5mm;
+            width: 52mm;
+            height: 20mm;
             display: flex;
             align-items: center;
             justify-content: center;
-            justify-self: center;
         }
 
         .footer-center-logo img {
-            max-height: 100%;
-            height: 22mm;
+            max-width: 100%;
+            max-height: 20mm;
             object-fit: contain;
+            display: block;
+            transform: translateX(1.5mm);
         }
 
-
         .company-logo-bottom {
-            width: 30mm;
-            height: 22mm;
-            min-height: 22mm;
+            position: absolute;
+            right: 0;
+            top: 5mm;
+            width: 32mm;
+            height: 20mm;
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            justify-self: end; /* right cell */
         }
 
         .company-logo-bottom img {
-            max-width: 100%;
-            height: 22mm; /* explicit height to match top logo */
-            object-fit: contain;
+            max-height: 20mm;
+            width: auto;
+            height: auto;
+            display: block;
+            margin-left: auto;
         }
 
-        /* Debug helpers (visible only with ?debuglayout) */
-        .debug-overlay {
+        .debug-box {
             position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
+            border: 0.3mm dashed rgba(255, 0, 0, 0.55);
             pointer-events: none;
-            z-index: 9999;
         }
-
-        .debug-border {
+        .debug-center-line-horizontal {
             position: absolute;
-            border: 1px dashed rgba(255,0,0,0.7);
+            height: 0;
+            border-top: 0.3mm dashed rgba(0, 0, 255, 0.7);
             pointer-events: none;
         }
 
-        .debug-panel {
+        .debug-center-line-vertical {
             position: absolute;
-            right: 6mm;
-            top: 6mm;
-            background: rgba(255,255,255,0.95);
-            color: #000;
-            font-size: 8pt;
-            padding: 6px;
-            border-radius: 4px;
-            max-width: 80mm;
-            z-index: 10000;
-            pointer-events: auto;
-        }
-
-        .debug-row-overlay {
-            position: absolute;
-            left: 18mm; /* match education side padding */
-            right: 18mm;
-            height: 40mm;
-            border-radius: 10mm;
-            opacity: 0.15;
-            pointer-events: none;
-            box-shadow: none;
-            z-index: 9980;
-        }
-        /* Lines-only debug helpers (no fill, only outlines) */
-        .debug-row-line {
-            position: absolute;
-            left: 18mm;
-            right: 18mm;
-            height: 40mm;
-            border-radius: 10mm;
-            border: 2px dashed rgba(0,0,0,0.35);
-            background: transparent;
-            pointer-events: none;
-            z-index: 9997;
-        }
-
-        .debug-center-line {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
             width: 0;
-            border-left: 1px dashed rgba(200,0,0,0.6);
-            z-index: 9999;
+            border-left: 0.3mm dashed rgba(0, 0, 255, 0.7);
+            pointer-events: none;
+        }
+
+        .debug-badge-span {
+            position: absolute;
+            inset: 0;
+            border: 0.3mm dashed rgba(0, 180, 0, 0.7);
+            pointer-events: none;
+        }
+        .debug-education-text-box {
+            position: absolute;
+            inset: 0;
+            border: 0.3mm dashed rgba(0, 180, 0, 0.7);
+            pointer-events: none;
+        }
+        .debug-footer-inner-box {
+            position: absolute;
+            inset: 0;
+            border: 0.3mm dashed rgba(0, 180, 0, 0.7);
             pointer-events: none;
         }
     </style>
@@ -326,10 +318,7 @@
         }
 
         $staticLogoPath = public_path('images/bedrijvendag-logo.png');
-
-        $staticLogo = file_exists($staticLogoPath)
-            ? 'file://' . $staticLogoPath
-            : null;
+        $staticLogo = file_exists($staticLogoPath) ? 'file://' . $staticLogoPath : null;
 
         $allEducations = \App\Models\Education::query()
             ->whereNotNull('name')
@@ -345,151 +334,171 @@
                 ->all()
             : [];
 
-        // Prepare company display name and an adaptive font-size to avoid overflow
         $companyName = trim($company?->name ?? 'Geen bedrijf');
         $companyNameLength = mb_strlen($companyName);
-        if ($companyNameLength <= 30) {
-            $companyNameFont = '14pt';
-        } elseif ($companyNameLength <= 50) {
-            $companyNameFont = '12pt';
+
+        if ($companyNameLength <= 26) {
+            $companyNameFont = '16pt';
+        } elseif ($companyNameLength <= 42) {
+            $companyNameFont = '13pt';
         } else {
-            $companyNameFont = '10pt';
+            $companyNameFont = '11pt';
         }
 
-        // Build a debug array for educations so we can re-use the computed values
-        $educationDebug = [];
-        foreach ($allEducations as $edu) {
-            $has = in_array((int) $edu->id, $companyEducationIds, true);
-            $bg = filled($edu->color) ? $edu->color : '#CCCCCC';
-            $norm = strtoupper($bg);
-            $tc = '#FFFFFF';
-            $ts = '-1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff, 0 6px 10px rgba(0,0,0,0.35)';
-            if ($norm === '#99FFFF') {
-                $tc = '#1a2a3a';
-                $ts = '0 0 8px rgba(255, 255, 255, 0.8)';
+        $slotTopPositions = [
+            0,
+            28,
+            56,
+            84,
+            112,
+            140,
+            168,
+        ];
+
+        $educationSlots = [];
+
+        foreach ($allEducations as $index => $education) {
+            $hasEducation = in_array((int) $education->id, $companyEducationIds, true);
+            $backgroundColor = filled($education->color) ? $education->color : '#CCCCCC';
+            $normalizedColor = strtoupper($backgroundColor);
+            $textColor = '#FFFFFF';
+
+            if ($normalizedColor === '#99FFFF') {
+                $textColor = '#1A2A3A';
             }
-            $educationDebug[] = [
-                'id' => $edu->id,
-                'name' => $edu->name,
-                'has' => $has,
-                'bg' => $bg,
-                'norm' => $norm,
-                'tc' => $tc,
-                'ts' => $ts,
+
+            $educationSlots[] = [
+                'name' => $education->name,
+                'has' => $hasEducation,
+                'background' => $backgroundColor,
+                'text_color' => $textColor,
+                'top' => $slotTopPositions[$index] ?? 0,
             ];
         }
     @endphp
 
-    @if(request()->has('debugpaths'))
-        <pre style="font-size:10pt; color:#000;">
-Company logo DB field: {{ $company?->logo_path ?? $company?->logo ?? 'N/A' }}
-Company Logo Path: {{ $companyLogo }}
-Exists: {{ $companyLogo ? 'YES' : 'NO' }}
-Static Logo Path: {{ $staticLogo }}
-Exists: {{ $staticLogo ? 'YES' : 'NO' }}
-Storage Dir: {{ public_path('storage/logos') }}
-Static logo file exists: {{ file_exists(str_replace('file://', '', $staticLogo ?? '')) ? 'YES' : 'NO' }}
-        </pre>
-    @endif
-
     <div class="stand-page">
-        <div class="stand-inner">
-            <div class="header">
-                <div class="header-inner">
-                    <div class="company-logo-top">
-                        @if($companyLogo)
-                            <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
+        <div class="header">
+            <div class="company-logo-top">
+                @if($companyLogo)
+                    <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
+                @endif
+            </div>
+
+            <div class="company-name" style="font-size: {{ $companyNameFont }};">
+                <span>{{ $companyName }}</span>
+            </div>
+
+            <div class="stand-badge-top">
+                <div class="badge-circle">
+                    <span>{{ $standNumber }}</span>
+
+                    @if(request()->boolean('debuglayout'))
+                        <div class="debug-badge-span"></div>
+                        <div class="debug-center-line-horizontal" style="top: 15mm; left: 0; width: 30mm;"></div>
+                        <div class="debug-center-line-vertical" style="left: 15mm; top: 0; height: 30mm;"></div>
+                    @endif
+                </div>
+            </div>
+
+            @if(request()->boolean('debuglayout'))
+                {{-- Header box --}}
+                <div class="debug-box" style="top: 0; left: 0; right: 0; height: 30mm;"></div>
+
+                {{-- Header center lines --}}
+                <div class="debug-center-line-horizontal" style="top: 15mm; left: 0; right: 0;"></div>
+                <div class="debug-center-line-vertical" style="left: 50%; top: 0; height: 30mm;"></div>
+
+                {{-- Logo box --}}
+                <div class="debug-box" style="top: 4mm; left: 0; width: 42mm; height: 22mm;"></div>
+
+                {{-- Company name box --}}
+                <div class="debug-box" style="top: 4mm; left: 45mm; width: 100mm; height: 22mm;"></div>
+
+                {{-- Badge box --}}
+                <div class="debug-box" style="top: 0; right: 0; width: 30mm; height: 30mm;"></div>
+            @endif
+        </div>
+
+        <div class="educations">
+            @foreach($educationSlots as $slot)
+                @if($slot['has'])
+                    <div
+                        class="education-slot"
+                        style="top: {{ $slot['top'] }}mm; background: {{ $slot['background'] }}; color: {{ $slot['text_color'] }};"
+                    >
+                        <span>{{ $slot['name'] }}</span>
+
+                        @if(request()->boolean('debuglayout'))
+                            <div class="debug-education-text-box"></div>
+                            <div class="debug-center-line-horizontal" style="top: 10.5mm; left: 0; right: 0;"></div>
+                            <div class="debug-center-line-vertical" style="left: 50%; top: 0; height: 21mm;"></div>
                         @endif
                     </div>
+                @else
+                    <div class="education-missing" style="top: {{ $slot['top'] }}mm;"></div>
+                @endif
+            @endforeach
+        </div>
 
-                    <div class="company-name" title="{{ $companyName }}" style="font-size: {{ $companyNameFont }};">
-                        {{ $companyName }}
-                    </div>
+        @if(request()->boolean('debuglayout'))
+            <div class="debug-box" style="top: 40mm; left: 0; right: 0; height: 189mm;"></div>
+            <div class="debug-center-line-horizontal" style="top: 134.5mm; left: 0; right: 0;"></div>
+            <div class="debug-center-line-vertical" style="left: 50%; top: 40mm; height: 189mm;"></div>
 
-                    <div class="stand-badge-top">
-                        <div class="badge-inner">{{ $standNumber }}</div>
-                    </div>
+            @foreach($educationSlots as $slot)
+                <div class="debug-box" style="top: {{ 40 + $slot['top'] }}mm; left: 8mm; width: 174mm; height: 21mm;"></div>
+            @endforeach
+        @endif
+
+        @if(request()->boolean('debuglayout'))
+            <div class="debug-box" style="left: 0; right: 0; bottom: 0; height: 30mm;"></div>
+            <div class="debug-center-line-horizontal" style="top: 262mm; left: 0; right: 0;"></div>
+            <div class="debug-center-line-vertical" style="left: 50%; top: 247mm; height: 30mm;"></div>
+
+            <div class="debug-box" style="left: 0; top: 249mm; width: 26mm; height: 26mm;"></div>
+            <div class="debug-box" style="left: 69mm; top: 252mm; width: 52mm; height: 20mm;"></div>
+            <div class="debug-box" style="right: 0; top: 252mm; width: 32mm; height: 20mm;"></div>
+        @endif
+
+        <div class="footer">
+            <div class="stand-badge-bottom">
+                <div class="badge-circle-bottom">
+                    <span>{{ $standNumber }}</span>
+
+                    @if(request()->boolean('debuglayout'))
+                        <div class="debug-footer-inner-box"></div>
+                        <div class="debug-center-line-horizontal" style="top: 13mm; left: 0; width: 26mm;"></div>
+                        <div class="debug-center-line-vertical" style="left: 13mm; top: 0; height: 26mm;"></div>
+                    @endif
                 </div>
             </div>
 
-            <div class="educations">
-                @foreach($educationDebug as $idx => $debug)
-                    @php
-                        $rowTop = $idx * (40 + 18) + 0; /* row height + gap; positioned relative inside .educations container */
-                    @endphp
-                    @if($debug['has'])
-                        <div
-                            class="education-slot"
-                            style="background: linear-gradient(rgba(255,255,255,0.16), rgba(0,0,0,0.06)), {{ $debug['bg'] }}; color: {{ $debug['tc'] }}; text-shadow: {{ $debug['ts'] }}; -webkit-text-stroke: 2px #ffffff;"
-                        >
-                            {{ $debug['name'] }}
-                        </div>
-                    @else
-                        <div class="education-missing"></div>
-                    @endif
-                @endforeach
+            <div class="footer-center-logo">
+                @if($staticLogo)
+                    <img src="{{ $staticLogo }}" alt="ATIx Bedrijvendag">
+                @endif
+
+                @if(request()->boolean('debuglayout'))
+                    <div class="debug-footer-inner-box"></div>
+                    <div class="debug-center-line-horizontal" style="top: 10mm; left: 0; width: 52mm;"></div>
+                    <div class="debug-center-line-vertical" style="left: 26mm; top: 0; height: 20mm;"></div>
+                @endif
             </div>
 
-            @php $dbgMode = request()->get('debuglayout'); @endphp
-            @if($dbgMode === 'lines')
-                <div class="debug-overlay">
-                    {{-- header/footer outlines only --}}
-                            <div class="debug-border" style="top:0; left:0; right:0; height:28mm; border-color: rgba(0,128,0,0.6);"></div>
-                            <div class="debug-border" style="bottom:0; left:0; right:0; height:28mm; border-color: rgba(0,128,128,0.6);"></div>
-                    <div class="debug-center-line"></div>
+            <div class="company-logo-bottom">
+                @if($companyLogo)
+                    <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
+                @endif
 
-                    {{-- per-row dashed outlines --}}
-                    @foreach($educationDebug as $idx => $debug)
-                        @php $rowTopMm = 68 + $idx * (40 + 18); @endphp
-                        <div class="debug-row-line" style="top: {{ $rowTopMm }}mm;"></div>
-                    @endforeach
-                </div>
-            @elseif(request()->has('debuglayout'))
-                <div class="debug-overlay">
-                    {{-- header/f footer bounds --}}
-                    <div class="debug-border" style="top:0; left:0; right:0; height:28mm; border-color: rgba(0,128,0,0.6);"></div>
-                    <div class="debug-border" style="bottom:0; left:0; right:0; height:28mm; border-color: rgba(0,128,128,0.6);"></div>
-
-                    {{-- per-row overlays positioned inside the educations area --}}
-                    @foreach($educationDebug as $idx => $debug)
-                        @php
-                            $rowTopMm = 68 + $idx * (40 + 18); // top offset in mm relative to page
-                        @endphp
-                        <div class="debug-row-overlay" style="top: {{ $rowTopMm }}mm; background: {{ $debug['bg'] }}; opacity: 0.18; border: 1px solid rgba(0,0,0,0.15);">
-                            <div style="position:absolute; left:6mm; top:4mm; font-size:8pt; color:#000; background:rgba(255,255,255,0.85); padding:2px 4px; border-radius:3px;">#{{ $debug['id'] }} {{ $debug['has'] ? 'HAS' : 'MISS' }}</div>
-                        </div>
-                    @endforeach
-                </div>
-
-                <div class="debug-panel">
-                    <div><strong>Company</strong>: {{ $companyName }}</div>
-                    <div><strong>Font</strong>: {{ $companyNameFont }}</div>
-                    <div><strong>Stand #</strong>: {{ $standNumber }}</div>
-                    <div><strong>CompanyLogo</strong>: {{ $companyLogo ?? 'N/A' }}</div>
-                    <div><strong>StaticLogo</strong>: {{ $staticLogo ?? 'N/A' }}</div>
-                    <div style="margin-top:6px"><strong>Educations (debug)</strong>:</div>
-                    <pre style="font-size:8pt; max-height:80mm; overflow:auto">{{ json_encode($educationDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
-                </div>
-            @endif
-
-            <div class="footer">
-                <div class="stand-badge-bottom">
-                    {{ $standNumber }}
-                </div>
-
-                <div class="footer-center-logo">
-                    @if($staticLogo)
-                        <img src="{{ $staticLogo }}" alt="ATIx Bedrijvendag">
-                    @endif
-                </div>
-
-                <div class="company-logo-bottom">
-                    @if($companyLogo)
-                        <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
-                    @endif
-                </div>
+                @if(request()->boolean('debuglayout'))
+                    <div class="debug-footer-inner-box"></div>
+                    <div class="debug-center-line-horizontal" style="top: 10mm; left: 0; width: 32mm;"></div>
+                    <div class="debug-center-line-vertical" style="left: 16mm; top: 0; height: 20mm;"></div>
+                @endif
             </div>
         </div>
+
     </div>
 @endforeach
 
