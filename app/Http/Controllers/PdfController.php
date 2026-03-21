@@ -40,6 +40,15 @@ class PdfController extends Controller
             ->setOption('zoom', '1.0')
             ->save($path);
 
+        $showInline = config('app.pdf_inline', false);
+
+        if ($showInline) {
+            return response()->file($path, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="stands.pdf"',
+            ]);
+        }
+
         return response()->download($path, 'stands.pdf')->deleteFileAfterSend(true);
     }
 }
