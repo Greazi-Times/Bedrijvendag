@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'pdf_inline' => env('PDF_INLINE', false),
+
 ];
