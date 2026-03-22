@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Filament\Resources\NewsletterSubscribers;
+
+use App\Filament\Resources\NewsletterSubscribers\Pages\CreateNewsletterSubscriber;
+use App\Filament\Resources\NewsletterSubscribers\Pages\EditNewsletterSubscriber;
+use App\Filament\Resources\NewsletterSubscribers\Pages\ListNewsletterSubscribers;
+use App\Filament\Resources\NewsletterSubscribers\Tables\NewsletterSubscribersTable;
+use App\Models\NewsletterSubscriber;
+use BackedEnum;
+use Filafly\Icons\Phosphor\Enums\Phosphor;
+use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
+
+class NewsletterSubscriberResource extends Resource
+{
+    protected static ?string $model = NewsletterSubscriber::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Phosphor::Newspaper;
+
+    protected static ?string $recordTitleAttribute = 'email';
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return false;
+    }
+
+    public static function table(Table $table): Table
+    {
+        return NewsletterSubscribersTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListNewsletterSubscribers::route('/'),
+        ];
+    }
+}
