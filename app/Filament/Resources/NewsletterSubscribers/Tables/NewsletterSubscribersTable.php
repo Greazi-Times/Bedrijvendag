@@ -35,7 +35,7 @@ class NewsletterSubscribersTable
                                 'subscribed_at',
                             ])
                             ->withWriterType(Excel::XLSX)
-                            ->withFilename('newsletter-subscribers-' . now()->format('Y-m-d')),
+                            ->withFilename('newsletter-subscribers-'.now()->format('Y-m-d')),
                     ]),
             ])
             ->actions([
