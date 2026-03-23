@@ -360,7 +360,7 @@ onUnmounted(() => {
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2">
                     <span class="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">
-                      Stand {{ selectedStand.code }}
+                      Stand {{ selectedStand.stand_type === 'partner' ? `P${String(selectedStand.code).replace(/^P/i, '')}` : String(selectedStand.code).replace(/^P/i, '') }}
                     </span>
                                     </div>
                                     <div class="mt-1 truncate text-sm font-medium text-black dark:text-white">
@@ -528,7 +528,7 @@ onUnmounted(() => {
                                 {{ selectedCompany.company_name ?? 'Geen organisatie ingesteld' }}
                             </h2>
                             <div class="mt-2 inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border">
-                                Stand {{ selectedCompany.code }}
+                                Stand {{ selectedCompany.stand_type === 'partner' ? `P${String(selectedCompany.code).replace(/^P/i, '')}` : String(selectedCompany.code).replace(/^P/i, '') }}
                             </div>
                         </div>
 
