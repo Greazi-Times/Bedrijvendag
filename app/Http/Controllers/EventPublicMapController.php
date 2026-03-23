@@ -50,7 +50,7 @@ class EventPublicMapController extends Controller
                         'company_name' => $entity?->name,
                         'company_logo' => $isCompany
                             ? ($company?->logo_path ? Storage::url($company->logo_path) : null)
-                            : (data_get($partner, 'logo_path') ? Storage::url(data_get($partner, 'logo_path')) : null),
+                            : (data_get($partner, 'image') ? Storage::url(data_get($partner, 'image')) : null),
                         'company_description' => $entity?->description,
                         'company_website_url' => $entity?->website_url,
                         'company_educations' => $isCompany
