@@ -13,12 +13,12 @@ class EventPublicMapController extends Controller
         $event = Event::query()
             ->nextOrLatest()
             ->with([
-                'companies' => fn ($q) => $q
+                'stands.company' => fn ($q) => $q
                     ->with([
                         'educations:id,name',
                         'sectors:id,name',
-                    ])
-                    ->orderBy('name'),
+                    ]),
+                'stands.partner',
             ])
             ->firstOrFail();
 
@@ -32,18 +32,38 @@ class EventPublicMapController extends Controller
                 'title' => $event->name,
                 'image_url' => $event->map_path ? Storage::url($event->map_path) : '',
             ],
-            'stands' => $event->companies->map(fn ($company) => [
-                'id' => (string) $company->id,
-                'code' => (string) ($company->pivot->stand_number ?? '—'),
-                'company_name' => $company->name,
-                'company_logo' => $company->logo_path ? Storage::url($company->logo_path) : null,
-                'company_description' => $company->description,
-                'company_website_url' => $company->website_url,
-                'company_educations' => $company->educations->pluck('name')->filter()->values()->all(),
-                'company_sectors' => $company->sectors->pluck('name')->filter()->values()->all(),
-                'x_percent' => $company->pivot->x_percent !== null ? (float) $company->pivot->x_percent : null,
-                'y_percent' => $company->pivot->y_percent !== null ? (float) $company->pivot->y_percent : null,
-            ])->values(),
+            'stands' => $event->stands
+                ->sortBy([
+                    ['type', 'asc'],
+                    ['stand_number', 'asc'],
+                ])
+                ->map(function ($stand) {
+                    $company = $stand->company;
+                    $partner = $stand->partner;
+                    $entity = $company ?? $partner;
+                    $isCompany = $stand->type === 'company';
+
+                    return [
+                        'id' => (string) $stand->id,
+                        'code' => (string) ($stand->stand_number ?? '—'),
+                        'stand_type' => (string) $stand->type,
+                        'company_name' => $entity?->name,
+                        'company_logo' => $isCompany
+                            ? ($company?->logo_path ? Storage::url($company->logo_path) : null)
+                            : (data_get($partner, 'logo_path') ? Storage::url(data_get($partner, 'logo_path')) : null),
+                        'company_description' => $entity?->description,
+                        'company_website_url' => $entity?->website_url,
+                        'company_educations' => $isCompany
+                            ? $company?->educations?->pluck('name')->filter()->values()->all()
+                            : [],
+                        'company_sectors' => $isCompany
+                            ? $company?->sectors?->pluck('name')->filter()->values()->all()
+                            : [],
+                        'x_percent' => $stand->x_percent !== null ? (float) $stand->x_percent : null,
+                        'y_percent' => $stand->y_percent !== null ? (float) $stand->y_percent : null,
+                    ];
+                })
+                ->values(),
             'backHref' => route('home'),
             'enableZoom' => false,
         ]);

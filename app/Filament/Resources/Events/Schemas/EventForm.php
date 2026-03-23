@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Events\Schemas;
 
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\FileUpload;
@@ -20,8 +19,15 @@ class EventForm
                 DatePicker::make('date')
                     ->required(),
                 TextInput::make('max_stands')
+                    ->label('Company stands')
                     ->numeric()
                     ->minValue(1)
+                    ->nullable(),
+                TextInput::make('partner_stand_count')
+                    ->label('Partner stands')
+                    ->numeric()
+                    ->minValue(0)
+                    ->default(0)
                     ->nullable(),
                 RichEditor::make('description')
                     ->label('Description')
@@ -54,10 +60,6 @@ class EventForm
                     ->disk('public')
                     ->imageEditor()
                     ->nullable(),
-                Select::make('partners')
-                    ->relationship('partners', 'name')
-                    ->multiple()
-                    ->preload(),
                 TextInput::make('google_photos_album_url')
                     ->url()
                     ->default(null),
