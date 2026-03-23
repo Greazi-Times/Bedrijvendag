@@ -8,6 +8,7 @@ import AppHeader from '@/components/AppHeader.vue';
 type Stand = {
     id: number | string
     code: string // stand number
+    stand_type?: 'company' | 'partner' | null
     company_name?: string | null
     company_logo?: string | null
     company_description?: string | null
@@ -122,6 +123,11 @@ const filteredStands = computed(() => {
             return sec.some((x) => names.includes(x));
         })
         .sort((a, b) => {
+            const aTypeOrder = a.stand_type === 'partner' ? 0 : 1;
+            const bTypeOrder = b.stand_type === 'partner' ? 0 : 1;
+
+            if (aTypeOrder !== bTypeOrder) return aTypeOrder - bTypeOrder;
+
             const aNum = parseInt(String(a.code).replace(/[^0-9]/g, '')) || 0;
             const bNum = parseInt(String(b.code).replace(/[^0-9]/g, '')) || 0;
 
@@ -274,7 +280,7 @@ onUnmounted(() => {
                     </h1>
 
                     <p class="mt-1 text-sm text-muted-foreground">
-                        Zoek je stand op de plattegrond. Klik op een markering of selecteer een stand uit de lijst.
+                        Zoek je stand, bedrijf of partner op de plattegrond. Klik op een markering of selecteer een stand uit de lijst.
                     </p>
                 </div>
 
@@ -358,7 +364,7 @@ onUnmounted(() => {
                     </span>
                                     </div>
                                     <div class="mt-1 truncate text-sm font-medium text-black dark:text-white">
-                                        {{ selectedStand.company_name ?? 'Company not set' }}
+                                        {{ selectedStand.company_name ?? 'Geen organisatie ingesteld' }}
                                     </div>
                                 </div>
 
@@ -386,13 +392,13 @@ onUnmounted(() => {
                             <input
                                 v-model="query"
                                 type="text"
-                                placeholder="Zoek op standnummer of bedrijfsnaam…"
+                                placeholder="Zoek op standnummer, bedrijfsnaam of partner…"
                                 class="w-full bg-transparent text-sm text-black placeholder:text-muted-foreground focus:outline-none dark:text-white"
                             />
                         </div>
 
                         <div class="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{{ filteredStands.length }} standplaatsen</span>
+                            <span>{{ filteredStands.length }} stands</span>
                             <button
                                 v-if="query"
                                 type="button"
@@ -468,7 +474,7 @@ onUnmounted(() => {
                                         class="flex h-10 min-w-10 shrink-0 items-center justify-center rounded-full px-2 text-sm font-semibold text-foreground"
                                         :class="index % 2 === 0 ? 'bg-primary/20' : 'bg-secondary/25'"
                                     >
-                                        {{ stand.code }}
+                                        {{ stand.stand_type === 'partner' ? `P${String(stand.code).replace(/^P/i, '')}` : String(stand.code).replace(/^P/i, '') }}
                                     </div>
 
                                     <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-stroke bg-white dark:border-strokedark dark:bg-blacksection/70">
@@ -488,7 +494,7 @@ onUnmounted(() => {
 
                                     <div class="min-w-0 flex-1">
                                         <div class="truncate text-sm font-medium text-black dark:text-white">
-                                            {{ stand.company_name ?? 'Company not set' }}
+                                            {{ stand.company_name ?? 'Geen organisatie ingesteld' }}
                                         </div>
                                     </div>
                                 </button>
@@ -517,9 +523,9 @@ onUnmounted(() => {
                 <div class="absolute left-1/2 top-1/2 flex max-h-[80vh] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl bg-background shadow-2xl ring-1 ring-border">
                     <div class="flex shrink-0 items-center justify-between gap-4 border-b border-border px-6 py-5">
                         <div class="min-w-0">
-                            <div class="text-sm font-semibold text-muted-foreground">Bedrijf</div>
+                            <div class="text-sm font-semibold text-muted-foreground">{{ selectedCompany.stand_type === 'partner' ? 'Partner' : 'Bedrijf' }}</div>
                             <h2 class="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground">
-                                {{ selectedCompany.company_name ?? 'Company not set' }}
+                                {{ selectedCompany.company_name ?? 'Geen organisatie ingesteld' }}
                             </h2>
                             <div class="mt-2 inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border">
                                 Stand {{ selectedCompany.code }}
