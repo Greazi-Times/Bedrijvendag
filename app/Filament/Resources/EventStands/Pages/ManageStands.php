@@ -4,8 +4,9 @@ namespace App\Filament\Resources\EventStands\Pages;
 
 use App\Filament\Resources\EventStands\EventStandResource;
 use App\Models\Company;
-use App\Models\CompanyEvent;
+use App\Models\EventStand;
 use App\Models\Event;
+use App\Models\Partner;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\Select;
@@ -49,6 +50,26 @@ class ManageStands extends Page implements HasForms, HasTable
 
     public ?float $markerY = null;
 
+    public function mount(): void
+    {
+        if ($this->selectedEventId) {
+            $this->syncStandRowsForSelectedEvent();
+        }
+    }
+
+    public function updatedSelectedEventId($state): void
+    {
+        $this->selectedEventId = filled($state) ? (int) $state : null;
+
+        if (! $this->selectedEventId) {
+            $this->resetTable();
+            return;
+        }
+
+        $this->syncStandRowsForSelectedEvent();
+        $this->resetTable();
+    }
+
     protected function getSelectedEvent(): ?Event
     {
         return $this->selectedEventId ? Event::find($this->selectedEventId) : null;
@@ -65,7 +86,7 @@ class ManageStands extends Page implements HasForms, HasTable
         return Storage::url($event->map_path);
     }
 
-    public function setMarkerForStand(int $companyEventId, float $xPercent, float $yPercent): void
+    public function setMarkerForStand(int $eventStandId, float $xPercent, float $yPercent): void
     {
         if (! $this->selectedEventId) {
             return;
@@ -74,8 +95,8 @@ class ManageStands extends Page implements HasForms, HasTable
         $xPercent = max(0, min(100, round($xPercent, 2)));
         $yPercent = max(0, min(100, round($yPercent, 2)));
 
-        CompanyEvent::query()
-            ->whereKey($companyEventId)
+        EventStand::query()
+            ->whereKey($eventStandId)
             ->where('event_id', $this->selectedEventId)
             ->update([
                 'x_percent' => $xPercent,
@@ -93,14 +114,14 @@ class ManageStands extends Page implements HasForms, HasTable
         $this->resetTable();
     }
 
-    public function clearMarkerForStand(int $companyEventId): void
+    public function clearMarkerForStand(int $eventStandId): void
     {
         if (! $this->selectedEventId) {
             return;
         }
 
-        CompanyEvent::query()
-            ->whereKey($companyEventId)
+        EventStand::query()
+            ->whereKey($eventStandId)
             ->where('event_id', $this->selectedEventId)
             ->update([
                 'x_percent' => null,
@@ -123,10 +144,15 @@ class ManageStands extends Page implements HasForms, HasTable
                     ->label('Event')
                     ->options(Event::orderBy('date', 'desc')->pluck('name', 'id'))
                     ->live()
-                    ->afterStateUpdated(function (?int $state): void {
-                        $this->selectedEventId = $state;
-                        $this->syncStandRowsForSelectedEvent();
-                        $this->resetTable();
+                    ->afterStateHydrated(function ($state): void {
+                        $this->selectedEventId = filled($state) ? (int) $state : null;
+
+                        if ($this->selectedEventId) {
+                            $this->syncStandRowsForSelectedEvent();
+                        }
+                    })
+                    ->afterStateUpdated(function ($state): void {
+                        $this->updatedSelectedEventId($state);
                     }),
             ]);
     }
@@ -136,13 +162,29 @@ class ManageStands extends Page implements HasForms, HasTable
         return $table
             ->query(fn () => $this->getStandQuery())
             ->columns([
+                TextColumn::make('type')
+                    ->label('Type')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->sortable(),
+
                 TextColumn::make('stand_number')
                     ->label('Stand')
                     ->sortable(),
 
                 TextColumn::make('company.name')
                     ->label('Company')
-                    ->default('—'),
+                    ->default('—')
+                    ->toggleable(),
+
+                TextColumn::make('partner.name')
+                    ->label('Partner')
+                    ->default('—')
+                    ->toggleable(),
+
+                TextColumn::make('assigned_name')
+                    ->label('Assigned to')
+                    ->getStateUsing(fn (EventStand $record): string => $record->company?->name ?? $record->partner?->name ?? '—'),
 
                 TextColumn::make('x_percent')
                     ->label('Marker')
@@ -239,35 +281,87 @@ class ManageStands extends Page implements HasForms, HasTable
                         $this->clearMarkerForStand((int) $record->id);
                     }),
                 Action::make('assign')
-                    ->form([
-                        Select::make('company_id')
-                            ->label('Company')
-                            ->searchable()
-                            ->getSearchResultsUsing(fn (string $search): array => Company::query()
-                                ->where('name', 'like', "%{$search}%")
-                                ->orderBy('name')
-                                ->limit(50)
-                                ->pluck('name', 'id')
-                                ->all()
-                            )
-                            ->getOptionLabelUsing(fn ($value): ?string => $value ? Company::query()->whereKey($value)->value('name') : null
-                            )
-                            ->required(),
-                    ])
-                    ->action(function (array $data, $record) {
-                        $companyId = (int) $data['company_id'];
+                    ->form(function ($record): array {
+                        if ($record->type === 'partner') {
+                            return [
+                                Select::make('partner_id')
+                                    ->label('Partner')
+                                    ->options(fn (): array => Partner::query()
+                                        ->orderBy('name')
+                                        ->pluck('name', 'id')
+                                        ->all()
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->default(fn (EventStand $record): ?int => $record->partner_id)
+                                    ->getSearchResultsUsing(fn (string $search): array => Partner::query()
+                                        ->where('name', 'like', "%{$search}%")
+                                        ->orderBy('name')
+                                        ->limit(50)
+                                        ->pluck('name', 'id')
+                                        ->all()
+                                    )
+                                    ->getOptionLabelUsing(fn ($value): ?string => $value ? Partner::query()->whereKey($value)->value('name') : null)
+                                    ->required(),
+                            ];
+                        }
 
-                        // If the company is already assigned in this event, move it to this stand.
-                        // This respects your unique index (event_id, company_id).
-                        DB::transaction(function () use ($companyId, $record): void {
-                            CompanyEvent::query()
+                        return [
+                            Select::make('company_id')
+                                ->label('Company')
+                                ->options(fn (): array => Company::query()
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id')
+                                    ->all()
+                                )
+                                ->searchable()
+                                ->preload()
+                                ->default(fn (EventStand $record): ?int => $record->company_id)
+                                ->getSearchResultsUsing(fn (string $search): array => Company::query()
+                                    ->where('name', 'like', "%{$search}%")
+                                    ->orderBy('name')
+                                    ->limit(50)
+                                    ->pluck('name', 'id')
+                                    ->all()
+                                )
+                                ->getOptionLabelUsing(fn ($value): ?string => $value ? Company::query()->whereKey($value)->value('name') : null)
+                                ->required(),
+                        ];
+                    })
+                    ->action(function (array $data, EventStand $record) {
+                        DB::transaction(function () use ($data, $record): void {
+                            if ($record->type === 'partner') {
+                                $partnerId = (int) $data['partner_id'];
+
+                                EventStand::query()
+                                    ->where('event_id', $this->selectedEventId)
+                                    ->where('type', 'partner')
+                                    ->where('partner_id', $partnerId)
+                                    ->where('id', '!=', $record->id)
+                                    ->update(['partner_id' => null]);
+
+                                $record->update([
+                                    'company_id' => null,
+                                    'partner_id' => $partnerId,
+                                    'type' => 'partner',
+                                ]);
+
+                                return;
+                            }
+
+                            $companyId = (int) $data['company_id'];
+
+                            EventStand::query()
                                 ->where('event_id', $this->selectedEventId)
+                                ->where('type', 'company')
                                 ->where('company_id', $companyId)
                                 ->where('id', '!=', $record->id)
                                 ->update(['company_id' => null]);
 
                             $record->update([
                                 'company_id' => $companyId,
+                                'partner_id' => null,
+                                'type' => 'company',
                             ]);
                         });
 
@@ -277,10 +371,11 @@ class ManageStands extends Page implements HasForms, HasTable
                 Action::make('remove')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(function ($record) {
+                    ->action(function (EventStand $record) {
                         DB::transaction(function () use ($record): void {
                             $record->update([
                                 'company_id' => null,
+                                'partner_id' => null,
                             ]);
                         });
 
@@ -292,11 +387,14 @@ class ManageStands extends Page implements HasForms, HasTable
     protected function getStandQuery(): Builder
     {
         if (! $this->selectedEventId) {
-            return CompanyEvent::query()->whereRaw('1 = 0');
+            return EventStand::query()->whereRaw('1 = 0');
         }
 
-        return CompanyEvent::query()
+        return EventStand::query()
+            ->with(['company', 'partner'])
             ->where('event_id', $this->selectedEventId)
+            ->orderByRaw("CASE WHEN type = 'company' THEN 0 ELSE 1 END")
+            ->orderByRaw('CAST(stand_number AS UNSIGNED)')
             ->orderBy('stand_number');
     }
 
@@ -312,22 +410,42 @@ class ManageStands extends Page implements HasForms, HasTable
             return;
         }
 
-        $max = (int) $event->max_stands;
+        $this->syncCompanyStandRows((int) ($event->max_stands ?? 0));
+        $this->syncPartnerStandRows((int) ($event->partner_stand_count ?? 0));
+    }
 
-        if ($max < 1) {
+    protected function syncCompanyStandRows(int $max): void
+    {
+        $this->syncStandRowsByType('company', $max);
+    }
+
+    protected function syncPartnerStandRows(int $max): void
+    {
+        $this->syncStandRowsByType('partner', $max);
+    }
+
+    protected function syncStandRowsByType(string $type, int $max): void
+    {
+        $max = max(0, $max);
+
+        $query = EventStand::query()
+            ->where('event_id', $this->selectedEventId)
+            ->where('type', $type);
+
+        if ($max === 0) {
+            $query->delete();
             return;
         }
 
-        // Delete stands that are now out of range.
-        CompanyEvent::query()
-            ->where('event_id', $this->selectedEventId)
-            ->where('stand_number', '>', $max)
+        $query
+            ->whereRaw('CAST(stand_number AS UNSIGNED) > ?', [$max])
             ->delete();
-        // Create missing stand rows (company_id stays null until assigned).
-        // We only need the existing stand numbers once.
-        $existing = CompanyEvent::query()
+
+        $existing = EventStand::query()
             ->where('event_id', $this->selectedEventId)
+            ->where('type', $type)
             ->pluck('stand_number')
+            ->map(fn ($standNumber) => (string) ((int) $standNumber))
             ->all();
 
         $existing = array_flip($existing);
@@ -336,24 +454,38 @@ class ManageStands extends Page implements HasForms, HasTable
         $chunkSize = 500;
 
         for ($i = 1; $i <= $max; $i++) {
-            if (isset($existing[$i])) {
+            $standNumber = (string) $i;
+
+            if (isset($existing[$standNumber])) {
                 continue;
             }
 
             $chunk[] = [
                 'event_id' => $this->selectedEventId,
-                'stand_number' => $i,
+                'type' => $type,
+                'stand_number' => $standNumber,
                 'company_id' => null,
+                'partner_id' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
 
             if (count($chunk) >= $chunkSize) {
-                CompanyEvent::query()->insertOrIgnore($chunk);
+                EventStand::query()->upsert(
+                    $chunk,
+                    ['event_id', 'type', 'stand_number'],
+                    ['updated_at']
+                );
                 $chunk = [];
             }
         }
 
         if ($chunk !== []) {
-            CompanyEvent::query()->insertOrIgnore($chunk);
+            EventStand::query()->upsert(
+                $chunk,
+                ['event_id', 'type', 'stand_number'],
+                ['updated_at']
+            );
         }
     }
 }

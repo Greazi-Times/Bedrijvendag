@@ -10,10 +10,43 @@ class PdfController extends Controller
     public function standsPdf(Event $event)
     {
         $stands = $event->stands()
-            ->whereNotNull('company_id')
-            ->with(['company.educations'])
-            ->orderBy('stand_number')
-            ->get();
+            ->where(function ($query) {
+                $query->whereNotNull('company_id')
+                    ->orWhereNotNull('partner_id');
+            })
+            ->with([
+                'company.educations',
+                'partner.educations',
+            ])
+            ->get()
+            ->sortBy(function ($stand) {
+                $typeOrder = $stand->type === 'partner' ? 0 : 1;
+                $standNumber = (int) ($stand->stand_number ?? 0);
+
+                return sprintf('%s-%05d', $typeOrder, $standNumber);
+            })
+            ->values()
+            ->map(function ($stand) {
+                $displayName = $stand->company?->name ?? $stand->partner?->name;
+                $displayDescription = $stand->company?->description ?? $stand->partner?->description;
+                $displayWebsiteUrl = $stand->company?->website_url ?? $stand->partner?->website_url;
+                $displayEducations = $stand->company?->educations
+                    ?? $stand->partner?->educations
+                    ?? collect();
+
+                $stand->setAttribute('display_name', $displayName);
+                $stand->setAttribute('display_description', $displayDescription);
+                $stand->setAttribute('display_website_url', $displayWebsiteUrl);
+                $stand->setAttribute('display_educations', $displayEducations);
+                $stand->setAttribute(
+                    'display_stand_number',
+                    $stand->type === 'partner'
+                        ? 'P' . (string) ($stand->stand_number ?? '')
+                        : (string) ($stand->stand_number ?? '')
+                );
+
+                return $stand;
+            });
 
         $fileName = 'stands-'.now()->format('Ymd-His').'.pdf';
         $path = storage_path('app/tmp/'.$fileName);
@@ -25,6 +58,7 @@ class PdfController extends Controller
         SnappyPdf::loadView('pdf.stands', [
             'event' => $event,
             'stands' => $stands,
+            'hasPartnerStands' => $stands->contains(fn ($stand) => $stand->type === 'partner'),
         ])->setOption('enable-local-file-access', true)
             ->setOption('encoding', 'UTF-8')
             ->setOption('page-size', 'A4')

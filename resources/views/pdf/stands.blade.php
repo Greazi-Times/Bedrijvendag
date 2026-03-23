@@ -299,10 +299,17 @@
 @foreach($stands as $stand)
     @php
         $company = $stand->company;
+        $partner = $stand->partner;
+        $entity = $company ?? $partner;
 
-        $standNumber = $stand->stand_number ?? $stand->number ?? '—';
+        $standNumber = $stand->display_stand_number ?? $stand->stand_number ?? $stand->number ?? '—';
 
-        $logoPath = $company?->logo_path ?? $company?->logo ?? null;
+        $logoPath = $company?->logo_path
+            ?? $company?->logo
+            ?? $partner?->logo_path
+            ?? $partner?->logo
+            ?? $partner?->image
+            ?? null;
         $companyLogo = null;
 
         if ($logoPath) {
@@ -334,7 +341,7 @@
                 ->all()
             : [];
 
-        $companyName = trim($company?->name ?? 'Geen bedrijf');
+        $companyName = trim($stand->display_name ?? $entity?->name ?? 'Geen organisatie');
         $companyNameLength = mb_strlen($companyName);
 
         if ($companyNameLength <= 26) {
@@ -344,6 +351,8 @@
         } else {
             $companyNameFont = '11pt';
         }
+
+        $displayEducations = collect($stand->display_educations ?? []);
 
         $slotTopPositions = [
             0,
@@ -358,7 +367,9 @@
         $educationSlots = [];
 
         foreach ($allEducations as $index => $education) {
-            $hasEducation = in_array((int) $education->id, $companyEducationIds, true);
+            $hasEducation = $displayEducations->isNotEmpty()
+                ? $displayEducations->contains(fn ($displayEducation) => (int) data_get($displayEducation, 'id') === (int) $education->id)
+                : in_array((int) $education->id, $companyEducationIds, true);
             $backgroundColor = filled($education->color) ? $education->color : '#CCCCCC';
             $normalizedColor = strtoupper($backgroundColor);
             $textColor = '#FFFFFF';
@@ -381,7 +392,7 @@
         <div class="header">
             <div class="company-logo-top">
                 @if($companyLogo)
-                    <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
+                    <img src="{{ $companyLogo }}" alt="Logo">
                 @endif
             </div>
 
@@ -488,7 +499,7 @@
 
             <div class="company-logo-bottom">
                 @if($companyLogo)
-                    <img src="{{ $companyLogo }}" alt="Bedrijfslogo">
+                    <img src="{{ $companyLogo }}" alt="Logo">
                 @endif
 
                 @if(request()->boolean('debuglayout'))
