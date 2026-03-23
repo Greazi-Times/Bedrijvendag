@@ -13,6 +13,7 @@ class Event extends Model
         'name',
         'date',
         'max_stands',
+        'partner_stand_count',
         'description',
         'header_image_path',
         'map_path',
@@ -22,19 +23,31 @@ class Event extends Model
     protected $casts = [
         'date' => 'date',
         'max_stands' => 'integer',
+        'partner_stand_count' => 'integer',
         'description' => 'array',
     ];
 
     public function companies(): BelongsToMany
     {
-        return $this->belongsToMany(Company::class)
-            ->withPivot('stand_number', 'x_percent', 'y_percent')
+        return $this->belongsToMany(Company::class, 'event_stands', 'event_id', 'company_id')
+            ->wherePivot('type', 'company')
+            ->withPivot('type', 'stand_number', 'x_percent', 'y_percent')
             ->withTimestamps();
     }
 
     public function stands(): HasMany
     {
-        return $this->hasMany(CompanyEvent::class);
+        return $this->hasMany(EventStand::class);
+    }
+
+    public function companyStands(): HasMany
+    {
+        return $this->hasMany(EventStand::class)->where('type', 'company');
+    }
+
+    public function partnerStands(): HasMany
+    {
+        return $this->hasMany(EventStand::class)->where('type', 'partner');
     }
 
     public function borrelEnrollments(): HasMany
@@ -42,9 +55,50 @@ class Event extends Model
         return $this->hasMany(BorrelEnrollment::class);
     }
 
-    public function partners()
+    public function partners(): BelongsToMany
     {
-        return $this->belongsToMany(Partner::class);
+        return $this->belongsToMany(Partner::class, 'event_stands', 'event_id', 'partner_id')
+            ->wherePivot('type', 'partner')
+            ->withPivot('type', 'stand_number', 'x_percent', 'y_percent')
+            ->withTimestamps();
+    }
+
+    public function getNextPartnerStandNumber(): string
+    {
+        $availableNumbers = $this->getAvailablePartnerStandNumbers();
+
+        if ($availableNumbers !== []) {
+            return $availableNumbers[0];
+        }
+
+        $lastNumber = $this->partnerStands()
+            ->pluck('stand_number')
+            ->map(fn (?string $standNumber): int => (int) $standNumber)
+            ->max() ?? 0;
+
+        return (string) ($lastNumber + 1);
+    }
+
+    public function getAvailablePartnerStandNumbers(): array
+    {
+        $count = max(0, (int) ($this->partner_stand_count ?? 0));
+
+        if ($count === 0) {
+            return [];
+        }
+
+        $usedNumbers = $this->partnerStands()
+            ->pluck('stand_number')
+            ->map(fn (?string $standNumber): string => (string) ((int) $standNumber))
+            ->filter()
+            ->values()
+            ->all();
+
+        return collect(range(1, $count))
+            ->map(fn (int $number): string => (string) $number)
+            ->reject(fn (string $standNumber): bool => in_array($standNumber, $usedNumbers, true))
+            ->values()
+            ->all();
     }
 
     public function scopeNextOrLatest(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
@@ -77,7 +131,7 @@ class Event extends Model
                 return;
             }
 
-            DB::table('company_event')
+            DB::table('event_stands')
                 ->where('event_id', $event->id)
                 ->update([
                     'x_percent' => null,

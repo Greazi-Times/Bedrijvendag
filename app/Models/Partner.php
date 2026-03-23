@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Partner extends Model
 {
@@ -10,10 +12,25 @@ class Partner extends Model
         'name',
         'url',
         'image',
+        'description',
     ];
 
-    public function events()
+    public function educations(): BelongsToMany
     {
-        return $this->belongsToMany(Event::class)->withTimestamps();
+        return $this->belongsToMany(Education::class)
+            ->orderBy('name');
+    }
+
+    public function events(): BelongsToMany
+    {
+        return $this->belongsToMany(Event::class, 'event_stands', 'partner_id', 'event_id')
+            ->wherePivot('type', 'partner')
+            ->withPivot('type', 'stand_number', 'x_percent', 'y_percent')
+            ->withTimestamps();
+    }
+
+    public function stands(): HasMany
+    {
+        return $this->hasMany(EventStand::class, 'partner_id');
     }
 }

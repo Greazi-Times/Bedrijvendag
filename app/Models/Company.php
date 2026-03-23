@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Company extends Model
 {
@@ -20,8 +21,9 @@ class Company extends Model
 
     public function events(): BelongsToMany
     {
-        return $this->belongsToMany(Event::class)
-            ->withPivot('stand_number')
+        return $this->belongsToMany(Event::class, 'event_stands', 'company_id', 'event_id')
+            ->wherePivot('type', 'company')
+            ->withPivot('type', 'stand_number', 'x_percent', 'y_percent')
             ->withTimestamps();
     }
 
@@ -37,6 +39,6 @@ class Company extends Model
 
     public function stands(): HasMany
     {
-        return $this->hasMany(CompanyEvent::class, 'company_id');
+        return $this->hasMany(EventStand::class, 'company_id');
     }
 }

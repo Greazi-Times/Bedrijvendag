@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Partners\Schemas;
 
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class PartnerForm
@@ -21,11 +23,21 @@ class PartnerForm
                 ->url()
                 ->required(),
 
+            RichEditor::make('description')
+                ->nullable()
+                ->columnSpanFull(),
+
+            CheckboxList::make('educations')
+                ->label('Educations')
+                ->relationship('educations', 'name')
+                ->columns(2)
+                ->searchable()
+                ->bulkToggleable(),
+
             FileUpload::make('image')
                 ->image()
                 ->disk('public')
                 ->directory('partners')
-                ->disk('public')
                 ->required(),
         ]);
     }
