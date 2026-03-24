@@ -79,7 +79,11 @@ class HomeController extends Controller
     {
         $event = Event::query()
             ->nextOrLatest()
-            ->with(['partners' => fn ($q) => $q->orderBy('name')])
+            ->with([
+                'eventPartners' => fn ($q) => $q->with('educations')->orderBy('name'),
+                'stands' => fn ($q) => $q->where('type', 'partner'),
+                'stands.partner' => fn ($q) => $q->with('educations')->orderBy('name'),
+            ])
             ->first();
 
         $eventPayload = $event ? [
@@ -88,42 +92,31 @@ class HomeController extends Controller
             'date' => optional($event->date)->toDateString(),
         ] : null;
 
-        $mapPartner = fn (Partner $p) => [
+        $mapPartner = fn (Partner $p, $standNumber = null) => [
             'id' => $p->id,
             'name' => $p->name,
             'url' => $p->url,
             'image_url' => $p->image ? Storage::url($p->image) : null,
             'description' => $p->description ?? null,
-            'type' => $p->partner_type ?? $p->type ?? $p->category ?? $p->kind ?? null,
-            'has_stand' => (bool) ($p->has_stand ?? false),
-            'stand_number' => $p->stand_number ?? null,
+            'educations' => method_exists($p, 'educations') ? $p->educations->map(fn ($education) => ['id' => $education->id, 'name' => $education->name])->values() : [],
+            'stand_number' => $standNumber,
         ];
 
-        $isStandPartner = function (Partner $p): bool {
-            $type = strtolower((string) ($p->partner_type ?? $p->type ?? $p->category ?? $p->kind ?? ''));
-
-            if (in_array($type, ['stand', 'stands', 'event', 'at_event', 'booth', 'exhibitor'], true)) {
-                return true;
-            }
-
-            if (!empty($p->stand_number)) {
-                return true;
-            }
-
-            return (bool) ($p->has_stand ?? false);
-        };
-
+        // Organising partners come from the event_partner pivot, not event_stands.
         $supportPartners = $event
-            ? $event->partners
-                ->filter(fn (Partner $p) => ! $isStandPartner($p))
-                ->map($mapPartner)
+            ? $event->eventPartners
+                ->map(fn (Partner $p) => $mapPartner($p))
                 ->values()
             : collect();
 
+        // Stand partners come from event_stands rows with type = partner.
         $standPartners = $event
-            ? $event->partners
-                ->filter(fn (Partner $p) => $isStandPartner($p))
-                ->map($mapPartner)
+            ? $event->stands
+                ->filter(fn ($stand) => $stand->type === 'partner' && $stand->partner)
+                ->map(fn ($stand) => $mapPartner(
+                    $stand->partner,
+                    $stand->stand_number ?? $stand->number ?? $stand->label ?? null,
+                ))
                 ->values()
             : collect();
 

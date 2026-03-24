@@ -139,4 +139,10 @@ class Event extends Model
                 ]);
         });
     }
+
+    public function eventPartners(): BelongsToMany
+    {
+        return $this->belongsToMany(Partner::class, 'event_partner', 'event_id', 'partner_id')
+            ->withTimestamps();
+    }
 }

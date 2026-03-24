@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
+import { Teleport, computed, ref } from 'vue';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
 
@@ -20,9 +21,8 @@ type PartnerSummary = {
     website_url?: string | null
     url?: string | null
     description: string | null
-    type?: string | null
-    has_stand?: boolean
     stand_number?: string | number | null
+    educations?: { id: number; name: string }[] | string[] | null
 }
 
 const props = defineProps<{
@@ -57,6 +57,29 @@ const partnerLogo = (p: PartnerSummary) => p.logo_url ?? p.image_url ?? null;
 const partnerUrl = (p: PartnerSummary) => p.website_url ?? p.url ?? null;
 const supportPartners = props.supportPartners ?? props.partners ?? [];
 const standPartners = props.standPartners ?? [];
+
+const selectedPartner = ref<PartnerSummary | null>(null);
+
+function openPartner(partner: PartnerSummary) {
+    selectedPartner.value = partner;
+}
+
+function closePartner() {
+    selectedPartner.value = null;
+}
+
+
+const selectedPartnerEducations = computed(() => {
+    const educations = selectedPartner.value?.educations;
+
+    if (!educations || !Array.isArray(educations)) return [];
+
+    return educations.map((education) => {
+        if (typeof education === 'string') return education;
+
+        return education?.name ?? '';
+    }).filter(Boolean);
+});
 </script>
 
 <template>
@@ -105,7 +128,12 @@ const standPartners = props.standPartners ?? [];
                         <article
                             v-for="partner in supportPartners"
                             :key="`support-${partner.id}`"
-                            class="group overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-border transition hover:shadow-xl"
+                            class="group cursor-pointer overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-border transition hover:shadow-xl"
+                            role="button"
+                            tabindex="0"
+                            @click="openPartner(partner)"
+                            @keydown.enter.prevent="openPartner(partner)"
+                            @keydown.space.prevent="openPartner(partner)"
                         >
                             <div class="flex items-center justify-center bg-accent/10 p-10">
                                 <img
@@ -122,9 +150,11 @@ const standPartners = props.standPartners ?? [];
                             <div class="p-7">
                                 <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ partner.name }}</h2>
 
-                                <p v-if="partner.description" class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                                    {{ partner.description }}
-                                </p>
+                                <div
+                                    v-if="partner.description"
+                                    class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground"
+                                    v-html="partner.description"
+                                ></div>
 
                                 <div class="mt-6">
                                     <a
@@ -133,6 +163,7 @@ const standPartners = props.standPartners ?? [];
                                         :href="partnerUrl(partner) as string"
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        @click.stop
                                     >
                                         Bezoek website
                                     </a>
@@ -161,7 +192,12 @@ const standPartners = props.standPartners ?? [];
                         <article
                             v-for="partner in standPartners"
                             :key="`stand-${partner.id}`"
-                            class="group overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-border transition hover:shadow-xl"
+                            class="group cursor-pointer overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-border transition hover:shadow-xl"
+                            role="button"
+                            tabindex="0"
+                            @click="openPartner(partner)"
+                            @keydown.enter.prevent="openPartner(partner)"
+                            @keydown.space.prevent="openPartner(partner)"
                         >
                             <div class="flex items-center justify-center bg-accent/10 p-10">
                                 <img
@@ -186,9 +222,11 @@ const standPartners = props.standPartners ?? [];
                                     </span>
                                 </div>
 
-                                <p v-if="partner.description" class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                                    {{ partner.description }}
-                                </p>
+                                <div
+                                    v-if="partner.description"
+                                    class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground"
+                                    v-html="partner.description"
+                                ></div>
 
                                 <div class="mt-6">
                                     <a
@@ -197,6 +235,7 @@ const standPartners = props.standPartners ?? [];
                                         :href="partnerUrl(partner) as string"
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        @click.stop
                                     >
                                         Bezoek website
                                     </a>
@@ -217,6 +256,85 @@ const standPartners = props.standPartners ?? [];
                     <p class="text-muted-foreground">Nog geen partners gekoppeld aan deze editie.</p>
                 </div>
             </div>
+
+            <Teleport to="body">
+                <div
+                    v-if="selectedPartner"
+                    class="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 p-4"
+                    @click.self="closePartner"
+                >
+                    <div class="relative max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-3xl bg-background shadow-2xl ring-1 ring-border">
+                        <button
+                            type="button"
+                            class="absolute right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/90 text-lg font-semibold text-foreground ring-1 ring-border transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                            @click="closePartner"
+                        >
+                            ×
+                        </button>
+
+                        <div class="grid max-h-[90vh] grid-cols-1 overflow-y-auto lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
+                            <div class="flex min-h-[260px] items-center justify-center bg-accent/10 p-10 lg:min-h-full">
+                                <img
+                                    v-if="partnerLogo(selectedPartner)"
+                                    :src="partnerLogo(selectedPartner) as string"
+                                    :alt="selectedPartner.name"
+                                    class="max-h-44 w-full max-w-[260px] object-contain"
+                                    loading="lazy"
+                                    decoding="async"
+                                />
+                                <div v-else class="text-sm text-muted-foreground">Geen logo</div>
+                            </div>
+
+                            <div class="p-8 lg:p-10">
+                                <div class="flex flex-wrap items-start justify-between gap-4">
+                                    <div>
+                                        <h2 class="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                                            {{ selectedPartner.name }}
+                                        </h2>
+
+                                        <div v-if="selectedPartner.stand_number" class="mt-3">
+                                            <span class="inline-flex items-center rounded-lg bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border">
+                                                Stand {{ selectedPartner.stand_number }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <a
+                                        v-if="partnerUrl(selectedPartner)"
+                                        class="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                                        :href="partnerUrl(selectedPartner) as string"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Bezoek website
+                                    </a>
+                                </div>
+
+                                <div v-if="selectedPartnerEducations.length" class="mt-6">
+                                    <h3 class="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Opleidingen</h3>
+                                    <div class="mt-3 flex flex-wrap gap-2">
+                                        <span
+                                            v-for="education in selectedPartnerEducations"
+                                            :key="education"
+                                            class="inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground ring-1 ring-border"
+                                        >
+                                            {{ education }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div v-if="selectedPartner.description" class="prose prose-sm mt-8 max-w-none text-foreground">
+                                    <div v-html="selectedPartner.description"></div>
+                                </div>
+
+                                <div v-else class="mt-8 text-sm text-muted-foreground">
+                                    Geen extra beschrijving beschikbaar.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Teleport>
         </section>
     </div>
 
