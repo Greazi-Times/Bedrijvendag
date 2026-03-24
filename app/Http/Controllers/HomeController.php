@@ -88,21 +88,50 @@ class HomeController extends Controller
             'date' => optional($event->date)->toDateString(),
         ] : null;
 
-        $partners = $event
+        $mapPartner = fn (Partner $p) => [
+            'id' => $p->id,
+            'name' => $p->name,
+            'url' => $p->url,
+            'image_url' => $p->image ? Storage::url($p->image) : null,
+            'description' => $p->description ?? null,
+            'type' => $p->partner_type ?? $p->type ?? $p->category ?? $p->kind ?? null,
+            'has_stand' => (bool) ($p->has_stand ?? false),
+            'stand_number' => $p->stand_number ?? null,
+        ];
+
+        $isStandPartner = function (Partner $p): bool {
+            $type = strtolower((string) ($p->partner_type ?? $p->type ?? $p->category ?? $p->kind ?? ''));
+
+            if (in_array($type, ['stand', 'stands', 'event', 'at_event', 'booth', 'exhibitor'], true)) {
+                return true;
+            }
+
+            if (!empty($p->stand_number)) {
+                return true;
+            }
+
+            return (bool) ($p->has_stand ?? false);
+        };
+
+        $supportPartners = $event
             ? $event->partners
-                ->map(fn (Partner $p) => [
-                    'id' => $p->id,
-                    'name' => $p->name,
-                    'url' => $p->url,
-                    'image_url' => $p->image ? Storage::url($p->image) : null,
-                    'description' => $p->description ?? null,
-                ])
+                ->filter(fn (Partner $p) => ! $isStandPartner($p))
+                ->map($mapPartner)
+                ->values()
+            : collect();
+
+        $standPartners = $event
+            ? $event->partners
+                ->filter(fn (Partner $p) => $isStandPartner($p))
+                ->map($mapPartner)
                 ->values()
             : collect();
 
         return Inertia::render('Partners', [
             'event' => $eventPayload,
-            'partners' => $partners,
+            'supportPartners' => $supportPartners,
+            'standPartners' => $standPartners,
+            'partners' => $supportPartners->concat($standPartners)->values(),
         ]);
     }
 }

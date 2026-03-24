@@ -20,11 +20,16 @@ type PartnerSummary = {
     website_url?: string | null
     url?: string | null
     description: string | null
+    type?: string | null
+    has_stand?: boolean
+    stand_number?: string | number | null
 }
 
 const props = defineProps<{
     event: EventSummary | null
-    partners: PartnerSummary[]
+    partners?: PartnerSummary[]
+    supportPartners?: PartnerSummary[]
+    standPartners?: PartnerSummary[]
 }>();
 
 function formatDate(iso: string) {
@@ -50,6 +55,8 @@ function formatDate(iso: string) {
 const eventTitle = () => props.event?.title ?? props.event?.name ?? null;
 const partnerLogo = (p: PartnerSummary) => p.logo_url ?? p.image_url ?? null;
 const partnerUrl = (p: PartnerSummary) => p.website_url ?? p.url ?? null;
+const supportPartners = props.supportPartners ?? props.partners ?? [];
+const standPartners = props.standPartners ?? [];
 </script>
 
 <template>
@@ -86,54 +93,127 @@ const partnerUrl = (p: PartnerSummary) => p.website_url ?? p.url ?? null;
                     </p>
                 </div>
 
-                <div class="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                    <article
-                        v-for="partner in props.partners"
-                        :key="partner.id"
-                        class="group overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-border transition hover:shadow-xl"
-                    >
-                        <div class="flex items-center justify-center bg-accent/10 p-10">
-                            <img
-                                v-if="partnerLogo(partner)"
-                                :src="partnerLogo(partner) as string"
-                                :alt="partner.name"
-                                class="max-h-20 w-full max-w-[260px] object-contain opacity-90 grayscale transition duration-200 group-hover:opacity-100 group-hover:grayscale-0"
-                                loading="lazy"
-                                decoding="async"
-                            />
-                            <div v-else class="text-sm text-muted-foreground">Geen logo</div>
-                        </div>
+                <div v-if="supportPartners.length" class="mt-14">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-semibold tracking-tight text-foreground">Partners die dit evenement mogelijk maken</h2>
+                        <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
+                            Deze partners ondersteunen de ATIx Bedrijvendag en maken de editie mogelijk.
+                        </p>
+                    </div>
 
-                        <div class="p-7">
-                            <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ partner.name }}</h2>
+                    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                        <article
+                            v-for="partner in supportPartners"
+                            :key="`support-${partner.id}`"
+                            class="group overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-border transition hover:shadow-xl"
+                        >
+                            <div class="flex items-center justify-center bg-accent/10 p-10">
+                                <img
+                                    v-if="partnerLogo(partner)"
+                                    :src="partnerLogo(partner) as string"
+                                    :alt="partner.name"
+                                    class="max-h-20 w-full max-w-[260px] object-contain opacity-90 grayscale transition duration-200 group-hover:opacity-100 group-hover:grayscale-0"
+                                    loading="lazy"
+                                    decoding="async"
+                                />
+                                <div v-else class="text-sm text-muted-foreground">Geen logo</div>
+                            </div>
 
-                            <p v-if="partner.description" class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                                {{ partner.description }}
-                            </p>
+                            <div class="p-7">
+                                <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ partner.name }}</h2>
 
-                            <div class="mt-6">
-                                <a
-                                    v-if="partnerUrl(partner)"
-                                    class="inline-flex w-full items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                    :href="partnerUrl(partner) as string"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    Bezoek website
-                                </a>
+                                <p v-if="partner.description" class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                                    {{ partner.description }}
+                                </p>
 
-                                <div
-                                    v-else
-                                    class="inline-flex w-full items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground ring-1 ring-border"
-                                >
-                                    Website ontbreekt
+                                <div class="mt-6">
+                                    <a
+                                        v-if="partnerUrl(partner)"
+                                        class="inline-flex w-full items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                                        :href="partnerUrl(partner) as string"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Bezoek website
+                                    </a>
+
+                                    <div
+                                        v-else
+                                        class="inline-flex w-full items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground ring-1 ring-border"
+                                    >
+                                        Website ontbreekt
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </article>
+                        </article>
+                    </div>
                 </div>
 
-                <div v-if="!props.partners.length" class="mx-auto mt-10 max-w-3xl rounded-2xl bg-accent/10 p-6 text-center ring-1 ring-border">
+                <div v-if="standPartners.length" class="mt-14">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-semibold tracking-tight text-foreground">Partners met een stand op het evenement</h2>
+                        <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
+                            Deze partners zijn aanwezig op de ATIx Bedrijvendag met een eigen stand.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                        <article
+                            v-for="partner in standPartners"
+                            :key="`stand-${partner.id}`"
+                            class="group overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-border transition hover:shadow-xl"
+                        >
+                            <div class="flex items-center justify-center bg-accent/10 p-10">
+                                <img
+                                    v-if="partnerLogo(partner)"
+                                    :src="partnerLogo(partner) as string"
+                                    :alt="partner.name"
+                                    class="max-h-20 w-full max-w-[260px] object-contain opacity-90 grayscale transition duration-200 group-hover:opacity-100 group-hover:grayscale-0"
+                                    loading="lazy"
+                                    decoding="async"
+                                />
+                                <div v-else class="text-sm text-muted-foreground">Geen logo</div>
+                            </div>
+
+                            <div class="p-7">
+                                <div class="flex items-start justify-between gap-3">
+                                    <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ partner.name }}</h2>
+                                    <span
+                                        v-if="partner.stand_number"
+                                        class="shrink-0 rounded-lg bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border"
+                                    >
+                                        Stand {{ partner.stand_number }}
+                                    </span>
+                                </div>
+
+                                <p v-if="partner.description" class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                                    {{ partner.description }}
+                                </p>
+
+                                <div class="mt-6">
+                                    <a
+                                        v-if="partnerUrl(partner)"
+                                        class="inline-flex w-full items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                                        :href="partnerUrl(partner) as string"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Bezoek website
+                                    </a>
+
+                                    <div
+                                        v-else
+                                        class="inline-flex w-full items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground ring-1 ring-border"
+                                    >
+                                        Website ontbreekt
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <div v-if="!supportPartners.length && !standPartners.length" class="mx-auto mt-10 max-w-3xl rounded-2xl bg-accent/10 p-6 text-center ring-1 ring-border">
                     <p class="text-muted-foreground">Nog geen partners gekoppeld aan deze editie.</p>
                 </div>
             </div>
