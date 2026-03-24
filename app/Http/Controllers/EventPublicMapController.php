@@ -18,7 +18,10 @@ class EventPublicMapController extends Controller
                         'educations:id,name',
                         'sectors:id,name',
                     ]),
-                'stands.partner',
+                'stands.partner' => fn ($q) => $q
+                    ->with([
+                        'educations:id,name',
+                    ]),
             ])
             ->firstOrFail();
 
@@ -55,7 +58,7 @@ class EventPublicMapController extends Controller
                         'company_website_url' => $entity?->website_url,
                         'company_educations' => $isCompany
                             ? $company?->educations?->pluck('name')->filter()->values()->all()
-                            : [],
+                            : ($partner?->educations?->pluck('name')->filter()->values()->all() ?? []),
                         'company_sectors' => $isCompany
                             ? $company?->sectors?->pluck('name')->filter()->values()->all()
                             : [],
