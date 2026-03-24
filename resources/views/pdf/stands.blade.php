@@ -240,19 +240,19 @@
             position: absolute;
             right: 0;
             top: 5mm;
-            width: 32mm;
+            width: 45mm;
             height: 20mm;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: center;
         }
 
         .company-logo-bottom img {
-            max-height: 20mm;
-            width: auto;
-            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            object-position: center center;
             display: block;
-            margin-left: auto;
         }
 
         .debug-box {
@@ -468,8 +468,7 @@
             <div class="debug-center-line-vertical" style="left: 50%; top: 247mm; height: 30mm;"></div>
 
             <div class="debug-box" style="left: 0; top: 249mm; width: 26mm; height: 26mm;"></div>
-            <div class="debug-box" style="left: 69mm; top: 252mm; width: 52mm; height: 20mm;"></div>
-            <div class="debug-box" style="right: 0; top: 252mm; width: 32mm; height: 20mm;"></div>
+            <div class="debug-box" style="right: 0; top: 252mm; width: 55mm; height: 20mm;"></div>
         @endif
 
         <div class="footer">
@@ -485,27 +484,17 @@
                 </div>
             </div>
 
-            <div class="footer-center-logo">
-                @if($staticLogo)
-                    <img src="{{ $staticLogo }}" alt="ATIx Bedrijvendag">
-                @endif
-
-                @if(request()->boolean('debuglayout'))
-                    <div class="debug-footer-inner-box"></div>
-                    <div class="debug-center-line-horizontal" style="top: 10mm; left: 0; width: 52mm;"></div>
-                    <div class="debug-center-line-vertical" style="left: 26mm; top: 0; height: 20mm;"></div>
-                @endif
-            </div>
+            {{-- Removed footer-center-logo --}}
 
             <div class="company-logo-bottom">
-                @if($companyLogo)
-                    <img src="{{ $companyLogo }}" alt="Logo">
+                @if($staticLogo)
+                    <img src="{{ $staticLogo }}" alt="Event logo">
                 @endif
 
                 @if(request()->boolean('debuglayout'))
                     <div class="debug-footer-inner-box"></div>
-                    <div class="debug-center-line-horizontal" style="top: 10mm; left: 0; width: 32mm;"></div>
-                    <div class="debug-center-line-vertical" style="left: 16mm; top: 0; height: 20mm;"></div>
+                    <div class="debug-center-line-horizontal" style="top: 10mm; left: 0; width: 70mm;"></div>
+                    <div class="debug-center-line-vertical" style="left: 35mm; top: 0; height: 20mm;"></div>
                 @endif
             </div>
         </div>
