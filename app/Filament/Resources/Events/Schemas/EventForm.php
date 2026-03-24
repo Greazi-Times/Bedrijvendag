@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Events\Schemas;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
 
@@ -29,6 +30,16 @@ class EventForm
                     ->minValue(0)
                     ->default(0)
                     ->nullable(),
+                Select::make('eventPartners')
+                    ->label('Organising partners')
+                    ->relationship('eventPartners', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->nullable(),
+                TextInput::make('google_photos_album_url')
+                    ->url()
+                    ->default(null),
                 RichEditor::make('description')
                     ->label('Description')
                     ->default(null)
@@ -60,9 +71,6 @@ class EventForm
                     ->disk('public')
                     ->imageEditor()
                     ->nullable(),
-                TextInput::make('google_photos_album_url')
-                    ->url()
-                    ->default(null),
             ]);
     }
 }
