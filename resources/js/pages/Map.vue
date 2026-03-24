@@ -567,7 +567,7 @@ onUnmounted(() => {
                             ></div>
                             <p v-else class="mt-2 text-sm text-muted-foreground">Geen beschrijving.</p>
 
-                            <div class="mt-6 grid gap-6 sm:grid-cols-2">
+                            <div class="mt-6 grid gap-6" :class="selectedCompany.stand_type !== 'partner' ? 'sm:grid-cols-2' : 'sm:grid-cols-1'">
                                 <div>
                                     <div class="text-sm font-semibold text-foreground">Opleidingen</div>
                                     <div class="mt-3 flex flex-wrap gap-2">
@@ -587,7 +587,7 @@ onUnmounted(() => {
                                     </div>
                                 </div>
 
-                                <div>
+                                <div v-if="selectedCompany.stand_type !== 'partner'">
                                     <div class="text-sm font-semibold text-foreground">Sectoren</div>
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         <span
