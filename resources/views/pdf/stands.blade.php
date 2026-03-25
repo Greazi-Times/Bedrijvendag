@@ -87,7 +87,7 @@
 
         .stand-badge-top {
             position: absolute;
-            top: 0;
+            top: 3mm;
             right: 0;
             width: 30mm;
             height: 30mm;
