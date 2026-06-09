@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import AppFooter from '@/components/AppFooter.vue'
-import AppHeader from '@/components/AppHeader.vue'
+import AppFooter from '@/components/AppFooter.vue';
+import AppHeader from '@/components/AppHeader.vue';
 
 interface Policy {
-    policyHtml: string | null
-    updatedAt?: string | null
+    policyHtml: string | null;
+    updatedAt?: string | null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -24,11 +24,7 @@ const props = defineProps<{
                     <h1 class="text-3xl font-semibold">Privacy policy</h1>
                 </div>
 
-                <div
-                    v-if="policy?.policyHtml"
-                    class="prose prose-m mt-6 max-w-none dark:prose-invert"
-                    v-html="policy.policyHtml"
-                />
+                <div v-if="policy?.policyHtml" class="prose-m prose mt-6 max-w-none dark:prose-invert" v-html="policy.policyHtml" />
                 <p v-else class="mt-5 text-sm text-muted-foreground">Er is nog geen privacy policy ingesteld.</p>
             </div>
         </div>

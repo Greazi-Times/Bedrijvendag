@@ -63,6 +63,6 @@ class UpcomingEventWidget extends Widget
             return '1 day to go';
         }
 
-        return $days . ' days to go';
+        return $days.' days to go';
     }
 }

@@ -48,9 +48,7 @@ onBeforeUnmount(() => {
             <div class="mx-auto max-w-3xl text-center">
                 <p class="text-sm font-semibold text-primary">Contact</p>
                 <h1 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Neem contact op</h1>
-                <p class="mt-4 text-base leading-relaxed text-muted-foreground">
-                    Stuur ons een bericht. We reageren zo snel mogelijk.
-                </p>
+                <p class="mt-4 text-base leading-relaxed text-muted-foreground">Stuur ons een bericht. We reageren zo snel mogelijk.</p>
             </div>
 
             <div class="mt-12 flex flex-col-reverse gap-7.5 md:flex-row md:items-start md:justify-between lg:mt-20 xl:gap-10">
@@ -86,16 +84,16 @@ onBeforeUnmount(() => {
                             </span>
                             <div>
                                 <p class="text-sm font-semibold text-foreground">E-mail</p>
-                                <a class="mt-1 inline-block break-all text-sm text-muted-foreground hover:text-foreground" href="mailto:bedrijvendag.atix@avans.nl">bedrijvendag.atix@avans.nl</a>
+                                <a class="mt-1 inline-block text-sm break-all text-muted-foreground hover:text-foreground" href="mailto:bedrijvendag.atix@avans.nl"
+                                    >bedrijvendag.atix@avans.nl</a
+                                >
                             </div>
                         </div>
                     </div>
 
                     <span class="my-8 block h-px bg-border"></span>
 
-                    <p class="text-sm text-muted-foreground">
-                        Liever direct contact? Mail of bel ons.
-                    </p>
+                    <p class="text-sm text-muted-foreground">Liever direct contact? Mail of bel ons.</p>
                 </aside>
 
                 <!-- Right: form -->
@@ -186,7 +184,7 @@ onBeforeUnmount(() => {
                             <p v-if="form.errors.message" class="mt-2 text-sm text-destructive">{{ form.errors.message }}</p>
                         </div>
 
-                        <div class="lg:col-span-2 flex flex-col items-center gap-4">
+                        <div class="flex flex-col items-center gap-4 lg:col-span-2">
                             <button
                                 type="submit"
                                 :disabled="form.processing"

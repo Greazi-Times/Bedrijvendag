@@ -4,7 +4,6 @@ import { PhBook, PhHandshake, PhMicrophone, PhShareNetwork, PhArrowDown, PhWine 
 import { Users, Compass, LogIn, Play, X, CheckCircle2 } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
-
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
 
@@ -29,7 +28,6 @@ const props = defineProps<{
     closingBorrelCount: number;
     partners: PartnerCard[];
 }>();
-
 
 const isVideoOpen = ref(false);
 const shouldShowBorrelCount = computed(() => props.closingBorrelCount >= 25);
@@ -130,7 +128,6 @@ const triggerBorrelSuccess = () => {
         showBorrelSuccess.value = false;
     }, 7000); // 7 seconds
 };
-
 </script>
 
 <template>
@@ -186,13 +183,9 @@ const triggerBorrelSuccess = () => {
                         <div class="inline-flex items-center gap-2">
                             <span class="h-2 w-2 rounded-full bg-secondary"></span>
 
-                            <template v-if="shouldShowBorrelCount">
-                                Borrel aanmeldingen: {{ props.closingBorrelCount }}
-                            </template>
+                            <template v-if="shouldShowBorrelCount"> Borrel aanmeldingen: {{ props.closingBorrelCount }} </template>
 
-                            <template v-else>
-                                Schrijf je snel in voor de borrel
-                            </template>
+                            <template v-else> Schrijf je snel in voor de borrel </template>
                         </div>
                     </div>
                 </div>
@@ -430,27 +423,20 @@ const triggerBorrelSuccess = () => {
     <section
         id="borrel"
         class="relative overflow-hidden bg-background px-6 py-20 lg:px-16"
-        style="background-image: url('/images/shape/shape-12.svg'); background-repeat: no-repeat; background-position: left bottom  ; background-size: 900px auto;"
+        style="background-image: url('/images/shape/shape-12.svg'); background-repeat: no-repeat; background-position: left bottom; background-size: 900px auto"
     >
-
         <div class="relative z-10 mx-auto max-w-7xl">
             <div class="mx-auto max-w-3xl text-center">
                 <p class="text-sm font-semibold text-primary">Borrel</p>
                 <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Meld je aan voor de borrel</h2>
                 <p class="mt-4 text-base leading-relaxed text-muted-foreground">Laat je e-mail achter. Dan sturen we je de details.</p>
 
-                <div
-                    class="mt-6 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground ring-1 ring-border"
-                >
+                <div class="mt-6 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground ring-1 ring-border">
                     <span class="h-2 w-2 rounded-full bg-secondary"></span>
 
-                    <template v-if="shouldShowBorrelCount">
-                        Al aangemeld: {{ props.closingBorrelCount }}
-                    </template>
+                    <template v-if="shouldShowBorrelCount"> Al aangemeld: {{ props.closingBorrelCount }} </template>
 
-                    <template v-else>
-                        Meld je nu aan voor de borrel
-                    </template>
+                    <template v-else> Meld je nu aan voor de borrel </template>
                 </div>
             </div>
 
@@ -522,7 +508,6 @@ const triggerBorrelSuccess = () => {
                         <CheckCircle2 class="h-5 w-5 shrink-0 text-emerald-600" />
                         <span>Je bent aangemeld. Tot bij de borrel.</span>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -540,13 +525,7 @@ const triggerBorrelSuccess = () => {
             <div class="mt-10 rounded-2xl bg-accent/10 p-6 ring-1 ring-border sm:p-8">
                 <div class="flex flex-wrap items-center justify-center gap-x-14 gap-y-10">
                     <div v-for="p in props.partners" :key="p.id" class="group flex basis-1/2 items-center justify-center sm:basis-1/3 lg:basis-1/4">
-                        <component
-                            :is="p.url ? 'a' : 'div'"
-                            :href="p.url ?? undefined"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="flex items-center justify-center"
-                        >
+                        <component :is="p.url ? 'a' : 'div'" :href="p.url ?? undefined" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center">
                             <img
                                 v-if="p.image_url"
                                 :src="p.image_url"
@@ -566,9 +545,8 @@ const triggerBorrelSuccess = () => {
     <!-- Latest editions (3 most recent past events) -->
     <section
         class="relative overflow-hidden bg-background px-6 py-20 lg:px-16"
-        style="background-image: url('/images/shape/shape-13.svg'); background-repeat: no-repeat; background-position: right top; background-size: 1500px auto;"
+        style="background-image: url('/images/shape/shape-13.svg'); background-repeat: no-repeat; background-position: right top; background-size: 1500px auto"
     >
-
         <div class="relative mx-auto max-w-7xl">
             <div class="mx-auto max-w-3xl text-center">
                 <p class="text-sm font-semibold text-primary">Laatste edities</p>
@@ -618,8 +596,8 @@ const triggerBorrelSuccess = () => {
         <div v-if="isVideoOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4" aria-modal="true" role="dialog" @click.self="closeVideo">
             <div class="absolute inset-0 bg-black/60"></div>
 
-            <div class="relative z-[101] w-full max-w-4xl max-h-[80vh] overflow-hidden rounded-2xl bg-background shadow-xl ring-1 ring-border flex flex-col">
-                <div class="shrink-0 flex items-center justify-between gap-4 border-b border-border px-4 py-3">
+            <div class="relative z-[101] flex max-h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-background shadow-xl ring-1 ring-border">
+                <div class="flex shrink-0 items-center justify-between gap-4 border-b border-border px-4 py-3">
                     <div class="text-sm font-semibold text-foreground">Video</div>
                     <button
                         type="button"
@@ -631,7 +609,7 @@ const triggerBorrelSuccess = () => {
                     </button>
                 </div>
 
-                <div class="flex-1 overflow-y-auto bg-black overscroll-contain">
+                <div class="flex-1 overflow-y-auto overscroll-contain bg-black">
                     <div class="relative aspect-video w-full">
                         <iframe
                             :key="videoInstanceKey"

@@ -172,14 +172,13 @@
     }
 }
 
-
 /* Only style lists inside rich text areas (Filament RichEditor output rendered with .prose). */
 .prose ul {
-    @apply list-disc pl-6 space-y-1;
+    @apply list-disc space-y-1 pl-6;
 }
 
 .prose ol {
-    @apply list-decimal pl-6 space-y-1;
+    @apply list-decimal space-y-1 pl-6;
 }
 
 .prose li {
@@ -193,5 +192,5 @@
 
 .prose ul li::marker,
 .prose ol li::marker {
-    @apply text-primary text-base;
+    @apply text-base text-primary;
 }

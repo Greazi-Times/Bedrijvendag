@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Events\RelationManagers;
 
 use App\Filament\Resources\BorrelEnrollments\BorrelEnrollmentResource;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class BorrelEnrollmentsRelationManager extends RelationManager

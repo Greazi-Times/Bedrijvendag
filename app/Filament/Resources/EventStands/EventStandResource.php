@@ -4,7 +4,6 @@ namespace App\Filament\Resources\EventStands;
 
 use App\Filament\Resources\EventStands\Pages\ManageStands;
 use App\Models\EventStand;
-use App\Models\Partner;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -18,6 +17,7 @@ class EventStandResource extends Resource
     protected static ?string $navigationLabel = 'Stands';
 
     protected static string|null|\UnitEnum $navigationGroup = 'Edition';
+
     protected static ?int $navigationSort = 3;
 
     public static function shouldRegisterNavigation(): bool

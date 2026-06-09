@@ -2,15 +2,12 @@
 
 namespace App\Filament\Resources\NewsletterSubscribers;
 
-use App\Filament\Resources\NewsletterSubscribers\Pages\CreateNewsletterSubscriber;
-use App\Filament\Resources\NewsletterSubscribers\Pages\EditNewsletterSubscriber;
 use App\Filament\Resources\NewsletterSubscribers\Pages\ListNewsletterSubscribers;
 use App\Filament\Resources\NewsletterSubscribers\Tables\NewsletterSubscribersTable;
 use App\Models\NewsletterSubscriber;
 use BackedEnum;
 use Filafly\Icons\Phosphor\Enums\Phosphor;
 use Filament\Resources\Resource;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class NewsletterSubscriberResource extends Resource

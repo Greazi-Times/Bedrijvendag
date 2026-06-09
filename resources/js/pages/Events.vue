@@ -55,7 +55,7 @@ function formatDateRange(startsAt: string | null, endsAt: string | null) {
     const fmt = new Intl.DateTimeFormat('nl-NL', {
         day: '2-digit',
         month: 'short',
-        year: 'numeric'
+        year: 'numeric',
     });
 
     const start = startsAt ? fmt.format(new Date(startsAt)) : null;
@@ -89,9 +89,7 @@ onBeforeUnmount(() => {
             <div class="relative mx-auto w-full max-w-7xl">
                 <div class="flex flex-col gap-3">
                     <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Events</h1>
-                    <p class="max-w-2xl text-base leading-relaxed text-muted-foreground">
-                        Bekijk alle aankomende events en eerdere events. Klik op een event voor details.
-                    </p>
+                    <p class="max-w-2xl text-base leading-relaxed text-muted-foreground">Bekijk alle aankomende events en eerdere events. Klik op een event voor details.</p>
                 </div>
 
                 <div class="mt-10 space-y-10">
@@ -119,7 +117,9 @@ onBeforeUnmount(() => {
                                                     class="h-full w-full object-cover"
                                                 />
                                             </div>
-                                            <div class="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border">
+                                            <div
+                                                class="absolute top-5 left-5 inline-flex items-center gap-2 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border"
+                                            >
                                                 <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                                                 Volgende editie
                                             </div>
@@ -143,7 +143,9 @@ onBeforeUnmount(() => {
 
                                             <div class="mt-6 flex items-center justify-between">
                                                 <span class="text-sm text-muted-foreground">Klik voor details</span>
-                                                <span class="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition group-hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none">
+                                                <span
+                                                    class="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition group-hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                                                >
                                                     Details
                                                 </span>
                                             </div>
@@ -161,12 +163,7 @@ onBeforeUnmount(() => {
                                     @click="openModal(event)"
                                 >
                                     <div class="h-40 w-full bg-accent/20">
-                                        <img
-                                            v-if="event.header_image_url"
-                                            :src="event.header_image_url"
-                                            :alt="event.title"
-                                            class="h-full w-full object-cover"
-                                        />
+                                        <img v-if="event.header_image_url" :src="event.header_image_url" :alt="event.title" class="h-full w-full object-cover" />
                                     </div>
                                     <div class="p-5">
                                         <p class="text-xs text-muted-foreground">
@@ -182,12 +179,7 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
 
-                        <div
-                            v-else
-                            class="mt-4 rounded-2xl border border-dashed border-border bg-background/40 px-5 py-6 text-sm text-muted-foreground"
-                        >
-                            Geen aankomend event.
-                        </div>
+                        <div v-else class="mt-4 rounded-2xl border border-dashed border-border bg-background/40 px-5 py-6 text-sm text-muted-foreground">Geen aankomend event.</div>
                     </section>
 
                     <!-- Past editions -->
@@ -206,12 +198,7 @@ onBeforeUnmount(() => {
                                 @click="openModal(event)"
                             >
                                 <div class="h-44 w-full bg-accent/20 sm:h-48">
-                                    <img
-                                        v-if="event.header_image_url"
-                                        :src="event.header_image_url"
-                                        :alt="event.title"
-                                        class="h-full w-full object-cover"
-                                    />
+                                    <img v-if="event.header_image_url" :src="event.header_image_url" :alt="event.title" class="h-full w-full object-cover" />
                                 </div>
 
                                 <div class="p-5">
@@ -234,9 +221,7 @@ onBeforeUnmount(() => {
                                         {{ event.short_description }}
                                     </p>
 
-                                    <p v-else class="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                                        Klik om meer te lezen.
-                                    </p>
+                                    <p v-else class="mt-2 line-clamp-2 text-sm text-muted-foreground">Klik om meer te lezen.</p>
 
                                     <div class="mt-4 flex items-center justify-between">
                                         <span class="text-sm text-muted-foreground">Details</span>
@@ -246,10 +231,7 @@ onBeforeUnmount(() => {
                             </button>
                         </div>
 
-                        <div
-                            v-else
-                            class="mt-4 rounded-2xl border border-dashed border-border bg-background/40 px-5 py-6 text-sm text-muted-foreground"
-                        >
+                        <div v-else class="mt-4 rounded-2xl border border-dashed border-border bg-background/40 px-5 py-6 text-sm text-muted-foreground">
                             Nog geen eerdere events.
                         </div>
                     </section>
@@ -259,20 +241,15 @@ onBeforeUnmount(() => {
 
         <!-- Modal -->
         <teleport to="body">
-            <div
-                v-if="isModalOpen"
-                class="fixed inset-0 z-50 bg-black/60"
-                aria-label="Sluiten"
-                @click="closeModal"
-            >
+            <div v-if="isModalOpen" class="fixed inset-0 z-50 bg-black/60" aria-label="Sluiten" @click="closeModal">
                 <div class="absolute inset-0 flex items-center justify-center px-4 py-8">
                     <div
-                        class="w-full max-w-3xl max-h-[80vh] overflow-hidden rounded-3xl bg-background shadow-xl ring-1 ring-border flex flex-col"
+                        class="flex max-h-[80vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-background shadow-xl ring-1 ring-border"
                         role="dialog"
                         aria-modal="true"
                         @click.stop
                     >
-                        <div class="shrink-0 flex items-start justify-between gap-4 border-b border-border px-6 py-5">
+                        <div class="flex shrink-0 items-start justify-between gap-4 border-b border-border px-6 py-5">
                             <div class="min-w-0">
                                 <p class="text-sm text-muted-foreground">
                                     {{ formatDateRange(selected?.starts_at ?? null, selected?.ends_at ?? null) }}
@@ -282,24 +259,16 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
 
-                        <div class="flex-1 overflow-y-auto px-6 py-6 overscroll-contain">
+                        <div class="flex-1 overflow-y-auto overscroll-contain px-6 py-6">
                             <div class="max-w-none">
                                 <div v-if="selected?.header_image_url" class="overflow-hidden rounded-2xl ring-1 ring-border">
-                                    <img
-                                        :src="selected.header_image_url"
-                                        :alt="selected.title"
-                                        class="h-56 w-full object-cover sm:h-64"
-                                    />
+                                    <img :src="selected.header_image_url" :alt="selected.title" class="h-56 w-full object-cover sm:h-64" />
                                 </div>
 
                                 <div class="mt-4">
                                     <p class="text-sm font-semibold text-foreground">Beschrijving</p>
 
-                                    <div
-                                        v-if="selected?.description_html"
-                                        class="prose prose-sm mt-2 max-w-none dark:prose-invert"
-                                        v-html="selected.description_html"
-                                    />
+                                    <div v-if="selected?.description_html" class="prose prose-sm mt-2 max-w-none dark:prose-invert" v-html="selected.description_html" />
 
                                     <p v-else class="mt-2 text-sm text-muted-foreground">Geen beschrijving.</p>
                                 </div>
@@ -308,9 +277,7 @@ onBeforeUnmount(() => {
 
                         <div class="shrink-0 border-t border-border px-6 py-5">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <p class="text-xs text-muted-foreground">
-                                    Bekijk de volledige editie of de fotogalerij.
-                                </p>
+                                <p class="text-xs text-muted-foreground">Bekijk de volledige editie of de fotogalerij.</p>
 
                                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                                     <a

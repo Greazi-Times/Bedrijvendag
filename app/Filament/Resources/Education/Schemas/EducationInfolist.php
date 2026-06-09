@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Education\Schemas;
 
 use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Schemas\Schema;
 
 class EducationInfolist

@@ -116,13 +116,12 @@ function formatDateRange(start: string | null, end: string | null) {
     <AppHeader class="sticky top-0 z-50" />
 
     <main class="relative overflow-hidden bg-background px-6 py-14 lg:px-16">
-      <div class="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-secondary/20" />
-      <div class="pointer-events-none absolute top-36 -left-20 h-40 w-40 rounded-[2.75rem] bg-primary/20" />
-      <div class="pointer-events-none absolute right-24 bottom-10 h-16 w-16 rounded-full bg-accent" />
+        <div class="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-secondary/20" />
+        <div class="pointer-events-none absolute top-36 -left-20 h-40 w-40 rounded-[2.75rem] bg-primary/20" />
+        <div class="pointer-events-none absolute right-24 bottom-10 h-16 w-16 rounded-full bg-accent" />
         <div class="relative mx-auto max-w-7xl">
-
             <div v-if="event.header_image_url" class="overflow-hidden rounded-3xl shadow-sm ring-1 ring-border">
-              <img :src="event.header_image_url" :alt="event.title" class="h-64 w-full object-cover" />
+                <img :src="event.header_image_url" :alt="event.title" class="h-64 w-full object-cover" />
             </div>
 
             <div class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -149,11 +148,7 @@ function formatDateRange(start: string | null, end: string | null) {
                 <!-- Description / info first (full width) -->
                 <div class="rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
                     <h2 class="text-sm font-medium">Beschrijving</h2>
-                    <div
-                        v-if="event.description_html"
-                        class="prose prose-sm mt-4 max-w-none dark:prose-invert"
-                        v-html="event.description_html"
-                    />
+                    <div v-if="event.description_html" class="prose prose-sm mt-4 max-w-none dark:prose-invert" v-html="event.description_html" />
                     <p v-else class="mt-4 text-sm text-muted-foreground">Geen beschrijving beschikbaar.</p>
                 </div>
 
@@ -162,18 +157,12 @@ function formatDateRange(start: string | null, end: string | null) {
                     <div class="lg:col-span-3 lg:h-full">
                         <div class="flex h-full min-h-0 flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
                             <div class="flex h-6 items-center justify-between">
-                              <h2 class="text-sm font-medium">Plattegrond</h2>
-                              <span class="text-xs text-muted-foreground">&nbsp;</span>
+                                <h2 class="text-sm font-medium">Plattegrond</h2>
+                                <span class="text-xs text-muted-foreground">&nbsp;</span>
                             </div>
 
                             <div v-if="hasMap" class="mt-4 overflow-hidden rounded-2xl ring-1 ring-border">
-                              <img
-                                ref="mapImgEl"
-                                :src="event.map_url ?? ''"
-                                alt="Plattegrond"
-                                class="h-full w-full object-contain"
-                                @load="updateMapImageHeight"
-                              />
+                                <img ref="mapImgEl" :src="event.map_url ?? ''" alt="Plattegrond" class="h-full w-full object-contain" @load="updateMapImageHeight" />
                             </div>
 
                             <p v-else class="mt-4 text-sm text-muted-foreground">Geen plattegrond beschikbaar.</p>
@@ -187,11 +176,7 @@ function formatDateRange(start: string | null, end: string | null) {
                                 <span class="text-xs text-muted-foreground">{{ companies.length }}</span>
                             </div>
 
-                            <div
-                              v-if="companies.length"
-                              class="mt-4 space-y-3 overflow-y-auto pr-1"
-                              :style="mapImageHeight ? { height: mapImageHeight + 'px' } : undefined"
-                            >
+                            <div v-if="companies.length" class="mt-4 space-y-3 overflow-y-auto pr-1" :style="mapImageHeight ? { height: mapImageHeight + 'px' } : undefined">
                                 <button
                                     v-for="c in sortedCompanies"
                                     :key="c.id"
@@ -200,12 +185,7 @@ function formatDateRange(start: string | null, end: string | null) {
                                     @click="openCompany(c)"
                                 >
                                     <div class="h-10 w-10 overflow-hidden rounded-xl bg-accent/20">
-                                        <img
-                                            v-if="c.logo_url"
-                                            :src="c.logo_url"
-                                            :alt="c.name"
-                                            class="h-full w-full object-contain p-1"
-                                        />
+                                        <img v-if="c.logo_url" :src="c.logo_url" :alt="c.name" class="h-full w-full object-contain p-1" />
                                     </div>
 
                                     <div class="min-w-0 flex-1">
@@ -243,34 +223,22 @@ function formatDateRange(start: string | null, end: string | null) {
     </main>
 
     <Teleport to="body">
-        <div
-            v-if="isCompanyModalOpen"
-            class="fixed inset-0 z-50 bg-black/60"
-            aria-label="Sluiten"
-            @click="closeCompany"
-        >
+        <div v-if="isCompanyModalOpen" class="fixed inset-0 z-50 bg-black/60" aria-label="Sluiten" @click="closeCompany">
             <div class="absolute inset-0 flex items-center justify-center px-4 py-8">
                 <div
-                    class="w-full max-w-3xl max-h-[80vh] overflow-hidden rounded-3xl bg-background shadow-xl ring-1 ring-border flex flex-col"
+                    class="flex max-h-[80vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-background shadow-xl ring-1 ring-border"
                     role="dialog"
                     aria-modal="true"
                     @click.stop
                 >
-                    <div class="shrink-0 flex items-start justify-between gap-4 border-b border-border px-6 py-5">
-                        <div class="min-w-0 flex items-center gap-3">
+                    <div class="flex shrink-0 items-start justify-between gap-4 border-b border-border px-6 py-5">
+                        <div class="flex min-w-0 items-center gap-3">
                             <div class="h-12 w-12 overflow-hidden rounded-2xl bg-accent/20 ring-1 ring-border">
-                                <img
-                                    v-if="selectedCompany?.logo_url"
-                                    :src="selectedCompany.logo_url"
-                                    :alt="selectedCompany?.name"
-                                    class="h-full w-full object-contain p-2"
-                                />
+                                <img v-if="selectedCompany?.logo_url" :src="selectedCompany.logo_url" :alt="selectedCompany?.name" class="h-full w-full object-contain p-2" />
                             </div>
                             <div class="min-w-0">
                                 <h3 class="truncate text-xl font-semibold">{{ selectedCompany?.name }}</h3>
-                                <p v-if="selectedCompany?.stand_number" class="mt-1 text-sm text-muted-foreground">
-                                    Stand {{ selectedCompany.stand_number }}
-                                </p>
+                                <p v-if="selectedCompany?.stand_number" class="mt-1 text-sm text-muted-foreground">Stand {{ selectedCompany.stand_number }}</p>
                             </div>
                         </div>
 
@@ -283,30 +251,26 @@ function formatDateRange(start: string | null, end: string | null) {
                         </button>
                     </div>
 
-                    <div class="flex-1 overflow-y-auto px-6 py-6 overscroll-contain">
+                    <div class="flex-1 overflow-y-auto overscroll-contain px-6 py-6">
                         <div class="flex flex-wrap gap-2">
-                        <span
-                            v-for="(s, i) in (selectedCompany?.sectors ?? [])"
-                            :key="`sector-${i}`"
-                            class="rounded-full bg-background px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border"
-                        >
-                            {{ s }}
-                        </span>
+                            <span
+                                v-for="(s, i) in selectedCompany?.sectors ?? []"
+                                :key="`sector-${i}`"
+                                class="rounded-full bg-background px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border"
+                            >
+                                {{ s }}
+                            </span>
 
                             <span
-                                v-for="(e, i) in (selectedCompany?.educations ?? [])"
+                                v-for="(e, i) in selectedCompany?.educations ?? []"
                                 :key="`edu-${i}`"
                                 class="rounded-full bg-background px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border"
                             >
-                            {{ e }}
-                        </span>
+                                {{ e }}
+                            </span>
                         </div>
 
-                        <div
-                            v-if="selectedCompany?.description_html"
-                            class="prose prose-sm mt-5 max-w-none dark:prose-invert"
-                            v-html="selectedCompany.description_html"
-                        />
+                        <div v-if="selectedCompany?.description_html" class="prose prose-sm mt-5 max-w-none dark:prose-invert" v-html="selectedCompany.description_html" />
                         <p v-else class="mt-5 text-sm text-muted-foreground">Geen extra informatie beschikbaar.</p>
 
                         <div class="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">

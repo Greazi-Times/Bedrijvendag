@@ -4,37 +4,37 @@ import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
 
 type EventDto = {
-    id: number
-    title: string
-    date: string // YYYY-MM-DD or ISO
-}
+    id: number;
+    title: string;
+    date: string; // YYYY-MM-DD or ISO
+};
 
 type FilterOption = {
-    id: number | string
-    name: string
-}
+    id: number | string;
+    name: string;
+};
 
 type CompanyDto = {
-    id: number
-    name: string
-    logo_url?: string | null
-    website_url?: string | null
-    booth?: string | null
-    description?: string | null
+    id: number;
+    name: string;
+    logo_url?: string | null;
+    website_url?: string | null;
+    booth?: string | null;
+    description?: string | null;
 
     // For filtering (names are easiest; controller can send these)
-    educations?: string[] | null
-    sectors?: string[] | null
-}
+    educations?: string[] | null;
+    sectors?: string[] | null;
+};
 
 const props = defineProps<{
-    event: EventDto | null
-    companies: CompanyDto[]
-    eventKind?: 'upcoming' | 'most-recent'
+    event: EventDto | null;
+    companies: CompanyDto[];
+    eventKind?: 'upcoming' | 'most-recent';
 
     // Optional: if you want to show filter chips from DB
-    educations?: FilterOption[]
-    sectors?: FilterOption[]
+    educations?: FilterOption[];
+    sectors?: FilterOption[];
 }>();
 
 const q = ref('');
@@ -83,7 +83,7 @@ const eventDateLabel = computed(() => {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
     });
 });
 
@@ -93,9 +93,7 @@ const headerSubtitle = computed(() => {
     const kind = props.eventKind === 'upcoming' ? 'de komende editie' : 'de meest recente editie';
     const date = eventDateLabel.value;
 
-    return date
-        ? `Bekijk alle bedrijven die aanwezig zijn bij ${kind} op ${date}.`
-        : `Bekijk alle bedrijven die aanwezig zijn bij ${kind}.`;
+    return date ? `Bekijk alle bedrijven die aanwezig zijn bij ${kind} op ${date}.` : `Bekijk alle bedrijven die aanwezig zijn bij ${kind}.`;
 });
 
 const educationOptions = computed<string[]>(() => {
@@ -163,16 +161,7 @@ const filteredCompanies = computed(() => {
         .filter((c) => {
             if (!query) return true;
 
-            const haystack = [
-                c.name,
-                c.booth ?? '',
-                c.website_url ?? '',
-                c.description ?? '',
-                ...(c.educations ?? []),
-                ...(c.sectors ?? [])
-            ]
-                .join(' ')
-                .toLowerCase();
+            const haystack = [c.name, c.booth ?? '', c.website_url ?? '', c.description ?? '', ...(c.educations ?? []), ...(c.sectors ?? [])].join(' ').toLowerCase();
 
             return haystack.includes(query);
         })
@@ -193,12 +182,12 @@ const filteredCompanies = computed(() => {
 const activeFilterCount = computed(() => selectedEducations.value.length + selectedSectors.value.length);
 
 const scrollToNewsletter = () => {
-    const el = document.getElementById('newsletter-email') as HTMLInputElement | null
-    if (!el) return
+    const el = document.getElementById('newsletter-email') as HTMLInputElement | null;
+    if (!el) return;
 
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    window.setTimeout(() => el.focus(), 250)
-}
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    window.setTimeout(() => el.focus(), 250);
+};
 
 const sanitizeHtml = (value: string) => {
     // Company descriptions are stored as rich text (HTML). We still need to guard against XSS.
@@ -238,7 +227,6 @@ const sanitizeHtml = (value: string) => {
 </script>
 
 <template>
-
     <AppHeader />
 
     <main class="bg-background px-6 py-16 lg:px-16">
@@ -267,9 +255,7 @@ const sanitizeHtml = (value: string) => {
                                 <span>{{ filteredCompanies.length }} bedrijven</span>
                             </div>
 
-                            <div v-if="activeFilterCount" class="text-xs font-semibold text-muted-foreground">
-                                {{ activeFilterCount }} filters actief
-                            </div>
+                            <div v-if="activeFilterCount" class="text-xs font-semibold text-muted-foreground">{{ activeFilterCount }} filters actief</div>
                         </div>
 
                         <div class="flex items-center justify-center gap-2 sm:justify-end">
@@ -279,7 +265,10 @@ const sanitizeHtml = (value: string) => {
                                 @click="openFilters"
                             >
                                 Filters
-                                <span v-if="activeFilterCount" class="ml-2 inline-flex min-w-6 items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
+                                <span
+                                    v-if="activeFilterCount"
+                                    class="ml-2 inline-flex min-w-6 items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground"
+                                >
                                     {{ activeFilterCount }}
                                 </span>
                             </button>
@@ -356,7 +345,7 @@ const sanitizeHtml = (value: string) => {
 
                         <div
                             v-if="company.description"
-                            class="prose prose-sm mt-3 line-clamp-2 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ul:my-0 prose-ol:my-0 prose-li:my-0"
+                            class="prose prose-sm mt-3 line-clamp-2 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ol:my-0 prose-ul:my-0 prose-li:my-0"
                             v-html="sanitizeHtml(company.description)"
                         ></div>
                         <p v-else class="mt-3 text-sm leading-relaxed text-muted-foreground">Geen beschrijving.</p>
@@ -432,8 +421,8 @@ const sanitizeHtml = (value: string) => {
                                 v-else
                                 class="inline-flex items-center justify-center rounded-xl bg-background px-5 py-2.5 text-sm font-semibold text-foreground ring-1 ring-border"
                             >
-                Geen website
-              </span>
+                                Geen website
+                            </span>
                         </div>
                     </div>
                 </article>
@@ -463,7 +452,7 @@ const sanitizeHtml = (value: string) => {
             <div v-if="isFilterOpen" class="fixed inset-0 z-[100]" aria-modal="true" role="dialog">
                 <button class="absolute inset-0 bg-black/40" type="button" @click="closeFilters" aria-label="Sluiten"></button>
 
-                <div class="absolute right-0 top-0 h-full w-full max-w-md overflow-hidden bg-background shadow-xl ring-1 ring-border">
+                <div class="absolute top-0 right-0 h-full w-full max-w-md overflow-hidden bg-background shadow-xl ring-1 ring-border">
                     <div class="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
                         <div>
                             <div class="text-sm font-semibold text-foreground">Filters</div>
@@ -483,14 +472,7 @@ const sanitizeHtml = (value: string) => {
                     <div class="h-full overflow-y-auto px-5 py-5 pb-28">
                         <div class="flex items-center justify-between">
                             <div class="text-sm font-semibold text-foreground">Geselecteerd: {{ activeFilterCount }}</div>
-                            <button
-                                v-if="activeFilterCount"
-                                type="button"
-                                class="text-sm font-semibold text-primary hover:underline"
-                                @click="clearAll"
-                            >
-                                Alles wissen
-                            </button>
+                            <button v-if="activeFilterCount" type="button" class="text-sm font-semibold text-primary hover:underline" @click="clearAll">Alles wissen</button>
                         </div>
 
                         <div class="mt-6">
@@ -503,13 +485,12 @@ const sanitizeHtml = (value: string) => {
                             />
 
                             <div class="mt-4 space-y-2">
-                                <label v-for="name in filteredEducationOptions" :key="'f-edu-' + name" class="flex items-center gap-3 rounded-xl bg-accent/40 px-3 py-2 ring-1 ring-border/70">
-                                    <input
-                                        type="checkbox"
-                                        class="h-4 w-4"
-                                        :checked="selectedEducations.includes(name)"
-                                        @change="toggle(selectedEducations, name)"
-                                    />
+                                <label
+                                    v-for="name in filteredEducationOptions"
+                                    :key="'f-edu-' + name"
+                                    class="flex items-center gap-3 rounded-xl bg-accent/40 px-3 py-2 ring-1 ring-border/70"
+                                >
+                                    <input type="checkbox" class="h-4 w-4" :checked="selectedEducations.includes(name)" @change="toggle(selectedEducations, name)" />
                                     <span class="text-sm font-medium text-foreground">{{ name }}</span>
                                 </label>
 
@@ -527,13 +508,12 @@ const sanitizeHtml = (value: string) => {
                             />
 
                             <div class="mt-4 space-y-2">
-                                <label v-for="name in filteredSectorOptions" :key="'f-sec-' + name" class="flex items-center gap-3 rounded-xl bg-accent/40 px-3 py-2 ring-1 ring-border/70">
-                                    <input
-                                        type="checkbox"
-                                        class="h-4 w-4"
-                                        :checked="selectedSectors.includes(name)"
-                                        @change="toggle(selectedSectors, name)"
-                                    />
+                                <label
+                                    v-for="name in filteredSectorOptions"
+                                    :key="'f-sec-' + name"
+                                    class="flex items-center gap-3 rounded-xl bg-accent/40 px-3 py-2 ring-1 ring-border/70"
+                                >
+                                    <input type="checkbox" class="h-4 w-4" :checked="selectedSectors.includes(name)" @change="toggle(selectedSectors, name)" />
                                     <span class="text-sm font-medium text-foreground">{{ name }}</span>
                                 </label>
 
@@ -542,7 +522,7 @@ const sanitizeHtml = (value: string) => {
                         </div>
                     </div>
 
-                    <div class="absolute bottom-0 left-0 right-0 border-t border-border bg-background px-5 py-4">
+                    <div class="absolute right-0 bottom-0 left-0 border-t border-border bg-background px-5 py-4">
                         <div class="flex items-center gap-3">
                             <button
                                 type="button"
@@ -568,14 +548,19 @@ const sanitizeHtml = (value: string) => {
             <div v-if="selectedCompany" class="fixed inset-0 z-[110]" aria-modal="true" role="dialog">
                 <button class="absolute inset-0 bg-black/50" type="button" @click="closeCompany" aria-label="Sluiten"></button>
 
-                <div class="absolute left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 max-h-[80vh] overflow-hidden rounded-2xl bg-background shadow-2xl ring-1 ring-border flex flex-col">
-                    <div class="shrink-0 flex items-center justify-between gap-4 border-b border-border px-6 py-5">
+                <div
+                    class="absolute top-1/2 left-1/2 flex max-h-[80vh] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl bg-background shadow-2xl ring-1 ring-border"
+                >
+                    <div class="flex shrink-0 items-center justify-between gap-4 border-b border-border px-6 py-5">
                         <div class="min-w-0">
                             <div class="text-sm font-semibold text-muted-foreground">Bedrijf</div>
                             <h2 class="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground">
                                 {{ selectedCompany.name }}
                             </h2>
-                            <div v-if="selectedCompany.booth" class="mt-2 inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border">
+                            <div
+                                v-if="selectedCompany.booth"
+                                class="mt-2 inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border"
+                            >
                                 Stand {{ selectedCompany.booth }}
                             </div>
                         </div>
@@ -589,7 +574,7 @@ const sanitizeHtml = (value: string) => {
                                     class="h-full w-full object-contain"
                                     loading="lazy"
                                     decoding="async"
-                                    @error="(e) => (((e.target as HTMLImageElement).style.display = 'none'))"
+                                    @error="(e) => ((e.target as HTMLImageElement).style.display = 'none')"
                                 />
                                 <span v-else class="text-xs font-semibold text-muted-foreground">Geen logo</span>
                             </div>
@@ -605,12 +590,12 @@ const sanitizeHtml = (value: string) => {
                         </button>
                     </div>
 
-                    <div class="flex-1 overflow-y-auto px-6 py-6 overscroll-contain">
+                    <div class="flex-1 overflow-y-auto overscroll-contain px-6 py-6">
                         <div>
                             <div class="text-sm font-semibold text-foreground">Beschrijving</div>
                             <div
                                 v-if="selectedCompany.description"
-                                class="prose prose-sm mt-2 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ul:my-0 prose-ol:my-0 prose-li:my-0"
+                                class="prose prose-sm mt-2 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ol:my-0 prose-ul:my-0 prose-li:my-0"
                                 v-html="sanitizeHtml(selectedCompany.description)"
                             ></div>
                             <p v-else class="mt-2 text-sm text-muted-foreground">Geen beschrijving.</p>
@@ -620,7 +605,7 @@ const sanitizeHtml = (value: string) => {
                                     <div class="text-sm font-semibold text-foreground">Opleidingen</div>
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         <span
-                                            v-for="n in (selectedCompany.educations ?? [])"
+                                            v-for="n in selectedCompany.educations ?? []"
                                             :key="'m-edu-' + n"
                                             class="inline-flex items-center rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-700 ring-1 ring-orange-500/30 dark:text-orange-300"
                                         >
@@ -639,7 +624,7 @@ const sanitizeHtml = (value: string) => {
                                     <div class="text-sm font-semibold text-foreground">Sectoren</div>
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         <span
-                                            v-for="n in (selectedCompany.sectors ?? [])"
+                                            v-for="n in selectedCompany.sectors ?? []"
                                             :key="'m-sec-' + n"
                                             class="inline-flex items-center rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-500/30 dark:text-blue-300"
                                         >
@@ -683,14 +668,9 @@ const sanitizeHtml = (value: string) => {
                 </div>
             </div>
         </Teleport>
-
     </main>
 
     <AppFooter />
-
 </template>
 
-<style scoped>
-
-</style>
-
+<style scoped></style>

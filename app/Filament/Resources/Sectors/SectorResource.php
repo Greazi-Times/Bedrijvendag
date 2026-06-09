@@ -25,6 +25,7 @@ class SectorResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static string|null|\UnitEnum $navigationGroup = 'Company';
+
     protected static ?int $navigationSort = 12;
 
     public static function form(Schema $schema): Schema

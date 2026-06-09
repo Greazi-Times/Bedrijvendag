@@ -11,8 +11,11 @@ use Filament\Support\Icons\Heroicon;
 class ManageTermsOfService extends SettingsPage
 {
     protected static string|null|\UnitEnum $navigationGroup = 'Settings';
+
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::OutlinedShieldCheck;
+
     protected static ?string $navigationLabel = 'Terms of service';
+
     protected static ?string $title = 'Terms of service';
 
     protected static string $settings = TermsOfServiceSettings::class;

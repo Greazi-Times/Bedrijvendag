@@ -4,14 +4,14 @@ namespace App\Filament\Resources\EventStands\Pages;
 
 use App\Filament\Resources\EventStands\EventStandResource;
 use App\Models\Company;
-use App\Models\EventStand;
 use App\Models\Event;
+use App\Models\EventStand;
 use App\Models\Partner;
 use Filament\Actions\Action;
-use Filament\Notifications\Notification;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -63,6 +63,7 @@ class ManageStands extends Page implements HasForms, HasTable
 
         if (! $this->selectedEventId) {
             $this->resetTable();
+
             return;
         }
 
@@ -215,8 +216,8 @@ class ManageStands extends Page implements HasForms, HasTable
 <div
   class="max-h-[95vh] overflow-y-auto pointer-events-auto"
   x-data=\'{
-    lwId: ' . json_encode($livewireId) . ',
-    standId: ' . $id . ',
+    lwId: '.json_encode($livewireId).',
+    standId: '.$id.',
     saved: false,
     x: null,
     y: null,
@@ -245,7 +246,7 @@ class ManageStands extends Page implements HasForms, HasTable
   }\'
 >
   <div class="text-sm text-gray-600 dark:text-gray-300">
-    Click on the map to set the marker for stand ' . htmlspecialchars((string) $record->stand_number, ENT_QUOTES) . '.
+    Click on the map to set the marker for stand '.htmlspecialchars((string) $record->stand_number, ENT_QUOTES).'.
   </div>
 
   <div
@@ -258,7 +259,7 @@ class ManageStands extends Page implements HasForms, HasTable
 
   <div class="mx-auto inline-block overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
     <img
-      src="' . htmlspecialchars($url, ENT_QUOTES) . '"
+      src="'.htmlspecialchars($url, ENT_QUOTES).'"
       alt="Event map"
       class="block h-auto w-auto max-h-[70vh] max-w-full cursor-crosshair select-none"
       draggable="false"
@@ -434,6 +435,7 @@ class ManageStands extends Page implements HasForms, HasTable
 
         if ($max === 0) {
             $query->delete();
+
             return;
         }
 
