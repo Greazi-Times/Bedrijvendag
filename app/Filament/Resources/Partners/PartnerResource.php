@@ -23,6 +23,7 @@ class PartnerResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static string|null|\UnitEnum $navigationGroup = 'Edition';
+
     protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema

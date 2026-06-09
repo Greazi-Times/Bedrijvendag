@@ -92,28 +92,22 @@ return new class extends Migration
 
     private function dropForeignKeyIfExists(string $table, string $column): void
     {
-        $databaseName = DB::getDatabaseName();
-        $constraint = DB::table('information_schema.KEY_COLUMN_USAGE')
-            ->select('CONSTRAINT_NAME')
-            ->where('TABLE_SCHEMA', $databaseName)
-            ->where('TABLE_NAME', $table)
-            ->where('COLUMN_NAME', $column)
-            ->whereNotNull('REFERENCED_TABLE_NAME')
-            ->value('CONSTRAINT_NAME');
+        if (! Schema::hasTable($table) || DB::getDriverName() === 'sqlite') {
+            return;
+        }
 
-        if ($constraint) {
-            DB::statement(sprintf('ALTER TABLE `%s` DROP FOREIGN KEY `%s`', $table, $constraint));
+        $foreignKey = collect(Schema::getForeignKeys($table))
+            ->first(fn (array $foreignKey): bool => in_array($column, $foreignKey['columns'] ?? [], true));
+
+        if ($foreignKey) {
+            Schema::table($table, function (Blueprint $table) use ($foreignKey) {
+                $table->dropForeign($foreignKey['name']);
+            });
         }
     }
 
     private function indexExists(string $table, string $indexName): bool
     {
-        $databaseName = DB::getDatabaseName();
-
-        return DB::table('information_schema.STATISTICS')
-            ->where('TABLE_SCHEMA', $databaseName)
-            ->where('TABLE_NAME', $table)
-            ->where('INDEX_NAME', $indexName)
-            ->exists();
+        return Schema::hasTable($table) && Schema::hasIndex($table, $indexName);
     }
 };

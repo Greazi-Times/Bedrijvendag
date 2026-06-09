@@ -41,7 +41,7 @@ class PdfController extends Controller
                 $stand->setAttribute(
                     'display_stand_number',
                     $stand->type === 'partner'
-                        ? 'P' . (string) ($stand->stand_number ?? '')
+                        ? 'P'.(string) ($stand->stand_number ?? '')
                         : (string) ($stand->stand_number ?? '')
                 );
 

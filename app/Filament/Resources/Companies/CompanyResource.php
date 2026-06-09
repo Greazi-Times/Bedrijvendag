@@ -10,7 +10,6 @@ use App\Filament\Resources\Companies\Schemas\CompanyForm;
 use App\Filament\Resources\Companies\Schemas\CompanyInfolist;
 use App\Filament\Resources\Companies\Tables\CompaniesTable;
 use App\Models\Company;
-use App\Filament\Resources\Companies\RelationManagers\EducationsRelationManager;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -26,6 +25,7 @@ class CompanyResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static string|null|\UnitEnum $navigationGroup = 'Company';
+
     protected static ?int $navigationSort = 10;
 
     public static function form(Schema $schema): Schema

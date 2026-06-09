@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\BorrelEnrollment;
 use App\Models\Event;
+use App\Models\Partner;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-use App\Models\Partner;
 
 class HomeController extends Controller
 {

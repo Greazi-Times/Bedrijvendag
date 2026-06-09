@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Event;
 use App\Models\Education;
+use App\Models\Event;
 use App\Models\Sector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;

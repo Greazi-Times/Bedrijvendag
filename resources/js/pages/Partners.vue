@@ -1,35 +1,35 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import { Teleport, computed, ref } from 'vue';
+import { computed, ref } from 'vue';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
 
 type EventSummary = {
-    id: number
+    id: number;
     // Some places use `title`, others use `name`
-    title?: string
-    name?: string
-    date: string
-}
+    title?: string;
+    name?: string;
+    date: string;
+};
 
 type PartnerSummary = {
-    id: number
-    name: string
+    id: number;
+    name: string;
     // Some places use `logo_url`/`website_url`, others use `image_url`/`url`
-    logo_url?: string | null
-    image_url?: string | null
-    website_url?: string | null
-    url?: string | null
-    description: string | null
-    stand_number?: string | number | null
-    educations?: { id: number; name: string }[] | string[] | null
-}
+    logo_url?: string | null;
+    image_url?: string | null;
+    website_url?: string | null;
+    url?: string | null;
+    description: string | null;
+    stand_number?: string | number | null;
+    educations?: { id: number; name: string }[] | string[] | null;
+};
 
 const props = defineProps<{
-    event: EventSummary | null
-    partners?: PartnerSummary[]
-    supportPartners?: PartnerSummary[]
-    standPartners?: PartnerSummary[]
+    event: EventSummary | null;
+    partners?: PartnerSummary[];
+    supportPartners?: PartnerSummary[];
+    standPartners?: PartnerSummary[];
 }>();
 
 function formatDate(iso: string) {
@@ -68,17 +68,18 @@ function closePartner() {
     selectedPartner.value = null;
 }
 
-
 const selectedPartnerEducations = computed(() => {
     const educations = selectedPartner.value?.educations;
 
     if (!educations || !Array.isArray(educations)) return [];
 
-    return educations.map((education) => {
-        if (typeof education === 'string') return education;
+    return educations
+        .map((education) => {
+            if (typeof education === 'string') return education;
 
-        return education?.name ?? '';
-    }).filter(Boolean);
+            return education?.name ?? '';
+        })
+        .filter(Boolean);
 });
 </script>
 
@@ -92,8 +93,8 @@ const selectedPartnerEducations = computed(() => {
             <div class="mx-auto max-w-7xl">
                 <div class="mx-auto max-w-3xl text-center">
                     <p class="text-sm font-semibold text-primary">
-                      <span v-if="props.event">Editie: {{ eventTitle() }}</span>
-                      <span v-else>ATIx Bedrijvendag</span>
+                        <span v-if="props.event">Editie: {{ eventTitle() }}</span>
+                        <span v-else>ATIx Bedrijvendag</span>
                     </p>
 
                     <h1 class="mt-4 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">Partners</h1>
@@ -101,27 +102,23 @@ const selectedPartnerEducations = computed(() => {
                     <div class="mx-auto mt-5 h-1 w-56 rounded-full bg-primary"></div>
 
                     <p class="mt-6 text-base leading-relaxed text-muted-foreground">
-            <span v-if="props.event">
-              Dankzij onderstaande partners kunnen wij dit jaar een succesvolle ATIx Bedrijvendag organiseren.
-              <span class="block mt-2 text-sm">
-                Huidige editie:
-                <span class="font-semibold text-foreground">{{ eventTitle() }}</span>
-                <span class="mx-2">•</span>
-                <span>{{ formatDate(props.event.date) }}</span>
-              </span>
-            </span>
-                        <span v-else>
-              Dankzij onderstaande partners kunnen wij dit jaar een succesvolle ATIx Bedrijvendag organiseren.
-            </span>
+                        <span v-if="props.event">
+                            Dankzij onderstaande partners kunnen wij dit jaar een succesvolle ATIx Bedrijvendag organiseren.
+                            <span class="mt-2 block text-sm">
+                                Huidige editie:
+                                <span class="font-semibold text-foreground">{{ eventTitle() }}</span>
+                                <span class="mx-2">•</span>
+                                <span>{{ formatDate(props.event.date) }}</span>
+                            </span>
+                        </span>
+                        <span v-else> Dankzij onderstaande partners kunnen wij dit jaar een succesvolle ATIx Bedrijvendag organiseren. </span>
                     </p>
                 </div>
 
                 <div v-if="supportPartners.length" class="mt-14">
                     <div class="mb-6">
                         <h2 class="text-2xl font-semibold tracking-tight text-foreground">Partners die dit evenement mogelijk maken</h2>
-                        <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
-                            Deze partners ondersteunen de ATIx Bedrijvendag en maken de editie mogelijk.
-                        </p>
+                        <p class="mt-2 text-sm leading-relaxed text-muted-foreground">Deze partners ondersteunen de ATIx Bedrijvendag en maken de editie mogelijk.</p>
                     </div>
 
                     <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -150,11 +147,7 @@ const selectedPartnerEducations = computed(() => {
                             <div class="p-7">
                                 <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ partner.name }}</h2>
 
-                                <div
-                                    v-if="partner.description"
-                                    class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground"
-                                    v-html="partner.description"
-                                ></div>
+                                <div v-if="partner.description" class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground" v-html="partner.description"></div>
 
                                 <div class="mt-6">
                                     <a
@@ -183,9 +176,7 @@ const selectedPartnerEducations = computed(() => {
                 <div v-if="standPartners.length" class="mt-14">
                     <div class="mb-6">
                         <h2 class="text-2xl font-semibold tracking-tight text-foreground">Partners met een stand op het evenement</h2>
-                        <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
-                            Deze partners zijn aanwezig op de ATIx Bedrijvendag met een eigen stand.
-                        </p>
+                        <p class="mt-2 text-sm leading-relaxed text-muted-foreground">Deze partners zijn aanwezig op de ATIx Bedrijvendag met een eigen stand.</p>
                     </div>
 
                     <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -222,11 +213,7 @@ const selectedPartnerEducations = computed(() => {
                                     </span>
                                 </div>
 
-                                <div
-                                    v-if="partner.description"
-                                    class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground"
-                                    v-html="partner.description"
-                                ></div>
+                                <div v-if="partner.description" class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground" v-html="partner.description"></div>
 
                                 <div class="mt-6">
                                     <a
@@ -258,15 +245,11 @@ const selectedPartnerEducations = computed(() => {
             </div>
 
             <Teleport to="body">
-                <div
-                    v-if="selectedPartner"
-                    class="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 p-4"
-                    @click.self="closePartner"
-                >
+                <div v-if="selectedPartner" class="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 p-4" @click.self="closePartner">
                     <div class="relative max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-3xl bg-background shadow-2xl ring-1 ring-border">
                         <button
                             type="button"
-                            class="absolute right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/90 text-lg font-semibold text-foreground ring-1 ring-border transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                            class="absolute top-4 right-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/90 text-lg font-semibold text-foreground ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                             @click="closePartner"
                         >
                             ×
@@ -301,7 +284,7 @@ const selectedPartnerEducations = computed(() => {
 
                                     <a
                                         v-if="partnerUrl(selectedPartner)"
-                                        class="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                                        class="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                                         :href="partnerUrl(selectedPartner) as string"
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -311,7 +294,7 @@ const selectedPartnerEducations = computed(() => {
                                 </div>
 
                                 <div v-if="selectedPartnerEducations.length" class="mt-6">
-                                    <h3 class="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Opleidingen</h3>
+                                    <h3 class="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Opleidingen</h3>
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         <span
                                             v-for="education in selectedPartnerEducations"
@@ -327,9 +310,7 @@ const selectedPartnerEducations = computed(() => {
                                     <div v-html="selectedPartner.description"></div>
                                 </div>
 
-                                <div v-else class="mt-8 text-sm text-muted-foreground">
-                                    Geen extra beschrijving beschikbaar.
-                                </div>
+                                <div v-else class="mt-8 text-sm text-muted-foreground">Geen extra beschrijving beschikbaar.</div>
                             </div>
                         </div>
                     </div>
@@ -339,9 +320,6 @@ const selectedPartnerEducations = computed(() => {
     </div>
 
     <AppFooter />
-
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -1,30 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from 'vue';
 
-type FlashType = 'success' | 'error'
+type FlashType = 'success' | 'error';
 
-const newsletterEmail = ref('')
-const newsletterFlash = ref<{ type: FlashType; message: string } | null>(null)
-let newsletterFlashTimeout: number | null = null
+const newsletterEmail = ref('');
+const newsletterFlash = ref<{ type: FlashType; message: string } | null>(null);
+let newsletterFlashTimeout: number | null = null;
 
 function setNewsletterFlash(type: FlashType, message: string) {
-    newsletterFlash.value = { type, message }
-    if (newsletterFlashTimeout) window.clearTimeout(newsletterFlashTimeout)
+    newsletterFlash.value = { type, message };
+    if (newsletterFlashTimeout) window.clearTimeout(newsletterFlashTimeout);
     newsletterFlashTimeout = window.setTimeout(() => {
-        newsletterFlash.value = null
-        newsletterFlashTimeout = null
-    }, 5000)
+        newsletterFlash.value = null;
+        newsletterFlashTimeout = null;
+    }, 5000);
 }
 
 async function submitNewsletter() {
-    const email = newsletterEmail.value.trim()
+    const email = newsletterEmail.value.trim();
     if (!email) {
-        setNewsletterFlash('error', 'Vul een email adres in.')
-        return
+        setNewsletterFlash('error', 'Vul een email adres in.');
+        return;
     }
 
     try {
-        const csrf = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null
+        const csrf = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
 
         const res = await fetch('/newsletter/subscribe', {
             method: 'POST',
@@ -34,20 +34,20 @@ async function submitNewsletter() {
                 ...(csrf?.content ? { 'X-CSRF-TOKEN': csrf.content } : {}),
             },
             body: JSON.stringify({ email }),
-        })
+        });
 
         if (!res.ok) {
-            const data = await res.json().catch(() => null)
-            const msg = data?.message || 'Inschrijven is niet gelukt. Probeer het opnieuw.'
-            setNewsletterFlash('error', msg)
-            return
+            const data = await res.json().catch(() => null);
+            const msg = data?.message || 'Inschrijven is niet gelukt. Probeer het opnieuw.';
+            setNewsletterFlash('error', msg);
+            return;
         }
 
-        newsletterEmail.value = ''
-        setNewsletterFlash('success', 'Je bent ingeschreven voor de nieuwsbrief.')
+        newsletterEmail.value = '';
+        setNewsletterFlash('success', 'Je bent ingeschreven voor de nieuwsbrief.');
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
-        setNewsletterFlash('error', 'Inschrijven is niet gelukt. Probeer het opnieuw.')
+        setNewsletterFlash('error', 'Inschrijven is niet gelukt. Probeer het opnieuw.');
     }
 }
 </script>
@@ -109,9 +109,27 @@ async function submitNewsletter() {
 
                         <p class="mb-4 text-gray-600 dark:text-gray-400">Ontvang updates over toekomstige edities.</p>
 
-                        <div v-if="newsletterFlash" class="mb-4 rounded-lg border px-4 py-3 text-sm" :class="newsletterFlash.type === 'success' ? 'border-green-300 bg-green-50 text-green-800 dark:border-green-800/40 dark:bg-green-900/20 dark:text-green-200' : 'border-red-300 bg-red-50 text-red-800 dark:border-red-800/40 dark:bg-red-900/20 dark:text-red-200'">
+                        <div
+                            v-if="newsletterFlash"
+                            class="mb-4 rounded-lg border px-4 py-3 text-sm"
+                            :class="
+                                newsletterFlash.type === 'success'
+                                    ? 'border-green-300 bg-green-50 text-green-800 dark:border-green-800/40 dark:bg-green-900/20 dark:text-green-200'
+                                    : 'border-red-300 bg-red-50 text-red-800 dark:border-red-800/40 dark:bg-red-900/20 dark:text-red-200'
+                            "
+                        >
                             <div class="flex items-center gap-2">
-                                <svg v-if="newsletterFlash.type === 'success'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                <svg
+                                    v-if="newsletterFlash.type === 'success'"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="h-4 w-4"
+                                >
                                     <path d="M20 6 9 17l-5-5" />
                                 </svg>
                                 <span>{{ newsletterFlash.message }}</span>

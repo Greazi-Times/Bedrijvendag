@@ -25,6 +25,7 @@ class EducationResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static string|null|\UnitEnum $navigationGroup = 'Company';
+
     protected static ?int $navigationSort = 11;
 
     public static function form(Schema $schema): Schema

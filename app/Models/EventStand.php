@@ -32,6 +32,7 @@ class EventStand extends Model
             if ($eventStand->type === 'partner' || $eventStand->partner_id) {
                 $eventStand->company_id = null;
                 $eventStand->type = 'partner';
+
                 return;
             }
 

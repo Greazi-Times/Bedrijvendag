@@ -89,15 +89,33 @@ class EventController extends Controller
 
         // Keep it lightweight: only select columns we need.
         $select = ['id'];
-        if ($startsAtColumn) $select[] = $startsAtColumn;
-        if ($endsAtColumn) $select[] = $endsAtColumn;
-        if ($titleColumn) $select[] = $titleColumn;
-        if ($locationColumn) $select[] = $locationColumn;
-        if ($shortDescriptionColumn) $select[] = $shortDescriptionColumn;
-        if ($descriptionColumn) $select[] = $descriptionColumn;
-        if ($headerImageColumn) $select[] = $headerImageColumn;
-        if ($mapUrlColumn) $select[] = $mapUrlColumn;
-        if ($galleryUrlColumn) $select[] = $galleryUrlColumn;
+        if ($startsAtColumn) {
+            $select[] = $startsAtColumn;
+        }
+        if ($endsAtColumn) {
+            $select[] = $endsAtColumn;
+        }
+        if ($titleColumn) {
+            $select[] = $titleColumn;
+        }
+        if ($locationColumn) {
+            $select[] = $locationColumn;
+        }
+        if ($shortDescriptionColumn) {
+            $select[] = $shortDescriptionColumn;
+        }
+        if ($descriptionColumn) {
+            $select[] = $descriptionColumn;
+        }
+        if ($headerImageColumn) {
+            $select[] = $headerImageColumn;
+        }
+        if ($mapUrlColumn) {
+            $select[] = $mapUrlColumn;
+        }
+        if ($galleryUrlColumn) {
+            $select[] = $galleryUrlColumn;
+        }
 
         $events = $query->get($select)->map(function ($event) use (
             $startsAtColumn,
@@ -116,24 +134,24 @@ class EventController extends Controller
             $title = $titleColumn ? (string) ($event->{$titleColumn} ?? '') : '';
 
             $headerImageUrl = null;
-            if ($headerImageColumn && !empty($event->{$headerImageColumn})) {
+            if ($headerImageColumn && ! empty($event->{$headerImageColumn})) {
                 $path = (string) $event->{$headerImageColumn};
                 $headerImageUrl = $path;
             }
 
             $mapUrl = null;
-            if ($mapUrlColumn && !empty($event->{$mapUrlColumn})) {
+            if ($mapUrlColumn && ! empty($event->{$mapUrlColumn})) {
                 $path = (string) $event->{$mapUrlColumn};
                 $mapUrl = $path;
             }
 
             $galleryUrl = null;
-            if ($galleryUrlColumn && !empty($event->{$galleryUrlColumn})) {
+            if ($galleryUrlColumn && ! empty($event->{$galleryUrlColumn})) {
                 $galleryUrl = (string) $event->{$galleryUrlColumn};
             }
 
             // Route will be implemented later.
-            $editionUrl = '/edities/' . $event->id;
+            $editionUrl = '/edities/'.$event->id;
 
             return [
                 'id' => $event->id,
@@ -152,7 +170,10 @@ class EventController extends Controller
 
         $upcoming = $events
             ->filter(function ($e) use ($now) {
-                if (!$e['starts_at']) return false;
+                if (! $e['starts_at']) {
+                    return false;
+                }
+
                 return Carbon::parse($e['starts_at'])->greaterThanOrEqualTo($now->startOfDay());
             })
             ->sortBy('starts_at')
@@ -160,7 +181,10 @@ class EventController extends Controller
 
         $past = $events
             ->filter(function ($e) use ($now) {
-                if (!$e['starts_at']) return true;
+                if (! $e['starts_at']) {
+                    return true;
+                }
+
                 return Carbon::parse($e['starts_at'])->lessThan($now->startOfDay());
             })
             ->sortByDesc('starts_at')
@@ -176,22 +200,22 @@ class EventController extends Controller
     {
         $event = $event->fresh();
 
-        $startsAtColumn = $this->firstExistingColumn('events', ['starts_at','start_at','start_date','date','event_date']);
-        $endsAtColumn = $this->firstExistingColumn('events', ['ends_at','end_at','end_date']);
-        $titleColumn = $this->firstExistingColumn('events', ['title','name']) ?? 'name';
-        $locationColumn = $this->firstExistingColumn('events', ['location','place','city']);
-        $descriptionColumn = $this->firstExistingColumn('events', ['description','content']);
+        $startsAtColumn = $this->firstExistingColumn('events', ['starts_at', 'start_at', 'start_date', 'date', 'event_date']);
+        $endsAtColumn = $this->firstExistingColumn('events', ['ends_at', 'end_at', 'end_date']);
+        $titleColumn = $this->firstExistingColumn('events', ['title', 'name']) ?? 'name';
+        $locationColumn = $this->firstExistingColumn('events', ['location', 'place', 'city']);
+        $descriptionColumn = $this->firstExistingColumn('events', ['description', 'content']);
 
         $headerImageColumn = $this->firstExistingColumn('events', [
-            'header_image_path','header_image','cover_image_path','cover_image','image_path','image','banner_path',
+            'header_image_path', 'header_image', 'cover_image_path', 'cover_image', 'image_path', 'image', 'banner_path',
         ]);
 
         $mapUrlColumn = $this->firstExistingColumn('events', [
-            'map_path','map_url','plattegrond_path','plattegrond_url',
+            'map_path', 'map_url', 'plattegrond_path', 'plattegrond_url',
         ]);
 
         $galleryUrlColumn = $this->firstExistingColumn('events', [
-            'google_photos_album_url','photo_gallery_url','gallery_url',
+            'google_photos_album_url', 'photo_gallery_url', 'gallery_url',
         ]);
 
         $startsAt = $startsAtColumn ? $event->{$startsAtColumn} : null;
@@ -199,19 +223,19 @@ class EventController extends Controller
         $title = (string) ($event->{$titleColumn} ?? '');
 
         $headerImageUrl = null;
-        if ($headerImageColumn && !empty($event->{$headerImageColumn})) {
+        if ($headerImageColumn && ! empty($event->{$headerImageColumn})) {
             $path = (string) $event->{$headerImageColumn};
             $headerImageUrl = $path;
         }
 
         $mapUrl = null;
-        if ($mapUrlColumn && !empty($event->{$mapUrlColumn})) {
+        if ($mapUrlColumn && ! empty($event->{$mapUrlColumn})) {
             $path = (string) $event->{$mapUrlColumn};
             $mapUrl = $path;
         }
 
         $galleryUrl = null;
-        if ($galleryUrlColumn && !empty($event->{$galleryUrlColumn})) {
+        if ($galleryUrlColumn && ! empty($event->{$galleryUrlColumn})) {
             $galleryUrl = (string) $event->{$galleryUrlColumn};
         }
 
