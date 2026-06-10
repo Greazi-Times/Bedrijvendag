@@ -4,17 +4,325 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
-/* Sidebar container */
+:root {
+    --dashboard-navy: 221 48% 22%;
+    --dashboard-blue: 217 91% 58%;
+    --dashboard-orange: 24 100% 50%;
+    --dashboard-ink: 221 52% 12%;
+    --dashboard-muted: 220 16% 43%;
+    --dashboard-border: 218 33% 88%;
+    --dashboard-card: 0 0% 100%;
+}
+
+.dark {
+    --dashboard-ink: 0 0% 98%;
+    --dashboard-muted: 218 22% 78%;
+    --dashboard-border: 220 20% 34%;
+    --dashboard-card: 222 30% 17%;
+}
+
+.fi-body,
+.fi-simple-layout {
+    background:
+        linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.07), transparent 34%), linear-gradient(315deg, hsl(var(--dashboard-orange) / 0.07), transparent 36%),
+        linear-gradient(180deg, hsl(215 92% 99%) 0%, hsl(30 100% 99%) 52%, hsl(214 64% 98%) 100%);
+    color: hsl(var(--dashboard-ink));
+}
+
+.dark .fi-body,
+.dark .fi-simple-layout {
+    background:
+        linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.12), transparent 34%), linear-gradient(315deg, hsl(var(--dashboard-orange) / 0.1), transparent 36%), hsl(222 30% 15%);
+}
+
+.fi-layout {
+    min-height: 100vh;
+}
+
+.fi-main {
+    --tw-ring-color: hsl(var(--dashboard-orange) / 0.25);
+}
+
+.fi-main-ctn {
+    background: transparent;
+}
+
+.fi-topbar {
+    background: hsl(0 0% 100% / 0.9);
+    border-bottom: 1px solid hsl(var(--dashboard-border) / 0.75);
+    box-shadow: 0 10px 28px hsl(var(--dashboard-navy) / 0.045);
+    backdrop-filter: blur(18px);
+}
+
+.dark .fi-topbar {
+    background: hsl(222 26% 19% / 0.9);
+    border-bottom-color: hsl(220 20% 36% / 0.7);
+}
+
 .fi-sidebar {
-    background-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
+    background:
+        linear-gradient(180deg, hsl(0 0% 100% / 0.94), hsl(217 95% 98% / 0.86)), linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.05), hsl(var(--dashboard-orange) / 0.05));
+    border-right: 1px solid hsl(var(--dashboard-border) / 0.76);
+    box-shadow: 14px 0 44px hsl(var(--dashboard-navy) / 0.055);
+    backdrop-filter: blur(22px);
 }
 
 .dark .fi-sidebar {
-    background-color: rgba(43, 43, 43, 0.3);
+    background:
+        linear-gradient(180deg, hsl(222 28% 19% / 0.94), hsl(221 34% 21% / 0.9)), linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.09), hsl(var(--dashboard-orange) / 0.08));
+    border-right-color: hsl(220 20% 36% / 0.74);
 }
 
-/* Optional: remove the grey default */
 .fi-sidebar::before {
     display: none;
+}
+
+.fi-sidebar-header {
+    border-bottom: 1px solid hsl(var(--dashboard-border) / 0.72);
+}
+
+.dark .fi-sidebar-header {
+    border-bottom-color: hsl(220 20% 36% / 0.74);
+}
+
+.fi-logo {
+    color: hsl(var(--dashboard-ink));
+    font-weight: 750;
+    letter-spacing: 0;
+}
+
+.fi-sidebar-nav {
+    padding-inline: 0.75rem;
+}
+
+.fi-sidebar-item-button {
+    border-radius: 0.875rem;
+    transition:
+        background-color 160ms ease,
+        color 160ms ease,
+        transform 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.fi-sidebar-item-button:hover {
+    background: hsl(var(--dashboard-blue) / 0.08);
+    color: hsl(var(--dashboard-ink));
+    transform: translateX(2px);
+}
+
+.fi-sidebar-item-active > .fi-sidebar-item-button,
+.fi-sidebar-item-button[aria-current='page'] {
+    background: linear-gradient(135deg, hsl(var(--dashboard-orange) / 0.13), hsl(var(--dashboard-blue) / 0.11));
+    color: hsl(var(--dashboard-ink));
+    box-shadow:
+        inset 0 0 0 1px hsl(var(--dashboard-orange) / 0.18),
+        0 10px 24px hsl(var(--dashboard-navy) / 0.055);
+}
+
+.fi-sidebar-item-active .fi-sidebar-item-icon,
+.fi-sidebar-item-button[aria-current='page'] .fi-sidebar-item-icon {
+    color: hsl(var(--dashboard-orange));
+}
+
+.fi-section,
+.fi-ta,
+.fi-wi-stats-overview-stat,
+.fi-simple-main {
+    background: hsl(var(--dashboard-card) / 0.88);
+    border: 1px solid hsl(var(--dashboard-border) / 0.78);
+    box-shadow: 0 14px 38px hsl(var(--dashboard-navy) / 0.055);
+    backdrop-filter: blur(18px);
+}
+
+.fi-section,
+.fi-ta,
+.fi-wi-stats-overview-stat,
+.fi-simple-main {
+    border-radius: 1.25rem;
+}
+
+.fi-wi-chart {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+.fi-wi-chart > .fi-section {
+    overflow: hidden;
+}
+
+.fi-wi-chart .fi-section-content {
+    padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.fi-wi-stats-overview {
+    gap: 1rem;
+}
+
+.fi-wi-stats-overview-stat {
+    min-height: 8.75rem;
+    background: linear-gradient(145deg, hsl(0 0% 100% / 0.9), hsl(216 100% 98% / 0.8));
+    box-shadow: 0 12px 32px hsl(var(--dashboard-navy) / 0.05);
+}
+
+.dark .fi-wi-stats-overview-stat {
+    background: linear-gradient(145deg, hsl(222 24% 22% / 0.9), hsl(221 28% 18% / 0.78));
+    border-color: hsl(220 20% 39% / 0.68);
+    box-shadow: 0 12px 28px hsl(221 52% 7% / 0.16);
+}
+
+.fi-wi-stats-overview-stat-label-ctn {
+    gap: 0.75rem;
+    color: hsl(var(--dashboard-muted));
+}
+
+.fi-wi-stats-overview-stat-label {
+    color: hsl(var(--dashboard-muted));
+    font-weight: 650;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    border-color: hsl(var(--dashboard-orange) / 0.38);
+    box-shadow: 0 18px 42px hsl(var(--dashboard-navy) / 0.08);
+}
+
+.fi-section-header {
+    background: transparent;
+}
+
+.fi-section.fi-aside {
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.fi-section.fi-aside > .fi-section-header {
+    align-self: start;
+    border: 0;
+    padding: 0;
+}
+
+.fi-section.fi-aside > .fi-section-header .fi-section-header-text-ctn {
+    gap: 0.35rem;
+}
+
+.fi-section.fi-aside > .fi-section-content-ctn {
+    background: hsl(0 0% 100% / 0.76);
+    border: 1px solid hsl(var(--dashboard-border) / 0.76);
+    border-radius: 1rem;
+    box-shadow: 0 10px 28px hsl(var(--dashboard-navy) / 0.04);
+}
+
+.dark .fi-section.fi-aside > .fi-section-content-ctn {
+    background: hsl(222 24% 21% / 0.72);
+    border-color: hsl(220 20% 40% / 0.7);
+}
+
+.fi-section.fi-aside > .fi-section-content-ctn > .fi-section-content {
+    padding: 1.5rem;
+}
+
+.fi-section-header-heading,
+.fi-header-heading {
+    color: hsl(var(--dashboard-ink));
+    font-weight: 750;
+    letter-spacing: 0;
+}
+
+.fi-header-subheading,
+.fi-section-header-description,
+.fi-ta-text,
+.fi-wi-stats-overview-stat-description {
+    color: hsl(var(--dashboard-muted));
+}
+
+.fi-btn {
+    border-radius: 0.875rem;
+    box-shadow: 0 8px 18px hsl(var(--dashboard-navy) / 0.06);
+    transition:
+        transform 160ms ease,
+        box-shadow 160ms ease,
+        background-color 160ms ease;
+}
+
+.fi-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px hsl(var(--dashboard-navy) / 0.09);
+}
+
+.fi-input-wrp,
+.fi-select-input,
+.fi-ta-search-field {
+    background: hsl(0 0% 100% / 0.88);
+    border-color: hsl(var(--dashboard-border) / 0.86);
+    border-radius: 0.875rem;
+    box-shadow: 0 10px 24px hsl(var(--dashboard-navy) / 0.04);
+}
+
+.dark .fi-input-wrp,
+.dark .fi-select-input,
+.dark .fi-ta-search-field {
+    background: hsl(222 24% 21% / 0.92);
+    border-color: hsl(220 20% 36% / 0.82);
+}
+
+.fi-input-wrp:focus-within,
+.fi-ta-search-field:focus-within {
+    border-color: hsl(var(--dashboard-orange) / 0.65);
+    box-shadow:
+        0 0 0 3px hsl(var(--dashboard-orange) / 0.14),
+        0 14px 30px hsl(var(--dashboard-navy) / 0.07);
+}
+
+.fi-ta-header,
+.fi-ta-content,
+.fi-ta-footer {
+    background: transparent;
+}
+
+.fi-ta {
+    overflow: hidden;
+}
+
+.fi-ta-header {
+    border-bottom-color: hsl(var(--dashboard-border) / 0.72);
+}
+
+.fi-ta-filter-indicators,
+.fi-ta-pagination {
+    background: hsl(0 0% 100% / 0.5);
+}
+
+.dark .fi-ta-filter-indicators,
+.dark .fi-ta-pagination {
+    background: hsl(222 24% 20% / 0.5);
+}
+
+.fi-ta-row {
+    transition:
+        background-color 140ms ease,
+        box-shadow 140ms ease;
+}
+
+.fi-ta-row:hover {
+    background: linear-gradient(90deg, hsl(var(--dashboard-blue) / 0.055), hsl(var(--dashboard-orange) / 0.04));
+}
+
+.fi-badge {
+    border-radius: 999px;
+    font-weight: 650;
+}
+
+.fi-wi-stats-overview-stat-value {
+    color: hsl(var(--dashboard-ink));
+    font-weight: 780;
+    letter-spacing: 0;
+}
+
+.fi-dropdown-panel,
+.fi-modal-window {
+    background: hsl(var(--dashboard-card) / 0.94);
+    border: 1px solid hsl(var(--dashboard-border) / 0.8);
+    border-radius: 1rem;
+    box-shadow: 0 20px 54px hsl(var(--dashboard-navy) / 0.12);
+    backdrop-filter: blur(18px);
 }

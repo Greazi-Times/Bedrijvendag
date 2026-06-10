@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Event;
 use App\Support\PageMedia;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -45,6 +47,9 @@ class HandleInertiaRequests extends Middleware
             'media' => [
                 'siteLogo' => PageMedia::siteLogo(),
             ],
+            'borrelEnrollmentOpen' => fn () => Event::query()
+                ->whereDate('date', '>', Carbon::today())
+                ->exists(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

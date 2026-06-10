@@ -58,7 +58,11 @@ Route::post('/borrel-signup', function (Request $request) {
     $eventId = $request->input('event_id');
 
     $validated = $request->validate([
-        'event_id' => ['required', 'integer', 'exists:events,id'],
+        'event_id' => [
+            'required',
+            'integer',
+            Rule::exists('events', 'id')->where(fn ($q) => $q->whereDate('date', '>', now()->toDateString())),
+        ],
         'name' => ['required', 'string', 'max:255'],
         'email' => [
             'required',
@@ -68,6 +72,7 @@ Route::post('/borrel-signup', function (Request $request) {
                 ->where(fn ($q) => $q->where('event_id', $eventId)),
         ],
     ], [
+        'event_id.exists' => 'Aanmelden voor de borrel is op dit moment niet mogelijk.',
         'email.unique' => 'Dit e-mailadres is al aangemeld voor deze borrel.',
     ]);
 

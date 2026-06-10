@@ -10,6 +10,7 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
     media: {
         siteLogo: string;
     };
+    borrelEnrollmentOpen: boolean;
     sidebarOpen: boolean;
     [key: string]: unknown;
 };

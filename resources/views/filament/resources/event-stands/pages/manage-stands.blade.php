@@ -1,10 +1,8 @@
 <x-filament-panels::page>
-    <div>
+    <div class="space-y-6">
         <x-filament::section>
             {{ $this->form }}
         </x-filament::section>
-
-        <div style="height: 24px;"></div>
 
         <div>
             {{ $this->table }}

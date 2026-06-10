@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import { Users, Building2, Compass, Handshake, Lightbulb, Wine, ArrowRight } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
@@ -15,6 +16,9 @@ type AboutImages = {
 const props = defineProps<{
     aboutImages: AboutImages;
 }>();
+
+const page = usePage();
+const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentOpen));
 </script>
 
 <template>
@@ -46,6 +50,7 @@ const props = defineProps<{
                         </Link>
 
                         <Link
+                            v-if="borrelEnrollmentOpen"
                             href="/#borrel"
                             class="inline-flex items-center justify-center rounded-xl bg-white/80 px-6 py-3 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border/80 backdrop-blur transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                         >
@@ -214,7 +219,10 @@ const props = defineProps<{
             <div class="flex flex-wrap gap-8 md:flex-nowrap md:items-center md:justify-between">
                 <div class="lg:w-1/2">
                     <h2 class="mb-4 text-3xl font-semibold text-white lg:text-4xl">Mis de volgende editie niet</h2>
-                    <p class="text-white/90">Bekijk eerdere edities of meld je aan voor de borrel. Dan houden we je op de hoogte.</p>
+                    <p class="text-white/90">
+                        <template v-if="borrelEnrollmentOpen">Bekijk eerdere edities of meld je aan voor de borrel. Dan houden we je op de hoogte.</template>
+                        <template v-else>Bekijk eerdere edities en ontdek welke bedrijven eerder aansloten.</template>
+                    </p>
                 </div>
 
                 <div class="shrink-0">
@@ -226,6 +234,7 @@ const props = defineProps<{
                             Bekijk alle edities
                         </Link>
                         <Link
+                            v-if="borrelEnrollmentOpen"
                             href="/#borrel"
                             class="inline-flex items-center justify-center rounded-full bg-white/10 px-7.5 py-3 text-sm font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
                         >

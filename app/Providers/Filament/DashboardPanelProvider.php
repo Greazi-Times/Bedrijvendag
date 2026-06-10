@@ -7,6 +7,7 @@ use App\Filament\Widgets\CompaniesPerEventChart;
 use App\Filament\Widgets\DashboardStatsOverview;
 use App\Filament\Widgets\UpcomingEventWidget;
 use Filafly\Icons\Phosphor\PhosphorIcons;
+use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -33,13 +34,19 @@ class DashboardPanelProvider extends PanelProvider
             ->id('dashboard')
             ->path('dashboard')
             ->viteTheme('resources/css/filament/dashboard/theme.css')
+            ->brandName('ATIx-Bedrijvendag')
+            ->brandLogo(asset('favicon.svg'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(asset('favicon.svg'))
+            ->defaultThemeMode(ThemeMode::Light)
             ->login()
             ->colors([
-                'primary' => Color::Orange,
+                'primary' => '#ff6600',
+                'info' => '#3b82f6',
+                'gray' => Color::Slate,
                 'success' => Color::Emerald,
                 'warning' => Color::Amber,
                 'danger' => Color::Rose,
-                'info' => Color::Sky,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
