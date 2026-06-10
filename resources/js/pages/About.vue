@@ -4,6 +4,17 @@ import { Users, Building2, Compass, Handshake, Lightbulb, Wine, ArrowRight } fro
 
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
+
+type AboutImages = {
+    hero: string;
+    infoFirst: string;
+    infoSecond: string;
+    infoThird: string;
+};
+
+const props = defineProps<{
+    aboutImages: AboutImages;
+}>();
 </script>
 
 <template>
@@ -12,11 +23,11 @@ import AppHeader from '@/components/AppHeader.vue';
     <AppHeader class="sticky top-0 z-50" />
 
     <!-- Hero -->
-    <header class="bg-background px-6 pt-14 pb-16 lg:px-16">
-        <div class="mx-auto max-w-7xl">
+    <header class="brand-hero overflow-hidden px-6 pt-14 pb-16 lg:px-16">
+        <div class="relative z-10 mx-auto max-w-7xl">
             <div class="grid items-center gap-10 lg:grid-cols-12">
                 <div class="lg:col-span-7">
-                    <p class="inline-flex items-center rounded-full bg-accent px-4 py-2 text-xs font-semibold tracking-wide text-accent-foreground ring-1 ring-border">OVER ONS</p>
+                    <p class="brand-eyebrow">OVER ONS</p>
 
                     <h1 class="mt-6 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">ATIx Bedrijvendag</h1>
 
@@ -28,7 +39,7 @@ import AppHeader from '@/components/AppHeader.vue';
                     <div class="mt-8 flex flex-wrap items-center gap-3">
                         <Link
                             href="/edities"
-                            class="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                            class="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg ring-1 shadow-primary/20 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                         >
                             Bekijk edities
                             <ArrowRight class="ml-2 h-4 w-4" />
@@ -36,24 +47,24 @@ import AppHeader from '@/components/AppHeader.vue';
 
                         <Link
                             href="/#borrel"
-                            class="inline-flex items-center justify-center rounded-xl bg-background px-6 py-3 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                            class="inline-flex items-center justify-center rounded-xl bg-white/80 px-6 py-3 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border/80 backdrop-blur transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                         >
                             Aanmelden borrel
                         </Link>
                     </div>
 
                     <div class="mt-10 grid gap-4 sm:grid-cols-3">
-                        <div class="rounded-2xl bg-background p-5 shadow-sm ring-1 ring-border">
+                        <div class="brand-card rounded-2xl p-5">
                             <div class="text-xs font-semibold text-muted-foreground">Doel</div>
                             <div class="mt-2 text-sm font-semibold text-foreground">Connecties leggen</div>
                             <p class="mt-1 text-sm text-muted-foreground">Studenten en bedrijven direct in gesprek.</p>
                         </div>
-                        <div class="rounded-2xl bg-background p-5 shadow-sm ring-1 ring-border">
+                        <div class="brand-card rounded-2xl p-5">
                             <div class="text-xs font-semibold text-muted-foreground">Focus</div>
                             <div class="mt-2 text-sm font-semibold text-foreground">Oriënteren</div>
                             <p class="mt-1 text-sm text-muted-foreground">Stages en functies verkennen.</p>
                         </div>
-                        <div class="rounded-2xl bg-background p-5 shadow-sm ring-1 ring-border">
+                        <div class="brand-card rounded-2xl p-5">
                             <div class="text-xs font-semibold text-muted-foreground">Sfeer</div>
                             <div class="mt-2 text-sm font-semibold text-foreground">Laagdrempelig</div>
                             <p class="mt-1 text-sm text-muted-foreground">Vrij rondlopen en vragen stellen.</p>
@@ -63,12 +74,11 @@ import AppHeader from '@/components/AppHeader.vue';
 
                 <div class="lg:col-span-5">
                     <div class="relative mx-auto w-full max-w-md">
-                        <div class="pointer-events-none absolute -top-10 -right-6 h-72 w-72 rounded-full bg-secondary/20"></div>
-                        <div class="pointer-events-none absolute top-24 -left-8 h-28 w-28 rounded-[2.25rem] bg-primary/25"></div>
-                        <div class="pointer-events-none absolute right-10 -bottom-8 h-20 w-20 rounded-full bg-accent"></div>
+                        <div class="pointer-events-none absolute -top-5 right-8 h-8 w-52 rounded-full bg-secondary/25 blur-sm"></div>
+                        <div class="pointer-events-none absolute bottom-8 -left-6 h-8 w-44 rounded-full bg-primary/25 blur-sm"></div>
 
-                        <div class="relative overflow-hidden rounded-[999px] shadow-lg ring-1 ring-border">
-                            <img src="/images/info-7.jpg" alt="ATIx Bedrijvendag" class="h-[420px] w-full object-cover object-center" />
+                        <div class="brand-card relative overflow-hidden rounded-3xl p-3">
+                            <img :src="props.aboutImages.hero" alt="ATIx Bedrijvendag" class="h-[420px] w-full rounded-2xl object-cover object-center" />
                         </div>
                     </div>
                 </div>
@@ -77,7 +87,7 @@ import AppHeader from '@/components/AppHeader.vue';
     </header>
 
     <!-- What is it -->
-    <section class="bg-background px-6 py-20 lg:px-16">
+    <section class="brand-section px-6 py-20 lg:px-16">
         <div class="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-12">
             <div class="lg:col-span-6">
                 <div class="relative mx-auto max-w-xl">
@@ -87,23 +97,23 @@ import AppHeader from '@/components/AppHeader.vue';
 
                     <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
                         <div class="flex flex-col gap-6 sm:w-5/12">
-                            <div class="overflow-hidden rounded-3xl shadow-sm ring-1 ring-border">
+                            <div class="brand-card overflow-hidden rounded-3xl p-2">
                                 <div class="aspect-[3/4] w-full">
-                                    <img src="/images/info-4.jpg" alt="Sfeer" class="h-full w-full object-cover" />
+                                    <img :src="props.aboutImages.infoFirst" alt="Sfeer" class="h-full w-full rounded-2xl object-cover" />
                                 </div>
                             </div>
 
-                            <div class="overflow-hidden rounded-3xl shadow-sm ring-1 ring-border">
+                            <div class="brand-card overflow-hidden rounded-3xl p-2">
                                 <div class="aspect-[3/4] w-full">
-                                    <img src="/images/info-5.jpg" alt="Studenten" class="h-full w-full object-cover" />
+                                    <img :src="props.aboutImages.infoSecond" alt="Studenten" class="h-full w-full rounded-2xl object-cover" />
                                 </div>
                             </div>
                         </div>
 
                         <div class="sm:w-7/12">
-                            <div class="overflow-hidden rounded-3xl shadow-sm ring-1 ring-border">
+                            <div class="brand-card overflow-hidden rounded-3xl p-2">
                                 <div class="aspect-[3/4] w-full">
-                                    <img src="/images/info-6.jpg" alt="Bedrijven" class="h-full w-full object-cover object-center" />
+                                    <img :src="props.aboutImages.infoThird" alt="Bedrijven" class="h-full w-full rounded-2xl object-cover object-center" />
                                 </div>
                             </div>
                         </div>
@@ -122,11 +132,11 @@ import AppHeader from '@/components/AppHeader.vue';
                 </p>
 
                 <div class="mt-8 grid gap-4 sm:grid-cols-2">
-                    <div class="rounded-2xl bg-background p-5 shadow-sm ring-1 ring-border">
+                    <div class="brand-card rounded-2xl p-5">
                         <div class="text-sm font-semibold text-foreground">Voor studenten</div>
                         <p class="mt-2 text-sm text-muted-foreground">Stel vragen, bouw je netwerk en vind kansen voor stage of afstuderen.</p>
                     </div>
-                    <div class="rounded-2xl bg-background p-5 shadow-sm ring-1 ring-border">
+                    <div class="brand-card rounded-2xl p-5">
                         <div class="text-sm font-semibold text-foreground">Voor bedrijven</div>
                         <p class="mt-2 text-sm text-muted-foreground">Ontmoet gemotiveerde studenten en presenteer je organisatie aan toekomstig talent.</p>
                     </div>
@@ -136,7 +146,7 @@ import AppHeader from '@/components/AppHeader.vue';
     </section>
 
     <!-- Values -->
-    <section class="bg-background px-6 py-20 lg:px-16">
+    <section class="brand-band px-6 py-20 lg:px-16">
         <div class="mx-auto max-w-7xl">
             <div class="mx-auto max-w-3xl text-center">
                 <p class="text-sm font-semibold text-primary">Onze waarden</p>
@@ -145,7 +155,7 @@ import AppHeader from '@/components/AppHeader.vue';
             </div>
 
             <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div class="group rounded-2xl bg-background p-8 shadow-sm ring-1 ring-border transition hover:bg-accent/20 hover:shadow-xl">
+                <div class="brand-card brand-card-hover group rounded-2xl p-8">
                     <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15">
                         <Compass class="h-6 w-6 text-primary" />
                     </div>
@@ -153,7 +163,7 @@ import AppHeader from '@/components/AppHeader.vue';
                     <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Een informele sfeer waarin je makkelijk op iemand afstapt.</p>
                 </div>
 
-                <div class="group rounded-2xl bg-background p-8 shadow-sm ring-1 ring-border transition hover:bg-accent/20 hover:shadow-xl">
+                <div class="brand-card brand-card-hover group rounded-2xl p-8">
                     <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/15">
                         <Lightbulb class="h-6 w-6 text-secondary" />
                     </div>
@@ -161,7 +171,7 @@ import AppHeader from '@/components/AppHeader.vue';
                     <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Focus op stages, traineeships en startersfuncties.</p>
                 </div>
 
-                <div class="group rounded-2xl bg-background p-8 shadow-sm ring-1 ring-border transition hover:bg-accent/20 hover:shadow-xl">
+                <div class="brand-card brand-card-hover group rounded-2xl p-8">
                     <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-chart-2/15">
                         <Wine class="h-6 w-6 text-chart-2" />
                     </div>
@@ -169,7 +179,7 @@ import AppHeader from '@/components/AppHeader.vue';
                     <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Sluit af met een borrel en praat door buiten de stands.</p>
                 </div>
 
-                <div class="group rounded-2xl bg-background p-8 shadow-sm ring-1 ring-border transition hover:bg-accent/20 hover:shadow-xl">
+                <div class="brand-card brand-card-hover group rounded-2xl p-8">
                     <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15">
                         <Users class="h-6 w-6 text-primary" />
                     </div>
@@ -177,7 +187,7 @@ import AppHeader from '@/components/AppHeader.vue';
                     <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Leg contact en houd het simpel: kort, helder, en persoonlijk.</p>
                 </div>
 
-                <div class="group rounded-2xl bg-background p-8 shadow-sm ring-1 ring-border transition hover:bg-accent/20 hover:shadow-xl">
+                <div class="brand-card brand-card-hover group rounded-2xl p-8">
                     <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/15">
                         <Building2 class="h-6 w-6 text-secondary" />
                     </div>
@@ -185,7 +195,7 @@ import AppHeader from '@/components/AppHeader.vue';
                     <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Hoor hoe teams werken en welke stappen je kunt zetten.</p>
                 </div>
 
-                <div class="group rounded-2xl bg-background p-8 shadow-sm ring-1 ring-border transition hover:bg-accent/20 hover:shadow-xl">
+                <div class="brand-card brand-card-hover group rounded-2xl p-8">
                     <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-chart-2/15">
                         <Handshake class="h-6 w-6 text-chart-2" />
                     </div>
@@ -197,7 +207,7 @@ import AppHeader from '@/components/AppHeader.vue';
     </section>
 
     <!-- CTA -->
-    <section class="relative overflow-hidden bg-primary px-6 py-16 lg:px-16 lg:py-20">
+    <section class="brand-dark-cta relative overflow-hidden px-6 py-16 lg:px-16 lg:py-20">
         <img alt="Bg Shape" loading="lazy" width="1660" height="337" decoding="async" class="pointer-events-none absolute right-0 bottom-0" src="/images/shape/shape-16.svg" />
 
         <div class="relative z-10 mx-auto max-w-7xl">

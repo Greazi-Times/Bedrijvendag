@@ -22,18 +22,24 @@ type PartnerCard = {
     image_url: string | null;
 };
 
+type HomeImages = {
+    hero: string;
+    infoFirst: string;
+    infoSecond: string;
+    infoThird: string;
+};
+
 const props = defineProps<{
     recentEvents: EventCard[];
     highlightEvent: EventCard | null;
     closingBorrelCount: number;
     partners: PartnerCard[];
+    homeImages: HomeImages;
+    homeYoutubeUrl: string;
 }>();
 
 const isVideoOpen = ref(false);
 const shouldShowBorrelCount = computed(() => props.closingBorrelCount >= 25);
-
-// Replace this with your real YouTube video id later.
-const youtubeVideoId = ref('yMBxJQk7gbg');
 
 // Used to force iframe remount to stop playback on close.
 const videoInstanceKey = ref(0);
@@ -80,8 +86,36 @@ const latestEditions = computed(() => {
     return picked.map(({ __t, ...e }) => e);
 });
 
+const extractYoutubeId = (value: string | null | undefined) => {
+    const fallback = 'yMBxJQk7gbg';
+    const source = value?.trim();
+
+    if (!source) return fallback;
+
+    try {
+        const url = new URL(source.startsWith('www.') ? `https://${source}` : source);
+        const videoId = url.searchParams.get('v');
+
+        if (videoId) return videoId;
+
+        const parts = url.pathname.split('/').filter(Boolean);
+
+        if (url.hostname.includes('youtu.be') && parts[0]) return parts[0];
+
+        const videoSegmentIndex = parts.findIndex((part) => ['embed', 'shorts', 'live'].includes(part));
+
+        if (videoSegmentIndex >= 0 && parts[videoSegmentIndex + 1]) {
+            return parts[videoSegmentIndex + 1];
+        }
+    } catch {
+        // The setting may be a raw YouTube video ID instead of a URL.
+    }
+
+    return source.split(/[?&]/)[0] || fallback;
+};
+
 const youtubeEmbedUrl = computed(() => {
-    const id = youtubeVideoId.value.trim();
+    const id = extractYoutubeId(props.homeYoutubeUrl);
     return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
 });
 
@@ -138,14 +172,12 @@ const triggerBorrelSuccess = () => {
 
     <AppHeader class="sticky top-0 z-50" />
 
-    <header class="bg-background px-6 pt-14 pb-16 lg:px-16">
-        <div class="mx-auto max-w-7xl">
+    <header class="brand-hero overflow-hidden px-6 pt-14 pb-16 lg:px-16">
+        <div class="relative z-10 mx-auto max-w-7xl">
             <!-- Top: copy + image -->
             <div class="grid items-center gap-10 lg:grid-cols-12">
                 <div class="lg:col-span-7">
-                    <p class="inline-flex items-center rounded-full bg-accent px-4 py-2 text-xs font-semibold tracking-wide text-accent-foreground ring-1 ring-border">
-                        VOOR STUDENTEN & DOOR STUDENTEN
-                    </p>
+                    <p class="brand-eyebrow">VOOR STUDENTEN & DOOR STUDENTEN</p>
 
                     <h1 class="mt-6 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">DE ATIx BEDRIJVENDAG</h1>
 
@@ -153,14 +185,14 @@ const triggerBorrelSuccess = () => {
 
                     <div class="mt-8 flex flex-wrap items-center gap-3">
                         <Link
-                            class="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                            class="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg ring-1 shadow-primary/20 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                             href="/over-ons"
                         >
                             Meer weten
                         </Link>
 
                         <Link
-                            class="inline-flex items-center justify-center rounded-xl bg-background px-6 py-3 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                            class="inline-flex items-center justify-center rounded-xl bg-white/80 px-6 py-3 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border/80 backdrop-blur transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                             href="/edities"
                         >
                             Vorige edities
@@ -168,7 +200,7 @@ const triggerBorrelSuccess = () => {
 
                         <Link
                             href="#borrel"
-                            class="inline-flex items-center justify-center rounded-xl bg-secondary px-6 py-3 text-sm font-semibold text-secondary-foreground shadow-sm ring-1 ring-secondary/25 transition hover:bg-secondary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                            class="inline-flex items-center justify-center rounded-xl bg-secondary px-6 py-3 text-sm font-semibold text-secondary-foreground shadow-lg ring-1 shadow-secondary/20 ring-secondary/25 transition hover:bg-secondary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                         >
                             Aanmelden borrel
                         </Link>
@@ -193,13 +225,12 @@ const triggerBorrelSuccess = () => {
                 <div class="lg:col-span-5">
                     <div class="relative mx-auto w-full max-w-md">
                         <!-- Decorative shapes (token based) -->
-                        <div class="pointer-events-none absolute -top-10 -right-6 h-72 w-72 rounded-full bg-secondary/20"></div>
-                        <div class="pointer-events-none absolute top-24 -left-8 h-28 w-28 rounded-[2.25rem] bg-primary/25"></div>
-                        <div class="pointer-events-none absolute right-10 -bottom-8 h-20 w-20 rounded-full bg-accent"></div>
+                        <div class="pointer-events-none absolute -top-5 right-8 h-8 w-52 rounded-full bg-secondary/25 blur-sm"></div>
+                        <div class="pointer-events-none absolute bottom-8 -left-6 h-8 w-44 rounded-full bg-primary/25 blur-sm"></div>
 
                         <!-- Image container -->
-                        <div class="relative overflow-hidden rounded-[999px] shadow-lg ring-1 ring-border">
-                            <img src="/images/hero.png" alt="ATIx Bedrijvendag" class="h-[420px] w-full object-cover object-center" />
+                        <div class="brand-card relative overflow-hidden rounded-3xl p-3">
+                            <img :src="props.homeImages.hero" alt="ATIx Bedrijvendag" class="h-[420px] w-full rounded-2xl object-cover object-center" />
                         </div>
                     </div>
                 </div>
@@ -208,7 +239,7 @@ const triggerBorrelSuccess = () => {
             <!-- Bottom: 3 scopes/features -->
             <div class="mt-20 grid gap-14 md:grid-cols-3 md:gap-16">
                 <div class="flex items-start gap-6">
-                    <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary/15">
+                    <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-primary/15 ring-1 ring-primary/20">
                         <Users class="h-9 w-9 text-primary" />
                     </div>
                     <div>
@@ -221,7 +252,7 @@ const triggerBorrelSuccess = () => {
                 </div>
 
                 <div class="flex items-start gap-6">
-                    <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-secondary/15">
+                    <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-secondary/15 ring-1 ring-secondary/20">
                         <Compass class="h-9 w-9 text-secondary" />
                     </div>
                     <div>
@@ -233,7 +264,7 @@ const triggerBorrelSuccess = () => {
                 </div>
 
                 <div class="flex items-start gap-6">
-                    <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-chart-2/15">
+                    <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-chart-2/15 ring-1 ring-chart-2/20">
                         <LogIn class="h-9 w-9 text-chart-2" />
                     </div>
                     <div>
@@ -248,7 +279,7 @@ const triggerBorrelSuccess = () => {
     </header>
 
     <!-- What is ATIx Bedrijvendag -->
-    <section class="bg-background px-6 py-20 lg:px-16">
+    <section class="brand-section px-6 py-20 lg:px-16">
         <div class="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-12">
             <!-- Left: image collage -->
             <div class="lg:col-span-6">
@@ -266,24 +297,24 @@ const triggerBorrelSuccess = () => {
                     <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
                         <!-- Left column: 2 stacked images -->
                         <div class="flex flex-col gap-6 sm:w-5/12">
-                            <div class="overflow-hidden rounded-3xl shadow-sm ring-1 ring-border">
+                            <div class="brand-card overflow-hidden rounded-3xl p-2">
                                 <div class="aspect-[3/4] w-full">
-                                    <img src="/images/info-1.jpg" alt="ATIx Bedrijvendag sfeer" class="h-full w-full object-cover" />
+                                    <img :src="props.homeImages.infoFirst" alt="ATIx Bedrijvendag sfeer" class="h-full w-full rounded-2xl object-cover" />
                                 </div>
                             </div>
 
-                            <div class="overflow-hidden rounded-3xl shadow-sm ring-1 ring-border">
+                            <div class="brand-card overflow-hidden rounded-3xl p-2">
                                 <div class="aspect-[3/4] w-full">
-                                    <img src="/images/info-2.jpg" alt="ATIx Bedrijvendag studenten" class="h-full w-full object-cover" />
+                                    <img :src="props.homeImages.infoSecond" alt="ATIx Bedrijvendag studenten" class="h-full w-full rounded-2xl object-cover" />
                                 </div>
                             </div>
                         </div>
 
                         <!-- Right: taller image -->
                         <div class="sm:w-7/12">
-                            <div class="overflow-hidden rounded-3xl shadow-sm ring-1 ring-border">
+                            <div class="brand-card overflow-hidden rounded-3xl p-2">
                                 <div class="aspect-[3/4] w-full">
-                                    <img src="/images/info-3.jpg" alt="ATIx Bedrijvendag bedrijven" class="h-full w-full object-cover object-center" />
+                                    <img :src="props.homeImages.infoThird" alt="ATIx Bedrijvendag bedrijven" class="h-full w-full rounded-2xl object-cover object-center" />
                                 </div>
                             </div>
                         </div>
@@ -340,7 +371,7 @@ const triggerBorrelSuccess = () => {
     </section>
 
     <!-- CTA under Latest editions -->
-    <section class="relative overflow-hidden bg-primary px-6 py-16 lg:px-16 lg:py-20">
+    <section class="brand-dark-cta relative overflow-hidden px-6 py-16 lg:px-16 lg:py-20">
         <img alt="Bg Shape" loading="lazy" width="1660" height="337" decoding="async" class="pointer-events-none absolute right-0 bottom-0" src="/images/shape/shape-16.svg" />
 
         <div class="relative z-10 mx-auto max-w-7xl">
@@ -371,12 +402,12 @@ const triggerBorrelSuccess = () => {
     </section>
 
     <!-- Our values -->
-    <section class="bg-background px-6 py-20 lg:px-16">
+    <section class="brand-band px-6 py-20 lg:px-16">
         <div class="mx-auto max-w-6xl">
             <h2 class="text-center text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Onze Waarden</h2>
 
-            <div class="mt-12 grid grid-cols-1 gap-y-0 md:grid-cols-2 lg:grid-cols-3">
-                <div class="rounded-lg px-8 py-12 transition duration-300 ease-in-out hover:bg-accent/20 hover:shadow-xl">
+            <div class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
+                <div class="brand-card brand-card-hover rounded-2xl px-8 py-12">
                     <PhArrowDown :size="50" weight="duotone" class="text-primary" />
                     <h3 class="mt-11 mb-5 text-2xl font-semibold tracking-tight text-foreground">Laagdrempelig</h3>
                     <p class="text-base leading-relaxed text-muted-foreground">
@@ -384,7 +415,7 @@ const triggerBorrelSuccess = () => {
                     </p>
                 </div>
 
-                <div class="rounded-lg px-8 py-12 transition duration-300 ease-in-out hover:bg-accent/20 hover:shadow-xl">
+                <div class="brand-card brand-card-hover rounded-2xl px-8 py-12">
                     <PhBook :size="50" weight="duotone" class="text-primary" />
                     <h3 class="mt-11 mb-5 text-2xl font-semibold tracking-tight text-foreground">Toekomstgericht</h3>
                     <p class="text-base leading-relaxed text-muted-foreground">
@@ -392,25 +423,25 @@ const triggerBorrelSuccess = () => {
                     </p>
                 </div>
 
-                <div class="rounded-lg px-8 py-12 transition duration-300 ease-in-out hover:bg-accent/20 hover:shadow-xl">
+                <div class="brand-card brand-card-hover rounded-2xl px-8 py-12">
                     <PhWine :size="50" weight="duotone" class="text-primary" />
                     <h3 class="mt-11 mb-5 text-2xl font-semibold tracking-tight text-foreground">Borrelen</h3>
                     <p class="text-base leading-relaxed text-muted-foreground">Sluit de dag af met een gezellige borrel en netwerk in een informele setting.</p>
                 </div>
 
-                <div class="rounded-lg px-8 py-12 transition duration-300 ease-in-out hover:bg-accent/20 hover:shadow-xl">
+                <div class="brand-card brand-card-hover rounded-2xl px-8 py-12">
                     <PhShareNetwork :size="50" weight="duotone" class="text-primary" />
                     <h3 class="mt-11 mb-5 text-2xl font-semibold tracking-tight text-foreground">Netwerken</h3>
                     <p class="text-base leading-relaxed text-muted-foreground">Breid je netwerk uit en leg waardevolle contacten voor je toekomstige carrière.</p>
                 </div>
 
-                <div class="rounded-lg px-8 py-12 transition duration-300 ease-in-out hover:bg-accent/20 hover:shadow-xl">
+                <div class="brand-card brand-card-hover rounded-2xl px-8 py-12">
                     <PhMicrophone :size="50" weight="duotone" class="text-primary" />
                     <h3 class="mt-11 mb-5 text-2xl font-semibold tracking-tight text-foreground">Inspirerend</h3>
                     <p class="text-base leading-relaxed text-muted-foreground">Laat je inspireren door de verhalen en ervaringen van professionals uit het veld.</p>
                 </div>
 
-                <div class="rounded-lg px-8 py-12 transition duration-300 ease-in-out hover:bg-accent/20 hover:shadow-xl">
+                <div class="brand-card brand-card-hover rounded-2xl px-8 py-12">
                     <PhHandshake :size="50" weight="duotone" class="text-primary" />
                     <h3 class="mt-11 mb-5 text-2xl font-semibold tracking-tight text-foreground">Samenwerking</h3>
                     <p class="text-base leading-relaxed text-muted-foreground">Werk samen met medestudenten en professionals om nieuwe kansen te ontdekken.</p>
@@ -422,7 +453,7 @@ const triggerBorrelSuccess = () => {
     <!-- Borrel Aanmelden Form -->
     <section
         id="borrel"
-        class="relative overflow-hidden bg-background px-6 py-20 lg:px-16"
+        class="brand-section relative overflow-hidden px-6 py-20 lg:px-16"
         style="background-image: url('/images/shape/shape-12.svg'); background-repeat: no-repeat; background-position: left bottom; background-size: 900px auto"
     >
         <div class="relative z-10 mx-auto max-w-7xl">
@@ -441,7 +472,7 @@ const triggerBorrelSuccess = () => {
             </div>
 
             <div class="mx-auto mt-12 max-w-2xl">
-                <div class="relative overflow-hidden rounded-2xl bg-background p-6 shadow-sm ring-1 ring-border sm:p-8">
+                <div class="brand-card relative overflow-hidden rounded-2xl p-6 sm:p-8">
                     <!-- Card decorations -->
                     <div class="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/10"></div>
                     <div class="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-secondary/10"></div>
@@ -464,7 +495,7 @@ const triggerBorrelSuccess = () => {
                                 v-model="borrelForm.name"
                                 type="text"
                                 autocomplete="name"
-                                class="w-full rounded-xl bg-background px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 placeholder="Voor- en achternaam"
                             />
                             <p v-if="borrelForm.errors.name" class="mt-2 text-sm text-destructive">
@@ -478,7 +509,7 @@ const triggerBorrelSuccess = () => {
                                 v-model="borrelForm.email"
                                 type="email"
                                 autocomplete="email"
-                                class="w-full rounded-xl bg-background px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 placeholder="E-mailadres"
                             />
                             <p v-if="borrelForm.errors.email" class="mt-2 text-sm text-destructive">
@@ -514,7 +545,7 @@ const triggerBorrelSuccess = () => {
     </section>
 
     <!-- Partners -->
-    <section id="partners" class="bg-accent/50 px-6 py-16 lg:px-16">
+    <section id="partners" class="brand-band px-6 py-16 lg:px-16">
         <div class="mx-auto max-w-7xl">
             <div class="mx-auto max-w-3xl text-center">
                 <p class="text-sm font-semibold text-primary">Partners</p>
@@ -522,7 +553,7 @@ const triggerBorrelSuccess = () => {
                 <p class="mt-4 text-base leading-relaxed text-muted-foreground">Deze partijen maken ATIx Bedrijvendag mogelijk.</p>
             </div>
 
-            <div class="mt-10 rounded-2xl bg-accent/10 p-6 ring-1 ring-border sm:p-8">
+            <div class="brand-card mt-10 rounded-2xl p-6 sm:p-8">
                 <div class="flex flex-wrap items-center justify-center gap-x-14 gap-y-10">
                     <div v-for="p in props.partners" :key="p.id" class="group flex basis-1/2 items-center justify-center sm:basis-1/3 lg:basis-1/4">
                         <component :is="p.url ? 'a' : 'div'" :href="p.url ?? undefined" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center">
@@ -544,7 +575,7 @@ const triggerBorrelSuccess = () => {
 
     <!-- Latest editions (3 most recent past events) -->
     <section
-        class="relative overflow-hidden bg-background px-6 py-20 lg:px-16"
+        class="brand-section relative overflow-hidden px-6 py-20 lg:px-16"
         style="background-image: url('/images/shape/shape-13.svg'); background-repeat: no-repeat; background-position: right top; background-size: 1500px auto"
     >
         <div class="relative mx-auto max-w-7xl">
@@ -555,7 +586,7 @@ const triggerBorrelSuccess = () => {
             </div>
 
             <div class="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                <article v-for="e in latestEditions" :key="e.id" class="group overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-border transition hover:shadow-xl">
+                <article v-for="e in latestEditions" :key="e.id" class="brand-card brand-card-hover group overflow-hidden rounded-2xl">
                     <div class="relative aspect-[16/10] w-full bg-accent/20">
                         <img v-if="e.image_url" :src="e.image_url" :alt="e.name" class="h-full w-full object-cover" />
                         <div v-else class="flex h-full w-full items-center justify-center text-sm text-muted-foreground">Geen afbeelding</div>

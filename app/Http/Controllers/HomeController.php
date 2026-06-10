@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BorrelEnrollment;
 use App\Models\Event;
 use App\Models\Partner;
+use App\Support\PageMedia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -72,6 +73,8 @@ class HomeController extends Controller
             'highlightEvent' => $highlightEventPayload,
             'closingBorrelCount' => $closingBorrelCount,
             'partners' => $partners,
+            'homeImages' => PageMedia::homeImages(),
+            'homeYoutubeUrl' => PageMedia::homeYoutubeUrl(),
         ]);
     }
 

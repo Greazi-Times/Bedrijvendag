@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 
-const images = [
+const fallbackImages = [
     '/images/slides/Bedrijvendag-maart-26-2026-3.png',
     '/images/slides/Bedrijvendag-maart-26-2026-4.png',
     '/images/slides/Bedrijvendag-maart-26-2026-5.png',
@@ -9,11 +9,16 @@ const images = [
     '/images/slides/Bedrijvendag-maart-26-2026-7.png',
 ];
 
+const props = defineProps<{
+    slideImages: string[];
+}>();
+
+const images = computed(() => (props.slideImages.length > 0 ? props.slideImages : fallbackImages));
 const currentIndex = ref(0);
 let intervalId: ReturnType<typeof setInterval> | null = null;
 
 function preloadImages() {
-    images.forEach((src) => {
+    images.value.forEach((src) => {
         const img = new Image();
         img.src = src;
     });
@@ -23,7 +28,7 @@ onMounted(() => {
     preloadImages();
 
     intervalId = setInterval(() => {
-        currentIndex.value = (currentIndex.value + 1) % images.length;
+        currentIndex.value = (currentIndex.value + 1) % images.value.length;
     }, 8000);
 });
 

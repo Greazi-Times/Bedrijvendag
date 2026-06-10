@@ -37,26 +37,17 @@ onBeforeUnmount(() => {
 
     <AppHeader class="sticky top-0 z-50" />
 
-    <section id="support" class="relative overflow-hidden bg-background px-6 py-20 lg:px-16 lg:py-24">
-        <!-- Decorative circles like Home -->
-        <div class="pointer-events-none absolute -top-10 -right-6 h-72 w-72 rounded-full bg-secondary/20"></div>
-        <div class="pointer-events-none absolute top-24 -left-8 h-28 w-28 rounded-[2.25rem] bg-primary/25"></div>
-        <div class="pointer-events-none absolute right-10 -bottom-8 h-20 w-20 rounded-full bg-accent"></div>
-        <div class="pointer-events-none absolute bottom-10 left-10 h-36 w-36 rounded-full bg-primary/10"></div>
-
+    <section id="support" class="brand-hero relative overflow-hidden px-6 py-20 lg:px-16 lg:py-24">
         <div class="relative mx-auto max-w-7xl">
             <div class="mx-auto max-w-3xl text-center">
-                <p class="text-sm font-semibold text-primary">Contact</p>
+                <p class="brand-eyebrow">Contact</p>
                 <h1 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Neem contact op</h1>
                 <p class="mt-4 text-base leading-relaxed text-muted-foreground">Stuur ons een bericht. We reageren zo snel mogelijk.</p>
             </div>
 
             <div class="mt-12 flex flex-col-reverse gap-7.5 md:flex-row md:items-start md:justify-between lg:mt-20 xl:gap-10">
                 <!-- Left: contact info -->
-                <aside class="relative w-full overflow-hidden rounded-2xl bg-background p-7.5 shadow-sm ring-1 ring-border md:w-2/5 lg:w-1/3 xl:p-10">
-                    <div class="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full bg-primary/10"></div>
-                    <div class="pointer-events-none absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-secondary/10"></div>
-
+                <aside class="brand-card relative w-full overflow-hidden rounded-2xl p-7.5 md:w-2/5 lg:w-1/3 xl:p-10">
                     <div class="space-y-7">
                         <div class="flex items-start gap-4">
                             <span class="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
@@ -97,9 +88,7 @@ onBeforeUnmount(() => {
                 </aside>
 
                 <!-- Right: form -->
-                <div class="relative w-full overflow-hidden rounded-2xl bg-background p-7.5 shadow-sm ring-1 ring-border md:w-3/5 lg:w-2/3 xl:p-12">
-                    <div class="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/10"></div>
-                    <div class="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-secondary/10"></div>
+                <div class="brand-card relative w-full overflow-hidden rounded-2xl p-7.5 md:w-3/5 lg:w-2/3 xl:p-12">
                     <form
                         class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-10 lg:gap-y-6"
                         @submit.prevent="
@@ -121,7 +110,7 @@ onBeforeUnmount(() => {
                                 name="name"
                                 autocomplete="name"
                                 placeholder="Voor- en achternaam"
-                                class="w-full rounded-xl bg-background px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 required
                             />
                             <p v-if="form.errors.name" class="mt-2 text-sm text-destructive">{{ form.errors.name }}</p>
@@ -136,7 +125,7 @@ onBeforeUnmount(() => {
                                 name="email"
                                 autocomplete="email"
                                 placeholder="voorbeeld@mail.com"
-                                class="w-full rounded-xl bg-background px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 required
                             />
                             <p v-if="form.errors.email" class="mt-2 text-sm text-destructive">{{ form.errors.email }}</p>
@@ -151,7 +140,7 @@ onBeforeUnmount(() => {
                                 name="phone"
                                 autocomplete="tel"
                                 placeholder="+31 6 12345678"
-                                class="w-full rounded-xl bg-background px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                             />
                             <p v-if="form.errors.phone" class="mt-2 text-sm text-destructive">{{ form.errors.phone }}</p>
                         </div>
@@ -164,7 +153,7 @@ onBeforeUnmount(() => {
                                 type="text"
                                 name="subject"
                                 placeholder="Waar gaat je vraag over?"
-                                class="w-full rounded-xl bg-background px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 required
                             />
                             <p v-if="form.errors.subject" class="mt-2 text-sm text-destructive">{{ form.errors.subject }}</p>
@@ -178,7 +167,7 @@ onBeforeUnmount(() => {
                                 name="message"
                                 rows="6"
                                 placeholder="Schrijf je bericht..."
-                                class="w-full rounded-xl bg-background p-4 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                class="brand-input w-full rounded-xl p-4 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 required
                             ></textarea>
                             <p v-if="form.errors.message" class="mt-2 text-sm text-destructive">{{ form.errors.message }}</p>
@@ -188,7 +177,7 @@ onBeforeUnmount(() => {
                             <button
                                 type="submit"
                                 :disabled="form.processing"
-                                class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                                class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground shadow-lg ring-1 shadow-primary/20 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 <Send class="h-4 w-4" />
                                 {{ form.processing ? 'Versturen...' : 'Verstuur bericht' }}

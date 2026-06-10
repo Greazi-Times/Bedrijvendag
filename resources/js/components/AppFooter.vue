@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+import AppLogoIcon from '@/components/AppLogoIcon.vue';
+
 type FlashType = 'success' | 'error';
 
 const newsletterEmail = ref('');
@@ -53,29 +55,31 @@ async function submitNewsletter() {
 </script>
 
 <template>
-    <footer class="dark:bg-blacksection bg-gray-50">
-        <div class="mx-auto max-w-[80%] px-6 lg:px-8">
+    <footer class="brand-dark-cta relative overflow-hidden text-white">
+        <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-primary via-white/40 to-secondary"></div>
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <!-- Top Section -->
             <div class="py-20">
                 <div class="grid grid-cols-1 gap-12 lg:grid-cols-4">
                     <!-- Logo + Description -->
                     <div>
                         <a href="/" class="flex items-center gap-3">
-                            <img src="/favicon.svg" class="h-10 dark:hidden" alt="Logo" />
-                            <img src="/favicon.svg" class="hidden h-10 dark:block" alt="Logo" />
-                            <span class="text-xl font-semibold text-gray-900 dark:text-white"> ATIx Bedrijvendag </span>
+                            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-black/20">
+                                <AppLogoIcon class="h-9" />
+                            </span>
+                            <span class="text-xl font-semibold text-white"> ATIx Bedrijvendag </span>
                         </a>
 
-                        <p class="mt-6 text-gray-600 dark:text-gray-400">De bedrijvendag van Avans ATIx opleidingen waar studenten en bedrijven elkaar ontmoeten.</p>
+                        <p class="mt-6 leading-relaxed text-white/70">De bedrijvendag van Avans ATIx opleidingen waar studenten en bedrijven elkaar ontmoeten.</p>
 
                         <div class="mt-6 flex gap-4">
-                            <a href="#" class="text-gray-400 transition hover:text-primary">
+                            <a href="#" class="text-white/45 transition hover:text-primary">
                                 <i class="lucide lucide-facebook h-5 w-5"></i>
                             </a>
-                            <a href="#" class="text-gray-400 transition hover:text-primary">
+                            <a href="#" class="text-white/45 transition hover:text-primary">
                                 <i class="lucide lucide-twitter h-5 w-5"></i>
                             </a>
-                            <a href="#" class="text-gray-400 transition hover:text-primary">
+                            <a href="#" class="text-white/45 transition hover:text-primary">
                                 <i class="lucide lucide-linkedin h-5 w-5"></i>
                             </a>
                         </div>
@@ -83,31 +87,31 @@ async function submitNewsletter() {
 
                     <!-- Pages -->
                     <div>
-                        <h4 class="mb-6 text-2xl font-semibold text-foreground">Pagina’s</h4>
-                        <ul class="space-y-3 text-gray-600 dark:text-gray-400">
-                            <li><a href="/" class="hover:text-primary">Home</a></li>
-                            <li><a href="/edities" class="hover:text-primary">Evenementen</a></li>
-                            <li><a href="/bedrijven" class="hover:text-primary">Bedrijven</a></li>
-                            <li><a href="/contact" class="hover:text-primary">Contact</a></li>
+                        <h4 class="mb-6 text-lg font-semibold text-white">Pagina's</h4>
+                        <ul class="space-y-3 text-white/68">
+                            <li><a href="/" class="transition hover:text-primary">Home</a></li>
+                            <li><a href="/edities" class="transition hover:text-primary">Evenementen</a></li>
+                            <li><a href="/bedrijven" class="transition hover:text-primary">Bedrijven</a></li>
+                            <li><a href="/contact" class="transition hover:text-primary">Contact</a></li>
                         </ul>
                     </div>
 
                     <!-- Info -->
                     <div>
-                        <h4 class="mb-6 text-2xl font-semibold text-foreground">Informatie</h4>
-                        <ul class="space-y-3 text-gray-600 dark:text-gray-400">
-                            <li><a href="/edities" class="hover:text-primary">Programma</a></li>
-                            <li><a href="/contact" class="hover:text-primary">Locatie</a></li>
-                            <li><a href="/partners" class="hover:text-primary">Partners</a></li>
-                            <li><a href="/dashboard" class="hover:text-primary">Dashboard</a></li>
+                        <h4 class="mb-6 text-lg font-semibold text-white">Informatie</h4>
+                        <ul class="space-y-3 text-white/68">
+                            <li><a href="/edities" class="transition hover:text-primary">Programma</a></li>
+                            <li><a href="/contact" class="transition hover:text-primary">Locatie</a></li>
+                            <li><a href="/partners" class="transition hover:text-primary">Partners</a></li>
+                            <li><a href="/dashboard" class="transition hover:text-primary">Dashboard</a></li>
                         </ul>
                     </div>
 
                     <!-- Newsletter -->
                     <div>
-                        <h4 class="mb-6 text-2xl font-semibold text-foreground">Nieuwsbrief</h4>
+                        <h4 class="mb-6 text-lg font-semibold text-white">Nieuwsbrief</h4>
 
-                        <p class="mb-4 text-gray-600 dark:text-gray-400">Ontvang updates over toekomstige edities.</p>
+                        <p class="mb-4 text-white/68">Ontvang updates over toekomstige edities.</p>
 
                         <div
                             v-if="newsletterFlash"
@@ -142,10 +146,13 @@ async function submitNewsletter() {
                                 type="email"
                                 id="newsletter-email"
                                 placeholder="Email adres"
-                                class="w-full rounded-full border border-gray-300 py-3 pr-14 pl-6 text-sm focus:border-primary focus:outline-none dark:border-gray-700 dark:bg-black dark:text-white"
+                                class="w-full rounded-full border border-white/15 bg-white/10 py-3 pr-14 pl-6 text-sm text-white placeholder:text-white/45 focus:border-primary focus:outline-none"
                                 required
                             />
-                            <button type="submit" class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-primary p-2 text-white transition hover:opacity-90">
+                            <button
+                                type="submit"
+                                class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-primary p-2 text-white shadow-lg shadow-primary/25 transition hover:bg-primary/90"
+                            >
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 6l6 6-6 6" />
                                 </svg>
@@ -156,15 +163,15 @@ async function submitNewsletter() {
             </div>
 
             <!-- Bottom Section -->
-            <div class="border-t border-gray-200 py-8 dark:border-gray-800">
+            <div class="border-t border-white/10 py-8">
                 <div class="flex flex-col items-center justify-between gap-4 lg:flex-row">
-                    <ul class="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
-                        <li><a href="/privacy-policy" class="hover:text-primary">Privacy Policy</a></li>
-                        <li><a href="/terms-of-service" class="hover:text-primary">Terms of Service</a></li>
-                        <li><a href="/cookie-policy" class="hover:text-primary">Cookie Policy</a></li>
+                    <ul class="flex flex-wrap justify-center gap-6 text-sm text-white/62">
+                        <li><a href="/privacy-policy" class="transition hover:text-primary">Privacy Policy</a></li>
+                        <li><a href="/terms-of-service" class="transition hover:text-primary">Terms of Service</a></li>
+                        <li><a href="/cookie-policy" class="transition hover:text-primary">Cookie Policy</a></li>
                     </ul>
 
-                    <p class="text-sm text-gray-500 dark:text-gray-400">© {{ new Date().getFullYear() }} ATIx Bedrijvendag. All rights reserved.</p>
+                    <p class="text-sm text-white/55">© {{ new Date().getFullYear() }} ATIx Bedrijvendag. All rights reserved.</p>
                 </div>
             </div>
         </div>
