@@ -10,6 +10,7 @@ use App\Http\Controllers\PdfController;
 use App\Http\Controllers\PrivacyPolicyController;
 use App\Http\Controllers\TermsOfServiceController;
 use App\Models\BorrelEnrollment;
+use App\Support\PageMedia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
@@ -24,7 +25,9 @@ Route::get('/bedrijven', [CompaniesController::class, 'index'])->name('companies
 Route::get('/partners', [HomeController::class, 'partners'])->name('partners');
 
 Route::get('/slides', function () {
-    return Inertia::render('Slides');
+    return Inertia::render('Slides', [
+        'slideImages' => PageMedia::slideImages(),
+    ]);
 })->name('slides');
 
 Route::get('/edities', [EventController::class, 'index'])->name('events');
@@ -32,7 +35,9 @@ Route::get('/edities', [EventController::class, 'index'])->name('events');
 Route::get('/edities/{event}', [EventController::class, 'show'])->name('edition.show');
 
 Route::get('/over-ons', function () {
-    return Inertia::render('About');
+    return Inertia::render('About', [
+        'aboutImages' => PageMedia::aboutImages(),
+    ]);
 })->name('about');
 
 Route::get('/contact', function () {

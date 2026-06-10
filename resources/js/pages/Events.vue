@@ -81,13 +81,11 @@ onBeforeUnmount(() => {
 <template>
     <AppHeader class="sticky top-0 z-50" />
 
-    <main class="relative bg-background">
-        <section class="relative overflow-hidden bg-background px-6 py-16 sm:py-20 lg:px-16">
-            <div class="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-secondary/20" />
-            <div class="pointer-events-none absolute top-28 -left-20 h-40 w-40 rounded-[2.75rem] bg-primary/20" />
-            <div class="pointer-events-none absolute right-24 bottom-10 h-16 w-16 rounded-full bg-accent" />
+    <main class="relative">
+        <section class="brand-hero relative overflow-hidden px-6 py-16 sm:py-20 lg:px-16">
             <div class="relative mx-auto w-full max-w-7xl">
                 <div class="flex flex-col gap-3">
+                    <p class="brand-eyebrow w-fit">Edities</p>
                     <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Events</h1>
                     <p class="max-w-2xl text-base leading-relaxed text-muted-foreground">Bekijk alle aankomende events en eerdere events. Klik op een event voor details.</p>
                 </div>
@@ -101,15 +99,11 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div v-if="featuredUpcoming" class="mt-4">
-                            <button
-                                type="button"
-                                class="group w-full overflow-hidden rounded-3xl bg-background text-left shadow-sm ring-1 ring-border transition hover:shadow-xl"
-                                @click="openModal(featuredUpcoming)"
-                            >
+                            <button type="button" class="brand-card brand-card-hover group w-full overflow-hidden rounded-3xl text-left" @click="openModal(featuredUpcoming)">
                                 <div class="grid grid-cols-1 gap-0 lg:grid-cols-5">
                                     <div class="lg:col-span-3">
                                         <div class="relative">
-                                            <div class="h-56 w-full bg-accent/20 sm:h-72">
+                                            <div class="h-56 w-full bg-gradient-to-br from-secondary/12 via-white/50 to-primary/10 sm:h-72">
                                                 <img
                                                     v-if="featuredUpcoming.header_image_url"
                                                     :src="featuredUpcoming.header_image_url"
@@ -159,10 +153,10 @@ onBeforeUnmount(() => {
                                     v-for="event in otherUpcoming"
                                     :key="event.id"
                                     type="button"
-                                    class="group overflow-hidden rounded-2xl bg-background text-left shadow-sm ring-1 ring-border transition hover:shadow-xl"
+                                    class="brand-card brand-card-hover group overflow-hidden rounded-2xl text-left"
                                     @click="openModal(event)"
                                 >
-                                    <div class="h-40 w-full bg-accent/20">
+                                    <div class="h-40 w-full bg-gradient-to-br from-secondary/12 via-white/50 to-primary/10">
                                         <img v-if="event.header_image_url" :src="event.header_image_url" :alt="event.title" class="h-full w-full object-cover" />
                                     </div>
                                     <div class="p-5">
@@ -194,10 +188,10 @@ onBeforeUnmount(() => {
                                 v-for="event in props.past"
                                 :key="event.id"
                                 type="button"
-                                class="group overflow-hidden rounded-2xl bg-background text-left shadow-sm ring-1 ring-border transition hover:shadow-xl"
+                                class="brand-card brand-card-hover group overflow-hidden rounded-2xl text-left"
                                 @click="openModal(event)"
                             >
-                                <div class="h-44 w-full bg-accent/20 sm:h-48">
+                                <div class="h-44 w-full bg-gradient-to-br from-secondary/12 via-white/50 to-primary/10 sm:h-48">
                                     <img v-if="event.header_image_url" :src="event.header_image_url" :alt="event.title" class="h-full w-full object-cover" />
                                 </div>
 

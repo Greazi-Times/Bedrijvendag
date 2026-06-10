@@ -115,13 +115,10 @@ function formatDateRange(start: string | null, end: string | null) {
 <template>
     <AppHeader class="sticky top-0 z-50" />
 
-    <main class="relative overflow-hidden bg-background px-6 py-14 lg:px-16">
-        <div class="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-secondary/20" />
-        <div class="pointer-events-none absolute top-36 -left-20 h-40 w-40 rounded-[2.75rem] bg-primary/20" />
-        <div class="pointer-events-none absolute right-24 bottom-10 h-16 w-16 rounded-full bg-accent" />
+    <main class="brand-hero relative overflow-hidden px-6 py-14 lg:px-16">
         <div class="relative mx-auto max-w-7xl">
-            <div v-if="event.header_image_url" class="overflow-hidden rounded-3xl shadow-sm ring-1 ring-border">
-                <img :src="event.header_image_url" :alt="event.title" class="h-64 w-full object-cover" />
+            <div v-if="event.header_image_url" class="brand-card overflow-hidden rounded-3xl p-2">
+                <img :src="event.header_image_url" :alt="event.title" class="h-64 w-full rounded-2xl object-cover" />
             </div>
 
             <div class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -138,7 +135,7 @@ function formatDateRange(start: string | null, end: string | null) {
                     :href="event.gallery_url"
                     target="_blank"
                     rel="noreferrer"
-                    class="inline-flex shrink-0 items-center justify-center rounded-xl bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                    class="inline-flex shrink-0 items-center justify-center rounded-xl bg-white/80 px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                 >
                     Fotoalbum
                 </a>
@@ -146,7 +143,7 @@ function formatDateRange(start: string | null, end: string | null) {
 
             <div class="mt-8 space-y-6">
                 <!-- Description / info first (full width) -->
-                <div class="rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
+                <div class="brand-card rounded-3xl p-6">
                     <h2 class="text-sm font-medium">Beschrijving</h2>
                     <div v-if="event.description_html" class="prose prose-sm mt-4 max-w-none dark:prose-invert" v-html="event.description_html" />
                     <p v-else class="mt-4 text-sm text-muted-foreground">Geen beschrijving beschikbaar.</p>
@@ -155,7 +152,7 @@ function formatDateRange(start: string | null, end: string | null) {
                 <!-- Map left, companies right -->
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-stretch">
                     <div class="lg:col-span-3 lg:h-full">
-                        <div class="flex h-full min-h-0 flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
+                        <div class="brand-card flex h-full min-h-0 flex-col rounded-3xl p-6">
                             <div class="flex h-6 items-center justify-between">
                                 <h2 class="text-sm font-medium">Plattegrond</h2>
                                 <span class="text-xs text-muted-foreground">&nbsp;</span>
@@ -170,7 +167,7 @@ function formatDateRange(start: string | null, end: string | null) {
                     </div>
 
                     <aside class="lg:col-span-2 lg:h-full">
-                        <div class="flex h-full min-h-0 flex-col rounded-3xl bg-background p-6 shadow-sm ring-1 ring-border">
+                        <div class="brand-card flex h-full min-h-0 flex-col rounded-3xl p-6">
                             <div class="flex h-6 items-center justify-between">
                                 <h2 class="text-sm font-medium">Bedrijven</h2>
                                 <span class="text-xs text-muted-foreground">{{ companies.length }}</span>
@@ -181,7 +178,7 @@ function formatDateRange(start: string | null, end: string | null) {
                                     v-for="c in sortedCompanies"
                                     :key="c.id"
                                     type="button"
-                                    class="flex w-full items-center gap-3 rounded-2xl bg-background p-3 text-left shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground"
+                                    class="flex w-full items-center gap-3 rounded-2xl bg-white/70 p-3 text-left shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground"
                                     @click="openCompany(c)"
                                 >
                                     <div class="h-10 w-10 overflow-hidden rounded-xl bg-accent/20">

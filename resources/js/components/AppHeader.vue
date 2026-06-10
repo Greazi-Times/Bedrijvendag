@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
 
-const activeItemStyles = 'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
+const activeItemStyles = 'bg-primary/10 text-primary ring-1 ring-primary/15 dark:bg-primary/20 dark:text-primary-foreground';
 
 const mainNavItems: NavItem[] = [
     {
@@ -62,13 +62,13 @@ const rightNavItems: NavItem[] = [
 
 <template>
     <div>
-        <div class="border-b border-sidebar-border/80 bg-background">
+        <div class="border-b border-white/70 bg-background/86 shadow-sm shadow-slate-900/5 backdrop-blur-xl">
             <div class="relative mx-auto flex h-20 items-center px-4 md:max-w-7xl">
                 <!-- Mobile Menu -->
                 <div class="lg:hidden">
                     <Sheet>
                         <SheetTrigger :as-child="true">
-                            <Button variant="ghost" size="icon" class="mr-2 h-9 w-9">
+                            <Button variant="ghost" size="icon" class="mr-2 h-9 w-9 rounded-xl bg-white/70 ring-1 ring-border/70">
                                 <Menu class="h-5 w-5" />
                             </Button>
                         </SheetTrigger>
@@ -117,11 +117,21 @@ const rightNavItems: NavItem[] = [
                     <NavigationMenu class="pointer-events-auto ml-10 flex h-full items-stretch">
                         <NavigationMenuList class="flex h-full items-stretch space-x-2">
                             <NavigationMenuItem v-for="(item, index) in mainNavItems" :key="index" class="relative flex h-full items-center">
-                                <Link :class="[navigationMenuTriggerStyle(), whenCurrentUrl(item.href, activeItemStyles), 'h-9 cursor-pointer px-3']" :href="item.href">
+                                <Link
+                                    :class="[
+                                        navigationMenuTriggerStyle(),
+                                        whenCurrentUrl(item.href, activeItemStyles),
+                                        'h-9 cursor-pointer rounded-xl px-3 transition hover:bg-primary/10 hover:text-primary',
+                                    ]"
+                                    :href="item.href"
+                                >
                                     <component v-if="item.icon" :is="item.icon" class="mr-2 h-4 w-4" />
                                     {{ item.title }}
                                 </Link>
-                                <div v-if="isCurrentUrl(item.href)" class="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
+                                <div
+                                    v-if="isCurrentUrl(item.href)"
+                                    class="absolute right-3 bottom-0 left-3 h-0.5 translate-y-px rounded-full bg-gradient-to-r from-primary to-secondary"
+                                ></div>
                             </NavigationMenuItem>
                         </NavigationMenuList>
                     </NavigationMenu>
@@ -135,7 +145,7 @@ const rightNavItems: NavItem[] = [
                                     <Tooltip>
                                         <TooltipTrigger>
                                             <Button variant="ghost" size="icon" as-child class="group h-9 w-9 cursor-pointer">
-                                                <a :href="toUrl(item.href)" target="_blank" rel="noopener noreferrer">
+                                                <a :href="toUrl(item.href)" target="_blank" rel="noopener noreferrer" class="rounded-xl bg-white/60 ring-1 ring-border/70">
                                                     <span class="sr-only">{{ item.title }}</span>
                                                     <component :is="item.icon" class="size-5 opacity-80 group-hover:opacity-100" />
                                                 </a>

@@ -89,17 +89,17 @@ const selectedPartnerEducations = computed(() => {
 
         <AppHeader />
 
-        <section class="bg-background px-6 py-20 lg:px-16">
-            <div class="mx-auto max-w-7xl">
+        <section class="brand-hero overflow-hidden px-6 py-20 lg:px-16">
+            <div class="relative z-10 mx-auto max-w-7xl">
                 <div class="mx-auto max-w-3xl text-center">
-                    <p class="text-sm font-semibold text-primary">
+                    <p class="brand-eyebrow">
                         <span v-if="props.event">Editie: {{ eventTitle() }}</span>
                         <span v-else>ATIx Bedrijvendag</span>
                     </p>
 
                     <h1 class="mt-4 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">Partners</h1>
 
-                    <div class="mx-auto mt-5 h-1 w-56 rounded-full bg-primary"></div>
+                    <div class="mx-auto mt-5 h-1 w-56 rounded-full bg-gradient-to-r from-primary to-secondary"></div>
 
                     <p class="mt-6 text-base leading-relaxed text-muted-foreground">
                         <span v-if="props.event">
@@ -125,14 +125,14 @@ const selectedPartnerEducations = computed(() => {
                         <article
                             v-for="partner in supportPartners"
                             :key="`support-${partner.id}`"
-                            class="group cursor-pointer overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-border transition hover:shadow-xl"
+                            class="brand-card brand-card-hover group cursor-pointer overflow-hidden rounded-2xl"
                             role="button"
                             tabindex="0"
                             @click="openPartner(partner)"
                             @keydown.enter.prevent="openPartner(partner)"
                             @keydown.space.prevent="openPartner(partner)"
                         >
-                            <div class="flex items-center justify-center bg-accent/10 p-10">
+                            <div class="flex items-center justify-center bg-gradient-to-br from-secondary/12 via-white/50 to-primary/10 p-10">
                                 <img
                                     v-if="partnerLogo(partner)"
                                     :src="partnerLogo(partner) as string"
@@ -183,14 +183,14 @@ const selectedPartnerEducations = computed(() => {
                         <article
                             v-for="partner in standPartners"
                             :key="`stand-${partner.id}`"
-                            class="group cursor-pointer overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-border transition hover:shadow-xl"
+                            class="brand-card brand-card-hover group cursor-pointer overflow-hidden rounded-2xl"
                             role="button"
                             tabindex="0"
                             @click="openPartner(partner)"
                             @keydown.enter.prevent="openPartner(partner)"
                             @keydown.space.prevent="openPartner(partner)"
                         >
-                            <div class="flex items-center justify-center bg-accent/10 p-10">
+                            <div class="flex items-center justify-center bg-gradient-to-br from-secondary/12 via-white/50 to-primary/10 p-10">
                                 <img
                                     v-if="partnerLogo(partner)"
                                     :src="partnerLogo(partner) as string"
@@ -239,7 +239,7 @@ const selectedPartnerEducations = computed(() => {
                     </div>
                 </div>
 
-                <div v-if="!supportPartners.length && !standPartners.length" class="mx-auto mt-10 max-w-3xl rounded-2xl bg-accent/10 p-6 text-center ring-1 ring-border">
+                <div v-if="!supportPartners.length && !standPartners.length" class="brand-card mx-auto mt-10 max-w-3xl rounded-2xl p-6 text-center">
                     <p class="text-muted-foreground">Nog geen partners gekoppeld aan deze editie.</p>
                 </div>
             </div>

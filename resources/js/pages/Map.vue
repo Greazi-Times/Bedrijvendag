@@ -262,8 +262,8 @@ onUnmounted(() => {
 
     <AppHeader />
 
-    <section class="mx-auto max-w-10/12 px-4 py-10 md:px-8">
-        <div class="flex flex-col gap-6">
+    <section class="brand-hero px-4 py-10 md:px-8">
+        <div class="relative z-10 mx-auto flex max-w-10/12 flex-col gap-6">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="min-w-0">
                     <div class="flex items-center gap-2 text-sm text-muted-foreground">
@@ -285,7 +285,7 @@ onUnmounted(() => {
                     <Link
                         v-if="backHref"
                         :href="backHref"
-                        class="border-stroke dark:border-strokedark dark:bg-blacksection dark:hover:bg-blacksection/70 inline-flex items-center justify-center rounded-full border bg-white px-4 py-2 text-sm font-medium text-black hover:bg-gray-50 dark:text-white"
+                        class="inline-flex items-center justify-center rounded-xl border border-border bg-white/80 px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-accent"
                     >
                         Terug
                     </Link>
@@ -295,7 +295,7 @@ onUnmounted(() => {
             <div class="grid items-stretch gap-6 lg:grid-cols-12">
                 <!-- Map -->
                 <div class="lg:col-span-8">
-                    <div class="border-stroke dark:border-strokedark dark:bg-blacksection relative overflow-hidden rounded-2xl border bg-white">
+                    <div class="brand-card relative overflow-hidden rounded-2xl">
                         <div class="relative">
                             <!-- zoom layer -->
                             <div class="relative">
@@ -331,7 +331,7 @@ onUnmounted(() => {
 
                                 <div
                                     v-if="standsWithCoords.length === 0"
-                                    class="border-stroke dark:border-strokedark dark:bg-blacksection/90 absolute top-4 left-4 rounded-xl border bg-white/90 px-3 py-2 text-xs text-black shadow-sm backdrop-blur dark:text-white"
+                                    class="absolute top-4 left-4 rounded-xl border border-border bg-white/90 px-3 py-2 text-xs text-foreground shadow-sm backdrop-blur"
                                 >
                                     Er zijn nog geen markeringen ingesteld voor dit evenement. Gebruik de lijst rechts.
                                 </div>
@@ -339,9 +339,7 @@ onUnmounted(() => {
 
                             <!-- empty state when filtering hides all -->
                             <div v-if="filteredStands.length === 0" class="absolute inset-0 flex items-center justify-center px-6 text-center">
-                                <div
-                                    class="border-stroke dark:border-strokedark dark:bg-blacksection/90 max-w-md rounded-2xl border bg-white/90 p-5 text-sm text-black shadow-sm backdrop-blur dark:text-white"
-                                >
+                                <div class="max-w-md rounded-2xl border border-border bg-white/90 p-5 text-sm text-foreground shadow-sm backdrop-blur">
                                     Geen stands gevonden die overeenkomen met je zoekopdracht.
                                 </div>
                             </div>
@@ -368,7 +366,7 @@ onUnmounted(() => {
 
                                 <button
                                     type="button"
-                                    class="border-stroke dark:border-strokedark dark:bg-blacksection dark:hover:bg-blacksection/70 inline-flex items-center justify-center rounded-full border bg-white px-4 py-2 text-sm font-medium text-black hover:bg-gray-50 dark:text-white"
+                                    class="inline-flex items-center justify-center rounded-xl border border-border bg-white/80 px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
                                     @click="clearSelection"
                                 >
                                     Sluiten
@@ -380,17 +378,14 @@ onUnmounted(() => {
 
                 <!-- Sidebar -->
                 <aside class="lg:col-span-4 lg:h-full">
-                    <div
-                        class="border-stroke dark:border-strokedark dark:bg-blacksection flex min-h-0 flex-col rounded-2xl border bg-white p-4"
-                        :style="mapImageHeight > 0 ? { height: `${mapImageHeight}px` } : undefined"
-                    >
+                    <div class="brand-card flex min-h-0 flex-col rounded-2xl p-4" :style="mapImageHeight > 0 ? { height: `${mapImageHeight}px` } : undefined">
                         <div class="flex items-center gap-2">
                             <Search class="h-4 w-4 text-muted-foreground" />
                             <input
                                 v-model="query"
                                 type="text"
                                 placeholder="Zoek op standnummer, bedrijfsnaam of partner…"
-                                class="w-full bg-transparent text-sm text-black placeholder:text-muted-foreground focus:outline-none dark:text-white"
+                                class="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                             />
                         </div>
 
@@ -406,7 +401,7 @@ onUnmounted(() => {
                             <div class="flex items-center gap-2">
                                 <button
                                     type="button"
-                                    class="inline-flex items-center justify-center rounded-xl bg-background px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                                    class="inline-flex items-center justify-center rounded-xl bg-white/80 px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                                     @click="openFilters"
                                 >
                                     Filters
@@ -453,8 +448,8 @@ onUnmounted(() => {
                             <div
                                 v-for="(stand, index) in filteredStands"
                                 :key="stand.id"
-                                class="hover:border-stroke dark:hover:border-strokedark dark:hover:bg-blacksection/70 flex items-center gap-3 rounded-xl border border-transparent px-3 py-2 transition hover:bg-gray-50"
-                                :class="selectedStandId === stand.id ? 'border-stroke dark:border-strokedark dark:bg-blacksection/70 bg-gray-50' : ''"
+                                class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-2 transition hover:border-border hover:bg-white/75"
+                                :class="selectedStandId === stand.id ? 'border-border bg-white/85 shadow-sm' : ''"
                             >
                                 <button type="button" class="flex min-w-0 flex-1 items-center gap-3 text-left" @click="selectStand(stand.id)">
                                     <div
@@ -464,15 +459,13 @@ onUnmounted(() => {
                                         {{ stand.stand_type === 'partner' ? `P${String(stand.code).replace(/^P/i, '')}` : String(stand.code).replace(/^P/i, '') }}
                                     </div>
 
-                                    <div
-                                        class="border-stroke dark:border-strokedark dark:bg-blacksection/70 flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-white"
-                                    >
+                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-white">
                                         <img v-if="stand.company_logo" :src="stand.company_logo" :alt="stand.company_name ?? stand.code" class="h-full w-full object-contain p-1" />
                                         <span v-else class="text-xs font-medium text-muted-foreground"> Logo </span>
                                     </div>
 
                                     <div class="min-w-0 flex-1">
-                                        <div class="truncate text-sm font-medium text-black dark:text-white">
+                                        <div class="truncate text-sm font-medium text-foreground">
                                             {{ stand.company_name ?? 'Geen organisatie ingesteld' }}
                                         </div>
                                     </div>
