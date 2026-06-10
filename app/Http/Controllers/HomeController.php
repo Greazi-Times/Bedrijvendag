@@ -29,6 +29,13 @@ class HomeController extends Controller
             ->first();
 
         $highlightEvent = $upcomingEvent ?? $lastEvent;
+        $borrelStatus = match (true) {
+            ! $upcomingEvent => 'none',
+            $upcomingEvent->date?->isSameDay($today) => 'today',
+            default => 'open',
+        };
+
+        $borrelEnrollmentEvent = $borrelStatus === 'open' ? $upcomingEvent : null;
 
         // 3 most recent events by event date
         $recentEvents = Event::query()
@@ -63,14 +70,24 @@ class HomeController extends Controller
             'image_url' => $highlightEvent->header_image_path ? Storage::url($highlightEvent->header_image_path) : null,
         ] : null;
 
-        // Borrel enrollments count for the highlight event (upcoming, else last)
-        $closingBorrelCount = $highlightEvent
-            ? BorrelEnrollment::query()->where('event_id', $highlightEvent->id)->count()
+        $borrelEventPayload = $upcomingEvent ? [
+            'id' => $upcomingEvent->id,
+            'name' => $upcomingEvent->name,
+            'date' => optional($upcomingEvent->date)->toDateString(),
+            'description' => $upcomingEvent->description,
+            'image_url' => $upcomingEvent->header_image_path ? Storage::url($upcomingEvent->header_image_path) : null,
+        ] : null;
+
+        // Borrel enrollments are only shown while enrollment is still open.
+        $closingBorrelCount = $borrelEnrollmentEvent
+            ? BorrelEnrollment::query()->where('event_id', $borrelEnrollmentEvent->id)->count()
             : 0;
 
         return Inertia::render('Home', [
             'recentEvents' => $recentEvents,
             'highlightEvent' => $highlightEventPayload,
+            'borrelEvent' => $borrelEventPayload,
+            'borrelStatus' => $borrelStatus,
             'closingBorrelCount' => $closingBorrelCount,
             'partners' => $partners,
             'homeImages' => PageMedia::homeImages(),

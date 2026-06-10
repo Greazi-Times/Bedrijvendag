@@ -29,9 +29,13 @@ type HomeImages = {
     infoThird: string;
 };
 
+type BorrelStatus = 'open' | 'today' | 'none';
+
 const props = defineProps<{
     recentEvents: EventCard[];
     highlightEvent: EventCard | null;
+    borrelEvent: EventCard | null;
+    borrelStatus: BorrelStatus;
     closingBorrelCount: number;
     partners: PartnerCard[];
     homeImages: HomeImages;
@@ -39,7 +43,9 @@ const props = defineProps<{
 }>();
 
 const isVideoOpen = ref(false);
-const shouldShowBorrelCount = computed(() => props.closingBorrelCount >= 25);
+const isBorrelEnrollmentOpen = computed(() => props.borrelStatus === 'open' && props.borrelEvent !== null);
+const isBorrelEventToday = computed(() => props.borrelStatus === 'today');
+const shouldShowBorrelCount = computed(() => isBorrelEnrollmentOpen.value && props.closingBorrelCount >= 25);
 
 // Used to force iframe remount to stop playback on close.
 const videoInstanceKey = ref(0);
@@ -147,7 +153,7 @@ onBeforeUnmount(() => {
 const borrelForm = useForm({
     name: '',
     email: '',
-    event_id: props.highlightEvent?.id ?? null,
+    event_id: props.borrelEvent?.id ?? null,
 });
 
 const showBorrelSuccess = ref(false);
@@ -181,7 +187,11 @@ const triggerBorrelSuccess = () => {
 
                     <h1 class="mt-6 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">DE ATIx BEDRIJVENDAG</h1>
 
-                    <p class="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">Ontmoet bedrijven, bouw je netwerk, en meld je aan voor de borrel.</p>
+                    <p class="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                        <template v-if="isBorrelEnrollmentOpen">Ontmoet bedrijven, bouw je netwerk, en meld je aan voor de borrel.</template>
+                        <template v-else-if="isBorrelEventToday">Ontmoet bedrijven, bouw je netwerk, en leg vandaag waardevolle contacten.</template>
+                        <template v-else>Ontmoet bedrijven, bouw je netwerk, en bekijk eerdere edities.</template>
+                    </p>
 
                     <div class="mt-8 flex flex-wrap items-center gap-3">
                         <Link
@@ -199,6 +209,7 @@ const triggerBorrelSuccess = () => {
                         </Link>
 
                         <Link
+                            v-if="isBorrelEnrollmentOpen"
                             href="#borrel"
                             class="inline-flex items-center justify-center rounded-xl bg-secondary px-6 py-3 text-sm font-semibold text-secondary-foreground shadow-lg ring-1 shadow-secondary/20 ring-secondary/25 transition hover:bg-secondary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                         >
@@ -209,15 +220,19 @@ const triggerBorrelSuccess = () => {
                     <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
                         <div class="inline-flex items-center gap-2">
                             <span class="h-2 w-2 rounded-full bg-primary"></span>
-                            Volgende editie:
-                            {{ props.highlightEvent?.date ?? 'Binnenkort' }}
+                            <template v-if="props.borrelEvent"> Volgende editie: {{ props.borrelEvent.date ?? 'Binnenkort' }} </template>
+                            <template v-else> Geen volgende editie gepland </template>
                         </div>
                         <div class="inline-flex items-center gap-2">
                             <span class="h-2 w-2 rounded-full bg-secondary"></span>
 
                             <template v-if="shouldShowBorrelCount"> Borrel aanmeldingen: {{ props.closingBorrelCount }} </template>
 
-                            <template v-else> Schrijf je snel in voor de borrel </template>
+                            <template v-else-if="isBorrelEnrollmentOpen"> Schrijf je snel in voor de borrel </template>
+
+                            <template v-else-if="isBorrelEventToday"> Happy connecting </template>
+
+                            <template v-else> Geen borrel gepland </template>
                         </div>
                     </div>
                 </div>
@@ -377,13 +392,22 @@ const triggerBorrelSuccess = () => {
         <div class="relative z-10 mx-auto max-w-7xl">
             <div class="flex flex-wrap gap-8 md:flex-nowrap md:items-center md:justify-between">
                 <div class="lg:w-1/2">
-                    <h2 class="mb-4 text-3xl font-semibold text-white lg:text-4xl">Meld je aan voor de volgende editie</h2>
-                    <p class="text-white/90">Krijg updates over deelnemende bedrijven, programma en locatie. Of bekijk eerdere edities.</p>
+                    <h2 class="mb-4 text-3xl font-semibold text-white lg:text-4xl">
+                        <template v-if="isBorrelEnrollmentOpen">Meld je aan voor de volgende editie</template>
+                        <template v-else-if="isBorrelEventToday">Happy connecting</template>
+                        <template v-else>Er is nog geen volgende editie gepland</template>
+                    </h2>
+                    <p class="text-white/90">
+                        <template v-if="isBorrelEnrollmentOpen">Krijg updates over deelnemende bedrijven, programma en locatie. Of bekijk eerdere edities.</template>
+                        <template v-else-if="isBorrelEventToday">Vandaag draait om ontmoeten, praten en nieuwe contacten leggen.</template>
+                        <template v-else>Bekijk eerdere edities terwijl we werken aan de volgende bedrijvendag.</template>
+                    </p>
                 </div>
 
                 <div class="shrink-0">
                     <div class="flex flex-wrap items-center gap-3">
                         <Link
+                            v-if="isBorrelEnrollmentOpen"
                             href="#borrel"
                             class="inline-flex items-center justify-center rounded-full bg-white px-7.5 py-3 text-sm font-semibold text-black transition hover:shadow-xl focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
                         >
@@ -459,10 +483,21 @@ const triggerBorrelSuccess = () => {
         <div class="relative z-10 mx-auto max-w-7xl">
             <div class="mx-auto max-w-3xl text-center">
                 <p class="text-sm font-semibold text-primary">Borrel</p>
-                <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Meld je aan voor de borrel</h2>
-                <p class="mt-4 text-base leading-relaxed text-muted-foreground">Laat je e-mail achter. Dan sturen we je de details.</p>
+                <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                    <template v-if="isBorrelEnrollmentOpen">Meld je aan voor de borrel</template>
+                    <template v-else-if="isBorrelEventToday">Happy connecting</template>
+                    <template v-else>Geen verdere editie gepland</template>
+                </h2>
+                <p class="mt-4 text-base leading-relaxed text-muted-foreground">
+                    <template v-if="isBorrelEnrollmentOpen">Laat je e-mail achter. Dan sturen we je de details.</template>
+                    <template v-else-if="isBorrelEventToday">Vandaag is de bedrijvendag bezig. Veel plezier met netwerken.</template>
+                    <template v-else>Er is op dit moment geen verdere editie gepland.</template>
+                </p>
 
-                <div class="mt-6 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground ring-1 ring-border">
+                <div
+                    v-if="isBorrelEnrollmentOpen"
+                    class="mt-6 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground ring-1 ring-border"
+                >
                     <span class="h-2 w-2 rounded-full bg-secondary"></span>
 
                     <template v-if="shouldShowBorrelCount"> Al aangemeld: {{ props.closingBorrelCount }} </template>
@@ -478,6 +513,7 @@ const triggerBorrelSuccess = () => {
                     <div class="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-secondary/10"></div>
 
                     <form
+                        v-if="isBorrelEnrollmentOpen"
                         class="relative grid gap-5"
                         @submit.prevent="
                             borrelForm.post('/borrel-signup', {
@@ -530,8 +566,22 @@ const triggerBorrelSuccess = () => {
                         </div>
                     </form>
 
+                    <div v-else class="relative text-center">
+                        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15 text-primary ring-1 ring-primary/20">
+                            <CheckCircle2 class="h-7 w-7" />
+                        </div>
+                        <h3 class="mt-5 text-2xl font-semibold tracking-tight text-foreground">
+                            <template v-if="isBorrelEventToday">Happy connecting</template>
+                            <template v-else>Geen verdere editie gepland</template>
+                        </h3>
+                        <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+                            <template v-if="isBorrelEventToday">De aanmelding is gesloten omdat het event vandaag plaatsvindt.</template>
+                            <template v-else>Er is op dit moment geen verdere editie gepland.</template>
+                        </p>
+                    </div>
+
                     <div
-                        v-if="showBorrelSuccess"
+                        v-if="isBorrelEnrollmentOpen && showBorrelSuccess"
                         class="mt-6 flex items-center gap-2 rounded-xl bg-emerald-500/15 p-4 text-sm text-emerald-900 ring-1 ring-emerald-500/25"
                         role="status"
                         aria-live="polite"
