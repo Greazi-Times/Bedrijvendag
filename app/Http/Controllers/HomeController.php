@@ -51,7 +51,7 @@ class HomeController extends Controller
             ]);
 
         $partners = $highlightEvent
-            ? $highlightEvent->partners()
+            ? $highlightEvent->eventPartners()
                 ->orderBy('name')
                 ->get(['partners.id', 'partners.name', 'partners.url', 'partners.image'])
                 ->map(fn (Partner $p) => [
