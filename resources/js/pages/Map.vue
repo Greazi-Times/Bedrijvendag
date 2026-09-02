@@ -146,17 +146,6 @@ const selectedStand = computed(() => {
     return props.stands.find((s) => s.id === selectedStandId.value) ?? null;
 });
 
-const selectedStandWithCoords = computed(() => {
-    if (selectedStandId.value == null) return null;
-
-    const s = props.stands.find((x) => x.id === selectedStandId.value) ?? null;
-    if (!s) return null;
-
-    if (typeof s.x_percent !== 'number' || typeof s.y_percent !== 'number') return null;
-
-    return s;
-});
-
 const updateMapImageHeight = () => {
     mapImageHeight.value = mapImageRef.value?.clientHeight ?? 0;
 };
@@ -189,6 +178,16 @@ const clearAll = () => {
 };
 
 const activeFilterCount = computed(() => selectedEducations.value.length + selectedSectors.value.length);
+
+function standDisplayCode(stand: Stand) {
+    const code = String(stand.code).replace(/^P/i, '');
+
+    return stand.stand_type === 'partner' ? `P${code}` : code;
+}
+
+function standDisplayName(stand: Stand) {
+    return stand.company_name ?? 'Geen organisatie ingesteld';
+}
 
 function selectStand(id: Stand['id']) {
     selectedStandId.value = id;
@@ -299,34 +298,48 @@ onUnmounted(() => {
                         <div class="relative">
                             <!-- zoom layer -->
                             <div class="relative">
-                                <img
-                                    ref="mapImageRef"
-                                    :src="map.image_url"
-                                    :alt="`${event.title} map`"
-                                    class="block h-auto w-full select-none"
-                                    draggable="false"
-                                    @load="updateMapImageHeight"
-                                />
+                                <template v-if="map.image_url">
+                                    <img
+                                        ref="mapImageRef"
+                                        :src="map.image_url"
+                                        :alt="`${event.title} map`"
+                                        class="block h-auto w-full select-none"
+                                        draggable="false"
+                                        @load="updateMapImageHeight"
+                                    />
 
-                                <!-- Selected stand highlight (large marker) -->
-                                <div
-                                    v-if="selectedStandWithCoords"
-                                    class="absolute z-10"
-                                    :style="{
-                                        left: `${selectedStandWithCoords.x_percent}%`,
-                                        top: `${selectedStandWithCoords.y_percent}%`,
-                                        transform: 'translate(-50%, -50%)',
-                                    }"
-                                >
-                                    <div class="relative">
-                                        <div class="h-14 w-14 rounded-full border-4 border-blue-500 bg-blue-500/20"></div>
-                                        <div class="absolute inset-0 h-14 w-14 animate-ping rounded-full border-4 border-blue-500"></div>
-                                        <div
-                                            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow"
+                                    <button
+                                        v-for="stand in standsWithCoords"
+                                        :key="`marker-${stand.id}`"
+                                        type="button"
+                                        class="group absolute z-10 flex h-6 min-w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full px-1.5 text-[11px] font-bold text-white shadow-md ring-2 ring-white/90 transition hover:z-20 hover:scale-110 focus-visible:z-20 focus-visible:ring-4 focus-visible:ring-primary/40 focus-visible:outline-none"
+                                        :class="
+                                            selectedStandId === stand.id
+                                                ? 'bg-blue-600 ring-blue-200'
+                                                : stand.stand_type === 'partner'
+                                                  ? 'bg-secondary text-secondary-foreground ring-white/90'
+                                                  : 'bg-primary ring-white/90'
+                                        "
+                                        :style="{ left: `${stand.x_percent}%`, top: `${stand.y_percent}%` }"
+                                        :aria-label="`Stand ${standDisplayCode(stand)} ${standDisplayName(stand)}`"
+                                        :title="standDisplayName(stand)"
+                                        @click="selectStand(stand.id)"
+                                    >
+                                        <span
+                                            v-if="selectedStandId === stand.id"
+                                            class="pointer-events-none absolute inset-0 -z-10 animate-ping rounded-full bg-blue-500/70"
+                                        ></span>
+                                        {{ standDisplayCode(stand) }}
+                                        <span
+                                            class="pointer-events-none absolute bottom-full left-1/2 mb-2 hidden max-w-56 -translate-x-1/2 rounded-lg bg-gray-950 px-3 py-1.5 text-center text-xs leading-snug font-semibold text-white shadow-xl ring-1 ring-white/10 group-hover:block group-focus-visible:block"
                                         >
-                                            {{ selectedStandWithCoords.code }}
-                                        </div>
-                                    </div>
+                                            {{ standDisplayName(stand) }}
+                                        </span>
+                                    </button>
+                                </template>
+
+                                <div v-else class="flex min-h-[360px] items-center justify-center bg-accent/40 px-6 text-center text-sm text-muted-foreground">
+                                    Er is nog geen plattegrond ingesteld voor dit evenement.
                                 </div>
 
                                 <div
@@ -352,11 +365,7 @@ onUnmounted(() => {
                                     <div class="flex items-center gap-2">
                                         <span class="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">
                                             Stand
-                                            {{
-                                                selectedStand.stand_type === 'partner'
-                                                    ? `P${String(selectedStand.code).replace(/^P/i, '')}`
-                                                    : String(selectedStand.code).replace(/^P/i, '')
-                                            }}
+                                            {{ standDisplayCode(selectedStand) }}
                                         </span>
                                     </div>
                                     <div class="mt-1 truncate text-sm font-medium text-black dark:text-white">
@@ -456,7 +465,7 @@ onUnmounted(() => {
                                         class="flex h-10 min-w-10 shrink-0 items-center justify-center rounded-full px-2 text-sm font-semibold text-foreground"
                                         :class="index % 2 === 0 ? 'bg-primary/20' : 'bg-secondary/25'"
                                     >
-                                        {{ stand.stand_type === 'partner' ? `P${String(stand.code).replace(/^P/i, '')}` : String(stand.code).replace(/^P/i, '') }}
+                                        {{ standDisplayCode(stand) }}
                                     </div>
 
                                     <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-white">
@@ -500,11 +509,7 @@ onUnmounted(() => {
                             </h2>
                             <div class="mt-2 inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border">
                                 Stand
-                                {{
-                                    selectedCompany.stand_type === 'partner'
-                                        ? `P${String(selectedCompany.code).replace(/^P/i, '')}`
-                                        : String(selectedCompany.code).replace(/^P/i, '')
-                                }}
+                                {{ standDisplayCode(selectedCompany) }}
                             </div>
                         </div>
 

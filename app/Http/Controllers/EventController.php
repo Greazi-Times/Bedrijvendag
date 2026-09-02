@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Support\PageMedia;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -164,7 +165,7 @@ class EventController extends Controller
                 'header_image_url' => Storage::url($headerImageUrl),
                 'edition_url' => $editionUrl,
                 'gallery_url' => $galleryUrl,
-                'map_url' => Storage::url($mapUrl),
+                'map_url' => PageMedia::eventMapUrl($mapUrl),
             ];
         })->values();
 
@@ -198,7 +199,10 @@ class EventController extends Controller
 
     public function show(Request $request, Event $event)
     {
-        $event = $event->fresh();
+        $event = $event->fresh([
+            'stands.company' => fn ($query) => $query->with(['sectors', 'educations']),
+            'stands.partner' => fn ($query) => $query->with(['educations']),
+        ]);
 
         $startsAtColumn = $this->firstExistingColumn('events', ['starts_at', 'start_at', 'start_date', 'date', 'event_date']);
         $endsAtColumn = $this->firstExistingColumn('events', ['ends_at', 'end_at', 'end_date']);
@@ -287,10 +291,34 @@ class EventController extends Controller
                 'location' => $locationColumn ? $event->{$locationColumn} : null,
                 'description_html' => $this->asHtmlDescription($descriptionColumn ? $event->{$descriptionColumn} : null),
                 'header_image_url' => Storage::url($headerImageUrl),
-                'map_url' => Storage::url($mapUrl),
+                'map_url' => PageMedia::eventMapUrl($mapUrl),
                 'gallery_url' => $galleryUrl,
             ],
             'companies' => $companies,
+            'stands' => $event->stands
+                ->sortBy([
+                    ['type', 'asc'],
+                    ['stand_number', 'asc'],
+                ])
+                ->map(function ($stand) {
+                    $company = $stand->company;
+                    $partner = $stand->partner;
+                    $entity = $company ?? $partner;
+                    $isCompany = $stand->type === 'company';
+
+                    return [
+                        'id' => (string) $stand->id,
+                        'code' => (string) ($stand->stand_number ?? '—'),
+                        'stand_type' => (string) $stand->type,
+                        'company_name' => $entity?->name,
+                        'company_logo' => $isCompany
+                            ? ($company?->logo_path ? Storage::url($company->logo_path) : null)
+                            : (data_get($partner, 'image') ? Storage::url(data_get($partner, 'image')) : null),
+                        'x_percent' => $stand->x_percent !== null ? (float) $stand->x_percent : null,
+                        'y_percent' => $stand->y_percent !== null ? (float) $stand->y_percent : null,
+                    ];
+                })
+                ->values(),
         ]);
     }
 

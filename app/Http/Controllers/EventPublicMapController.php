@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Support\PageMedia;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -33,7 +34,7 @@ class EventPublicMapController extends Controller
             ],
             'map' => [
                 'title' => $event->name,
-                'image_url' => $event->map_path ? Storage::url($event->map_path) : '',
+                'image_url' => PageMedia::eventMapUrl($event->map_path),
             ],
             'stands' => $event->stands
                 ->sortBy([

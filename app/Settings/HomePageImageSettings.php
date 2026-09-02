@@ -8,6 +8,8 @@ class HomePageImageSettings extends Settings
 {
     public ?string $site_logo_path = null;
 
+    public ?string $event_map_path = null;
+
     public ?string $home_youtube_url = 'https://www.youtube.com/watch?v=yMBxJQk7gbg';
 
     public ?string $hero_image_path = null;

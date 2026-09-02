@@ -16,8 +16,6 @@ class EventInfolist
                 TextEntry::make('description')
                     ->placeholder('-')
                     ->columnSpanFull(),
-                TextEntry::make('map_path')
-                    ->placeholder('-'),
                 TextEntry::make('google_photos_album_url')
                     ->placeholder('-'),
                 TextEntry::make('created_at')
