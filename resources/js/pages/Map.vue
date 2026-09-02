@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { Building2, Search } from 'lucide-vue-next';
+import { Beer, Building2, DoorOpen, Info, MapPin, Search, Utensils } from 'lucide-vue-next';
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
@@ -15,6 +15,14 @@ type Stand = {
     company_website_url?: string | null;
     company_educations?: string[] | null;
     company_sectors?: string[] | null;
+    x_percent?: number | null;
+    y_percent?: number | null;
+};
+
+type MapPoint = {
+    id: number | string;
+    label: string;
+    type: string;
     x_percent?: number | null;
     y_percent?: number | null;
 };
@@ -42,6 +50,7 @@ const props = defineProps<{
     };
     map: EventMap;
     stands: Stand[];
+    mapPoints?: MapPoint[];
     backHref?: string;
     educations?: FilterOption[];
     sectors?: FilterOption[];
@@ -141,6 +150,10 @@ const standsWithCoords = computed(() => {
     return filteredStands.value.filter((s) => typeof s.x_percent === 'number' && typeof s.y_percent === 'number');
 });
 
+const mapPointsWithCoords = computed(() => {
+    return (props.mapPoints ?? []).filter((point) => typeof point.x_percent === 'number' && typeof point.y_percent === 'number');
+});
+
 const selectedStand = computed(() => {
     if (selectedStandId.value == null) return null;
     return props.stands.find((s) => s.id === selectedStandId.value) ?? null;
@@ -187,6 +200,40 @@ function standDisplayCode(stand: Stand) {
 
 function standDisplayName(stand: Stand) {
     return stand.company_name ?? 'Geen organisatie ingesteld';
+}
+
+function standBadgeClass(stand: Stand) {
+    return stand.stand_type === 'partner'
+        ? 'bg-sky-100 text-sky-950 ring-sky-200 dark:bg-sky-400/20 dark:text-sky-100 dark:ring-sky-300/30'
+        : 'bg-orange-100 text-orange-950 ring-orange-200 dark:bg-orange-400/20 dark:text-orange-100 dark:ring-orange-300/30';
+}
+
+function standRowClass(stand: Stand) {
+    return selectedStandId.value === stand.id
+        ? 'border-primary/35 bg-primary/5 shadow-sm ring-1 ring-primary/20'
+        : 'border-border/70 bg-white/55 hover:border-primary/25 hover:bg-white/90 dark:bg-white/5 dark:hover:bg-white/10';
+}
+
+function mapPointIcon(point: MapPoint) {
+    return (
+        {
+            bar: Beer,
+            info: Info,
+            lunch: Utensils,
+            entrance: DoorOpen,
+        }[point.type] ?? MapPin
+    );
+}
+
+function mapPointMarkerClass(point: MapPoint) {
+    return (
+        {
+            bar: 'bg-amber-500 text-amber-950 ring-white/95',
+            info: '!h-7 !w-7 !min-w-7 !px-0 bg-sky-500 text-white ring-white/95 [&_svg]:h-4 [&_svg]:w-4',
+            lunch: 'bg-emerald-500 text-white ring-white/95',
+            entrance: 'bg-violet-500 text-white ring-white/95',
+        }[point.type] ?? 'bg-slate-600 text-white ring-white/95'
+    );
 }
 
 function selectStand(id: Stand['id']) {
@@ -336,6 +383,24 @@ onUnmounted(() => {
                                             {{ standDisplayName(stand) }}
                                         </span>
                                     </button>
+
+                                    <button
+                                        v-for="point in mapPointsWithCoords"
+                                        :key="`map-point-${point.id}`"
+                                        type="button"
+                                        class="group absolute z-10 flex h-9 min-w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full px-2 text-xs font-bold shadow-lg ring-2 transition hover:z-20 hover:scale-110 focus-visible:z-20 focus-visible:ring-4 focus-visible:ring-primary/40 focus-visible:outline-none"
+                                        :class="mapPointMarkerClass(point)"
+                                        :style="{ left: `${point.x_percent}%`, top: `${point.y_percent}%` }"
+                                        :aria-label="point.label"
+                                        :title="point.label"
+                                    >
+                                        <component :is="mapPointIcon(point)" class="h-5 w-5" aria-hidden="true" />
+                                        <span
+                                            class="pointer-events-none absolute bottom-full left-1/2 mb-2 hidden max-w-56 -translate-x-1/2 rounded-lg bg-gray-950 px-3 py-1.5 text-center text-xs leading-snug font-semibold text-white shadow-xl ring-1 ring-white/10 group-hover:block group-focus-visible:block"
+                                        >
+                                            {{ point.label }}
+                                        </span>
+                                    </button>
                                 </template>
 
                                 <div v-else class="flex min-h-[360px] items-center justify-center bg-accent/40 px-6 text-center text-sm text-muted-foreground">
@@ -455,15 +520,15 @@ onUnmounted(() => {
 
                         <div class="mt-4 min-h-0 flex-1 overflow-auto pr-1">
                             <div
-                                v-for="(stand, index) in filteredStands"
+                                v-for="stand in filteredStands"
                                 :key="stand.id"
-                                class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-2 transition hover:border-border hover:bg-white/75"
-                                :class="selectedStandId === stand.id ? 'border-border bg-white/85 shadow-sm' : ''"
+                                class="mb-2 flex items-center gap-3 rounded-xl border px-3 py-2 transition last:mb-0"
+                                :class="standRowClass(stand)"
                             >
                                 <button type="button" class="flex min-w-0 flex-1 items-center gap-3 text-left" @click="selectStand(stand.id)">
                                     <div
-                                        class="flex h-10 min-w-10 shrink-0 items-center justify-center rounded-full px-2 text-sm font-semibold text-foreground"
-                                        :class="index % 2 === 0 ? 'bg-primary/20' : 'bg-secondary/25'"
+                                        class="flex h-10 min-w-10 shrink-0 items-center justify-center rounded-full px-2 text-sm font-semibold ring-1"
+                                        :class="standBadgeClass(stand)"
                                     >
                                         {{ standDisplayCode(stand) }}
                                     </div>
@@ -481,8 +546,7 @@ onUnmounted(() => {
                                 </button>
                                 <button
                                     type="button"
-                                    class="inline-flex items-center justify-center rounded-xl px-4 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 transition focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                    :class="index % 2 === 0 ? 'bg-primary/60 ring-primary/20 hover:bg-primary/80' : 'bg-secondary/80 ring-secondary/25 hover:bg-secondary'"
+                                    class="inline-flex items-center justify-center rounded-xl bg-white/85 px-4 py-1.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none dark:bg-white/10 dark:hover:bg-white/15"
                                     @click.stop="openCompany(stand)"
                                 >
                                     Lees meer

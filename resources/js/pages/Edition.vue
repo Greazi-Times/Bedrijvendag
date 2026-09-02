@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Beer, DoorOpen, Info, MapPin, Utensils } from 'lucide-vue-next';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
@@ -24,6 +25,14 @@ interface Stand {
     y_percent?: number | null;
 }
 
+interface MapPoint {
+    id: number | string;
+    label: string;
+    type: string;
+    x_percent?: number | null;
+    y_percent?: number | null;
+}
+
 interface EditionEvent {
     id: number;
     title: string;
@@ -40,6 +49,7 @@ const props = defineProps<{
     event: EditionEvent;
     companies: Company[];
     stands: Stand[];
+    mapPoints?: MapPoint[];
 }>();
 
 const sortedCompanies = computed(() => {
@@ -70,6 +80,10 @@ const standsWithCoords = computed(() => {
     return props.stands.filter((stand) => typeof stand.x_percent === 'number' && typeof stand.y_percent === 'number');
 });
 
+const mapPointsWithCoords = computed(() => {
+    return (props.mapPoints ?? []).filter((point) => typeof point.x_percent === 'number' && typeof point.y_percent === 'number');
+});
+
 const mapImgEl = ref<HTMLImageElement | null>(null);
 const mapImageHeight = ref<number>(0);
 let mapResizeObserver: ResizeObserver | null = null;
@@ -98,6 +112,28 @@ function standDisplayCode(stand: Stand) {
 
 function standDisplayName(stand: Stand) {
     return stand.company_name ?? 'Geen organisatie ingesteld';
+}
+
+function mapPointIcon(point: MapPoint) {
+    return (
+        {
+            bar: Beer,
+            info: Info,
+            lunch: Utensils,
+            entrance: DoorOpen,
+        }[point.type] ?? MapPin
+    );
+}
+
+function mapPointMarkerClass(point: MapPoint) {
+    return (
+        {
+            bar: 'bg-amber-500 text-amber-950 ring-white/95',
+            info: '!h-7 !w-7 !min-w-7 !px-0 bg-sky-500 text-white ring-white/95 [&_svg]:h-4 [&_svg]:w-4',
+            lunch: 'bg-emerald-500 text-white ring-white/95',
+            entrance: 'bg-violet-500 text-white ring-white/95',
+        }[point.type] ?? 'bg-slate-600 text-white ring-white/95'
+    );
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -201,6 +237,24 @@ function formatDateRange(start: string | null, end: string | null) {
                                         class="pointer-events-none absolute bottom-full left-1/2 mb-2 hidden max-w-56 -translate-x-1/2 rounded-lg bg-gray-950 px-3 py-1.5 text-center text-xs leading-snug font-semibold text-white shadow-xl ring-1 ring-white/10 group-hover:block group-focus-visible:block"
                                     >
                                         {{ standDisplayName(stand) }}
+                                    </span>
+                                </button>
+
+                                <button
+                                    v-for="point in mapPointsWithCoords"
+                                    :key="`edition-map-point-${point.id}`"
+                                    type="button"
+                                    class="group absolute z-10 flex h-9 min-w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full px-2 text-xs font-bold shadow-lg ring-2 transition hover:z-20 hover:scale-110 focus-visible:z-20 focus-visible:ring-4 focus-visible:ring-primary/40 focus-visible:outline-none"
+                                    :class="mapPointMarkerClass(point)"
+                                    :style="{ left: `${point.x_percent}%`, top: `${point.y_percent}%` }"
+                                    :aria-label="point.label"
+                                    :title="point.label"
+                                >
+                                    <component :is="mapPointIcon(point)" class="h-5 w-5" aria-hidden="true" />
+                                    <span
+                                        class="pointer-events-none absolute bottom-full left-1/2 mb-2 hidden max-w-56 -translate-x-1/2 rounded-lg bg-gray-950 px-3 py-1.5 text-center text-xs leading-snug font-semibold text-white shadow-xl ring-1 ring-white/10 group-hover:block group-focus-visible:block"
+                                    >
+                                        {{ point.label }}
                                     </span>
                                 </button>
                             </div>

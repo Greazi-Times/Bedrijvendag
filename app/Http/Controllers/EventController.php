@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\EventMapPoint;
 use App\Support\PageMedia;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -319,6 +320,21 @@ class EventController extends Controller
                     ];
                 })
                 ->values(),
+            'mapPoints' => EventMapPoint::query()
+                ->where('event_id', $event->id)
+                ->whereNotNull('x_percent')
+                ->whereNotNull('y_percent')
+                ->orderBy('sort_order')
+                ->orderBy('label')
+                ->get()
+                ->map(fn (EventMapPoint $point): array => [
+                    'id' => (string) $point->id,
+                    'label' => $this->formatMapPointLabel($point),
+                    'type' => $point->type,
+                    'x_percent' => (float) $point->x_percent,
+                    'y_percent' => (float) $point->y_percent,
+                ])
+                ->values(),
         ]);
     }
 
@@ -360,5 +376,16 @@ class EventController extends Controller
         }
 
         return null;
+    }
+
+    private function formatMapPointLabel(EventMapPoint $point): string
+    {
+        return match ($point->type) {
+            'bar' => 'Bar',
+            'info' => 'Info',
+            'lunch' => 'Lunch',
+            'entrance' => 'Entrance',
+            default => 'Other',
+        };
     }
 }
