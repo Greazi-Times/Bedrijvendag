@@ -406,13 +406,6 @@ onUnmounted(() => {
                                 <div v-else class="flex min-h-[360px] items-center justify-center bg-accent/40 px-6 text-center text-sm text-muted-foreground">
                                     Er is nog geen plattegrond ingesteld voor dit evenement.
                                 </div>
-
-                                <div
-                                    v-if="standsWithCoords.length === 0"
-                                    class="absolute top-4 left-4 rounded-xl border border-border bg-white/90 px-3 py-2 text-xs text-foreground shadow-sm backdrop-blur"
-                                >
-                                    Er zijn nog geen markeringen ingesteld voor dit evenement. Gebruik de lijst rechts.
-                                </div>
                             </div>
 
                             <!-- empty state when filtering hides all -->
