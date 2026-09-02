@@ -16,8 +16,10 @@ class BorrelEnrollmentsTable
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('event.id')
-                    ->searchable(),
+                TextColumn::make('event.name')
+                    ->label('Event')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
