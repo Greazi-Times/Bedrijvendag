@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Event;
 use App\Models\EventStand;
 use App\Models\Partner;
+use App\Support\PageMedia;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -19,8 +20,6 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\HtmlString;
 
 class ManageStands extends Page implements HasForms, HasTable
 {
@@ -50,6 +49,8 @@ class ManageStands extends Page implements HasForms, HasTable
 
     public ?float $markerY = null;
 
+    public ?int $markerEditorStandId = null;
+
     public function mount(): void
     {
         if ($this->selectedEventId) {
@@ -62,12 +63,14 @@ class ManageStands extends Page implements HasForms, HasTable
         $this->selectedEventId = filled($state) ? (int) $state : null;
 
         if (! $this->selectedEventId) {
+            $this->markerEditorStandId = null;
             $this->resetTable();
 
             return;
         }
 
         $this->syncStandRowsForSelectedEvent();
+        $this->markerEditorStandId = null;
         $this->resetTable();
     }
 
@@ -80,11 +83,77 @@ class ManageStands extends Page implements HasForms, HasTable
     {
         $event = $this->getSelectedEvent();
 
-        if (! $event || ! $event->map_path) {
+        if (! $event) {
             return null;
         }
 
-        return Storage::url($event->map_path);
+        return PageMedia::eventMapUrl($event->map_path) ?: null;
+    }
+
+    public function openMarkerEditorForStand(int $eventStandId): void
+    {
+        if (! $this->selectedEventId) {
+            return;
+        }
+
+        $exists = EventStand::query()
+            ->whereKey($eventStandId)
+            ->where('event_id', $this->selectedEventId)
+            ->exists();
+
+        if (! $exists) {
+            return;
+        }
+
+        $this->markerEditorStandId = $eventStandId;
+    }
+
+    public function closeMarkerEditor(): void
+    {
+        $this->markerEditorStandId = null;
+    }
+
+    public function getMarkerEditorStand(): ?EventStand
+    {
+        if (! $this->selectedEventId || ! $this->markerEditorStandId) {
+            return null;
+        }
+
+        return EventStand::query()
+            ->with(['company', 'partner'])
+            ->whereKey($this->markerEditorStandId)
+            ->where('event_id', $this->selectedEventId)
+            ->first();
+    }
+
+    public function getMarkerEditorMapUrl(): ?string
+    {
+        return $this->getSelectedEventMapUrl();
+    }
+
+    public function getMarkerEditorMarkers(): array
+    {
+        if (! $this->selectedEventId) {
+            return [];
+        }
+
+        return EventStand::query()
+            ->where('event_id', $this->selectedEventId)
+            ->whereNotNull('x_percent')
+            ->whereNotNull('y_percent')
+            ->orderByRaw("CASE WHEN type = 'company' THEN 0 ELSE 1 END")
+            ->orderByRaw('CAST(stand_number AS UNSIGNED)')
+            ->get(['id', 'type', 'stand_number', 'x_percent', 'y_percent'])
+            ->map(fn (EventStand $stand): array => [
+                'id' => $stand->id,
+                'code' => $this->formatStandCode($stand),
+                'type' => $stand->type,
+                'x' => (float) $stand->x_percent,
+                'y' => (float) $stand->y_percent,
+                'current' => $stand->id === $this->markerEditorStandId,
+            ])
+            ->values()
+            ->all();
     }
 
     public function setMarkerForStand(int $eventStandId, float $xPercent, float $yPercent): void
@@ -198,79 +267,9 @@ class ManageStands extends Page implements HasForms, HasTable
             ->actions([
                 Action::make('set_marker')
                     ->label('Set marker')
-                    ->modalHeading('Set marker')
-                    ->modalWidth('5xl')
-                    ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Close')
-                    ->modalContent(function ($record) {
-                        $url = $this->getSelectedEventMapUrl();
-
-                        if (! $url) {
-                            return new HtmlString('<div class="text-sm text-gray-600 dark:text-gray-300">No map uploaded for this event.</div>');
-                        }
-
-                        $id = (int) $record->id;
-                        $livewireId = $this->getId();
-
-                        $html = '
-<div
-  class="max-h-[95vh] overflow-y-auto pointer-events-auto"
-  x-data=\'{
-    lwId: '.json_encode($livewireId).',
-    standId: '.$id.',
-    saved: false,
-    x: null,
-    y: null,
-    click(e){
-      const img = e.currentTarget;
-      const r = img.getBoundingClientRect();
-      const x = ((e.clientX - r.left) / r.width) * 100;
-      const y = ((e.clientY - r.top) / r.height) * 100;
-      this.x = Math.max(0, Math.min(100, Math.round(x * 100) / 100));
-      this.y = Math.max(0, Math.min(100, Math.round(y * 100) / 100));
-      this.saved = true;
-      if (window.Livewire && window.Livewire.find) {
-        const lw = window.Livewire.find(this.lwId);
-        if (lw) {
-          Promise.resolve(lw.call("setMarkerForStand", this.standId, this.x, this.y))
-            .then(() => {
-              // Close the Filament modal after the save finishes.
-              this.$dispatch("close-modal");
-            })
-            .catch(() => {
-              // If something fails, keep the modal open so the admin can try again.
-            });
-        }
-      }
-    }
-  }\'
->
-  <div class="text-sm text-gray-600 dark:text-gray-300">
-    Click on the map to set the marker for stand '.htmlspecialchars((string) $record->stand_number, ENT_QUOTES).'.
-  </div>
-
-  <div
-    x-show="saved"
-    x-cloak
-    class="rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-900 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-100"
-  >
-    Saved. X: <span x-text="x"></span>%, Y: <span x-text="y"></span>%
-  </div>
-
-  <div class="mx-auto inline-block overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
-    <img
-      src="'.htmlspecialchars($url, ENT_QUOTES).'"
-      alt="Event map"
-      class="block h-auto w-auto max-h-[70vh] max-w-full cursor-crosshair select-none"
-      draggable="false"
-      @click.stop.prevent="click($event)"
-    />
-  </div>
-
-  <div class="text-xs text-gray-500 dark:text-gray-400">You can click again to move the marker.</div>
-</div>';
-
-                        return new HtmlString($html);
+                    ->icon('heroicon-o-map-pin')
+                    ->action(function (EventStand $record): void {
+                        $this->openMarkerEditorForStand((int) $record->id);
                     }),
 
                 Action::make('clear_marker')
@@ -489,5 +488,14 @@ class ManageStands extends Page implements HasForms, HasTable
                 ['updated_at']
             );
         }
+    }
+
+    private function formatStandCode(EventStand $stand): string
+    {
+        if ($stand->type === 'partner') {
+            return 'P'.preg_replace('/^P/i', '', (string) $stand->stand_number);
+        }
+
+        return (string) $stand->stand_number;
     }
 }

@@ -22,8 +22,6 @@ class EventsTable
                 TextColumn::make('date')
                     ->date()
                     ->sortable(),
-                TextColumn::make('map_path')
-                    ->searchable(),
                 TextColumn::make('google_photos_album_url')
                     ->searchable(),
             ])

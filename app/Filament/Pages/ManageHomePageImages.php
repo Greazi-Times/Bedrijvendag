@@ -52,6 +52,15 @@ class ManageHomePageImages extends SettingsPage
                         ->imageEditor()
                         ->helperText('Used in the header, mobile menu, and footer. Leave empty to use the default favicon logo.')
                         ->nullable(),
+
+                    FileUpload::make('event_map_path')
+                        ->label('Event map')
+                        ->image()
+                        ->disk('public')
+                        ->directory('event-maps')
+                        ->imageEditor()
+                        ->helperText('Used as the shared blank map on /plattegrond and in the stand marker editor.')
+                        ->nullable(),
                 ]),
 
             Section::make('Home page')
@@ -194,6 +203,7 @@ class ManageHomePageImages extends SettingsPage
     {
         return [
             'site_logo_path' => null,
+            'event_map_path' => null,
             'home_youtube_url' => 'https://www.youtube.com/watch?v=yMBxJQk7gbg',
             'hero_image_path' => null,
             'info_first_image_path' => null,

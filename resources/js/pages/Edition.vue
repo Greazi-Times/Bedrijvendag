@@ -14,6 +14,16 @@ interface Company {
     stand_number: string | number | null;
 }
 
+interface Stand {
+    id: number | string;
+    code: string;
+    stand_type?: 'company' | 'partner' | null;
+    company_name?: string | null;
+    company_logo?: string | null;
+    x_percent?: number | null;
+    y_percent?: number | null;
+}
+
 interface EditionEvent {
     id: number;
     title: string;
@@ -29,6 +39,7 @@ interface EditionEvent {
 const props = defineProps<{
     event: EditionEvent;
     companies: Company[];
+    stands: Stand[];
 }>();
 
 const sortedCompanies = computed(() => {
@@ -55,6 +66,10 @@ const sortedCompanies = computed(() => {
 
 const hasMap = computed(() => !!props.event.map_url);
 
+const standsWithCoords = computed(() => {
+    return props.stands.filter((stand) => typeof stand.x_percent === 'number' && typeof stand.y_percent === 'number');
+});
+
 const mapImgEl = ref<HTMLImageElement | null>(null);
 const mapImageHeight = ref<number>(0);
 let mapResizeObserver: ResizeObserver | null = null;
@@ -73,6 +88,16 @@ function openCompany(company: Company) {
 
 function closeCompany() {
     selectedCompany.value = null;
+}
+
+function standDisplayCode(stand: Stand) {
+    const code = String(stand.code).replace(/^P/i, '');
+
+    return stand.stand_type === 'partner' ? `P${code}` : code;
+}
+
+function standDisplayName(stand: Stand) {
+    return stand.company_name ?? 'Geen organisatie ingesteld';
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -158,8 +183,26 @@ function formatDateRange(start: string | null, end: string | null) {
                                 <span class="text-xs text-muted-foreground">&nbsp;</span>
                             </div>
 
-                            <div v-if="hasMap" class="mt-4 overflow-hidden rounded-2xl ring-1 ring-border">
-                                <img ref="mapImgEl" :src="event.map_url ?? ''" alt="Plattegrond" class="h-full w-full object-contain" @load="updateMapImageHeight" />
+                            <div v-if="hasMap" class="relative mt-4 rounded-2xl ring-1 ring-border">
+                                <img ref="mapImgEl" :src="event.map_url ?? ''" alt="Plattegrond" class="h-full w-full rounded-2xl object-contain" @load="updateMapImageHeight" />
+
+                                <button
+                                    v-for="stand in standsWithCoords"
+                                    :key="`edition-marker-${stand.id}`"
+                                    type="button"
+                                    class="group absolute z-10 flex h-6 min-w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full px-1.5 text-[11px] font-bold text-white shadow-md ring-2 ring-white/90 transition hover:z-20 hover:scale-110 focus-visible:z-20 focus-visible:ring-4 focus-visible:ring-primary/40 focus-visible:outline-none"
+                                    :class="stand.stand_type === 'partner' ? 'bg-secondary text-secondary-foreground ring-white/90' : 'bg-primary ring-white/90'"
+                                    :style="{ left: `${stand.x_percent}%`, top: `${stand.y_percent}%` }"
+                                    :aria-label="`Stand ${standDisplayCode(stand)} ${standDisplayName(stand)}`"
+                                    :title="standDisplayName(stand)"
+                                >
+                                    {{ standDisplayCode(stand) }}
+                                    <span
+                                        class="pointer-events-none absolute bottom-full left-1/2 mb-2 hidden max-w-56 -translate-x-1/2 rounded-lg bg-gray-950 px-3 py-1.5 text-center text-xs leading-snug font-semibold text-white shadow-xl ring-1 ring-white/10 group-hover:block group-focus-visible:block"
+                                    >
+                                        {{ standDisplayName(stand) }}
+                                    </span>
+                                </button>
                             </div>
 
                             <p v-else class="mt-4 text-sm text-muted-foreground">Geen plattegrond beschikbaar.</p>

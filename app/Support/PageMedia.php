@@ -19,6 +19,17 @@ class PageMedia
         }
     }
 
+    public static function eventMapUrl(?string $fallbackPath = null): string
+    {
+        try {
+            $settings = app(HomePageImageSettings::class);
+
+            return self::imageUrl($settings->event_map_path, $fallbackPath ? self::imageUrl($fallbackPath, '') : '');
+        } catch (MissingSettings) {
+            return $fallbackPath ? self::imageUrl($fallbackPath, '') : '';
+        }
+    }
+
     public static function homeImages(): array
     {
         $fallbacks = [

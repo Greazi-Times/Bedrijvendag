@@ -64,13 +64,6 @@ class EventForm
                     ->disk('public')
                     ->imageEditor()
                     ->nullable(),
-                FileUpload::make('map_path')
-                    ->label('Map image')
-                    ->image()
-                    ->directory('event-maps')
-                    ->disk('public')
-                    ->imageEditor()
-                    ->nullable(),
             ]);
     }
 }
