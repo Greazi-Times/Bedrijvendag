@@ -11,7 +11,7 @@ class BorrelEnrollmentInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('event.id')
+                TextEntry::make('event.name')
                     ->label('Event'),
                 TextEntry::make('name'),
                 TextEntry::make('email')

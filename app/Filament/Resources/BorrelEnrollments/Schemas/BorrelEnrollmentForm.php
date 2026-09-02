@@ -13,7 +13,7 @@ class BorrelEnrollmentForm
         return $schema
             ->components([
                 Select::make('event_id')
-                    ->relationship('event', 'id')
+                    ->relationship('event', 'name')
                     ->required(),
                 TextInput::make('name')
                     ->required(),
