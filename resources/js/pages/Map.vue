@@ -407,13 +407,6 @@ onUnmounted(() => {
                                     Er is nog geen plattegrond ingesteld voor dit evenement.
                                 </div>
                             </div>
-
-                            <!-- empty state when filtering hides all -->
-                            <div v-if="filteredStands.length === 0" class="absolute inset-0 flex items-center justify-center px-6 text-center">
-                                <div class="max-w-md rounded-2xl border border-border bg-white/90 p-5 text-sm text-foreground shadow-sm backdrop-blur">
-                                    Geen stands gevonden die overeenkomen met je zoekopdracht.
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Selected stand card -->
