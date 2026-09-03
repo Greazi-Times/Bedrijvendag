@@ -19,6 +19,15 @@ class CompanyInfolist
                     ->placeholder('No logo has been uploaded'),
                 TextEntry::make('website_url')
                     ->placeholder('No website URL has been provided'),
+                TextEntry::make('profile_contact_email')
+                    ->label('Profile contact email')
+                    ->placeholder('No profile contact email has been provided'),
+                TextEntry::make('profileVerificationUrl')
+                    ->label('Verification link')
+                    ->getStateUsing(fn ($record): string => $record->profileVerificationUrl())
+                    ->copyable()
+                    ->copyMessage('Verification link copied')
+                    ->columnSpanFull(),
                 TextEntry::make('description')
                     ->placeholder('No description has been provided')
                     ->columnSpanFull(),

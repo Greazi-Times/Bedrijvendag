@@ -27,6 +27,10 @@ class CompanyForm
                 TextInput::make('website_url')
                     ->url()
                     ->default(null),
+                TextInput::make('profile_contact_email')
+                    ->label('Profile contact email')
+                    ->email()
+                    ->default(null),
                 RichEditor::make('description')
                     ->toolbarButtons([
                         'bold',

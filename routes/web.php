@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\CompaniesController;
+use App\Http\Controllers\CompanyAccessController;
+use App\Http\Controllers\CompanyProfileController;
 use App\Http\Controllers\CookiePolicyController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventPublicMapController;
@@ -21,6 +23,20 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/plattegrond', [EventPublicMapController::class, 'show'])->name('map');
 
 Route::get('/bedrijven', [CompaniesController::class, 'index'])->name('companies');
+
+Route::get('/bedrijf-toegang', [CompanyAccessController::class, 'create'])
+    ->name('company-access.create');
+
+Route::post('/bedrijf-toegang', [CompanyAccessController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('company-access.store');
+
+Route::get('/bedrijf-profiel/{token}', [CompanyProfileController::class, 'edit'])
+    ->name('company-profile.edit');
+
+Route::post('/bedrijf-profiel/{token}', [CompanyProfileController::class, 'update'])
+    ->middleware('throttle:10,1')
+    ->name('company-profile.update');
 
 Route::get('/partners', [HomeController::class, 'partners'])->name('partners');
 
