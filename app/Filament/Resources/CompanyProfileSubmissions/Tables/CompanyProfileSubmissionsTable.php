@@ -63,12 +63,15 @@ class CompanyProfileSubmissionsTable
                     ])
                     ->requiresConfirmation()
                     ->action(function (CompanyProfileSubmission $record, array $data): void {
-                        $record->approve($data['review_note'] ?? null);
+                        $emailSent = $record->approve($data['review_note'] ?? null);
 
-                        Notification::make()
+                        $notification = Notification::make()
                             ->title('Company profile updated')
-                            ->success()
-                            ->send();
+                            ->body($emailSent
+                                ? 'The company contact has been emailed.'
+                                : 'The email could not be sent. Check the mail settings before approving more submissions.');
+
+                        ($emailSent ? $notification->success() : $notification->warning())->send();
                     }),
                 Action::make('reject')
                     ->color('danger')
@@ -83,12 +86,15 @@ class CompanyProfileSubmissionsTable
                     ])
                     ->requiresConfirmation()
                     ->action(function (CompanyProfileSubmission $record, array $data): void {
-                        $record->reject($data['review_note'] ?? null);
+                        $emailSent = $record->reject($data['review_note'] ?? null);
 
-                        Notification::make()
+                        $notification = Notification::make()
                             ->title('Submission rejected')
-                            ->success()
-                            ->send();
+                            ->body($emailSent
+                                ? 'The company contact has been emailed.'
+                                : 'The email could not be sent. Check the mail settings before rejecting more submissions.');
+
+                        ($emailSent ? $notification->success() : $notification->warning())->send();
                     }),
             ]);
     }

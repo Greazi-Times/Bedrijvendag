@@ -112,3 +112,33 @@ test('new company request only creates a company after approval', function () {
             && $mail->accessRequest->verificationUrl() !== null;
     });
 });
+
+test('access request stays pending when the approval email fails', function () {
+    Mail::shouldReceive('to')
+        ->once()
+        ->with('jane@acme.example')
+        ->andReturnSelf();
+
+    Mail::shouldReceive('send')
+        ->once()
+        ->andThrow(new RuntimeException('SMTP unavailable'));
+
+    $company = Company::create([
+        'name' => 'Acme',
+        'profile_contact_email' => null,
+    ]);
+
+    $request = CompanyAccessRequest::create([
+        'type' => CompanyAccessRequest::TYPE_EXISTING,
+        'status' => CompanyAccessRequest::STATUS_PENDING,
+        'company_id' => $company->id,
+        'company_name' => $company->name,
+        'contact_name' => 'Jane Doe',
+        'contact_email' => 'jane@acme.example',
+        'submitted_at' => now(),
+    ]);
+
+    expect($request->approve())->toBeFalse()
+        ->and($request->fresh()->status)->toBe(CompanyAccessRequest::STATUS_PENDING)
+        ->and($company->refresh()->profile_contact_email)->toBeNull();
+});

@@ -74,12 +74,22 @@ class CompanyAccessRequestsTable
                     ])
                     ->requiresConfirmation()
                     ->action(function (CompanyAccessRequest $record, array $data): void {
-                        $record->approve($data['review_note'] ?? null);
+                        $emailSent = $record->approve($data['review_note'] ?? null);
+
+                        if ($emailSent) {
+                            Notification::make()
+                                ->title('Access request approved')
+                                ->body('The requester has been emailed the private verification link.')
+                                ->success()
+                                ->send();
+
+                            return;
+                        }
 
                         Notification::make()
                             ->title('Access request approved')
-                            ->body('Open the request to copy the verification link.')
-                            ->success()
+                            ->body('The email could not be sent. Check the mail settings before approving more requests.')
+                            ->warning()
                             ->send();
                     }),
                 Action::make('reject')

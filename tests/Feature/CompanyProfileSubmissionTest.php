@@ -37,6 +37,8 @@ test('company can open its verification form with a token', function () {
 });
 
 test('company rich text submission keeps safe formatting and removes unsafe markup', function () {
+    Mail::fake();
+
     $company = Company::create([
         'name' => 'Formatted Company',
         'description' => ['html' => '<p>Old</p>'],
@@ -44,6 +46,7 @@ test('company rich text submission keeps safe formatting and removes unsafe mark
 
     $this->post(route('company-profile.update', $company->profile_token), [
         'name' => 'Formatted Company',
+        'contact_email' => 'profile@example.com',
         'description' => '<h2>Summary</h2><p><strong>Bold</strong> and <em>italic</em> with <u>underline</u>.</p><ul><li>One</li></ul><a href="javascript:alert(1)" onclick="alert(1)">Bad link</a><script>alert(1)</script>',
         'education_ids' => [],
         'sector_ids' => [],
@@ -170,4 +173,37 @@ test('rejecting a submission emails the company contact', function () {
         return $mail->hasTo('fallback@example.com')
             && $mail->submission->review_note === 'Please shorten the description.';
     });
+});
+
+test('profile submission stays pending and does not update the company when the approval email fails', function () {
+    Mail::shouldReceive('to')
+        ->once()
+        ->with('profile@example.com')
+        ->andReturnSelf();
+
+    Mail::shouldReceive('send')
+        ->once()
+        ->andThrow(new RuntimeException('SMTP unavailable'));
+
+    $company = Company::create([
+        'name' => 'Before',
+        'website_url' => 'https://before.example',
+        'description' => ['html' => '<p>Before description</p>'],
+    ]);
+
+    $submission = CompanyProfileSubmission::create([
+        'company_id' => $company->id,
+        'status' => CompanyProfileSubmission::STATUS_PENDING,
+        'contact_email' => 'profile@example.com',
+        'proposed_name' => 'After',
+        'proposed_website_url' => 'https://after.example',
+        'proposed_description' => 'After description',
+        'submitted_at' => now(),
+    ]);
+
+    expect($submission->approve())->toBeFalse()
+        ->and($submission->fresh()->status)->toBe(CompanyProfileSubmission::STATUS_PENDING)
+        ->and($company->refresh()->name)->toBe('Before')
+        ->and($company->website_url)->toBe('https://before.example')
+        ->and($company->description['html'])->toBe('<p>Before description</p>');
 });

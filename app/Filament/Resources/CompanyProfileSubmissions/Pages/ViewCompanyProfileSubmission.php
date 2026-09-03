@@ -28,12 +28,15 @@ class ViewCompanyProfileSubmission extends ViewRecord
                 ])
                 ->requiresConfirmation()
                 ->action(function (array $data): void {
-                    $this->record->approve($data['review_note'] ?? null);
+                    $emailSent = $this->record->approve($data['review_note'] ?? null);
 
-                    Notification::make()
+                    $notification = Notification::make()
                         ->title('Company profile updated')
-                        ->success()
-                        ->send();
+                        ->body($emailSent
+                            ? 'The company contact has been emailed.'
+                            : 'The email could not be sent. Check the mail settings before approving more submissions.');
+
+                    ($emailSent ? $notification->success() : $notification->warning())->send();
                 }),
             Action::make('reject')
                 ->label('Reject')
@@ -47,12 +50,15 @@ class ViewCompanyProfileSubmission extends ViewRecord
                 ])
                 ->requiresConfirmation()
                 ->action(function (array $data): void {
-                    $this->record->reject($data['review_note'] ?? null);
+                    $emailSent = $this->record->reject($data['review_note'] ?? null);
 
-                    Notification::make()
+                    $notification = Notification::make()
                         ->title('Submission rejected')
-                        ->success()
-                        ->send();
+                        ->body($emailSent
+                            ? 'The company contact has been emailed.'
+                            : 'The email could not be sent. Check the mail settings before rejecting more submissions.');
+
+                    ($emailSent ? $notification->success() : $notification->warning())->send();
                 }),
         ];
     }
