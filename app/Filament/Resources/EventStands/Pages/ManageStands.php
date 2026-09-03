@@ -5,6 +5,7 @@ namespace App\Filament\Resources\EventStands\Pages;
 use App\Filament\Resources\EventStands\EventStandResource;
 use App\Models\Company;
 use App\Models\Event;
+use App\Models\EventMapPoint;
 use App\Models\EventStand;
 use App\Models\Partner;
 use App\Support\PageMedia;
@@ -40,6 +41,12 @@ class ManageStands extends Page implements HasForms, HasTable
                 ->visible(fn (): bool => filled($this->selectedEventId))
                 ->url(fn (): string => route('stands-pdf', ['event' => $this->selectedEventId]))
                 ->openUrlInNewTab(),
+
+            Action::make('create_map_location')
+                ->label('Add map location')
+                ->icon('heroicon-o-plus')
+                ->visible(fn (): bool => filled($this->selectedEventId))
+                ->action(fn () => $this->openCreatePointEditor()),
         ];
     }
 
@@ -51,8 +58,22 @@ class ManageStands extends Page implements HasForms, HasTable
 
     public ?int $markerEditorStandId = null;
 
+    public ?int $markerEditorPointId = null;
+
+    public ?string $pointEditorMode = null;
+
+    public ?int $pointEditorPointId = null;
+
+    public array $pointData = [
+        'type' => 'other',
+    ];
+
     public function mount(): void
     {
+        $this->selectedEventId = Event::query()
+            ->orderByDesc('date')
+            ->value('id');
+
         if ($this->selectedEventId) {
             $this->syncStandRowsForSelectedEvent();
         }
@@ -64,6 +85,8 @@ class ManageStands extends Page implements HasForms, HasTable
 
         if (! $this->selectedEventId) {
             $this->markerEditorStandId = null;
+            $this->markerEditorPointId = null;
+            $this->closePointEditor();
             $this->resetTable();
 
             return;
@@ -71,6 +94,8 @@ class ManageStands extends Page implements HasForms, HasTable
 
         $this->syncStandRowsForSelectedEvent();
         $this->markerEditorStandId = null;
+        $this->markerEditorPointId = null;
+        $this->closePointEditor();
         $this->resetTable();
     }
 
@@ -111,6 +136,11 @@ class ManageStands extends Page implements HasForms, HasTable
     public function closeMarkerEditor(): void
     {
         $this->markerEditorStandId = null;
+    }
+
+    public function closePointMarkerEditor(): void
+    {
+        $this->markerEditorPointId = null;
     }
 
     public function getMarkerEditorStand(): ?EventStand
@@ -156,6 +186,33 @@ class ManageStands extends Page implements HasForms, HasTable
             ->all();
     }
 
+    public function getPointMarkerEditorMarkers(): array
+    {
+        if (! $this->selectedEventId) {
+            return [];
+        }
+
+        return EventMapPoint::query()
+            ->where('event_id', $this->selectedEventId)
+            ->whereNotNull('x_percent')
+            ->whereNotNull('y_percent')
+            ->orderBy('type')
+            ->orderBy('id')
+            ->get(['id', 'label', 'type', 'x_percent', 'y_percent'])
+            ->map(fn (EventMapPoint $point): array => [
+                'id' => $point->id,
+                'key' => 'point-'.$point->id,
+                'label' => $this->pointTypeOptions()[$point->type] ?? $point->label,
+                'code' => $this->formatMapPointCode($point),
+                'type' => $point->type,
+                'x' => (float) $point->x_percent,
+                'y' => (float) $point->y_percent,
+                'current' => $point->id === $this->markerEditorPointId,
+            ])
+            ->values()
+            ->all();
+    }
+
     public function setMarkerForStand(int $eventStandId, float $xPercent, float $yPercent): void
     {
         if (! $this->selectedEventId) {
@@ -182,6 +239,198 @@ class ManageStands extends Page implements HasForms, HasTable
             ->send();
 
         $this->resetTable();
+    }
+
+    public function setMarkerForPoint(int $mapPointId, float $xPercent, float $yPercent): void
+    {
+        if (! $this->selectedEventId) {
+            return;
+        }
+
+        $xPercent = max(0, min(100, round($xPercent, 2)));
+        $yPercent = max(0, min(100, round($yPercent, 2)));
+
+        EventMapPoint::query()
+            ->whereKey($mapPointId)
+            ->where('event_id', $this->selectedEventId)
+            ->update([
+                'x_percent' => $xPercent,
+                'y_percent' => $yPercent,
+            ]);
+
+        Notification::make()
+            ->title('Marker saved')
+            ->success()
+            ->send();
+    }
+
+    public function openCreatePointEditor(): void
+    {
+        if (! $this->selectedEventId) {
+            return;
+        }
+
+        $this->pointEditorMode = 'create';
+        $this->pointEditorPointId = null;
+        $this->pointData = [
+            'type' => 'other',
+        ];
+    }
+
+    public function openEditPointEditor(int $mapPointId): void
+    {
+        if (! $this->selectedEventId) {
+            return;
+        }
+
+        $point = EventMapPoint::query()
+            ->whereKey($mapPointId)
+            ->where('event_id', $this->selectedEventId)
+            ->first();
+
+        if (! $point) {
+            return;
+        }
+
+        $this->pointEditorMode = 'edit';
+        $this->pointEditorPointId = $point->id;
+        $this->pointData = [
+            'type' => $point->type,
+        ];
+    }
+
+    public function savePointEditor(): void
+    {
+        if (! $this->selectedEventId || ! $this->pointEditorMode) {
+            return;
+        }
+
+        $data = $this->validate([
+            'pointData.type' => ['required', 'string', 'in:bar,info,lunch,entrance,other'],
+        ])['pointData'];
+
+        $data['label'] = $this->pointTypeOptions()[$data['type']] ?? 'Other';
+        $data['description'] = null;
+        $data['sort_order'] = 0;
+
+        if ($this->pointEditorMode === 'create') {
+            $data['event_id'] = $this->selectedEventId;
+            EventMapPoint::create($data);
+        } else {
+            EventMapPoint::query()
+                ->whereKey($this->pointEditorPointId)
+                ->where('event_id', $this->selectedEventId)
+                ->update($data);
+        }
+
+        Notification::make()
+            ->title($this->pointEditorMode === 'create' ? 'Map location created' : 'Map location updated')
+            ->success()
+            ->send();
+
+        $this->closePointEditor();
+    }
+
+    public function closePointEditor(): void
+    {
+        $this->pointEditorMode = null;
+        $this->pointEditorPointId = null;
+        $this->resetValidation();
+    }
+
+    public function openMarkerEditorForPoint(int $mapPointId): void
+    {
+        if (! $this->selectedEventId) {
+            return;
+        }
+
+        $exists = EventMapPoint::query()
+            ->whereKey($mapPointId)
+            ->where('event_id', $this->selectedEventId)
+            ->exists();
+
+        if (! $exists) {
+            return;
+        }
+
+        $this->markerEditorPointId = $mapPointId;
+    }
+
+    public function getMarkerEditorPoint(): ?EventMapPoint
+    {
+        if (! $this->selectedEventId || ! $this->markerEditorPointId) {
+            return null;
+        }
+
+        return EventMapPoint::query()
+            ->whereKey($this->markerEditorPointId)
+            ->where('event_id', $this->selectedEventId)
+            ->first();
+    }
+
+    public function clearMarkerForPoint(int $mapPointId): void
+    {
+        if (! $this->selectedEventId) {
+            return;
+        }
+
+        EventMapPoint::query()
+            ->whereKey($mapPointId)
+            ->where('event_id', $this->selectedEventId)
+            ->update([
+                'x_percent' => null,
+                'y_percent' => null,
+            ]);
+
+        Notification::make()
+            ->title('Marker cleared')
+            ->success()
+            ->send();
+    }
+
+    public function deletePoint(int $mapPointId): void
+    {
+        if (! $this->selectedEventId) {
+            return;
+        }
+
+        EventMapPoint::query()
+            ->whereKey($mapPointId)
+            ->where('event_id', $this->selectedEventId)
+            ->delete();
+
+        if ($this->markerEditorPointId === $mapPointId) {
+            $this->markerEditorPointId = null;
+        }
+
+        Notification::make()
+            ->title('Map location deleted')
+            ->success()
+            ->send();
+    }
+
+    public function getMapLocations()
+    {
+        if (! $this->selectedEventId) {
+            return collect();
+        }
+
+        return EventMapPoint::query()
+            ->where('event_id', $this->selectedEventId)
+            ->orderBy('type')
+            ->orderBy('id')
+            ->get();
+    }
+
+    public function pointTypeOptions(): array
+    {
+        return [
+            'bar' => 'Bar',
+            'info' => 'Info',
+            'lunch' => 'Lunch',
+            'entrance' => 'Entrance',
+            'other' => 'Other',
+        ];
     }
 
     public function clearMarkerForStand(int $eventStandId): void
@@ -497,5 +746,16 @@ class ManageStands extends Page implements HasForms, HasTable
         }
 
         return (string) $stand->stand_number;
+    }
+
+    private function formatMapPointCode(EventMapPoint $point): string
+    {
+        return match ($point->type) {
+            'bar' => 'B',
+            'info' => 'i',
+            'lunch' => 'L',
+            'entrance' => 'E',
+            default => strtoupper(substr($point->label, 0, 1)),
+        };
     }
 }

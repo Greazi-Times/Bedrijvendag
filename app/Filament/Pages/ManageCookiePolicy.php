@@ -14,7 +14,9 @@ class ManageCookiePolicy extends SettingsPage
 
     protected static string|null|\BackedEnum $navigationIcon = Phosphor::Cookie;
 
-    protected static ?string $navigationLabel = 'Cookie policy';
+    protected static ?string $navigationLabel = 'Cookie Policy';
+
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $title = 'Cookie policy';
 

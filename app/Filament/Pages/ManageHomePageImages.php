@@ -19,6 +19,8 @@ class ManageHomePageImages extends SettingsPage
 
     protected static ?string $navigationLabel = 'Page media';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $title = 'Page media';
 
     protected static ?string $slug = 'page-media';

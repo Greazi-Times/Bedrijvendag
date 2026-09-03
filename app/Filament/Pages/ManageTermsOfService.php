@@ -14,7 +14,9 @@ class ManageTermsOfService extends SettingsPage
 
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static ?string $navigationLabel = 'Terms of service';
+    protected static ?string $navigationLabel = 'Terms of Service';
+
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $title = 'Terms of service';
 

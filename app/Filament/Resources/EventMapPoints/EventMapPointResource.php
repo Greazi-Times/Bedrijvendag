@@ -14,16 +14,13 @@ class EventMapPointResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMap;
 
-    protected static ?string $navigationLabel = 'Map points';
+    protected static ?string $navigationLabel = 'Map Points';
 
     protected static string|null|\UnitEnum $navigationGroup = 'Edition';
 
     protected static ?int $navigationSort = 4;
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return true;
-    }
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function canViewAny(): bool
     {

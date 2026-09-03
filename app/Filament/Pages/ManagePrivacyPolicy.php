@@ -14,7 +14,9 @@ class ManagePrivacyPolicy extends SettingsPage
 
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::OutlinedShieldExclamation;
 
-    protected static ?string $navigationLabel = 'Privacy policy';
+    protected static ?string $navigationLabel = 'Privacy Policy';
+
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $title = 'Privacy policy';
 
