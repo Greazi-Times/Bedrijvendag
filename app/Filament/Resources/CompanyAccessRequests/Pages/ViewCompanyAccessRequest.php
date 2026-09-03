@@ -28,12 +28,22 @@ class ViewCompanyAccessRequest extends ViewRecord
                 ])
                 ->requiresConfirmation()
                 ->action(function (array $data): void {
-                    $this->record->approve($data['review_note'] ?? null);
+                    $emailSent = $this->record->approve($data['review_note'] ?? null);
+
+                    if ($emailSent) {
+                        Notification::make()
+                            ->title('Access request approved')
+                            ->body('The requester has been emailed the private verification link.')
+                            ->success()
+                            ->send();
+
+                        return;
+                    }
 
                     Notification::make()
                         ->title('Access request approved')
-                        ->body('The verification link can now be copied from this request.')
-                        ->success()
+                        ->body('The email could not be sent. Check the mail settings before approving more requests.')
+                        ->warning()
                         ->send();
                 }),
             Action::make('reject')

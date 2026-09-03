@@ -6,7 +6,10 @@ use App\Mail\CompanyAccessApprovedMail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class CompanyAccessRequest extends Model
 {
@@ -50,36 +53,50 @@ class CompanyAccessRequest extends Model
         return $this->belongsTo(User::class, 'reviewed_by');
     }
 
-    public function approve(?string $note = null): void
+    public function approve(?string $note = null): bool
     {
         if ($this->status !== self::STATUS_PENDING) {
-            return;
+            return false;
         }
 
-        if ($this->type === self::TYPE_NEW && ! $this->company_id) {
-            $company = Company::query()->create([
-                'name' => $this->company_name,
-                'website_url' => $this->website_url,
-                'profile_contact_email' => $this->contact_email,
+        try {
+            DB::transaction(function () use ($note): void {
+                if ($this->type === self::TYPE_NEW && ! $this->company_id) {
+                    $company = Company::query()->create([
+                        'name' => $this->company_name,
+                        'website_url' => $this->website_url,
+                        'profile_contact_email' => $this->contact_email,
+                    ]);
+
+                    $this->company()->associate($company);
+                }
+
+                if ($this->type === self::TYPE_EXISTING && $this->company && ! $this->company->profile_contact_email) {
+                    $this->company->forceFill([
+                        'profile_contact_email' => $this->contact_email,
+                    ])->save();
+                }
+
+                Mail::to($this->contact_email)->send(new CompanyAccessApprovedMail($this));
+
+                $this->forceFill([
+                    'status' => self::STATUS_APPROVED,
+                    'reviewed_at' => now(),
+                    'reviewed_by' => Auth::id(),
+                    'review_note' => $note,
+                ])->save();
+            });
+
+            return true;
+        } catch (Throwable $exception) {
+            Log::error('Failed to send company access approval email.', [
+                'company_access_request_id' => $this->id,
+                'contact_email' => $this->contact_email,
+                'exception' => $exception,
             ]);
 
-            $this->company()->associate($company);
+            return false;
         }
-
-        if ($this->type === self::TYPE_EXISTING && $this->company && ! $this->company->profile_contact_email) {
-            $this->company->forceFill([
-                'profile_contact_email' => $this->contact_email,
-            ])->save();
-        }
-
-        $this->forceFill([
-            'status' => self::STATUS_APPROVED,
-            'reviewed_at' => now(),
-            'reviewed_by' => Auth::id(),
-            'review_note' => $note,
-        ])->save();
-
-        Mail::to($this->contact_email)->send(new CompanyAccessApprovedMail($this));
     }
 
     public function reject(?string $note = null): void

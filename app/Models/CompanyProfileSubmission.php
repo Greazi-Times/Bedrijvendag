@@ -6,8 +6,12 @@ use App\Mail\CompanyProfileApprovedMail;
 use App\Mail\CompanyProfileRejectedMail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class CompanyProfileSubmission extends Model
 {
@@ -77,52 +81,42 @@ class CompanyProfileSubmission extends Model
             ->implode(', ') ?: 'Geen';
     }
 
-    public function approve(?string $note = null): void
+    public function approve(?string $note = null): bool
     {
         if ($this->status !== self::STATUS_PENDING) {
-            return;
+            return false;
         }
 
-        $this->company->update([
-            'name' => $this->proposed_name,
-            'logo_path' => $this->proposed_logo_path ?: $this->company->logo_path,
-            'website_url' => $this->proposed_website_url,
-            'description' => [
-                'html' => $this->descriptionHtml(),
-            ],
-        ]);
+        $email = $this->notificationEmail();
 
-        $this->company->educations()->sync($this->proposed_education_ids ?? []);
-        $this->company->sectors()->sync($this->proposed_sector_ids ?? []);
+        if (! $email) {
+            Log::warning('Company profile approval email was not sent because no notification email is available.', [
+                'company_profile_submission_id' => $this->id,
+            ]);
 
-        $this->forceFill([
-            'status' => self::STATUS_APPROVED,
-            'reviewed_at' => now(),
-            'reviewed_by' => Auth::id(),
-            'review_note' => $note,
-        ])->save();
-
-        if ($email = $this->notificationEmail()) {
-            Mail::to($email)->send(new CompanyProfileApprovedMail($this));
+            return false;
         }
+
+        return $this->approveWithNotification($email, $note);
     }
 
-    public function reject(?string $note = null): void
+    public function reject(?string $note = null): bool
     {
         if ($this->status !== self::STATUS_PENDING) {
-            return;
+            return false;
         }
 
-        $this->forceFill([
-            'status' => self::STATUS_REJECTED,
-            'reviewed_at' => now(),
-            'reviewed_by' => Auth::id(),
-            'review_note' => $note,
-        ])->save();
+        $email = $this->notificationEmail();
 
-        if ($email = $this->notificationEmail()) {
-            Mail::to($email)->send(new CompanyProfileRejectedMail($this));
+        if (! $email) {
+            Log::warning('Company profile rejection email was not sent because no notification email is available.', [
+                'company_profile_submission_id' => $this->id,
+            ]);
+
+            return false;
         }
+
+        return $this->rejectWithNotification($email, $note);
     }
 
     public function notificationEmail(): ?string
@@ -147,5 +141,78 @@ class CompanyProfileSubmission extends Model
             ->filter()
             ->map(fn (string $paragraph): string => '<p>'.nl2br(e($paragraph), false).'</p>')
             ->implode('') ?: null;
+    }
+
+    private function approveWithNotification(string $email, ?string $note = null): bool
+    {
+        try {
+            DB::transaction(function () use ($email, $note): void {
+                $this->company->update([
+                    'name' => $this->proposed_name,
+                    'logo_path' => $this->proposed_logo_path ?: $this->company->logo_path,
+                    'website_url' => $this->proposed_website_url,
+                    'description' => [
+                        'html' => $this->descriptionHtml(),
+                    ],
+                ]);
+
+                $this->company->educations()->sync($this->proposed_education_ids ?? []);
+                $this->company->sectors()->sync($this->proposed_sector_ids ?? []);
+
+                $this->sendNotificationEmail($email, new CompanyProfileApprovedMail($this));
+
+                $this->forceFill([
+                    'status' => self::STATUS_APPROVED,
+                    'reviewed_at' => now(),
+                    'reviewed_by' => Auth::id(),
+                    'review_note' => $note,
+                ])->save();
+            });
+
+            return true;
+        } catch (Throwable $exception) {
+            Log::error('Failed to approve company profile submission after email failure.', [
+                'company_profile_submission_id' => $this->id,
+                'contact_email' => $email,
+                'exception' => $exception,
+            ]);
+
+            return false;
+        }
+    }
+
+    private function rejectWithNotification(string $email, ?string $note = null): bool
+    {
+        try {
+            DB::transaction(function () use ($email, $note): void {
+                $this->forceFill([
+                    'review_note' => $note,
+                ]);
+
+                $this->sendNotificationEmail($email, new CompanyProfileRejectedMail($this));
+
+                $this->forceFill([
+                    'status' => self::STATUS_REJECTED,
+                    'reviewed_at' => now(),
+                    'reviewed_by' => Auth::id(),
+                    'review_note' => $note,
+                ])->save();
+            });
+
+            return true;
+        } catch (Throwable $exception) {
+            Log::error('Failed to reject company profile submission after email failure.', [
+                'company_profile_submission_id' => $this->id,
+                'contact_email' => $email,
+                'exception' => $exception,
+            ]);
+
+            return false;
+        }
+    }
+
+    private function sendNotificationEmail(string $email, Mailable $mailable): void
+    {
+        Mail::to($email)->send($mailable);
     }
 }
