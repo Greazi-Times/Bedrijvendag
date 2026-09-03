@@ -14,7 +14,7 @@ class EventStandResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
 
-    protected static ?string $navigationLabel = 'Stands';
+    protected static ?string $navigationLabel = 'Event Map';
 
     protected static string|null|\UnitEnum $navigationGroup = 'Edition';
 

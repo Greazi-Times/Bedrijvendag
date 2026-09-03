@@ -358,48 +358,39 @@
                 $mapLocations = $this->getMapLocations();
             @endphp
 
-            <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-white/10">
-                <table class="w-full divide-y divide-gray-200 text-sm dark:divide-white/10">
-                    <thead class="bg-gray-50 dark:bg-white/5">
+            <div class="overflow-hidden rounded-xl" style="border: 1px solid rgba(255, 255, 255, 0.10); background-color: rgba(15, 23, 42, 0.42);">
+                <table class="w-full text-sm" style="border-collapse: collapse;">
+                    <thead style="background-color: rgb(17, 24, 39);">
                         <tr>
-                            <th class="px-4 py-3 text-left font-semibold text-gray-950 dark:text-white">Type</th>
-                            <th class="px-4 py-3 text-left font-semibold text-gray-950 dark:text-white">Marker</th>
-                            <th class="px-4 py-3 text-right font-semibold text-gray-950 dark:text-white">Actions</th>
+                            <th class="px-4 py-3 text-left font-semibold" style="color: rgb(255, 255, 255);">Type</th>
+                            <th class="px-4 py-3 text-right font-semibold" style="color: rgb(255, 255, 255);">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white dark:divide-white/10 dark:bg-gray-900">
+                    <tbody style="background-color: rgba(15, 23, 42, 0.30);">
                         @forelse ($mapLocations as $point)
-                            <tr wire:key="map-location-{{ $point->id }}">
-                                <td class="px-4 py-3 text-gray-950 dark:text-white">
-                                    <span class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-white/10 dark:text-gray-200">
+                            <tr wire:key="map-location-{{ $point->id }}" style="border-top: 1px solid rgba(255, 255, 255, 0.10);">
+                                <td class="px-4 py-3" style="color: rgb(255, 255, 255);">
+                                    <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium" style="background-color: rgba(255, 255, 255, 0.10); color: rgb(229, 231, 235);">
                                         {{ $this->pointTypeOptions()[$point->type] ?? $point->label }}
                                     </span>
-                                </td>
-                                <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
-                                    {{ is_numeric($point->x_percent) && is_numeric($point->y_percent) ? 'Set' : '-' }}
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex flex-wrap justify-end gap-2">
                                         <x-filament::button size="sm" color="gray" icon="heroicon-o-map-pin" wire:click="openMarkerEditorForPoint({{ $point->id }})">
-                                            Set marker
+                                            {{ is_numeric($point->x_percent) && is_numeric($point->y_percent) ? 'Change marker' : 'Set marker' }}
                                         </x-filament::button>
                                         <x-filament::button size="sm" color="gray" icon="heroicon-o-pencil-square" wire:click="openEditPointEditor({{ $point->id }})">
                                             Edit
                                         </x-filament::button>
-                                        @if (is_numeric($point->x_percent) && is_numeric($point->y_percent))
-                                            <x-filament::button size="sm" color="danger" wire:click="clearMarkerForPoint({{ $point->id }})" wire:confirm="Clear this marker?">
-                                                Clear marker
-                                            </x-filament::button>
-                                        @endif
-                                        <x-filament::button size="sm" color="danger" wire:click="deletePoint({{ $point->id }})" wire:confirm="Delete this map location?">
+                                        <x-filament::button size="sm" color="danger" icon="heroicon-o-trash" wire:click="deletePoint({{ $point->id }})" wire:confirm="Delete this map location?">
                                             Delete
                                         </x-filament::button>
                                     </div>
                                 </td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                            <tr style="border-top: 1px solid rgba(255, 255, 255, 0.10);">
+                                <td colspan="2" class="px-4 py-8 text-center text-sm" style="color: rgb(156, 163, 175);">
                                     No map locations have been added for this event yet.
                                 </td>
                             </tr>

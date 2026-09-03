@@ -15,6 +15,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Support\Enums\Size;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -30,6 +31,8 @@ class ManageStands extends Page implements HasForms, HasTable
     protected static string $resource = EventStandResource::class;
 
     protected string $view = 'filament.resources.event-stands.pages.manage-stands';
+
+    protected static ?string $title = 'Event Map';
 
     protected function getHeaderActions(): array
     {
@@ -368,26 +371,6 @@ class ManageStands extends Page implements HasForms, HasTable
             ->first();
     }
 
-    public function clearMarkerForPoint(int $mapPointId): void
-    {
-        if (! $this->selectedEventId) {
-            return;
-        }
-
-        EventMapPoint::query()
-            ->whereKey($mapPointId)
-            ->where('event_id', $this->selectedEventId)
-            ->update([
-                'x_percent' => null,
-                'y_percent' => null,
-            ]);
-
-        Notification::make()
-            ->title('Marker cleared')
-            ->success()
-            ->send();
-    }
-
     public function deletePoint(int $mapPointId): void
     {
         if (! $this->selectedEventId) {
@@ -433,28 +416,6 @@ class ManageStands extends Page implements HasForms, HasTable
         ];
     }
 
-    public function clearMarkerForStand(int $eventStandId): void
-    {
-        if (! $this->selectedEventId) {
-            return;
-        }
-
-        EventStand::query()
-            ->whereKey($eventStandId)
-            ->where('event_id', $this->selectedEventId)
-            ->update([
-                'x_percent' => null,
-                'y_percent' => null,
-            ]);
-
-        Notification::make()
-            ->title('Marker cleared')
-            ->success()
-            ->send();
-
-        $this->resetTable();
-    }
-
     public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
         return $schema
@@ -491,45 +452,28 @@ class ManageStands extends Page implements HasForms, HasTable
                     ->label('Stand')
                     ->sortable(),
 
-                TextColumn::make('company.name')
-                    ->label('Company')
-                    ->default('—')
-                    ->toggleable(),
-
-                TextColumn::make('partner.name')
-                    ->label('Partner')
-                    ->default('—')
-                    ->toggleable(),
-
                 TextColumn::make('assigned_name')
                     ->label('Assigned to')
                     ->getStateUsing(fn (EventStand $record): string => $record->company?->name ?? $record->partner?->name ?? '—'),
-
-                TextColumn::make('x_percent')
-                    ->label('Marker')
-                    ->formatStateUsing(function ($state, $record) {
-                        return (is_numeric($record->x_percent) && is_numeric($record->y_percent))
-                            ? 'Set'
-                            : '—';
-                    }),
             ])
             ->actions([
                 Action::make('set_marker')
-                    ->label('Set marker')
+                    ->label(fn (EventStand $record): string => is_numeric($record->x_percent) && is_numeric($record->y_percent)
+                        ? 'Change marker'
+                        : 'Set marker')
                     ->icon('heroicon-o-map-pin')
+                    ->button()
+                    ->size(Size::Small)
+                    ->color('gray')
                     ->action(function (EventStand $record): void {
                         $this->openMarkerEditorForStand((int) $record->id);
                     }),
 
-                Action::make('clear_marker')
-                    ->label('Clear marker')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->visible(fn ($record) => is_numeric($record->x_percent) && is_numeric($record->y_percent))
-                    ->action(function ($record) {
-                        $this->clearMarkerForStand((int) $record->id);
-                    }),
                 Action::make('assign')
+                    ->label(fn (EventStand $record): string => $this->standHasAssignment($record) ? 'Reassign' : 'Assign')
+                    ->button()
+                    ->size(Size::Small)
+                    ->color('primary')
                     ->form(function ($record): array {
                         if ($record->type === 'partner') {
                             return [
@@ -618,8 +562,13 @@ class ManageStands extends Page implements HasForms, HasTable
                     }),
 
                 Action::make('remove')
+                    ->label('Remove assignment')
+                    ->icon('heroicon-o-trash')
+                    ->button()
+                    ->size(Size::Small)
                     ->color('danger')
                     ->requiresConfirmation()
+                    ->visible(fn (EventStand $record): bool => $this->standHasAssignment($record))
                     ->action(function (EventStand $record) {
                         DB::transaction(function () use ($record): void {
                             $record->update([
@@ -746,6 +695,11 @@ class ManageStands extends Page implements HasForms, HasTable
         }
 
         return (string) $stand->stand_number;
+    }
+
+    private function standHasAssignment(EventStand $stand): bool
+    {
+        return filled($stand->company_id) || filled($stand->partner_id);
     }
 
     private function formatMapPointCode(EventMapPoint $point): string
