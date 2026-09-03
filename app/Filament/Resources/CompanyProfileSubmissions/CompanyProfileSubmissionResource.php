@@ -23,7 +23,7 @@ class CompanyProfileSubmissionResource extends Resource
 
     protected static string|null|\UnitEnum $navigationGroup = 'Company';
 
-    protected static ?int $navigationSort = 15;
+    protected static ?int $navigationSort = 3;
 
     public static function getNavigationBadge(): ?string
     {

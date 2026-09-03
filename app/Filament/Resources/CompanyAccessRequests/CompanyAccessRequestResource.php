@@ -23,7 +23,7 @@ class CompanyAccessRequestResource extends Resource
 
     protected static string|null|\UnitEnum $navigationGroup = 'Company';
 
-    protected static ?int $navigationSort = 14;
+    protected static ?int $navigationSort = 2;
 
     public static function getNavigationBadge(): ?string
     {
