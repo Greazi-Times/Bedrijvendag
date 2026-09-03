@@ -328,6 +328,22 @@
 }
 
 /*
+ * Table record action modals are emitted inside the table markup. Because the
+ * table card uses backdrop-filter, browsers treat it as the containing block
+ * for fixed children. Disable that filter while a Filament modal lives inside
+ * the table so the overlay can cover the full viewport.
+ */
+.fi-ta:has(.fi-modal) {
+    backdrop-filter: none;
+}
+
+.fi-ta .fi-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+}
+
+/*
  * A backdrop filter creates a containing block for fixed descendants. Since
  * Filament renders the image editor inside the section, the editor would
  * otherwise be positioned against that card and overflow the viewport.
