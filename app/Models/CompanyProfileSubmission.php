@@ -32,6 +32,7 @@ class CompanyProfileSubmission extends Model
         'proposed_description',
         'proposed_education_ids',
         'proposed_sector_ids',
+        'proposed_new_sector_names',
         'submitted_at',
         'reviewed_at',
         'reviewed_by',
@@ -41,6 +42,7 @@ class CompanyProfileSubmission extends Model
     protected $casts = [
         'proposed_education_ids' => 'array',
         'proposed_sector_ids' => 'array',
+        'proposed_new_sector_names' => 'array',
         'submitted_at' => 'datetime',
         'reviewed_at' => 'datetime',
     ];
@@ -70,15 +72,29 @@ class CompanyProfileSubmission extends Model
 
     public function proposedSectorNames(): string
     {
-        if (! $this->proposed_sector_ids) {
+        $existingSectorNames = collect();
+
+        if ($this->proposed_sector_ids) {
+            $existingSectorNames = Sector::query()
+                ->whereIn('id', $this->proposed_sector_ids)
+                ->orderBy('name')
+                ->pluck('name');
+        }
+
+        $newSectorNames = collect($this->proposed_new_sector_names ?? [])
+            ->map(fn (string $name): string => "{$name} (new)")
+            ->values();
+
+        $sectorNames = $existingSectorNames
+            ->merge($newSectorNames)
+            ->filter()
+            ->implode(', ');
+
+        if ($sectorNames === '') {
             return 'Geen';
         }
 
-        return Sector::query()
-            ->whereIn('id', $this->proposed_sector_ids)
-            ->orderBy('name')
-            ->pluck('name')
-            ->implode(', ') ?: 'Geen';
+        return $sectorNames;
     }
 
     public function approve(?string $note = null): bool
@@ -157,7 +173,7 @@ class CompanyProfileSubmission extends Model
                 ]);
 
                 $this->company->educations()->sync($this->proposed_education_ids ?? []);
-                $this->company->sectors()->sync($this->proposed_sector_ids ?? []);
+                $this->company->sectors()->sync($this->approvedSectorIds());
 
                 $this->sendNotificationEmail($email, new CompanyProfileApprovedMail($this));
 
@@ -214,5 +230,34 @@ class CompanyProfileSubmission extends Model
     private function sendNotificationEmail(string $email, Mailable $mailable): void
     {
         Mail::to($email)->send($mailable);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function approvedSectorIds(): array
+    {
+        $sectorIds = collect($this->proposed_sector_ids ?? [])
+            ->map(fn (int|string $id): int => (int) $id)
+            ->filter()
+            ->values();
+
+        collect($this->proposed_new_sector_names ?? [])
+            ->map(fn (string $name): string => trim(preg_replace('/\s+/', ' ', $name) ?? $name))
+            ->filter(fn (string $name): bool => $name !== '')
+            ->each(function (string $name) use ($sectorIds): void {
+                $existingSector = Sector::query()
+                    ->whereRaw('lower(name) = ?', [mb_strtolower($name)])
+                    ->first();
+
+                $sector = $existingSector ?: Sector::query()->create(['name' => $name]);
+
+                $sectorIds->push($sector->id);
+            });
+
+        return $sectorIds
+            ->unique()
+            ->values()
+            ->all();
     }
 }

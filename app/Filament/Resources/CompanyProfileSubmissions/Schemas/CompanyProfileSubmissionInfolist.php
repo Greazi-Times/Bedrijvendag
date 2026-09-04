@@ -63,6 +63,11 @@ class CompanyProfileSubmissionInfolist
                             ->label('Sectors')
                             ->getStateUsing(fn (CompanyProfileSubmission $record): string => $record->proposedSectorNames())
                             ->columnSpanFull(),
+                        TextEntry::make('proposed_new_sector_names')
+                            ->label('New sectors to review')
+                            ->badge()
+                            ->placeholder('No new sectors proposed')
+                            ->columnSpanFull(),
                     ]),
                 Section::make('Review')
                     ->columns(2)

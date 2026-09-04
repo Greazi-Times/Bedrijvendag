@@ -61,6 +61,8 @@ class CompanyProfileController extends Controller
             'education_ids.*' => ['integer', Rule::exists('education', 'id')],
             'sector_ids' => ['array'],
             'sector_ids.*' => ['integer', Rule::exists('sectors', 'id')],
+            'new_sector_names' => ['array', 'max:10'],
+            'new_sector_names.*' => ['string', 'max:80'],
         ]);
 
         $logoPath = $company->logo_path;
@@ -80,6 +82,7 @@ class CompanyProfileController extends Controller
             'proposed_description' => $this->sanitizeSubmittedDescription($validated['description'] ?? ''),
             'proposed_education_ids' => $validated['education_ids'] ?? [],
             'proposed_sector_ids' => $validated['sector_ids'] ?? [],
+            'proposed_new_sector_names' => $this->normalizeNewSectorNames($validated['new_sector_names'] ?? []),
             'submitted_at' => now(),
         ]);
 
@@ -173,5 +176,37 @@ class CompanyProfileController extends Controller
         $description = preg_replace('/\s+href\s*=\s*(["\'])\s*javascript:.*?\1/is', '', $description) ?? $description;
 
         return trim($description) ?: null;
+    }
+
+    /**
+     * @param  array<int, string>  $names
+     * @return array<int, string>
+     */
+    private function normalizeNewSectorNames(array $names): array
+    {
+        $existingNames = Sector::query()
+            ->pluck('name')
+            ->map(fn (string $name): string => mb_strtolower(trim($name)))
+            ->all();
+
+        $seen = [];
+
+        return collect($names)
+            ->map(fn (string $name): string => trim(preg_replace('/\s+/', ' ', $name) ?? $name))
+            ->filter(fn (string $name): bool => $name !== '')
+            ->reject(fn (string $name): bool => in_array(mb_strtolower($name), $existingNames, true))
+            ->filter(function (string $name) use (&$seen): bool {
+                $key = mb_strtolower($name);
+
+                if (isset($seen[$key])) {
+                    return false;
+                }
+
+                $seen[$key] = true;
+
+                return true;
+            })
+            ->values()
+            ->all();
     }
 }

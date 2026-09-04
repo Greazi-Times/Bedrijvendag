@@ -109,6 +109,46 @@ test('company submission is stored for review and does not immediately update pu
     Storage::disk('public')->assertExists($submission->proposed_logo_path);
 });
 
+test('company can propose a new sector that is only created after approval', function () {
+    Mail::fake();
+
+    $company = Company::create([
+        'name' => 'Sector Company',
+        'description' => ['html' => '<p>Current description</p>'],
+    ]);
+
+    $this->post(route('company-profile.update', $company->profile_token), [
+        'contact_email' => 'profile@example.com',
+        'name' => 'Sector Company',
+        'description' => 'Current description',
+        'education_ids' => [],
+        'sector_ids' => [],
+        'new_sector_names' => ['Biotechnologie', ' biotechnologie ', 'Software & AI'],
+    ])->assertRedirect();
+
+    $this->assertDatabaseMissing('sectors', [
+        'name' => 'Biotechnologie',
+    ]);
+
+    $submission = CompanyProfileSubmission::query()->firstOrFail();
+
+    expect($submission->proposed_new_sector_names)->toBe(['Biotechnologie', 'Software & AI'])
+        ->and($submission->proposedSectorNames())->toBe('Biotechnologie (new), Software & AI (new)');
+
+    expect($submission->approve())->toBeTrue();
+
+    $this->assertDatabaseHas('sectors', [
+        'name' => 'Biotechnologie',
+    ]);
+
+    $this->assertDatabaseHas('sectors', [
+        'name' => 'Software & AI',
+    ]);
+
+    expect($company->refresh()->sectors()->pluck('name')->sort()->values()->all())
+        ->toBe(['Biotechnologie', 'Software & AI']);
+});
+
 test('approving a submission updates the company profile', function () {
     Mail::fake();
 

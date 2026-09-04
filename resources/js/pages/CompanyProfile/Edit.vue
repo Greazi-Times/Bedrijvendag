@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { CheckCircle2, ExternalLink, Link2, List, ListOrdered, Pilcrow, Quote, Redo2, RemoveFormatting, Send, SeparatorHorizontal, Type, Underline, Undo2, Upload } from 'lucide-vue-next';
+import { CheckCircle2, ExternalLink, Link2, List, ListOrdered, Pilcrow, Plus, Quote, Redo2, RemoveFormatting, Search, Send, SeparatorHorizontal, Type, Underline, Undo2, Upload, X } from 'lucide-vue-next';
 import { computed, nextTick, onMounted, ref } from 'vue';
 
 import AppFooter from '@/components/AppFooter.vue';
@@ -33,6 +33,8 @@ const props = defineProps<{
 const logoPreview = ref<string | null>(props.company.logo_url ?? null);
 const saved = ref(false);
 const editor = ref<HTMLElement | null>(null);
+const sectorSearch = ref('');
+const newSectorName = ref('');
 
 const form = useForm({
     contact_name: '',
@@ -43,6 +45,7 @@ const form = useForm({
     description: props.company.description ?? '',
     education_ids: [...(props.company.education_ids ?? [])],
     sector_ids: [...(props.company.sector_ids ?? [])],
+    new_sector_names: [] as string[],
 });
 
 const submittedAt = computed(() => {
@@ -83,6 +86,30 @@ const toolbarGroups = [
     ],
 ];
 
+const filteredSectors = computed(() => {
+    const query = sectorSearch.value.trim().toLowerCase();
+
+    if (!query) return props.options.sectors;
+
+    return props.options.sectors.filter((sector) => sector.name.toLowerCase().includes(query));
+});
+
+const canAddNewSector = computed(() => {
+    const name = normalizedSectorName(newSectorName.value || sectorSearch.value);
+
+    if (!name) return false;
+
+    const key = name.toLowerCase();
+    const alreadyExists = props.options.sectors.some((sector) => sector.name.trim().toLowerCase() === key);
+    const alreadyProposed = form.new_sector_names.some((sectorName) => sectorName.trim().toLowerCase() === key);
+
+    return !alreadyExists && !alreadyProposed && form.new_sector_names.length < 10;
+});
+
+const sectorError = computed(() => {
+    return form.errors.sector_ids || form.errors.new_sector_names || Object.entries(form.errors).find(([key]) => key.startsWith('new_sector_names.'))?.[1];
+});
+
 onMounted(() => {
     if (editor.value) {
         editor.value.innerHTML = form.description;
@@ -93,6 +120,24 @@ function toggleValue(values: number[], id: number) {
     const index = values.indexOf(id);
     if (index >= 0) values.splice(index, 1);
     else values.push(id);
+}
+
+function normalizedSectorName(value: string) {
+    return value.replace(/\s+/g, ' ').trim();
+}
+
+function addNewSector() {
+    const name = normalizedSectorName(newSectorName.value || sectorSearch.value);
+
+    if (!canAddNewSector.value) return;
+
+    form.new_sector_names.push(name);
+    newSectorName.value = '';
+    sectorSearch.value = '';
+}
+
+function removeNewSector(name: string) {
+    form.new_sector_names = form.new_sector_names.filter((sectorName) => sectorName !== name);
 }
 
 function syncDescription() {
@@ -301,18 +346,75 @@ function submit() {
 
                         <div class="sm:col-span-2">
                             <p class="text-sm font-semibold text-foreground">Sectoren</p>
-                            <div class="mt-4 flex flex-wrap gap-3">
-                                <label v-for="sector in options.sectors" :key="sector.id" class="inline-flex max-w-full items-center gap-3 rounded-lg bg-background/60 px-3 py-2 text-sm whitespace-nowrap text-foreground ring-1 ring-border">
-                                    <input
-                                        type="checkbox"
-                                        class="h-4 w-4 shrink-0 rounded border-border text-primary focus:ring-ring/40"
-                                        :checked="form.sector_ids.includes(sector.id)"
-                                        @change="toggleValue(form.sector_ids, sector.id)"
-                                    />
-                                    <span>{{ sector.name }}</span>
-                                </label>
+                            <div class="relative mt-4">
+                                <Search class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <input
+                                    v-model="sectorSearch"
+                                    type="search"
+                                    placeholder="Zoek sector..."
+                                    class="brand-input w-full rounded-xl py-3 pr-4 pl-10 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                />
                             </div>
-                            <p v-if="form.errors.sector_ids" class="mt-2 text-sm text-destructive">{{ form.errors.sector_ids }}</p>
+
+                            <div class="mt-4 max-h-64 overflow-y-auto rounded-xl bg-background/40 p-3 ring-1 ring-border">
+                                <div class="flex flex-wrap gap-3">
+                                    <label
+                                        v-for="sector in filteredSectors"
+                                        :key="sector.id"
+                                        class="inline-flex max-w-full items-center gap-3 rounded-lg bg-background/80 px-3 py-2 text-sm whitespace-nowrap text-foreground ring-1 ring-border"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            class="h-4 w-4 shrink-0 rounded border-border text-primary focus:ring-ring/40"
+                                            :checked="form.sector_ids.includes(sector.id)"
+                                            @change="toggleValue(form.sector_ids, sector.id)"
+                                        />
+                                        <span>{{ sector.name }}</span>
+                                    </label>
+                                </div>
+
+                                <p v-if="!filteredSectors.length" class="text-sm text-muted-foreground">Geen bestaande sector gevonden.</p>
+                            </div>
+
+                            <div class="mt-4 rounded-xl bg-background/60 p-4 ring-1 ring-border">
+                                <label for="new_sector_name" class="text-sm font-semibold text-foreground">Nieuwe sector voorstellen</label>
+                                <div class="mt-3 flex flex-col gap-3 sm:flex-row">
+                                    <input
+                                        id="new_sector_name"
+                                        v-model="newSectorName"
+                                        type="text"
+                                        maxlength="80"
+                                        placeholder="Bijvoorbeeld: Biotechnologie"
+                                        class="brand-input min-w-0 flex-1 rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                        @keydown.enter.prevent="addNewSector"
+                                    />
+                                    <button
+                                        type="button"
+                                        :disabled="!canAddNewSector"
+                                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                        @click="addNewSector"
+                                    >
+                                        <Plus class="h-4 w-4" />
+                                        Toevoegen
+                                    </button>
+                                </div>
+                                <p class="mt-2 text-xs text-muted-foreground">Nieuwe sectoren worden eerst door de organisatie gecontroleerd.</p>
+
+                                <div v-if="form.new_sector_names.length" class="mt-4 flex flex-wrap gap-2">
+                                    <span
+                                        v-for="name in form.new_sector_names"
+                                        :key="name"
+                                        class="inline-flex max-w-full items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm font-semibold whitespace-nowrap text-primary ring-1 ring-primary/20"
+                                    >
+                                        {{ name }}
+                                        <button type="button" :aria-label="`${name} verwijderen`" class="rounded-md p-0.5 transition hover:bg-primary/10" @click="removeNewSector(name)">
+                                            <X class="h-3.5 w-3.5" />
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <p v-if="sectorError" class="mt-2 text-sm text-destructive">{{ sectorError }}</p>
                         </div>
                     </div>
                 </section>
