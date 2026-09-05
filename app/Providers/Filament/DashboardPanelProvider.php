@@ -16,6 +16,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -39,6 +40,10 @@ class DashboardPanelProvider extends PanelProvider
             ->brandLogoHeight('2.5rem')
             ->favicon(asset('favicon.svg'))
             ->defaultThemeMode(ThemeMode::Light)
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn (): string => view('filament.theme-cookie-sync')->render(),
+            )
             ->login()
             ->colors([
                 'primary' => '#ff6600',

@@ -4,6 +4,7 @@ import { Github, Menu } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
+import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Button } from '@/components/ui/button';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -62,13 +63,13 @@ const rightNavItems: NavItem[] = [
 
 <template>
     <div>
-        <div class="border-b border-white/70 bg-background/86 shadow-sm shadow-slate-900/5 backdrop-blur-xl">
+        <div class="border-b border-white/70 bg-background/86 shadow-sm shadow-slate-900/5 backdrop-blur-xl dark:border-white/10">
             <div class="relative mx-auto flex h-20 items-center px-4 md:max-w-7xl">
                 <!-- Mobile Menu -->
                 <div class="lg:hidden">
                     <Sheet>
                         <SheetTrigger :as-child="true">
-                            <Button variant="ghost" size="icon" class="mr-2 h-9 w-9 rounded-xl bg-white/70 ring-1 ring-border/70">
+                            <Button variant="ghost" size="icon" class="mr-2 h-9 w-9 rounded-xl bg-white/70 ring-1 ring-border/70 dark:bg-white/5">
                                 <Menu class="h-5 w-5" />
                             </Button>
                         </SheetTrigger>
@@ -138,6 +139,7 @@ const rightNavItems: NavItem[] = [
                 </div>
 
                 <div class="ml-auto flex items-center space-x-2">
+                    <ThemeToggle />
                     <div class="relative flex items-center space-x-1">
                         <div class="hidden space-x-1 lg:flex">
                             <template v-for="item in rightNavItems" :key="item.title">
@@ -145,7 +147,12 @@ const rightNavItems: NavItem[] = [
                                     <Tooltip>
                                         <TooltipTrigger>
                                             <Button variant="ghost" size="icon" as-child class="group h-9 w-9 cursor-pointer">
-                                                <a :href="toUrl(item.href)" target="_blank" rel="noopener noreferrer" class="rounded-xl bg-white/60 ring-1 ring-border/70">
+                                                <a
+                                                    :href="toUrl(item.href)"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="rounded-xl bg-white/60 ring-1 ring-border/70 dark:bg-white/5"
+                                                >
                                                     <span class="sr-only">{{ item.title }}</span>
                                                     <component :is="item.icon" class="size-5 opacity-80 group-hover:opacity-100" />
                                                 </a>
