@@ -23,7 +23,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
 
-const activeItemStyles = 'bg-primary/10 text-primary ring-1 ring-primary/15 dark:bg-primary/20 dark:text-primary-foreground';
+const activeItemStyles = 'bg-primary/10 text-primary ring-1 ring-primary/15 dark:bg-primary/20 dark:text-white';
 
 const mainNavItems: NavItem[] = [
     {

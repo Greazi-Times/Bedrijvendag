@@ -196,7 +196,7 @@ function formatDateRange(start: string | null, end: string | null) {
                     :href="event.gallery_url"
                     target="_blank"
                     rel="noreferrer"
-                    class="inline-flex shrink-0 items-center justify-center rounded-xl bg-white/80 px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                    class="inline-flex shrink-0 items-center justify-center rounded-xl bg-white/80 px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none dark:bg-white/10 dark:hover:bg-white/15"
                 >
                     Fotoalbum
                 </a>
@@ -275,7 +275,7 @@ function formatDateRange(start: string | null, end: string | null) {
                                     v-for="c in sortedCompanies"
                                     :key="c.id"
                                     type="button"
-                                    class="flex w-full items-center gap-3 rounded-2xl bg-white/70 p-3 text-left shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground"
+                                    class="flex w-full items-center gap-3 rounded-2xl bg-white/70 p-3 text-left shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground dark:bg-white/10 dark:hover:bg-white/15"
                                     @click="openCompany(c)"
                                 >
                                     <div class="h-10 w-10 overflow-hidden rounded-xl bg-accent/20">
