@@ -139,6 +139,30 @@ php artisan route:clear
 npm run dev # restart vite
 ```
 
+## Automatic deployment version
+
+The site footer displays an automatically generated version in the format
+`2.0.<build>+<commit>`, for example `2.0.143+019f857`.
+
+`composer install` and `composer dump-autoload` generate the ignored `VERSION`
+file automatically. In GitHub Actions, the build number comes from
+`GITHUB_RUN_NUMBER`. On a development machine or a server-side Git deployment,
+the generator falls back to the Git commit count. The exact revision is always
+included as a seven-character commit SHA.
+
+If a deployment does not run Composer, generate the version explicitly after
+checking out the new revision and before caching Laravel's configuration:
+
+```bash
+php scripts/generate-version.php
+php artisan optimize:clear
+php artisan config:cache
+```
+
+Set `VERSION_PREFIX` in the deployment environment to override the default
+`2.0` prefix. `APP_VERSION` can be used as a complete explicit override when
+needed.
+
 - If you run into permission issues for `storage` or `bootstrap/cache` folders:
 
 ```bash

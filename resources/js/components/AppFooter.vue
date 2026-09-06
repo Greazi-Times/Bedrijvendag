@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
@@ -7,6 +8,7 @@ type FlashType = 'success' | 'error';
 
 const newsletterEmail = ref('');
 const newsletterFlash = ref<{ type: FlashType; message: string } | null>(null);
+const page = usePage();
 let newsletterFlashTimeout: number | null = null;
 
 function setNewsletterFlash(type: FlashType, message: string) {
@@ -171,7 +173,10 @@ async function submitNewsletter() {
                         <li><a href="/cookie-policy" class="transition hover:text-primary">Cookie Policy</a></li>
                     </ul>
 
-                    <p class="text-sm text-white/55">© {{ new Date().getFullYear() }} ATIx Bedrijvendag. All rights reserved.</p>
+                    <div class="text-center text-sm text-white/55 lg:text-right">
+                        <p>© {{ new Date().getFullYear() }} ATIx Bedrijvendag. All rights reserved.</p>
+                        <p class="mt-1 text-xs text-white/40">{{ page.props.deploymentVersion }}</p>
+                    </div>
                 </div>
             </div>
         </div>

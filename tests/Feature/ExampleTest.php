@@ -1,9 +1,19 @@
 <?php
 
+use Inertia\Testing\AssertableInertia as Assert;
+
 test('returns a successful response', function () {
     $response = $this->get(route('home'));
 
     $response->assertOk();
+});
+
+test('shares the generated deployment version', function () {
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('deploymentVersion', config('version.display'))
+        );
 });
 
 test('renders the public site using the saved dark appearance', function () {
