@@ -37,7 +37,7 @@ $commitSha = preg_match('/^[0-9a-f]{7,40}$/i', (string) $commitSha)
     ? substr((string) $commitSha, 0, 7)
     : 'unknown';
 
-$version = sprintf('%s.%s+%s', $versionPrefix, $buildNumber, $commitSha);
+$version = sprintf('%s.%s-%s', $versionPrefix, $buildNumber, $commitSha);
 $versionFile = $projectRoot.DIRECTORY_SEPARATOR.'VERSION';
 
 if (file_put_contents($versionFile, $version.PHP_EOL) === false) {
