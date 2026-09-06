@@ -1,38 +1,33 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import '../../theme.css';
 @source '../../../../vendor/jeffgreco13/filament-breezy/resources/**/*';
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
 :root {
-    --dashboard-navy: 221 48% 22%;
-    --dashboard-blue: 217 91% 58%;
-    --dashboard-orange: 24 100% 50%;
-    --dashboard-ink: 221 52% 12%;
-    --dashboard-muted: 220 16% 43%;
-    --dashboard-border: 218 33% 88%;
-    --dashboard-card: 0 0% 100%;
-}
-
-.dark {
-    --dashboard-ink: 0 0% 98%;
-    --dashboard-muted: 218 22% 78%;
-    --dashboard-border: 220 20% 34%;
-    --dashboard-card: 222 30% 17%;
+    --dashboard-navy: var(--brand-ink);
+    --dashboard-blue: var(--brand-blue);
+    --dashboard-orange: var(--brand-orange);
+    --dashboard-ink: var(--text-primary);
+    --dashboard-muted: var(--text-muted);
+    --dashboard-border: var(--border-default);
+    --dashboard-card: var(--surface-card);
 }
 
 .fi-body,
 .fi-simple-layout {
     background:
         linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.07), transparent 34%), linear-gradient(315deg, hsl(var(--dashboard-orange) / 0.07), transparent 36%),
-        linear-gradient(180deg, hsl(215 92% 99%) 0%, hsl(30 100% 99%) 52%, hsl(214 64% 98%) 100%);
+        linear-gradient(180deg, hsl(var(--surface-page)) 0%, hsl(30 100% 99%) 52%, hsl(var(--surface-page)) 100%);
     color: hsl(var(--dashboard-ink));
 }
 
 .dark .fi-body,
 .dark .fi-simple-layout {
     background:
-        linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.12), transparent 34%), linear-gradient(315deg, hsl(var(--dashboard-orange) / 0.1), transparent 36%), hsl(222 30% 15%);
+        linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.12), transparent 34%), linear-gradient(315deg, hsl(var(--dashboard-orange) / 0.1), transparent 36%),
+        hsl(var(--surface-page));
 }
 
 .fi-layout {
@@ -48,20 +43,21 @@
 }
 
 .fi-topbar {
-    background: hsl(0 0% 100% / 0.9);
+    background: hsl(var(--surface-elevated) / 0.9);
     border-bottom: 1px solid hsl(var(--dashboard-border) / 0.75);
     box-shadow: 0 10px 28px hsl(var(--dashboard-navy) / 0.045);
     backdrop-filter: blur(18px);
 }
 
 .dark .fi-topbar {
-    background: hsl(222 26% 19% / 0.9);
-    border-bottom-color: hsl(220 20% 36% / 0.7);
+    background: hsl(var(--surface-elevated) / 0.9);
+    border-bottom-color: hsl(var(--dashboard-border) / 0.7);
 }
 
 .fi-sidebar {
     background:
-        linear-gradient(180deg, hsl(0 0% 100% / 0.94), hsl(217 95% 98% / 0.86)), linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.05), hsl(var(--dashboard-orange) / 0.05));
+        linear-gradient(180deg, hsl(var(--surface-card) / 0.94), hsl(var(--surface-section) / 0.86)),
+        linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.05), hsl(var(--dashboard-orange) / 0.05));
     border-right: 1px solid hsl(var(--dashboard-border) / 0.76);
     box-shadow: 14px 0 44px hsl(var(--dashboard-navy) / 0.055);
     backdrop-filter: blur(22px);
@@ -69,8 +65,9 @@
 
 .dark .fi-sidebar {
     background:
-        linear-gradient(180deg, hsl(222 28% 19% / 0.94), hsl(221 34% 21% / 0.9)), linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.09), hsl(var(--dashboard-orange) / 0.08));
-    border-right-color: hsl(220 20% 36% / 0.74);
+        linear-gradient(180deg, hsl(var(--surface-elevated) / 0.94), hsl(var(--surface-card) / 0.9)),
+        linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.09), hsl(var(--dashboard-orange) / 0.08));
+    border-right-color: hsl(var(--dashboard-border) / 0.74);
 }
 
 .fi-sidebar::before {
@@ -82,7 +79,7 @@
 }
 
 .dark .fi-sidebar-header {
-    border-bottom-color: hsl(220 20% 36% / 0.74);
+    border-bottom-color: hsl(var(--dashboard-border) / 0.74);
 }
 
 .fi-logo {
@@ -175,13 +172,13 @@
 
 .fi-wi-stats-overview-stat {
     min-height: 8.75rem;
-    background: linear-gradient(145deg, hsl(0 0% 100% / 0.9), hsl(216 100% 98% / 0.8));
+    background: linear-gradient(145deg, hsl(var(--surface-card) / 0.9), hsl(var(--surface-section) / 0.8));
     box-shadow: 0 12px 32px hsl(var(--dashboard-navy) / 0.05);
 }
 
 .dark .fi-wi-stats-overview-stat {
-    background: linear-gradient(145deg, hsl(222 24% 22% / 0.9), hsl(221 28% 18% / 0.78));
-    border-color: hsl(220 20% 39% / 0.68);
+    background: linear-gradient(145deg, hsl(var(--surface-elevated) / 0.9), hsl(var(--surface-card) / 0.78));
+    border-color: hsl(var(--dashboard-border) / 0.68);
     box-shadow: 0 12px 28px hsl(221 52% 7% / 0.16);
 }
 
@@ -220,15 +217,15 @@
 }
 
 .fi-section.fi-aside > .fi-section-content-ctn {
-    background: hsl(0 0% 100% / 0.76);
+    background: hsl(var(--surface-elevated) / 0.76);
     border: 1px solid hsl(var(--dashboard-border) / 0.76);
     border-radius: 1rem;
     box-shadow: 0 10px 28px hsl(var(--dashboard-navy) / 0.04);
 }
 
 .dark .fi-section.fi-aside > .fi-section-content-ctn {
-    background: hsl(222 24% 21% / 0.72);
-    border-color: hsl(220 20% 40% / 0.7);
+    background: hsl(var(--surface-elevated) / 0.72);
+    border-color: hsl(var(--dashboard-border) / 0.7);
 }
 
 .fi-section.fi-aside > .fi-section-content-ctn > .fi-section-content {
@@ -266,7 +263,7 @@
 .fi-input-wrp,
 .fi-select-input,
 .fi-ta-search-field {
-    background: hsl(0 0% 100% / 0.88);
+    background: hsl(var(--surface-elevated) / 0.88);
     border-color: hsl(var(--dashboard-border) / 0.86);
     border-radius: 0.875rem;
     box-shadow: 0 10px 24px hsl(var(--dashboard-navy) / 0.04);
@@ -275,8 +272,8 @@
 .dark .fi-input-wrp,
 .dark .fi-select-input,
 .dark .fi-ta-search-field {
-    background: hsl(222 24% 21% / 0.92);
-    border-color: hsl(220 20% 36% / 0.82);
+    background: hsl(var(--surface-elevated) / 0.92);
+    border-color: hsl(var(--dashboard-border) / 0.82);
 }
 
 .fi-input-wrp:focus-within,
@@ -303,12 +300,12 @@
 
 .fi-ta-filter-indicators,
 .fi-ta-pagination {
-    background: hsl(0 0% 100% / 0.5);
+    background: hsl(var(--surface-elevated) / 0.5);
 }
 
 .dark .fi-ta-filter-indicators,
 .dark .fi-ta-pagination {
-    background: hsl(222 24% 20% / 0.5);
+    background: hsl(var(--surface-elevated) / 0.5);
 }
 
 .fi-ta-row {

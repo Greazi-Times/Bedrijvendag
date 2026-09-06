@@ -331,7 +331,7 @@ onUnmounted(() => {
                     <Link
                         v-if="backHref"
                         :href="backHref"
-                        class="inline-flex items-center justify-center rounded-xl border border-border bg-white/80 px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-accent"
+                        class="inline-flex items-center justify-center rounded-xl border border-border bg-white/80 px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-accent dark:bg-white/10 dark:hover:bg-white/15"
                     >
                         Terug
                     </Link>
@@ -426,7 +426,7 @@ onUnmounted(() => {
 
                                 <button
                                     type="button"
-                                    class="inline-flex items-center justify-center rounded-xl border border-border bg-white/80 px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
+                                    class="inline-flex items-center justify-center rounded-xl border border-border bg-white/80 px-4 py-2 text-sm font-medium text-foreground hover:bg-accent dark:bg-white/10 dark:hover:bg-white/15"
                                     @click="clearSelection"
                                 >
                                     Sluiten
@@ -461,7 +461,7 @@ onUnmounted(() => {
                             <div class="flex items-center gap-2">
                                 <button
                                     type="button"
-                                    class="inline-flex items-center justify-center rounded-xl bg-white/80 px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
+                                    class="inline-flex items-center justify-center rounded-xl bg-white/80 px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none dark:bg-white/10 dark:hover:bg-white/15"
                                     @click="openFilters"
                                 >
                                     Filters

@@ -1,0 +1,41 @@
+/*
+ * Shared ATIx color theme.
+ *
+ * Keep the two brand hues stable and change the semantic surface tokens when
+ * tuning light or dark mode. Both the Inertia front end and Filament dashboard
+ * import this file, so one edit updates the entire product.
+ */
+:root {
+    color-scheme: light;
+
+    --brand-orange: 24 100% 50%;
+    --brand-orange-strong: 24 100% 42%;
+    --brand-blue: 217 91% 58%;
+    --brand-blue-strong: 217 72% 44%;
+    --brand-ink: 221 66% 12%;
+
+    --surface-page: 214 64% 98%;
+    --surface-section: 216 50% 96%;
+    --surface-card: 0 0% 100%;
+    --surface-elevated: 0 0% 100%;
+    --text-primary: var(--brand-ink);
+    --text-muted: 220 16% 40%;
+    --border-default: 218 33% 88%;
+    --shadow-color: 221 52% 12%;
+}
+
+.dark {
+    color-scheme: dark;
+
+    --brand-orange-strong: 24 100% 58%;
+    --brand-blue-strong: 217 91% 68%;
+
+    --surface-page: 222 30% 13%;
+    --surface-section: 222 27% 16%;
+    --surface-card: 222 24% 19%;
+    --surface-elevated: 222 22% 23%;
+    --text-primary: 210 40% 98%;
+    --text-muted: 215 20% 73%;
+    --border-default: 220 18% 34%;
+    --shadow-color: 222 60% 4%;
+}
