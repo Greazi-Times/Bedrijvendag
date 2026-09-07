@@ -53,12 +53,12 @@ class HomeController extends Controller
         $partners = $highlightEvent
             ? $highlightEvent->eventPartners()
                 ->orderBy('name')
-                ->get(['partners.id', 'partners.name', 'partners.url', 'partners.image'])
+                ->get(['partners.id', 'partners.name', 'partners.url', 'partners.logo'])
                 ->map(fn (Partner $p) => [
                     'id' => $p->id,
                     'name' => $p->name,
                     'url' => $p->url,
-                    'image_url' => $p->image ? Storage::url($p->image) : null,
+                    'logo_url' => $p->logo ? Storage::url($p->logo) : null,
                 ])
             : collect();
 
@@ -116,7 +116,7 @@ class HomeController extends Controller
             'id' => $p->id,
             'name' => $p->name,
             'url' => $p->url,
-            'image_url' => $p->image ? Storage::url($p->image) : null,
+            'logo_url' => $p->logo ? Storage::url($p->logo) : null,
             'description' => $p->description ?? null,
             'educations' => method_exists($p, 'educations') ? $p->educations->map(fn ($education) => ['id' => $education->id, 'name' => $education->name])->values() : [],
             'stand_number' => $standNumber,

@@ -21,7 +21,7 @@ class PartnersTable
                     ->sortable(),
                 TextColumn::make('url')
                     ->searchable(),
-                ImageColumn::make('image')
+                ImageColumn::make('logo')
                     ->disk('public')
                     ->square(),
             ])

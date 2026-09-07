@@ -15,9 +15,7 @@ type EventSummary = {
 type PartnerSummary = {
     id: number;
     name: string;
-    // Some places use `logo_url`/`website_url`, others use `image_url`/`url`
     logo_url?: string | null;
-    image_url?: string | null;
     website_url?: string | null;
     url?: string | null;
     description: string | null;
@@ -53,7 +51,7 @@ function formatDate(iso: string) {
 }
 
 const eventTitle = () => props.event?.title ?? props.event?.name ?? null;
-const partnerLogo = (p: PartnerSummary) => p.logo_url ?? p.image_url ?? null;
+const partnerLogo = (p: PartnerSummary) => p.logo_url ?? null;
 const partnerUrl = (p: PartnerSummary) => p.website_url ?? p.url ?? null;
 const supportPartners = props.supportPartners ?? props.partners ?? [];
 const standPartners = props.standPartners ?? [];

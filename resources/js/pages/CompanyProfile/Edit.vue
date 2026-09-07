@@ -253,24 +253,26 @@ function submit() {
                 <section class="brand-card rounded-2xl p-6 sm:p-8">
                     <div class="grid gap-6 sm:grid-cols-2">
                         <div>
-                            <label for="contact_name" class="mb-2 block text-sm font-semibold text-foreground">Contactpersoon</label>
+                            <label for="contact_name" class="mb-2 block text-sm font-semibold text-foreground">Contactpersoon <span class="text-destructive">*</span></label>
                             <input
                                 id="contact_name"
                                 v-model="form.contact_name"
                                 type="text"
                                 autocomplete="name"
+                                required
                                 class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                             />
                             <p v-if="form.errors.contact_name" class="mt-2 text-sm text-destructive">{{ form.errors.contact_name }}</p>
                         </div>
 
                         <div>
-                            <label for="contact_email" class="mb-2 block text-sm font-semibold text-foreground">Contact e-mail</label>
+                            <label for="contact_email" class="mb-2 block text-sm font-semibold text-foreground">Contact e-mail <span class="text-destructive">*</span></label>
                             <input
                                 id="contact_email"
                                 v-model="form.contact_email"
                                 type="email"
                                 autocomplete="email"
+                                required
                                 class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                             />
                             <p v-if="form.errors.contact_email" class="mt-2 text-sm text-destructive">{{ form.errors.contact_email }}</p>
