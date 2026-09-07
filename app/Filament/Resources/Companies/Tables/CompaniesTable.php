@@ -9,6 +9,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Maatwebsite\Excel\Excel;
@@ -23,11 +24,16 @@ class CompaniesTable
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
+                ImageColumn::make('logo_path')
+                    ->label('Logo')
+                    ->disk('public')
+                    ->height(40)
+                    ->width(40)
+                    ->square()
+                    ->toggleable(),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('logo_path')
-                    ->searchable(),
                 TextColumn::make('website_url')
                     ->searchable(),
                 TextColumn::make('profile_contact_email')
@@ -70,17 +76,21 @@ class CompaniesTable
                 //
             ])
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
+                ViewAction::make()
+                    ->button(),
+                EditAction::make()
+                    ->button(),
                 Action::make('verificationLink')
                     ->label('Verification link')
                     ->icon('heroicon-o-link')
+                    ->button()
                     ->url(fn (Company $record): string => $record->profileVerificationUrl())
                     ->openUrlInNewTab(),
                 Action::make('regenerateProfileToken')
                     ->label('Regenerate link')
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
+                    ->button()
                     ->requiresConfirmation()
                     ->action(function (Company $record): void {
                         $record->regenerateProfileToken();

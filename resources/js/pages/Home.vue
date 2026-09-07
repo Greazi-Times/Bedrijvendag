@@ -19,7 +19,7 @@ type PartnerCard = {
     id: number;
     name: string;
     url: string | null;
-    image_url: string | null;
+    logo_url: string | null;
 };
 
 type HomeImages = {
@@ -608,8 +608,8 @@ const triggerBorrelSuccess = () => {
                     <div v-for="p in props.partners" :key="p.id" class="group flex basis-1/2 items-center justify-center sm:basis-1/3 lg:basis-1/4">
                         <component :is="p.url ? 'a' : 'div'" :href="p.url ?? undefined" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center">
                             <img
-                                v-if="p.image_url"
-                                :src="p.image_url"
+                                v-if="p.logo_url"
+                                :src="p.logo_url"
                                 :alt="p.name"
                                 class="max-h-16 w-full max-w-[220px] object-contain opacity-80 grayscale transition duration-200 group-hover:opacity-100 group-hover:grayscale-0"
                                 loading="lazy"

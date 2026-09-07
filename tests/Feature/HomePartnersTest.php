@@ -22,13 +22,13 @@ test('home displays the organising partners for the highlighted event', function
     $zebra = Partner::create([
         'name' => 'Zebra Partner',
         'url' => 'https://zebra.example',
-        'image' => 'partners/zebra.png',
+        'logo' => 'partners/zebra.png',
     ]);
 
     $alpha = Partner::create([
         'name' => 'Alpha Partner',
         'url' => 'https://alpha.example',
-        'image' => 'partners/alpha.png',
+        'logo' => 'partners/alpha.png',
     ]);
 
     $event->eventPartners()->attach([$zebra->id, $alpha->id]);
@@ -40,9 +40,9 @@ test('home displays the organising partners for the highlighted event', function
             ->has('partners', 2)
             ->where('partners.0.id', $alpha->id)
             ->where('partners.0.name', 'Alpha Partner')
-            ->where('partners.0.image_url', '/storage/partners/alpha.png')
+            ->where('partners.0.logo_url', '/storage/partners/alpha.png')
             ->where('partners.1.id', $zebra->id)
             ->where('partners.1.name', 'Zebra Partner')
-            ->where('partners.1.image_url', '/storage/partners/zebra.png')
+            ->where('partners.1.logo_url', '/storage/partners/zebra.png')
         );
 });

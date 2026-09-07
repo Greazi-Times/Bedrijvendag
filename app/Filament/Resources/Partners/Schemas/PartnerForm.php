@@ -33,7 +33,7 @@ class PartnerForm
                 ->searchable()
                 ->bulkToggleable(),
 
-            FileUpload::make('image')
+            FileUpload::make('logo')
                 ->image()
                 ->disk('public')
                 ->directory('partners')

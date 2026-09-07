@@ -314,7 +314,7 @@ class EventController extends Controller
                         'company_name' => $entity?->name,
                         'company_logo' => $isCompany
                             ? ($company?->logo_path ? Storage::url($company->logo_path) : null)
-                            : (data_get($partner, 'image') ? Storage::url(data_get($partner, 'image')) : null),
+                            : ($partner?->logo ? Storage::url($partner->logo) : null),
                         'x_percent' => $stand->x_percent !== null ? (float) $stand->x_percent : null,
                         'y_percent' => $stand->y_percent !== null ? (float) $stand->y_percent : null,
                     ];

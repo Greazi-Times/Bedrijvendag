@@ -51,8 +51,8 @@ class CompanyProfileController extends Controller
         $company = $this->findCompanyForToken($token);
 
         $validated = $request->validate([
-            'contact_name' => ['nullable', 'string', 'max:255'],
-            'contact_email' => ['nullable', 'email', 'max:255'],
+            'contact_name' => ['required', 'string', 'max:255'],
+            'contact_email' => ['required', 'email', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'max:4096'],
             'website_url' => ['nullable', 'url', 'max:255'],

@@ -46,6 +46,7 @@ test('company rich text submission keeps safe formatting and removes unsafe mark
 
     $this->post(route('company-profile.update', $company->profile_token), [
         'name' => 'Formatted Company',
+        'contact_name' => 'Jane Doe',
         'contact_email' => 'profile@example.com',
         'description' => '<h2>Summary</h2><p><strong>Bold</strong> and <em>italic</em> with <u>underline</u>.</p><ul><li>One</li></ul><a href="javascript:alert(1)" onclick="alert(1)">Bad link</a><script>alert(1)</script>',
         'education_ids' => [],
@@ -69,6 +70,24 @@ test('company rich text submission keeps safe formatting and removes unsafe mark
     expect($company->refresh()->description['html'])
         ->toContain('<strong>Bold</strong>')
         ->toContain('<u>underline</u>');
+});
+
+test('company profile submission requires contact details', function () {
+    $company = Company::create([
+        'name' => 'Required Contact Company',
+    ]);
+
+    $this->from(route('company-profile.edit', $company->profile_token))
+        ->post(route('company-profile.update', $company->profile_token), [
+            'name' => 'Required Contact Company',
+            'description' => 'Description',
+            'education_ids' => [],
+            'sector_ids' => [],
+        ])
+        ->assertRedirect(route('company-profile.edit', $company->profile_token))
+        ->assertSessionHasErrors(['contact_name', 'contact_email']);
+
+    expect(CompanyProfileSubmission::query()->count())->toBe(0);
 });
 
 test('company submission is stored for review and does not immediately update public data', function () {
@@ -118,6 +137,7 @@ test('company can propose a new sector that is only created after approval', fun
     ]);
 
     $this->post(route('company-profile.update', $company->profile_token), [
+        'contact_name' => 'Jane Doe',
         'contact_email' => 'profile@example.com',
         'name' => 'Sector Company',
         'description' => 'Current description',

@@ -308,7 +308,6 @@
             ?? $company?->logo
             ?? $partner?->logo_path
             ?? $partner?->logo
-            ?? $partner?->image
             ?? null;
         $companyLogo = null;
 
