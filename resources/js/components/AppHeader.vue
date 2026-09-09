@@ -5,16 +5,16 @@ import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
-import ThemeToggle from '@/components/ThemeToggle.vue';
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
+import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Button } from '@/components/ui/button';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
+import { useTranslations } from '@/i18n';
 import { toUrl } from '@/lib/utils';
 import type { BreadcrumbItem, NavItem } from '@/types';
-import { useTranslations } from '@/i18n';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
@@ -37,6 +37,10 @@ const mainNavItems = computed<NavItem[]>(() => [
     {
         title: t('nav.companies'),
         href: '/bedrijven',
+    },
+    {
+        title: t('nav.forCompanies'),
+        href: '/bedrijf-toegang',
     },
     {
         title: t('nav.partners'),
