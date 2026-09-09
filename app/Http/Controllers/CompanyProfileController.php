@@ -31,7 +31,7 @@ class CompanyProfileController extends Controller
                 'name' => $company->name,
                 'logo_url' => $company->logo_path ? Storage::url($company->logo_path) : null,
                 'website_url' => $company->website_url,
-                'description' => $this->htmlDescription($company->description),
+                'description' => $company->localizedDescription('nl'),
                 'education_ids' => $company->educations->pluck('id')->values(),
                 'sector_ids' => $company->sectors->pluck('id')->values(),
             ],
@@ -86,7 +86,7 @@ class CompanyProfileController extends Controller
             'submitted_at' => now(),
         ]);
 
-        return back()->with('success', 'Je bedrijfsinformatie is verstuurd. We controleren de wijzigingen voordat ze zichtbaar worden op de website.');
+        return back()->with('success', __('messages.company_profile_success'));
     }
 
     private function findCompanyForToken(string $token): Company

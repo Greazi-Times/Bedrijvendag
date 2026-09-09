@@ -139,6 +139,34 @@ php artisan route:clear
 npm run dev # restart vite
 ```
 
+## Dutch and English content translations
+
+The Dutch database content is the source for automatic English translations. Event names and
+descriptions, partner descriptions, and education and sector text are translated once after they
+are created or changed. The company editor exposes one Dutch description field; its English version
+is generated and stored automatically in the background whenever that description changes. Company
+and partner names, links, logos,
+dates, stand numbers, and other structural data are never sent for translation.
+
+Create a DeepL API Free account and add its authentication key to `.env`:
+
+```dotenv
+TRANSLATION_SOURCE_LOCALE=nl
+DEEPL_API_KEY=your-free-api-key
+```
+
+Then create the translation table and translate existing records:
+
+```bash
+php artisan migrate
+php artisan translations:sync
+```
+
+Translations run through Laravel's queue. `composer run-script dev` already starts a queue listener;
+production must also keep a queue worker running. Missing or failed translations safely fall back to
+the original Dutch content. Use `php artisan translations:sync` to retry missing translations, or
+`php artisan translations:sync --force` to regenerate all supported translated fields.
+
 ## Automatic deployment version
 
 The site footer displays an automatically generated version in the format

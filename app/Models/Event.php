@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAutomaticTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 class Event extends Model
 {
+    use HasAutomaticTranslations;
+
     protected $fillable = [
         'name',
         'date',
@@ -26,6 +29,11 @@ class Event extends Model
         'partner_stand_count' => 'integer',
         'description' => 'array',
     ];
+
+    public function automaticTranslationFields(): array
+    {
+        return ['name', 'description'];
+    }
 
     public function companies(): BelongsToMany
     {

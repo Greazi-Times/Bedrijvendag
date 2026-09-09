@@ -135,7 +135,7 @@
     color: hsl(var(--dashboard-orange));
 }
 
-.fi-section,
+.fi-section:not(.fi-section-not-contained),
 .fi-ta,
 .fi-wi-stats-overview-stat,
 .fi-simple-main {
@@ -145,7 +145,7 @@
     backdrop-filter: blur(18px);
 }
 
-.fi-section,
+.fi-section:not(.fi-section-not-contained),
 .fi-ta,
 .fi-wi-stats-overview-stat,
 .fi-simple-main {

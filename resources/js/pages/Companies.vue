@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { useTranslations } from '@/i18n';
 
 type EventDto = {
     id: number;
@@ -36,6 +37,7 @@ const props = defineProps<{
     educations?: FilterOption[];
     sectors?: FilterOption[];
 }>();
+const { dateLocale, t } = useTranslations();
 
 const q = ref('');
 const selectedEducations = ref<string[]>([]);
@@ -79,7 +81,7 @@ const eventDateLabel = computed(() => {
     const d = new Date(v);
     if (Number.isNaN(d.getTime())) return v;
 
-    return d.toLocaleDateString('nl-NL', {
+    return d.toLocaleDateString(dateLocale.value, {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
@@ -88,12 +90,12 @@ const eventDateLabel = computed(() => {
 });
 
 const headerSubtitle = computed(() => {
-    if (!props.event) return 'Er is nog geen editie aangemaakt.';
+    if (!props.event) return t('companies.noEdition');
 
-    const kind = props.eventKind === 'upcoming' ? 'de komende editie' : 'de meest recente editie';
+    const kind = props.eventKind === 'upcoming' ? t('companies.upcomingEdition') : t('companies.recentEdition');
     const date = eventDateLabel.value;
 
-    return date ? `Bekijk alle bedrijven die aanwezig zijn bij ${kind} op ${date}.` : `Bekijk alle bedrijven die aanwezig zijn bij ${kind}.`;
+    return t('companies.subtitle', { edition: kind, date: date ? ` ${dateLocale.value === 'en-GB' ? 'on' : 'op'} ${date}` : '' });
 });
 
 const educationOptions = computed<string[]>(() => {
@@ -232,8 +234,8 @@ const sanitizeHtml = (value: string) => {
     <main class="brand-hero min-h-screen overflow-hidden px-6 py-16 lg:px-16">
         <div class="relative z-10 mx-auto max-w-7xl">
             <header class="mx-auto max-w-3xl text-center">
-                <p class="brand-eyebrow">Bedrijven</p>
-                <h1 class="mt-4 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">Deelnemende bedrijven</h1>
+                <p class="brand-eyebrow">{{ t('companies.eyebrow') }}</p>
+                <h1 class="mt-4 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">{{ t('companies.title') }}</h1>
                 <p class="mt-4 text-base leading-relaxed text-muted-foreground">
                     {{ headerSubtitle }}
                 </p>
@@ -243,7 +245,7 @@ const sanitizeHtml = (value: string) => {
                         <input
                             v-model="q"
                             type="search"
-                            placeholder="Zoek op bedrijfsnaam, stand, sector…"
+                            :placeholder="t('companies.searchPlaceholder')"
                             class="brand-input h-12 w-full rounded-xl px-4 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                         />
                     </div>
@@ -252,10 +254,10 @@ const sanitizeHtml = (value: string) => {
                         <div class="flex items-center justify-center gap-3 sm:justify-start">
                             <div class="inline-flex items-center gap-2 rounded-xl bg-accent px-3 py-2 text-xs font-semibold text-accent-foreground ring-1 ring-border">
                                 <span class="h-2 w-2 rounded-full bg-primary"></span>
-                                <span>{{ filteredCompanies.length }} bedrijven</span>
+                                <span>{{ t('companies.companyCount', { count: filteredCompanies.length }) }}</span>
                             </div>
 
-                            <div v-if="activeFilterCount" class="text-xs font-semibold text-muted-foreground">{{ activeFilterCount }} filters actief</div>
+                            <div v-if="activeFilterCount" class="text-xs font-semibold text-muted-foreground">{{ t('companies.activeFilters', { count: activeFilterCount }) }}</div>
                         </div>
 
                         <div class="flex items-center justify-center gap-2 sm:justify-end">
@@ -264,7 +266,7 @@ const sanitizeHtml = (value: string) => {
                                 class="inline-flex items-center justify-center rounded-xl bg-white/80 px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none dark:bg-white/10 dark:hover:bg-white/15"
                                 @click="openFilters"
                             >
-                                Filters
+                                {{ t('common.filters') }}
                                 <span
                                     v-if="activeFilterCount"
                                     class="ml-2 inline-flex min-w-6 items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground"
@@ -279,7 +281,7 @@ const sanitizeHtml = (value: string) => {
                                 class="inline-flex items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground ring-1 ring-border transition hover:bg-accent/70 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                                 @click="clearAll"
                             >
-                                Wissen
+                                {{ t('common.clear') }}
                             </button>
                         </div>
                     </div>
@@ -327,14 +329,14 @@ const sanitizeHtml = (value: string) => {
                                 loading="lazy"
                                 decoding="async"
                             />
-                            <div v-else class="text-sm text-muted-foreground">Geen logo</div>
+                            <div v-else class="text-sm text-muted-foreground">{{ t('common.noLogo') }}</div>
                         </div>
 
                         <div
                             v-if="company.booth"
                             class="absolute top-4 left-4 inline-flex items-center rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border"
                         >
-                            Stand {{ company.booth }}
+                            {{ t('common.stand') }} {{ company.booth }}
                         </div>
                     </div>
 
@@ -348,11 +350,11 @@ const sanitizeHtml = (value: string) => {
                             class="prose prose-sm mt-3 line-clamp-2 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ol:my-0 prose-ul:my-0 prose-li:my-0"
                             v-html="sanitizeHtml(company.description)"
                         ></div>
-                        <p v-else class="mt-3 text-sm leading-relaxed text-muted-foreground">Geen beschrijving.</p>
+                        <p v-else class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('common.noDescription') }}</p>
 
                         <div class="mt-5 grid gap-4 sm:grid-cols-2">
                             <div>
-                                <div class="text-xs font-semibold text-muted-foreground">Opleidingen</div>
+                                <div class="text-xs font-semibold text-muted-foreground">{{ t('common.educations') }}</div>
                                 <div class="mt-2 flex flex-wrap gap-2">
                                     <span
                                         v-for="n in (company.educations ?? []).slice(0, 4)"
@@ -366,7 +368,7 @@ const sanitizeHtml = (value: string) => {
                                         v-if="!(company.educations ?? []).length"
                                         class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
                                     >
-                                        Geen
+                                        {{ t('common.none') }}
                                     </span>
 
                                     <span
@@ -379,7 +381,7 @@ const sanitizeHtml = (value: string) => {
                             </div>
 
                             <div>
-                                <div class="text-xs font-semibold text-muted-foreground">Sectoren</div>
+                                <div class="text-xs font-semibold text-muted-foreground">{{ t('common.sectors') }}</div>
                                 <div class="mt-2 flex flex-wrap gap-2">
                                     <span
                                         v-for="n in (company.sectors ?? []).slice(0, 4)"
@@ -393,7 +395,7 @@ const sanitizeHtml = (value: string) => {
                                         v-if="!(company.sectors ?? []).length"
                                         class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
                                     >
-                                        Geen
+                                        {{ t('common.none') }}
                                     </span>
 
                                     <span
@@ -414,14 +416,14 @@ const sanitizeHtml = (value: string) => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                Website
+                                {{ t('common.website') }}
                             </a>
 
                             <span
                                 v-else
                                 class="inline-flex items-center justify-center rounded-xl bg-background px-5 py-2.5 text-sm font-semibold text-foreground ring-1 ring-border"
                             >
-                                Geen website
+                                {{ t('common.noWebsite') }}
                             </span>
                         </div>
                     </div>
@@ -430,40 +432,38 @@ const sanitizeHtml = (value: string) => {
 
             <section v-else class="brand-card mx-auto mt-14 max-w-3xl rounded-2xl p-10 text-center">
                 <template v-if="!(props.companies ?? []).length">
-                    <h2 class="text-base font-semibold text-foreground">We zijn de bedrijvenlijst nog aan het afronden</h2>
-                    <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
-                        We zijn momenteel bezig met het finaliseren van de lijst met deelnemende bedrijven. Houd deze pagina in de gaten voor updates.
-                    </p>
+                    <h2 class="text-base font-semibold text-foreground">{{ t('companies.finishing') }}</h2>
+                    <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{{ t('companies.finishingDescription') }}</p>
                     <button
                         type="button"
                         class="mt-6 inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                         @click="scrollToNewsletter"
                     >
-                        Inschrijven voor nieuwsbrief
+                        {{ t('companies.subscribe') }}
                     </button>
                 </template>
                 <template v-else>
-                    <h2 class="text-base font-semibold text-foreground">Geen bedrijven gevonden</h2>
-                    <p class="mt-2 text-sm text-muted-foreground">Pas je zoekopdracht of filters aan.</p>
+                    <h2 class="text-base font-semibold text-foreground">{{ t('companies.noneFound') }}</h2>
+                    <p class="mt-2 text-sm text-muted-foreground">{{ t('companies.adjustFilters') }}</p>
                 </template>
             </section>
         </div>
         <Teleport to="body">
             <div v-if="isFilterOpen" class="fixed inset-0 z-[100]" aria-modal="true" role="dialog">
-                <button class="absolute inset-0 bg-black/40" type="button" @click="closeFilters" aria-label="Sluiten"></button>
+                <button class="absolute inset-0 bg-black/40" type="button" @click="closeFilters" :aria-label="t('common.close')"></button>
 
                 <div class="absolute top-0 right-0 h-full w-full max-w-md overflow-hidden bg-background shadow-xl ring-1 ring-border">
                     <div class="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
                         <div>
-                            <div class="text-sm font-semibold text-foreground">Filters</div>
-                            <div class="mt-1 text-xs text-muted-foreground">Filter op opleiding en sector.</div>
+                            <div class="text-sm font-semibold text-foreground">{{ t('common.filters') }}</div>
+                            <div class="mt-1 text-xs text-muted-foreground">{{ t('companies.filterDescription') }}</div>
                         </div>
 
                         <button
                             type="button"
                             class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                             @click="closeFilters"
-                            aria-label="Sluiten"
+                            :aria-label="t('common.close')"
                         >
                             ×
                         </button>
@@ -471,16 +471,18 @@ const sanitizeHtml = (value: string) => {
 
                     <div class="h-full overflow-y-auto px-5 py-5 pb-28">
                         <div class="flex items-center justify-between">
-                            <div class="text-sm font-semibold text-foreground">Geselecteerd: {{ activeFilterCount }}</div>
-                            <button v-if="activeFilterCount" type="button" class="text-sm font-semibold text-primary hover:underline" @click="clearAll">Alles wissen</button>
+                            <div class="text-sm font-semibold text-foreground">{{ t('common.selected', { count: activeFilterCount }) }}</div>
+                            <button v-if="activeFilterCount" type="button" class="text-sm font-semibold text-primary hover:underline" @click="clearAll">
+                                {{ t('common.clearAll') }}
+                            </button>
                         </div>
 
                         <div class="mt-6">
-                            <div class="text-sm font-semibold text-foreground">Opleidingen</div>
+                            <div class="text-sm font-semibold text-foreground">{{ t('common.educations') }}</div>
                             <input
                                 v-model="educationFilterQuery"
                                 type="search"
-                                placeholder="Zoek opleiding…"
+                                :placeholder="t('companies.searchEducation')"
                                 class="mt-3 h-10 w-full rounded-xl bg-background px-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                             />
 
@@ -494,16 +496,16 @@ const sanitizeHtml = (value: string) => {
                                     <span class="text-sm font-medium text-foreground">{{ name }}</span>
                                 </label>
 
-                                <div v-if="!filteredEducationOptions.length" class="text-sm text-muted-foreground">Geen resultaten.</div>
+                                <div v-if="!filteredEducationOptions.length" class="text-sm text-muted-foreground">{{ t('common.noResults') }}</div>
                             </div>
                         </div>
 
                         <div class="mt-8">
-                            <div class="text-sm font-semibold text-foreground">Sectoren</div>
+                            <div class="text-sm font-semibold text-foreground">{{ t('common.sectors') }}</div>
                             <input
                                 v-model="sectorFilterQuery"
                                 type="search"
-                                placeholder="Zoek sector…"
+                                :placeholder="t('companies.searchSector')"
                                 class="mt-3 h-10 w-full rounded-xl bg-background px-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                             />
 
@@ -517,7 +519,7 @@ const sanitizeHtml = (value: string) => {
                                     <span class="text-sm font-medium text-foreground">{{ name }}</span>
                                 </label>
 
-                                <div v-if="!filteredSectorOptions.length" class="text-sm text-muted-foreground">Geen resultaten.</div>
+                                <div v-if="!filteredSectorOptions.length" class="text-sm text-muted-foreground">{{ t('common.noResults') }}</div>
                             </div>
                         </div>
                     </div>
@@ -529,14 +531,14 @@ const sanitizeHtml = (value: string) => {
                                 class="inline-flex flex-1 items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                                 @click="closeFilters"
                             >
-                                Toon resultaten
+                                {{ t('common.showResults') }}
                             </button>
                             <button
                                 type="button"
                                 class="inline-flex items-center justify-center rounded-xl bg-background px-4 py-2.5 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent"
                                 @click="clearAll"
                             >
-                                Wissen
+                                {{ t('common.clear') }}
                             </button>
                         </div>
                     </div>
@@ -546,14 +548,14 @@ const sanitizeHtml = (value: string) => {
 
         <Teleport to="body">
             <div v-if="selectedCompany" class="fixed inset-0 z-[110]" aria-modal="true" role="dialog">
-                <button class="absolute inset-0 bg-black/50" type="button" @click="closeCompany" aria-label="Sluiten"></button>
+                <button class="absolute inset-0 bg-black/50" type="button" @click="closeCompany" :aria-label="t('common.close')"></button>
 
                 <div
                     class="absolute top-1/2 left-1/2 flex max-h-[80vh] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl bg-background shadow-2xl ring-1 ring-border"
                 >
                     <div class="flex shrink-0 items-center justify-between gap-4 border-b border-border px-6 py-5">
                         <div class="min-w-0">
-                            <div class="text-sm font-semibold text-muted-foreground">Bedrijf</div>
+                            <div class="text-sm font-semibold text-muted-foreground">{{ t('common.company') }}</div>
                             <h2 class="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground">
                                 {{ selectedCompany.name }}
                             </h2>
@@ -561,7 +563,7 @@ const sanitizeHtml = (value: string) => {
                                 v-if="selectedCompany.booth"
                                 class="mt-2 inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border"
                             >
-                                Stand {{ selectedCompany.booth }}
+                                {{ t('common.stand') }} {{ selectedCompany.booth }}
                             </div>
                         </div>
 
@@ -576,7 +578,7 @@ const sanitizeHtml = (value: string) => {
                                     decoding="async"
                                     @error="(e) => ((e.target as HTMLImageElement).style.display = 'none')"
                                 />
-                                <span v-else class="text-xs font-semibold text-muted-foreground">Geen logo</span>
+                                <span v-else class="text-xs font-semibold text-muted-foreground">{{ t('common.noLogo') }}</span>
                             </div>
                         </div>
 
@@ -584,7 +586,7 @@ const sanitizeHtml = (value: string) => {
                             type="button"
                             class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                             @click="closeCompany"
-                            aria-label="Sluiten"
+                            :aria-label="t('common.close')"
                         >
                             ×
                         </button>
@@ -592,17 +594,17 @@ const sanitizeHtml = (value: string) => {
 
                     <div class="flex-1 overflow-y-auto overscroll-contain px-6 py-6">
                         <div>
-                            <div class="text-sm font-semibold text-foreground">Beschrijving</div>
+                            <div class="text-sm font-semibold text-foreground">{{ t('common.description') }}</div>
                             <div
                                 v-if="selectedCompany.description"
                                 class="prose prose-sm mt-2 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ol:my-0 prose-ul:my-0 prose-li:my-0"
                                 v-html="sanitizeHtml(selectedCompany.description)"
                             ></div>
-                            <p v-else class="mt-2 text-sm text-muted-foreground">Geen beschrijving.</p>
+                            <p v-else class="mt-2 text-sm text-muted-foreground">{{ t('common.noDescription') }}</p>
 
                             <div class="mt-6 grid gap-6 sm:grid-cols-2">
                                 <div>
-                                    <div class="text-sm font-semibold text-foreground">Opleidingen</div>
+                                    <div class="text-sm font-semibold text-foreground">{{ t('common.educations') }}</div>
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         <span
                                             v-for="n in selectedCompany.educations ?? []"
@@ -615,13 +617,13 @@ const sanitizeHtml = (value: string) => {
                                             v-if="!(selectedCompany.educations ?? []).length"
                                             class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
                                         >
-                                            Geen
+                                            {{ t('common.none') }}
                                         </span>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <div class="text-sm font-semibold text-foreground">Sectoren</div>
+                                    <div class="text-sm font-semibold text-foreground">{{ t('common.sectors') }}</div>
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         <span
                                             v-for="n in selectedCompany.sectors ?? []"
@@ -634,7 +636,7 @@ const sanitizeHtml = (value: string) => {
                                             v-if="!(selectedCompany.sectors ?? []).length"
                                             class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
                                         >
-                                            Geen
+                                            {{ t('common.none') }}
                                         </span>
                                     </div>
                                 </div>
@@ -651,7 +653,7 @@ const sanitizeHtml = (value: string) => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                Website
+                                {{ t('common.website') }}
                             </a>
 
                             <div v-else></div>
@@ -661,7 +663,7 @@ const sanitizeHtml = (value: string) => {
                                 class="inline-flex items-center justify-center rounded-xl bg-background px-4 py-2.5 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent"
                                 @click="closeCompany"
                             >
-                                Sluiten
+                                {{ t('common.close') }}
                             </button>
                         </div>
                     </div>

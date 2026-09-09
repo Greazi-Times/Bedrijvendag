@@ -14,11 +14,23 @@ use App\Http\Controllers\TermsOfServiceController;
 use App\Models\BorrelEnrollment;
 use App\Support\PageMedia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::post('/locale', function (Request $request) {
+    $validated = $request->validate([
+        'locale' => ['required', Rule::in(['nl', 'en'])],
+    ]);
+
+    $request->session()->put('locale', $validated['locale']);
+    App::setLocale($validated['locale']);
+
+    return back();
+})->name('locale.update');
 
 Route::get('/plattegrond', [EventPublicMapController::class, 'show'])->name('map');
 
@@ -88,11 +100,11 @@ Route::post('/borrel-signup', function (Request $request) {
                 ->where(fn ($q) => $q->where('event_id', $eventId)),
         ],
     ], [
-        'event_id.exists' => 'Aanmelden voor de borrel is op dit moment niet mogelijk.',
-        'email.unique' => 'Dit e-mailadres is al aangemeld voor deze borrel.',
+        'event_id.exists' => __('messages.borrel_unavailable'),
+        'email.unique' => __('messages.borrel_duplicate'),
     ]);
 
     BorrelEnrollment::create($validated);
 
-    return redirect()->back()->with('success', 'Je bent aangemeld. Tot bij de borrel.');
+    return redirect()->back()->with('success', __('messages.borrel_success'));
 });

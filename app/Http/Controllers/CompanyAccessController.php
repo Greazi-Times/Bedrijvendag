@@ -67,6 +67,6 @@ class CompanyAccessController extends Controller
             'submitted_at' => now(),
         ]);
 
-        return back()->with('success', 'Je aanvraag is ontvangen. De organisatie controleert deze voordat er toegang wordt gegeven.');
+        return back()->with('success', __('messages.company_access_success'));
     }
 }

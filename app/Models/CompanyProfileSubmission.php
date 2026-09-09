@@ -167,9 +167,7 @@ class CompanyProfileSubmission extends Model
                     'name' => $this->proposed_name,
                     'logo_path' => $this->proposed_logo_path ?: $this->company->logo_path,
                     'website_url' => $this->proposed_website_url,
-                    'description' => [
-                        'html' => $this->descriptionHtml(),
-                    ],
+                    'description_nl' => $this->descriptionHtml(),
                 ]);
 
                 $this->company->educations()->sync($this->proposed_education_ids ?? []);

@@ -9,14 +9,17 @@ class PdfController extends Controller
 {
     public function standsPdf(Event $event)
     {
+        $event->load('translations');
+
         $stands = $event->stands()
             ->where(function ($query) {
                 $query->whereNotNull('company_id')
                     ->orWhereNotNull('partner_id');
             })
             ->with([
-                'company.educations',
-                'partner.educations',
+                'company.educations.translations',
+                'partner.translations',
+                'partner.educations.translations',
             ])
             ->get()
             ->sortBy(function ($stand) {
@@ -28,7 +31,7 @@ class PdfController extends Controller
             ->values()
             ->map(function ($stand) {
                 $displayName = $stand->company?->name ?? $stand->partner?->name;
-                $displayDescription = $stand->company?->description ?? $stand->partner?->description;
+                $displayDescription = $stand->company?->localizedDescription() ?? $stand->partner?->translated('description');
                 $displayWebsiteUrl = $stand->company?->website_url ?? $stand->partner?->website_url;
                 $displayEducations = $stand->company?->educations
                     ?? $stand->partner?->educations

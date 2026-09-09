@@ -327,6 +327,7 @@
         $staticLogo = file_exists($staticLogoPath) ? 'file://' . $staticLogoPath : null;
 
         $allEducations = \App\Models\Education::query()
+            ->with('translations')
             ->whereNotNull('name')
             ->orderBy('id')
             ->take(7)
@@ -378,7 +379,7 @@
             }
 
             $educationSlots[] = [
-                'name' => $education->name,
+                'name' => $education->translated('name'),
                 'has' => $hasEducation,
                 'background' => $backgroundColor,
                 'text_color' => $textColor,

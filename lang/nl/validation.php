@@ -1,0 +1,35 @@
+<?php
+
+return [
+    'required' => 'Het veld :attribute is verplicht.',
+    'email' => 'Het veld :attribute moet een geldig e-mailadres zijn.',
+    'url' => 'Het veld :attribute moet een geldige URL zijn.',
+    'string' => 'Het veld :attribute moet tekst bevatten.',
+    'integer' => 'Het veld :attribute moet een geheel getal zijn.',
+    'array' => 'Het veld :attribute moet een lijst zijn.',
+    'image' => 'Het veld :attribute moet een afbeelding zijn.',
+    'file' => 'Het veld :attribute moet een bestand zijn.',
+    'exists' => 'De geselecteerde waarde voor :attribute is ongeldig.',
+    'unique' => 'Deze waarde voor :attribute is al in gebruik.',
+    'in' => 'De geselecteerde waarde voor :attribute is ongeldig.',
+    'max' => [
+        'numeric' => 'Het veld :attribute mag niet groter zijn dan :max.',
+        'file' => 'Het bestand :attribute mag niet groter zijn dan :max kilobytes.',
+        'string' => 'Het veld :attribute mag niet meer dan :max tekens bevatten.',
+        'array' => 'Het veld :attribute mag niet meer dan :max items bevatten.',
+    ],
+    'attributes' => [
+        'name' => 'naam',
+        'email' => 'e-mail',
+        'message' => 'bericht',
+        'company_id' => 'bedrijf',
+        'company_name' => 'bedrijfsnaam',
+        'contact_name' => 'contactpersoon',
+        'contact_email' => 'contact-e-mail',
+        'website_url' => 'website',
+        'description' => 'beschrijving',
+        'logo' => 'logo',
+        'sector_ids' => 'sectoren',
+        'education_ids' => 'opleidingen',
+    ],
+];

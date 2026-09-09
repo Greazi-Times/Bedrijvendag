@@ -2,6 +2,16 @@
 
 return [
 
+    'translation' => [
+        'source_locale' => env('TRANSLATION_SOURCE_LOCALE', 'nl'),
+        'target_locales' => ['en'],
+    ],
+
+    'deepl' => [
+        'key' => env('DEEPL_API_KEY'),
+        'url' => env('DEEPL_API_URL'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

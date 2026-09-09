@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { useTranslations } from '@/i18n';
 
 type EventItem = {
     id: number;
@@ -34,6 +35,7 @@ type Props = {
 };
 
 const props = defineProps<Props>();
+const { dateLocale, t } = useTranslations();
 
 const selected = ref<EventItem | null>(null);
 const isModalOpen = computed(() => selected.value !== null);
@@ -50,9 +52,9 @@ function openModal(event: EventItem) {
 }
 
 function formatDateRange(startsAt: string | null, endsAt: string | null) {
-    if (!startsAt && !endsAt) return 'Onbekende datum';
+    if (!startsAt && !endsAt) return t('common.unknownDate');
 
-    const fmt = new Intl.DateTimeFormat('nl-NL', {
+    const fmt = new Intl.DateTimeFormat(dateLocale.value, {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
@@ -61,8 +63,8 @@ function formatDateRange(startsAt: string | null, endsAt: string | null) {
     const start = startsAt ? fmt.format(new Date(startsAt)) : null;
     const end = endsAt ? fmt.format(new Date(endsAt)) : null;
 
-    if (start && end && start !== end) return `${start} t/m ${end}`;
-    return start ?? end ?? 'Onbekende datum';
+    if (start && end && start !== end) return `${start} – ${end}`;
+    return start ?? end ?? t('common.unknownDate');
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -85,17 +87,17 @@ onBeforeUnmount(() => {
         <section class="brand-hero relative overflow-hidden px-6 py-16 sm:py-20 lg:px-16">
             <div class="relative mx-auto w-full max-w-7xl">
                 <div class="flex flex-col gap-3">
-                    <p class="brand-eyebrow w-fit">Edities</p>
-                    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Events</h1>
-                    <p class="max-w-2xl text-base leading-relaxed text-muted-foreground">Bekijk alle aankomende events en eerdere events. Klik op een event voor details.</p>
+                    <p class="brand-eyebrow w-fit">{{ t('events.eyebrow') }}</p>
+                    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">{{ t('events.title') }}</h1>
+                    <p class="max-w-2xl text-base leading-relaxed text-muted-foreground">{{ t('events.intro') }}</p>
                 </div>
 
                 <div class="mt-10 space-y-10">
                     <!-- Featured upcoming -->
                     <section>
                         <div class="flex items-baseline justify-between">
-                            <h2 class="text-xl font-semibold">Aankomend</h2>
-                            <span class="text-sm text-muted-foreground">{{ props.upcoming.length }} event(s)</span>
+                            <h2 class="text-xl font-semibold">{{ t('events.upcoming') }}</h2>
+                            <span class="text-sm text-muted-foreground">{{ t('events.eventCount', { count: props.upcoming.length }) }}</span>
                         </div>
 
                         <div v-if="featuredUpcoming" class="mt-4">
@@ -115,7 +117,7 @@ onBeforeUnmount(() => {
                                                 class="absolute top-5 left-5 inline-flex items-center gap-2 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border"
                                             >
                                                 <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                                                Volgende editie
+                                                {{ t('events.nextEdition') }}
                                             </div>
                                         </div>
                                     </div>
@@ -136,11 +138,11 @@ onBeforeUnmount(() => {
                                             </div>
 
                                             <div class="mt-6 flex items-center justify-between">
-                                                <span class="text-sm text-muted-foreground">Klik voor details</span>
+                                                <span class="text-sm text-muted-foreground">{{ t('events.clickDetails') }}</span>
                                                 <span
                                                     class="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition group-hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                                                 >
-                                                    Details
+                                                    {{ t('common.details') }}
                                                 </span>
                                             </div>
                                         </div>
@@ -173,14 +175,16 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
 
-                        <div v-else class="mt-4 rounded-2xl border border-dashed border-border bg-background/40 px-5 py-6 text-sm text-muted-foreground">Geen aankomend event.</div>
+                        <div v-else class="mt-4 rounded-2xl border border-dashed border-border bg-background/40 px-5 py-6 text-sm text-muted-foreground">
+                            {{ t('events.noneUpcoming') }}
+                        </div>
                     </section>
 
                     <!-- Past editions -->
                     <section>
                         <div class="flex items-baseline justify-between">
-                            <h2 class="text-xl font-semibold">Eerdere edities</h2>
-                            <span class="text-sm text-muted-foreground">{{ props.past.length }} editie(s)</span>
+                            <h2 class="text-xl font-semibold">{{ t('events.previous') }}</h2>
+                            <span class="text-sm text-muted-foreground">{{ t('events.editionCount', { count: props.past.length }) }}</span>
                         </div>
 
                         <div v-if="props.past.length" class="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -199,7 +203,7 @@ onBeforeUnmount(() => {
                                     <div class="flex items-center gap-3 text-xs text-muted-foreground">
                                         <span class="inline-flex items-center gap-2">
                                             <span class="inline-flex h-2 w-2 rounded-full bg-gray-400" />
-                                            Eerder
+                                            {{ t('events.earlier') }}
                                         </span>
                                         <span class="truncate">
                                             {{ formatDateRange(event.starts_at, event.ends_at) }}
@@ -215,18 +219,18 @@ onBeforeUnmount(() => {
                                         {{ event.short_description }}
                                     </p>
 
-                                    <p v-else class="mt-2 line-clamp-2 text-sm text-muted-foreground">Klik om meer te lezen.</p>
+                                    <p v-else class="mt-2 line-clamp-2 text-sm text-muted-foreground">{{ t('events.clickMore') }}</p>
 
                                     <div class="mt-4 flex items-center justify-between">
-                                        <span class="text-sm text-muted-foreground">Details</span>
-                                        <span class="text-sm font-medium text-foreground">Open</span>
+                                        <span class="text-sm text-muted-foreground">{{ t('common.details') }}</span>
+                                        <span class="text-sm font-medium text-foreground">{{ t('common.open') }}</span>
                                     </div>
                                 </div>
                             </button>
                         </div>
 
                         <div v-else class="mt-4 rounded-2xl border border-dashed border-border bg-background/40 px-5 py-6 text-sm text-muted-foreground">
-                            Nog geen eerdere events.
+                            {{ t('events.nonePrevious') }}
                         </div>
                     </section>
                 </div>
@@ -235,7 +239,7 @@ onBeforeUnmount(() => {
 
         <!-- Modal -->
         <teleport to="body">
-            <div v-if="isModalOpen" class="fixed inset-0 z-50 bg-black/60" aria-label="Sluiten" @click="closeModal">
+            <div v-if="isModalOpen" class="fixed inset-0 z-50 bg-black/60" :aria-label="t('common.close')" @click="closeModal">
                 <div class="absolute inset-0 flex items-center justify-center px-4 py-8">
                     <div
                         class="flex max-h-[80vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-background shadow-xl ring-1 ring-border"
@@ -260,18 +264,18 @@ onBeforeUnmount(() => {
                                 </div>
 
                                 <div class="mt-4">
-                                    <p class="text-sm font-semibold text-foreground">Beschrijving</p>
+                                    <p class="text-sm font-semibold text-foreground">{{ t('common.description') }}</p>
 
                                     <div v-if="selected?.description_html" class="prose prose-sm mt-2 max-w-none dark:prose-invert" v-html="selected.description_html" />
 
-                                    <p v-else class="mt-2 text-sm text-muted-foreground">Geen beschrijving.</p>
+                                    <p v-else class="mt-2 text-sm text-muted-foreground">{{ t('common.noDescription') }}</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="shrink-0 border-t border-border px-6 py-5">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <p class="text-xs text-muted-foreground">Bekijk de volledige editie of de fotogalerij.</p>
+                                <p class="text-xs text-muted-foreground">{{ t('events.modalHint') }}</p>
 
                                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                                     <a
@@ -279,7 +283,7 @@ onBeforeUnmount(() => {
                                         :href="selected.edition_url"
                                         class="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                                     >
-                                        Bekijk volledige editie
+                                        {{ t('events.viewFull') }}
                                     </a>
 
                                     <a
@@ -289,7 +293,7 @@ onBeforeUnmount(() => {
                                         rel="noreferrer"
                                         class="inline-flex items-center justify-center rounded-xl bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                                     >
-                                        Bekijk foto's
+                                        {{ t('events.viewPhotos') }}
                                     </a>
 
                                     <button
@@ -297,7 +301,7 @@ onBeforeUnmount(() => {
                                         class="inline-flex items-center justify-center rounded-xl bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                                         @click="closeModal"
                                     >
-                                        Sluiten
+                                        {{ t('common.close') }}
                                     </button>
                                 </div>
                             </div>

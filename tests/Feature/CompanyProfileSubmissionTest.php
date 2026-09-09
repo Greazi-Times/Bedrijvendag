@@ -18,7 +18,8 @@ test('company can open its verification form with a token', function () {
     $company = Company::create([
         'name' => 'Acme',
         'website_url' => 'https://acme.example',
-        'description' => ['html' => '<p>Current description</p>'],
+        'description_nl' => '<p>Current description</p>',
+        'description_en' => '<p>English description</p>',
     ]);
 
     $company->educations()->attach($education);
@@ -41,7 +42,7 @@ test('company rich text submission keeps safe formatting and removes unsafe mark
 
     $company = Company::create([
         'name' => 'Formatted Company',
-        'description' => ['html' => '<p>Old</p>'],
+        'description_nl' => '<p>Old</p>',
     ]);
 
     $this->post(route('company-profile.update', $company->profile_token), [
@@ -67,7 +68,7 @@ test('company rich text submission keeps safe formatting and removes unsafe mark
 
     $submission->approve();
 
-    expect($company->refresh()->description['html'])
+    expect($company->refresh()->description_nl)
         ->toContain('<strong>Bold</strong>')
         ->toContain('<u>underline</u>');
 });
@@ -99,7 +100,7 @@ test('company submission is stored for review and does not immediately update pu
     $company = Company::create([
         'name' => 'Old Name',
         'website_url' => 'https://old.example',
-        'description' => ['html' => '<p>Old description</p>'],
+        'description_nl' => '<p>Old description</p>',
     ]);
 
     $this->post(route('company-profile.update', $company->profile_token), [
@@ -133,7 +134,7 @@ test('company can propose a new sector that is only created after approval', fun
 
     $company = Company::create([
         'name' => 'Sector Company',
-        'description' => ['html' => '<p>Current description</p>'],
+        'description_nl' => '<p>Current description</p>',
     ]);
 
     $this->post(route('company-profile.update', $company->profile_token), [
@@ -178,7 +179,7 @@ test('approving a submission updates the company profile', function () {
     $company = Company::create([
         'name' => 'Before',
         'website_url' => 'https://before.example',
-        'description' => ['html' => '<p>Before description</p>'],
+        'description_nl' => '<p>Before description</p>',
     ]);
 
     $submission = CompanyProfileSubmission::create([
@@ -201,7 +202,7 @@ test('approving a submission updates the company profile', function () {
     expect($company->name)->toBe('After')
         ->and($company->website_url)->toBe('https://after.example')
         ->and($company->logo_path)->toBe('company-logos/logo.png')
-        ->and($company->description['html'])->toBe('<p>After description</p>')
+        ->and($company->description_nl)->toBe('<p>After description</p>')
         ->and($company->educations()->pluck('education.id')->all())->toBe([$education->id])
         ->and($company->sectors()->pluck('sectors.id')->all())->toBe([$sector->id]);
 
@@ -248,7 +249,7 @@ test('profile submission stays pending and does not update the company when the 
     $company = Company::create([
         'name' => 'Before',
         'website_url' => 'https://before.example',
-        'description' => ['html' => '<p>Before description</p>'],
+        'description_nl' => '<p>Before description</p>',
     ]);
 
     $submission = CompanyProfileSubmission::create([
@@ -265,5 +266,5 @@ test('profile submission stays pending and does not update the company when the 
         ->and($submission->fresh()->status)->toBe(CompanyProfileSubmission::STATUS_PENDING)
         ->and($company->refresh()->name)->toBe('Before')
         ->and($company->website_url)->toBe('https://before.example')
-        ->and($company->description['html'])->toBe('<p>Before description</p>');
+        ->and($company->description_nl)->toBe('<p>Before description</p>');
 });

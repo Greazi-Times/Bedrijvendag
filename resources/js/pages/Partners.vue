@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { useTranslations } from '@/i18n';
 
 type EventSummary = {
     id: number;
@@ -29,12 +30,13 @@ const props = defineProps<{
     supportPartners?: PartnerSummary[];
     standPartners?: PartnerSummary[];
 }>();
+const { dateLocale, t } = useTranslations();
 
 function formatDate(iso: string) {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return iso;
 
-    const parts = new Intl.DateTimeFormat('nl-NL', {
+    const parts = new Intl.DateTimeFormat(dateLocale.value, {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
@@ -83,7 +85,7 @@ const selectedPartnerEducations = computed(() => {
 
 <template>
     <div>
-        <Head title="Partners" />
+        <Head :title="t('nav.partners')" />
 
         <AppHeader />
 
@@ -91,32 +93,32 @@ const selectedPartnerEducations = computed(() => {
             <div class="relative z-10 mx-auto max-w-7xl">
                 <div class="mx-auto max-w-3xl text-center">
                     <p class="brand-eyebrow">
-                        <span v-if="props.event">Editie: {{ eventTitle() }}</span>
+                        <span v-if="props.event">{{ t('partners.edition', { name: eventTitle() ?? '' }) }}</span>
                         <span v-else>ATIx Bedrijvendag</span>
                     </p>
 
-                    <h1 class="mt-4 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">Partners</h1>
+                    <h1 class="mt-4 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">{{ t('nav.partners') }}</h1>
 
                     <div class="mx-auto mt-5 h-1 w-56 rounded-full bg-gradient-to-r from-primary to-secondary"></div>
 
                     <p class="mt-6 text-base leading-relaxed text-muted-foreground">
                         <span v-if="props.event">
-                            Dankzij onderstaande partners kunnen wij dit jaar een succesvolle ATIx Bedrijvendag organiseren.
+                            {{ t('partners.intro') }}
                             <span class="mt-2 block text-sm">
-                                Huidige editie:
+                                {{ t('partners.currentEdition') }}
                                 <span class="font-semibold text-foreground">{{ eventTitle() }}</span>
                                 <span class="mx-2">•</span>
                                 <span>{{ formatDate(props.event.date) }}</span>
                             </span>
                         </span>
-                        <span v-else> Dankzij onderstaande partners kunnen wij dit jaar een succesvolle ATIx Bedrijvendag organiseren. </span>
+                        <span v-else>{{ t('partners.intro') }}</span>
                     </p>
                 </div>
 
                 <div v-if="supportPartners.length" class="mt-14">
                     <div class="mb-6">
-                        <h2 class="text-2xl font-semibold tracking-tight text-foreground">Partners die dit evenement mogelijk maken</h2>
-                        <p class="mt-2 text-sm leading-relaxed text-muted-foreground">Deze partners ondersteunen de ATIx Bedrijvendag en maken de editie mogelijk.</p>
+                        <h2 class="text-2xl font-semibold tracking-tight text-foreground">{{ t('partners.supportingTitle') }}</h2>
+                        <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{{ t('partners.supportingDescription') }}</p>
                     </div>
 
                     <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -139,13 +141,17 @@ const selectedPartnerEducations = computed(() => {
                                     loading="lazy"
                                     decoding="async"
                                 />
-                                <div v-else class="text-sm text-muted-foreground">Geen logo</div>
+                                <div v-else class="text-sm text-muted-foreground">{{ t('common.noLogo') }}</div>
                             </div>
 
                             <div class="p-7">
                                 <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ partner.name }}</h2>
 
-                                <div v-if="partner.description" class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground" v-html="partner.description"></div>
+                                <div
+                                    v-if="partner.description"
+                                    class="prose prose-sm mt-3 line-clamp-3 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ol:my-0 prose-ul:my-0 prose-li:my-0"
+                                    v-html="partner.description"
+                                ></div>
 
                                 <div class="mt-6">
                                     <a
@@ -156,14 +162,14 @@ const selectedPartnerEducations = computed(() => {
                                         rel="noopener noreferrer"
                                         @click.stop
                                     >
-                                        Bezoek website
+                                        {{ t('partners.visitWebsite') }}
                                     </a>
 
                                     <div
                                         v-else
                                         class="inline-flex w-full items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground ring-1 ring-border"
                                     >
-                                        Website ontbreekt
+                                        {{ t('partners.websiteMissing') }}
                                     </div>
                                 </div>
                             </div>
@@ -173,8 +179,8 @@ const selectedPartnerEducations = computed(() => {
 
                 <div v-if="standPartners.length" class="mt-14">
                     <div class="mb-6">
-                        <h2 class="text-2xl font-semibold tracking-tight text-foreground">Partners met een stand op het evenement</h2>
-                        <p class="mt-2 text-sm leading-relaxed text-muted-foreground">Deze partners zijn aanwezig op de ATIx Bedrijvendag met een eigen stand.</p>
+                        <h2 class="text-2xl font-semibold tracking-tight text-foreground">{{ t('partners.standsTitle') }}</h2>
+                        <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{{ t('partners.standsDescription') }}</p>
                     </div>
 
                     <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -197,7 +203,7 @@ const selectedPartnerEducations = computed(() => {
                                     loading="lazy"
                                     decoding="async"
                                 />
-                                <div v-else class="text-sm text-muted-foreground">Geen logo</div>
+                                <div v-else class="text-sm text-muted-foreground">{{ t('common.noLogo') }}</div>
                             </div>
 
                             <div class="p-7">
@@ -207,11 +213,15 @@ const selectedPartnerEducations = computed(() => {
                                         v-if="partner.stand_number"
                                         class="shrink-0 rounded-lg bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border"
                                     >
-                                        Stand {{ partner.stand_number }}
+                                        {{ t('common.stand') }} {{ partner.stand_number }}
                                     </span>
                                 </div>
 
-                                <div v-if="partner.description" class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground" v-html="partner.description"></div>
+                                <div
+                                    v-if="partner.description"
+                                    class="prose prose-sm mt-3 line-clamp-3 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ol:my-0 prose-ul:my-0 prose-li:my-0"
+                                    v-html="partner.description"
+                                ></div>
 
                                 <div class="mt-6">
                                     <a
@@ -222,14 +232,14 @@ const selectedPartnerEducations = computed(() => {
                                         rel="noopener noreferrer"
                                         @click.stop
                                     >
-                                        Bezoek website
+                                        {{ t('partners.visitWebsite') }}
                                     </a>
 
                                     <div
                                         v-else
                                         class="inline-flex w-full items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground ring-1 ring-border"
                                     >
-                                        Website ontbreekt
+                                        {{ t('partners.websiteMissing') }}
                                     </div>
                                 </div>
                             </div>
@@ -238,7 +248,7 @@ const selectedPartnerEducations = computed(() => {
                 </div>
 
                 <div v-if="!supportPartners.length && !standPartners.length" class="brand-card mx-auto mt-10 max-w-3xl rounded-2xl p-6 text-center">
-                    <p class="text-muted-foreground">Nog geen partners gekoppeld aan deze editie.</p>
+                    <p class="text-muted-foreground">{{ t('partners.none') }}</p>
                 </div>
             </div>
 
@@ -263,7 +273,7 @@ const selectedPartnerEducations = computed(() => {
                                     loading="lazy"
                                     decoding="async"
                                 />
-                                <div v-else class="text-sm text-muted-foreground">Geen logo</div>
+                                <div v-else class="text-sm text-muted-foreground">{{ t('common.noLogo') }}</div>
                             </div>
 
                             <div class="p-8 lg:p-10">
@@ -275,7 +285,7 @@ const selectedPartnerEducations = computed(() => {
 
                                         <div v-if="selectedPartner.stand_number" class="mt-3">
                                             <span class="inline-flex items-center rounded-lg bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border">
-                                                Stand {{ selectedPartner.stand_number }}
+                                                {{ t('common.stand') }} {{ selectedPartner.stand_number }}
                                             </span>
                                         </div>
                                     </div>
@@ -287,12 +297,12 @@ const selectedPartnerEducations = computed(() => {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        Bezoek website
+                                        {{ t('partners.visitWebsite') }}
                                     </a>
                                 </div>
 
                                 <div v-if="selectedPartnerEducations.length" class="mt-6">
-                                    <h3 class="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Opleidingen</h3>
+                                    <h3 class="text-sm font-semibold tracking-wide text-muted-foreground uppercase">{{ t('common.educations') }}</h3>
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         <span
                                             v-for="education in selectedPartnerEducations"
@@ -304,11 +314,11 @@ const selectedPartnerEducations = computed(() => {
                                     </div>
                                 </div>
 
-                                <div v-if="selectedPartner.description" class="prose prose-sm mt-8 max-w-none text-foreground">
+                                <div v-if="selectedPartner.description" class="prose prose-sm mt-8 max-w-none text-foreground dark:prose-invert">
                                     <div v-html="selectedPartner.description"></div>
                                 </div>
 
-                                <div v-else class="mt-8 text-sm text-muted-foreground">Geen extra beschrijving beschikbaar.</div>
+                                <div v-else class="mt-8 text-sm text-muted-foreground">{{ t('partners.noExtraDescription') }}</div>
                             </div>
                         </div>
                     </div>
