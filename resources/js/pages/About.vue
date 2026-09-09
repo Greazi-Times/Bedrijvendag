@@ -103,13 +103,13 @@ const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentO
                         <div class="flex flex-col gap-6 sm:w-5/12">
                             <div class="brand-card overflow-hidden rounded-3xl p-2">
                                 <div class="aspect-[3/4] w-full">
-                                    <img :src="props.aboutImages.infoFirst" alt="Sfeer" class="h-full w-full rounded-2xl object-cover" />
+                                    <img :src="props.aboutImages.infoFirst" :alt="t('about.atmosphereImageAlt')" class="h-full w-full rounded-2xl object-cover" />
                                 </div>
                             </div>
 
                             <div class="brand-card overflow-hidden rounded-3xl p-2">
                                 <div class="aspect-[3/4] w-full">
-                                    <img :src="props.aboutImages.infoSecond" alt="Studenten" class="h-full w-full rounded-2xl object-cover" />
+                                    <img :src="props.aboutImages.infoSecond" :alt="t('about.studentsImageAlt')" class="h-full w-full rounded-2xl object-cover" />
                                 </div>
                             </div>
                         </div>
@@ -117,7 +117,7 @@ const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentO
                         <div class="sm:w-7/12">
                             <div class="brand-card overflow-hidden rounded-3xl p-2">
                                 <div class="aspect-[3/4] w-full">
-                                    <img :src="props.aboutImages.infoThird" alt="Bedrijven" class="h-full w-full rounded-2xl object-cover object-center" />
+                                    <img :src="props.aboutImages.infoThird" :alt="t('about.companiesImageAlt')" class="h-full w-full rounded-2xl object-cover object-center" />
                                 </div>
                             </div>
                         </div>
@@ -209,7 +209,7 @@ const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentO
 
     <!-- CTA -->
     <section class="brand-dark-cta relative overflow-hidden px-6 py-16 lg:px-16 lg:py-20">
-        <img alt="Bg Shape" loading="lazy" width="1660" height="337" decoding="async" class="pointer-events-none absolute right-0 bottom-0" src="/images/shape/shape-16.svg" />
+        <img alt="" loading="lazy" width="1660" height="337" decoding="async" class="pointer-events-none absolute right-0 bottom-0" src="/images/shape/shape-16.svg" />
 
         <div class="relative z-10 mx-auto max-w-7xl">
             <div class="flex flex-wrap gap-8 md:flex-nowrap md:items-center md:justify-between">

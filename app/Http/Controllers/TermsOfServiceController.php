@@ -11,7 +11,9 @@ class TermsOfServiceController extends Controller
 {
     public function __invoke(TermsOfServiceSettings $settings)
     {
-        $content = $settings->content ?? null;
+        $content = app()->getLocale() === 'en' && filled($settings->content_en)
+            ? $settings->content_en
+            : $settings->content;
 
         if (is_string($content) && $content !== '') {
             $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -23,10 +25,11 @@ class TermsOfServiceController extends Controller
 
         $updatedAtRaw = DB::table($table)
             ->where('group', TermsOfServiceSettings::group())
+            ->where('name', 'content')
             ->max('updated_at');
 
         $updatedAt = $updatedAtRaw
-            ? Carbon::parse($updatedAtRaw)->timezone(config('app.timezone'))->format('F-d-Y')
+            ? Carbon::parse($updatedAtRaw)->timezone(config('app.timezone'))->toDateString()
             : null;
 
         return Inertia::render('legal/TermsOfService', [

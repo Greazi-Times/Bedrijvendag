@@ -222,7 +222,7 @@ function formatDateRange(start: string | null, end: string | null) {
                             </div>
 
                             <div v-if="hasMap" class="relative mt-4 rounded-2xl ring-1 ring-border">
-                                <img ref="mapImgEl" :src="event.map_url ?? ''" alt="Plattegrond" class="h-full w-full rounded-2xl object-contain" @load="updateMapImageHeight" />
+                                <img ref="mapImgEl" :src="event.map_url ?? ''" :alt="t('map.imageAlt', { event: event.title })" class="h-full w-full rounded-2xl object-contain" @load="updateMapImageHeight" />
 
                                 <button
                                     v-for="stand in standsWithCoords"

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Pages\Concerns\QueuesPolicyContentTranslation;
 use App\Settings\CookiePolicySettings;
 use Filafly\Icons\Phosphor\Enums\Phosphor;
 use Filament\Forms\Components\RichEditor;
@@ -10,6 +11,8 @@ use Filament\Schemas\Schema;
 
 class ManageCookiePolicy extends SettingsPage
 {
+    use QueuesPolicyContentTranslation;
+
     protected static string|null|\UnitEnum $navigationGroup = 'Settings';
 
     protected static string|null|\BackedEnum $navigationIcon = Phosphor::Cookie;

@@ -11,16 +11,19 @@ class PrivacyPolicyController extends Controller
 {
     public function __invoke(PrivacyPolicySettings $settings)
     {
-        $content = $settings->content ?? null;
+        $content = app()->getLocale() === 'en' && filled($settings->content_en)
+            ? $settings->content_en
+            : $settings->content;
 
         $table = config('settings.table', 'settings');
 
         $updatedAtRaw = DB::table($table)
             ->where('group', PrivacyPolicySettings::group())
+            ->where('name', 'content')
             ->max('updated_at');
 
         $updatedAt = $updatedAtRaw
-            ? Carbon::parse($updatedAtRaw)->timezone(config('app.timezone'))->format('F-d-Y')
+            ? Carbon::parse($updatedAtRaw)->timezone(config('app.timezone'))->toDateString()
             : null;
 
         return Inertia::render('legal/PrivacyPolicy', [

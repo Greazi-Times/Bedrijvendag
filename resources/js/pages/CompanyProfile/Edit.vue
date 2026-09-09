@@ -183,7 +183,7 @@ function runEditorCommand(command: string, value?: string) {
     focusEditor();
 
     if (command === 'createLink') {
-        const url = window.prompt('Plak de link');
+        const url = window.prompt(t('companyProfile.linkPrompt'));
         if (!url) return;
 
         document.execCommand('createLink', false, url);
