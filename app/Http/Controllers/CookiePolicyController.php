@@ -11,7 +11,9 @@ class CookiePolicyController extends Controller
 {
     public function __invoke(CookiePolicySettings $settings)
     {
-        $content = $settings->content ?? null;
+        $content = app()->getLocale() === 'en' && filled($settings->content_en)
+            ? $settings->content_en
+            : $settings->content;
 
         if (is_string($content) && $content !== '') {
             // In some cases the editor content can end up entity-encoded.
@@ -24,10 +26,11 @@ class CookiePolicyController extends Controller
 
         $updatedAtRaw = DB::table($table)
             ->where('group', CookiePolicySettings::group())
+            ->where('name', 'content')
             ->max('updated_at');
 
         $updatedAt = $updatedAtRaw
-            ? Carbon::parse($updatedAtRaw)->timezone(config('app.timezone'))->format('F-d-Y')
+            ? Carbon::parse($updatedAtRaw)->timezone(config('app.timezone'))->toDateString()
             : null;
 
         return Inertia::render('legal/CookiePolicy', [

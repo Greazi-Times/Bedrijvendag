@@ -2,8 +2,9 @@
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import { useTranslations } from '@/i18n';
+import { computed } from 'vue';
 
-const { t } = useTranslations();
+const { dateLocale, t } = useTranslations();
 
 interface Policy {
     policyHtml: string | null;
@@ -15,6 +16,13 @@ const props = defineProps<{
 }>();
 
 const policy = props.policy;
+
+const updatedAt = computed(() => {
+    if (!policy.updatedAt) return null;
+
+    const date = new Date(`${policy.updatedAt}T00:00:00`);
+    return Number.isNaN(date.getTime()) ? policy.updatedAt : new Intl.DateTimeFormat(dateLocale.value, { dateStyle: 'long' }).format(date);
+});
 </script>
 
 <template>
@@ -24,7 +32,7 @@ const policy = props.policy;
         <div class="relative mx-auto max-w-5xl">
             <div class="brand-card rounded-3xl p-6">
                 <div class="flex flex-col gap-1">
-                    <p v-if="policy.updatedAt" class="text-sm text-muted-foreground">{{ t('legal.lastModified', { date: policy.updatedAt }) }}</p>
+                    <p v-if="updatedAt" class="text-sm text-muted-foreground">{{ t('legal.lastModified', { date: updatedAt }) }}</p>
                     <h1 class="text-3xl font-semibold">{{ t('legal.terms') }}</h1>
                 </div>
 

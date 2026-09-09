@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\Partner;
 use App\Models\Sector;
 use App\Services\DeepLTranslator;
+use App\Support\PolicyContentTranslation;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 
@@ -49,6 +50,13 @@ class SyncContentTranslations extends Command
                     $jobs += $record->queueAutomaticTranslations(force: (bool) $this->option('force'));
                 }
             });
+        }
+
+        foreach (PolicyContentTranslation::SETTINGS_CLASSES as $settingsClass) {
+            $jobs += (int) PolicyContentTranslation::queue(
+                $settingsClass,
+                force: (bool) $this->option('force'),
+            );
         }
 
         $this->info("Queued {$jobs} translation job(s).");

@@ -201,7 +201,7 @@ function standDisplayCode(stand: Stand) {
 }
 
 function standDisplayName(stand: Stand) {
-    return stand.company_name ?? 'Geen organisatie ingesteld';
+    return stand.company_name ?? t('map.noOrganisation');
 }
 
 function standBadgeClass(stand: Stand) {
@@ -351,7 +351,7 @@ onUnmounted(() => {
                                     <img
                                         ref="mapImageRef"
                                         :src="map.image_url"
-                                        :alt="`${event.title} map`"
+                                        :alt="t('map.imageAlt', { event: event.title })"
                                         class="block h-auto w-full select-none"
                                         draggable="false"
                                         @load="updateMapImageHeight"

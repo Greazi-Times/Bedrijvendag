@@ -95,7 +95,7 @@ const headerSubtitle = computed(() => {
     const kind = props.eventKind === 'upcoming' ? t('companies.upcomingEdition') : t('companies.recentEdition');
     const date = eventDateLabel.value;
 
-    return t('companies.subtitle', { edition: kind, date: date ? ` ${dateLocale.value === 'en-GB' ? 'on' : 'op'} ${date}` : '' });
+    return t('companies.subtitle', { edition: kind, date: date ? t('companies.onDate', { date }) : '' });
 });
 
 const educationOptions = computed<string[]>(() => {
