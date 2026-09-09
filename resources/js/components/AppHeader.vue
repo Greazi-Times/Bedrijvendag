@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import { Github, Menu } from 'lucide-vue-next';
+import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import { Button } from '@/components/ui/button';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -12,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { toUrl } from '@/lib/utils';
 import type { BreadcrumbItem, NavItem } from '@/types';
+import { useTranslations } from '@/i18n';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
@@ -22,43 +25,44 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+const { t } = useTranslations();
 
 const activeItemStyles = 'bg-primary/10 text-primary ring-1 ring-primary/15 dark:bg-primary/20 dark:text-white';
 
-const mainNavItems: NavItem[] = [
+const mainNavItems = computed<NavItem[]>(() => [
     {
-        title: 'Plattegrond',
+        title: t('nav.map'),
         href: '/plattegrond',
     },
     {
-        title: 'Bedrijven',
+        title: t('nav.companies'),
         href: '/bedrijven',
     },
     {
-        title: 'Partners',
+        title: t('nav.partners'),
         href: '/partners',
     },
     {
-        title: 'Edities',
+        title: t('nav.editions'),
         href: '/edities',
     },
     {
-        title: 'Over Ons',
+        title: t('nav.about'),
         href: '/over-ons',
     },
     {
-        title: 'Contact',
+        title: t('nav.contact'),
         href: '/contact',
     },
-];
+]);
 
-const rightNavItems: NavItem[] = [
+const rightNavItems = computed<NavItem[]>(() => [
     {
-        title: 'Repository',
+        title: t('nav.repository'),
         href: 'https://github.com/Greazi-Times/Bedrijvendag',
         icon: Github,
     },
-];
+]);
 </script>
 
 <template>
@@ -74,7 +78,7 @@ const rightNavItems: NavItem[] = [
                             </Button>
                         </SheetTrigger>
                         <SheetContent side="left" class="w-[300px] p-6">
-                            <SheetTitle class="sr-only">Navigation Menu</SheetTitle>
+                            <SheetTitle class="sr-only">{{ t('nav.menu') }}</SheetTitle>
                             <SheetHeader class="flex justify-start text-left">
                                 <AppLogoIcon class="size-6 fill-current text-black dark:text-white" />
                             </SheetHeader>
@@ -139,6 +143,7 @@ const rightNavItems: NavItem[] = [
                 </div>
 
                 <div class="ml-auto flex items-center space-x-2">
+                    <LanguageSwitcher />
                     <ThemeToggle />
                     <div class="relative flex items-center space-x-1">
                         <div class="hidden space-x-1 lg:flex">

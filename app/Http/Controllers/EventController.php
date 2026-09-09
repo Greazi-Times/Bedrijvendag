@@ -77,7 +77,7 @@ class EventController extends Controller
 
         $now = Carbon::now();
 
-        $query = Event::query();
+        $query = Event::query()->with('translations');
 
         if ($startsAtColumn) {
             // Upcoming first (soonest first), past later (most recent first)
@@ -133,7 +133,9 @@ class EventController extends Controller
             $startsAt = $startsAtColumn ? $event->{$startsAtColumn} : null;
             $endsAt = $endsAtColumn ? $event->{$endsAtColumn} : null;
 
-            $title = $titleColumn ? (string) ($event->{$titleColumn} ?? '') : '';
+            $title = $titleColumn === 'name'
+                ? (string) $event->translated('name')
+                : ($titleColumn ? (string) ($event->{$titleColumn} ?? '') : '');
 
             $headerImageUrl = null;
             if ($headerImageColumn && ! empty($event->{$headerImageColumn})) {
@@ -162,7 +164,7 @@ class EventController extends Controller
                 'ends_at' => $endsAt ? Carbon::parse($endsAt)->toIso8601String() : null,
                 'location' => $locationColumn ? $event->{$locationColumn} : null,
                 'short_description' => $shortDescriptionColumn ? $event->{$shortDescriptionColumn} : null,
-                'description_html' => $this->asHtmlDescription($descriptionColumn ? $event->{$descriptionColumn} : null),
+                'description_html' => $this->asHtmlDescription($descriptionColumn === 'description' ? $event->translated('description') : ($descriptionColumn ? $event->{$descriptionColumn} : null)),
                 'header_image_url' => Storage::url($headerImageUrl),
                 'edition_url' => $editionUrl,
                 'gallery_url' => $galleryUrl,
@@ -201,8 +203,9 @@ class EventController extends Controller
     public function show(Request $request, Event $event)
     {
         $event = $event->fresh([
-            'stands.company' => fn ($query) => $query->with(['sectors', 'educations']),
-            'stands.partner' => fn ($query) => $query->with(['educations']),
+            'translations',
+            'stands.company' => fn ($query) => $query->with(['sectors.translations', 'educations.translations']),
+            'stands.partner' => fn ($query) => $query->with(['translations', 'educations.translations']),
         ]);
 
         $startsAtColumn = $this->firstExistingColumn('events', ['starts_at', 'start_at', 'start_date', 'date', 'event_date']);
@@ -225,7 +228,9 @@ class EventController extends Controller
 
         $startsAt = $startsAtColumn ? $event->{$startsAtColumn} : null;
         $endsAt = $endsAtColumn ? $event->{$endsAtColumn} : null;
-        $title = (string) ($event->{$titleColumn} ?? '');
+        $title = $titleColumn === 'name'
+            ? (string) $event->translated('name')
+            : (string) ($event->{$titleColumn} ?? '');
 
         $headerImageUrl = null;
         if ($headerImageColumn && ! empty($event->{$headerImageColumn})) {
@@ -247,7 +252,7 @@ class EventController extends Controller
         $companies = [];
         if (method_exists($event, 'companies')) {
             $companies = $event->companies()
-                ->with(['sectors', 'educations'])
+                ->with(['sectors.translations', 'educations.translations'])
                 ->orderBy('name')
                 ->get()
                 ->map(function ($company) {
@@ -255,12 +260,12 @@ class EventController extends Controller
 
                     $sectors = [];
                     if (method_exists($company, 'sectors') && $company->relationLoaded('sectors')) {
-                        $sectors = $company->sectors->pluck('name')->filter()->values()->all();
+                        $sectors = $company->sectors->map(fn ($sector) => $sector->translated('name'))->filter()->values()->all();
                     }
 
                     $educations = [];
                     if (method_exists($company, 'educations') && $company->relationLoaded('educations')) {
-                        $educations = $company->educations->pluck('name')->filter()->values()->all();
+                        $educations = $company->educations->map(fn ($education) => $education->translated('name'))->filter()->values()->all();
                     }
 
                     $standNumber = null;
@@ -273,7 +278,7 @@ class EventController extends Controller
                         'name' => $company->name ?? '',
                         'website_url' => $company->website_url ?? null,
                         'logo_url' => Storage::url($logoPath),
-                        'description_html' => $this->asHtmlDescription($company->description ?? null),
+                        'description_html' => $this->asHtmlDescription($company->localizedDescription()),
                         'sectors' => $sectors,
                         'educations' => $educations,
                         'stand_number' => $standNumber,
@@ -290,7 +295,7 @@ class EventController extends Controller
                 'starts_at' => $startsAt ? Carbon::parse($startsAt)->toIso8601String() : null,
                 'ends_at' => $endsAt ? Carbon::parse($endsAt)->toIso8601String() : null,
                 'location' => $locationColumn ? $event->{$locationColumn} : null,
-                'description_html' => $this->asHtmlDescription($descriptionColumn ? $event->{$descriptionColumn} : null),
+                'description_html' => $this->asHtmlDescription($descriptionColumn === 'description' ? $event->translated('description') : ($descriptionColumn ? $event->{$descriptionColumn} : null)),
                 'header_image_url' => Storage::url($headerImageUrl),
                 'map_url' => PageMedia::eventMapUrl($mapUrl),
                 'gallery_url' => $galleryUrl,
@@ -381,11 +386,11 @@ class EventController extends Controller
     private function formatMapPointLabel(EventMapPoint $point): string
     {
         return match ($point->type) {
-            'bar' => 'Bar',
-            'info' => 'Info',
-            'lunch' => 'Lunch',
-            'entrance' => 'Entrance',
-            default => 'Other',
+            'bar' => __('messages.map_points.bar'),
+            'info' => __('messages.map_points.info'),
+            'lunch' => __('messages.map_points.lunch'),
+            'entrance' => __('messages.map_points.entrance'),
+            default => __('messages.map_points.other'),
         };
     }
 }

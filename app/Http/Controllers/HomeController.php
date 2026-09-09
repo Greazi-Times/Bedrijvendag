@@ -18,12 +18,14 @@ class HomeController extends Controller
 
         // Upcoming event = first event with a future date
         $upcomingEvent = Event::query()
+            ->with('translations')
             ->whereDate('date', '>=', $today)
             ->orderBy('date')
             ->first();
 
         // Fallback = last event that happened
         $lastEvent = Event::query()
+            ->with('translations')
             ->whereDate('date', '<', $today)
             ->orderByDesc('date')
             ->first();
@@ -39,14 +41,15 @@ class HomeController extends Controller
 
         // 3 most recent events by event date
         $recentEvents = Event::query()
+            ->with('translations')
             ->orderByDesc('date')
             ->limit(3)
             ->get(['id', 'name', 'date', 'description', 'header_image_path'])
             ->map(fn (Event $e) => [
                 'id' => $e->id,
-                'name' => $e->name,
+                'name' => $e->translated('name'),
                 'date' => optional($e->date)->toDateString(), // YYYY-MM-DD
-                'description' => $e->description, // you cast it to array
+                'description' => $e->translated('description'),
                 'image_url' => $e->header_image_path ? Storage::url($e->header_image_path) : null,
             ]);
 
@@ -64,17 +67,17 @@ class HomeController extends Controller
 
         $highlightEventPayload = $highlightEvent ? [
             'id' => $highlightEvent->id,
-            'name' => $highlightEvent->name,
+            'name' => $highlightEvent->translated('name'),
             'date' => optional($highlightEvent->date)->toDateString(),
-            'description' => $highlightEvent->description,
+            'description' => $highlightEvent->translated('description'),
             'image_url' => $highlightEvent->header_image_path ? Storage::url($highlightEvent->header_image_path) : null,
         ] : null;
 
         $borrelEventPayload = $upcomingEvent ? [
             'id' => $upcomingEvent->id,
-            'name' => $upcomingEvent->name,
+            'name' => $upcomingEvent->translated('name'),
             'date' => optional($upcomingEvent->date)->toDateString(),
-            'description' => $upcomingEvent->description,
+            'description' => $upcomingEvent->translated('description'),
             'image_url' => $upcomingEvent->header_image_path ? Storage::url($upcomingEvent->header_image_path) : null,
         ] : null;
 
@@ -100,15 +103,16 @@ class HomeController extends Controller
         $event = Event::query()
             ->nextOrLatest()
             ->with([
-                'eventPartners' => fn ($q) => $q->with('educations')->orderBy('name'),
+                'translations',
+                'eventPartners' => fn ($q) => $q->with(['translations', 'educations.translations'])->orderBy('name'),
                 'stands' => fn ($q) => $q->where('type', 'partner'),
-                'stands.partner' => fn ($q) => $q->with('educations')->orderBy('name'),
+                'stands.partner' => fn ($q) => $q->with(['translations', 'educations.translations'])->orderBy('name'),
             ])
             ->first();
 
         $eventPayload = $event ? [
             'id' => $event->id,
-            'name' => $event->name,
+            'name' => $event->translated('name'),
             'date' => optional($event->date)->toDateString(),
         ] : null;
 
@@ -117,8 +121,8 @@ class HomeController extends Controller
             'name' => $p->name,
             'url' => $p->url,
             'logo_url' => $p->logo ? Storage::url($p->logo) : null,
-            'description' => $p->description ?? null,
-            'educations' => method_exists($p, 'educations') ? $p->educations->map(fn ($education) => ['id' => $education->id, 'name' => $education->name])->values() : [],
+            'description' => $p->translated('description'),
+            'educations' => method_exists($p, 'educations') ? $p->educations->map(fn ($education) => ['id' => $education->id, 'name' => $education->translated('name')])->values() : [],
             'stand_number' => $standNumber,
         ];
 

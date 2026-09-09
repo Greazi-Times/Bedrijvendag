@@ -15,9 +15,10 @@ class CompaniesController extends Controller
     public function index(Request $request): Response
     {
         $event = Event::query()->nextOrLatest()->with([
+            'translations',
             'companies' => function ($q) {
                 $q->orderBy('name');
-                $q->with(['educations:id,name', 'sectors:id,name']);
+                $q->with(['educations.translations', 'sectors.translations']);
             },
         ])->first();
 
@@ -54,9 +55,9 @@ class CompaniesController extends Controller
                 'logo_url' => Storage::url($company->logo_path),
                 'website_url' => $company->website_url,
                 'booth' => $company->pivot?->stand_number, // from company_event.stand_number
-                'description' => is_array($company->description) ? implode(' ', array_filter($company->description)) : $company->description,
-                'educations' => $company->educations?->pluck('name')->values() ?? [],
-                'sectors' => $company->sectors?->pluck('name')->values() ?? [],
+                'description' => $company->localizedDescription(),
+                'educations' => $company->educations?->map(fn ($education) => $education->translated('name'))->filter()->values() ?? [],
+                'sectors' => $company->sectors?->map(fn ($sector) => $sector->translated('name'))->filter()->values() ?? [],
                 // Optional if you want them on the page later:
                 // 'x_percent' => $company->pivot?->x_percent,
                 // 'y_percent' => $company->pivot?->y_percent,
@@ -66,13 +67,19 @@ class CompaniesController extends Controller
         return Inertia::render('Companies', [
             'event' => [
                 'id' => $event->id,
-                'title' => $event->name, // keeps your current Companies.vue working
+                'title' => $event->translated('name'),
                 'date' => optional($event->date)->toDateString(),
             ],
             'companies' => $companies,
             'eventKind' => $eventKind,
-            'educations' => Education::query()->orderBy('name')->get(['id', 'name']),
-            'sectors' => Sector::query()->orderBy('name')->get(['id', 'name']),
+            'educations' => Education::query()->with('translations')->orderBy('name')->get(['id', 'name'])->map(fn (Education $education) => [
+                'id' => $education->id,
+                'name' => $education->translated('name'),
+            ]),
+            'sectors' => Sector::query()->with('translations')->orderBy('name')->get(['id', 'name'])->map(fn (Sector $sector) => [
+                'id' => $sector->id,
+                'name' => $sector->translated('name'),
+            ]),
         ]);
     }
 }

@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Jobs\TranslateCompanyDescription;
+use App\Services\DeepLTranslator;
+use App\Support\TranslationContent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,13 +17,13 @@ class Company extends Model
         'logo_path',
         'website_url',
         'profile_contact_email',
-        'description',
+        'description_nl',
+        'description_en',
         'profile_token',
         'profile_token_expires_at',
     ];
 
     protected $casts = [
-        'description' => 'array',
         'profile_token_expires_at' => 'datetime',
     ];
 
@@ -31,6 +34,40 @@ class Company extends Model
                 $company->profile_token = static::generateUniqueProfileToken();
             }
         });
+
+        static::created(function (Company $company): void {
+            if (blank($company->description_en)) {
+                $company->queueEnglishDescriptionTranslation(overwrite: true);
+            }
+        });
+
+        static::updated(function (Company $company): void {
+            if ($company->wasChanged('description_nl') && ! $company->wasChanged('description_en')) {
+                $company->queueEnglishDescriptionTranslation(overwrite: true);
+            }
+        });
+    }
+
+    public function localizedDescription(?string $locale = null): ?string
+    {
+        $locale ??= app()->getLocale();
+        $primary = $locale === 'en' ? $this->description_en : $this->description_nl;
+        $fallback = $locale === 'en' ? $this->description_nl : $this->description_en;
+
+        return filled($primary) ? $primary : (filled($fallback) ? $fallback : null);
+    }
+
+    public function queueEnglishDescriptionTranslation(bool $overwrite = false): bool
+    {
+        $description = trim((string) $this->description_nl);
+
+        if ($description === '' || (! $overwrite && filled($this->description_en)) || ! app(DeepLTranslator::class)->configured()) {
+            return false;
+        }
+
+        TranslateCompanyDescription::dispatch($this->getKey(), TranslationContent::hash($description))->afterCommit();
+
+        return true;
     }
 
     public static function generateUniqueProfileToken(): string

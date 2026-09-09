@@ -3,11 +3,13 @@ import { computed } from 'vue';
 import { Moon, Sun } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { useAppearance } from '@/composables/useAppearance';
+import { useTranslations } from '@/i18n';
 
 const { resolvedAppearance, updateAppearance } = useAppearance();
+const { t } = useTranslations();
 
 const isDark = computed(() => resolvedAppearance.value === 'dark');
-const label = computed(() => (isDark.value ? 'Lichte modus inschakelen' : 'Donkere modus inschakelen'));
+const label = computed(() => (isDark.value ? t('theme.light') : t('theme.dark')));
 
 const toggleTheme = () => {
     updateAppearance(isDark.value ? 'light' : 'dark');

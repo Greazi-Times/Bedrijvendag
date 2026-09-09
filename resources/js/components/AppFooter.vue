@@ -3,12 +3,14 @@ import { usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import { useTranslations } from '@/i18n';
 
 type FlashType = 'success' | 'error';
 
 const newsletterEmail = ref('');
 const newsletterFlash = ref<{ type: FlashType; message: string } | null>(null);
 const page = usePage();
+const { t } = useTranslations();
 let newsletterFlashTimeout: number | null = null;
 
 function setNewsletterFlash(type: FlashType, message: string) {
@@ -23,7 +25,7 @@ function setNewsletterFlash(type: FlashType, message: string) {
 async function submitNewsletter() {
     const email = newsletterEmail.value.trim();
     if (!email) {
-        setNewsletterFlash('error', 'Vul een email adres in.');
+        setNewsletterFlash('error', t('footer.emailRequired'));
         return;
     }
 
@@ -42,16 +44,16 @@ async function submitNewsletter() {
 
         if (!res.ok) {
             const data = await res.json().catch(() => null);
-            const msg = data?.message || 'Inschrijven is niet gelukt. Probeer het opnieuw.';
+            const msg = data?.message || t('footer.subscribeFailed');
             setNewsletterFlash('error', msg);
             return;
         }
 
         newsletterEmail.value = '';
-        setNewsletterFlash('success', 'Je bent ingeschreven voor de nieuwsbrief.');
+        setNewsletterFlash('success', t('footer.subscribeSuccess'));
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
-        setNewsletterFlash('error', 'Inschrijven is niet gelukt. Probeer het opnieuw.');
+        setNewsletterFlash('error', t('footer.subscribeFailed'));
     }
 }
 </script>
@@ -72,7 +74,7 @@ async function submitNewsletter() {
                             <span class="text-xl font-semibold text-white"> ATIx Bedrijvendag </span>
                         </a>
 
-                        <p class="mt-6 leading-relaxed text-white/70">De bedrijvendag van Avans ATIx opleidingen waar studenten en bedrijven elkaar ontmoeten.</p>
+                        <p class="mt-6 leading-relaxed text-white/70">{{ t('footer.description') }}</p>
 
                         <div class="mt-6 flex gap-4">
                             <a href="#" class="text-white/45 transition hover:text-primary">
@@ -89,31 +91,43 @@ async function submitNewsletter() {
 
                     <!-- Pages -->
                     <div>
-                        <h4 class="mb-6 text-lg font-semibold text-white">Pagina's</h4>
+                        <h4 class="mb-6 text-lg font-semibold text-white">{{ t('footer.pages') }}</h4>
                         <ul class="space-y-3 text-white/68">
                             <li><a href="/" class="transition hover:text-primary">Home</a></li>
-                            <li><a href="/edities" class="transition hover:text-primary">Evenementen</a></li>
-                            <li><a href="/bedrijven" class="transition hover:text-primary">Bedrijven</a></li>
-                            <li><a href="/contact" class="transition hover:text-primary">Contact</a></li>
+                            <li>
+                                <a href="/edities" class="transition hover:text-primary">{{ t('footer.events') }}</a>
+                            </li>
+                            <li>
+                                <a href="/bedrijven" class="transition hover:text-primary">{{ t('nav.companies') }}</a>
+                            </li>
+                            <li>
+                                <a href="/contact" class="transition hover:text-primary">{{ t('nav.contact') }}</a>
+                            </li>
                         </ul>
                     </div>
 
                     <!-- Info -->
                     <div>
-                        <h4 class="mb-6 text-lg font-semibold text-white">Informatie</h4>
+                        <h4 class="mb-6 text-lg font-semibold text-white">{{ t('footer.information') }}</h4>
                         <ul class="space-y-3 text-white/68">
-                            <li><a href="/edities" class="transition hover:text-primary">Programma</a></li>
-                            <li><a href="/contact" class="transition hover:text-primary">Locatie</a></li>
-                            <li><a href="/partners" class="transition hover:text-primary">Partners</a></li>
+                            <li>
+                                <a href="/edities" class="transition hover:text-primary">{{ t('footer.programme') }}</a>
+                            </li>
+                            <li>
+                                <a href="/contact" class="transition hover:text-primary">{{ t('footer.location') }}</a>
+                            </li>
+                            <li>
+                                <a href="/partners" class="transition hover:text-primary">{{ t('nav.partners') }}</a>
+                            </li>
                             <li><a href="/dashboard" class="transition hover:text-primary">Dashboard</a></li>
                         </ul>
                     </div>
 
                     <!-- Newsletter -->
                     <div>
-                        <h4 class="mb-6 text-lg font-semibold text-white">Nieuwsbrief</h4>
+                        <h4 class="mb-6 text-lg font-semibold text-white">{{ t('footer.newsletter') }}</h4>
 
-                        <p class="mb-4 text-white/68">Ontvang updates over toekomstige edities.</p>
+                        <p class="mb-4 text-white/68">{{ t('footer.newsletterDescription') }}</p>
 
                         <div
                             v-if="newsletterFlash"
@@ -147,7 +161,7 @@ async function submitNewsletter() {
                                 v-model="newsletterEmail"
                                 type="email"
                                 id="newsletter-email"
-                                placeholder="Email adres"
+                                :placeholder="t('footer.emailPlaceholder')"
                                 class="w-full rounded-full border border-white/15 bg-white/10 py-3 pr-14 pl-6 text-sm text-white placeholder:text-white/45 focus:border-primary focus:outline-none"
                                 required
                             />
@@ -168,13 +182,19 @@ async function submitNewsletter() {
             <div class="border-t border-white/10 py-8">
                 <div class="flex flex-col items-center justify-between gap-4 lg:flex-row">
                     <ul class="flex flex-wrap justify-center gap-6 text-sm text-white/62">
-                        <li><a href="/privacy-policy" class="transition hover:text-primary">Privacy Policy</a></li>
-                        <li><a href="/terms-of-service" class="transition hover:text-primary">Terms of Service</a></li>
-                        <li><a href="/cookie-policy" class="transition hover:text-primary">Cookie Policy</a></li>
+                        <li>
+                            <a href="/privacy-policy" class="transition hover:text-primary">{{ t('footer.privacy') }}</a>
+                        </li>
+                        <li>
+                            <a href="/terms-of-service" class="transition hover:text-primary">{{ t('footer.terms') }}</a>
+                        </li>
+                        <li>
+                            <a href="/cookie-policy" class="transition hover:text-primary">{{ t('footer.cookies') }}</a>
+                        </li>
                     </ul>
 
                     <div class="text-center text-sm text-white/55 lg:text-right">
-                        <p>© {{ new Date().getFullYear() }} ATIx Bedrijvendag. All rights reserved.</p>
+                        <p>© {{ new Date().getFullYear() }} ATIx Bedrijvendag. {{ t('footer.rights') }}</p>
                         <p class="mt-1 text-xs text-white/40">{{ page.props.deploymentVersion }}</p>
                     </div>
                 </div>

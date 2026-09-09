@@ -5,6 +5,7 @@ import { computed } from 'vue';
 
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { useTranslations } from '@/i18n';
 
 type AboutImages = {
     hero: string;
@@ -18,11 +19,12 @@ const props = defineProps<{
 }>();
 
 const page = usePage();
+const { t } = useTranslations();
 const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentOpen));
 </script>
 
 <template>
-    <Head title="Over ons" />
+    <Head :title="t('nav.about')" />
 
     <AppHeader class="sticky top-0 z-50" />
 
@@ -31,21 +33,18 @@ const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentO
         <div class="relative z-10 mx-auto max-w-7xl">
             <div class="grid items-center gap-10 lg:grid-cols-12">
                 <div class="lg:col-span-7">
-                    <p class="brand-eyebrow">OVER ONS</p>
+                    <p class="brand-eyebrow">{{ t('about.eyebrow') }}</p>
 
                     <h1 class="mt-6 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">ATIx Bedrijvendag</h1>
 
-                    <p class="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-                        Wij brengen studenten en bedrijven samen in een setting waar je makkelijk in gesprek komt, vragen stelt en kansen vindt voor stage, afstuderen en
-                        startersfuncties.
-                    </p>
+                    <p class="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">{{ t('about.heroText') }}</p>
 
                     <div class="mt-8 flex flex-wrap items-center gap-3">
                         <Link
                             href="/edities"
                             class="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg ring-1 shadow-primary/20 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                         >
-                            Bekijk edities
+                            {{ t('about.viewEditions') }}
                             <ArrowRight class="ml-2 h-4 w-4" />
                         </Link>
 
@@ -54,25 +53,25 @@ const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentO
                             href="/#borrel"
                             class="inline-flex items-center justify-center rounded-xl bg-white/80 px-6 py-3 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border/80 backdrop-blur transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none dark:bg-white/10 dark:hover:bg-white/15"
                         >
-                            Aanmelden borrel
+                            {{ t('home.registerDrinks') }}
                         </Link>
                     </div>
 
                     <div class="mt-10 grid gap-4 sm:grid-cols-3">
                         <div class="brand-card rounded-2xl p-5">
-                            <div class="text-xs font-semibold text-muted-foreground">Doel</div>
-                            <div class="mt-2 text-sm font-semibold text-foreground">Connecties leggen</div>
-                            <p class="mt-1 text-sm text-muted-foreground">Studenten en bedrijven direct in gesprek.</p>
+                            <div class="text-xs font-semibold text-muted-foreground">{{ t('about.goal') }}</div>
+                            <div class="mt-2 text-sm font-semibold text-foreground">{{ t('about.connect') }}</div>
+                            <p class="mt-1 text-sm text-muted-foreground">{{ t('about.connectText') }}</p>
                         </div>
                         <div class="brand-card rounded-2xl p-5">
-                            <div class="text-xs font-semibold text-muted-foreground">Focus</div>
-                            <div class="mt-2 text-sm font-semibold text-foreground">Oriënteren</div>
-                            <p class="mt-1 text-sm text-muted-foreground">Stages en functies verkennen.</p>
+                            <div class="text-xs font-semibold text-muted-foreground">{{ t('about.focus') }}</div>
+                            <div class="mt-2 text-sm font-semibold text-foreground">{{ t('about.explore') }}</div>
+                            <p class="mt-1 text-sm text-muted-foreground">{{ t('about.exploreText') }}</p>
                         </div>
                         <div class="brand-card rounded-2xl p-5">
-                            <div class="text-xs font-semibold text-muted-foreground">Sfeer</div>
-                            <div class="mt-2 text-sm font-semibold text-foreground">Laagdrempelig</div>
-                            <p class="mt-1 text-sm text-muted-foreground">Vrij rondlopen en vragen stellen.</p>
+                            <div class="text-xs font-semibold text-muted-foreground">{{ t('about.atmosphere') }}</div>
+                            <div class="mt-2 text-sm font-semibold text-foreground">{{ t('about.approachable') }}</div>
+                            <p class="mt-1 text-sm text-muted-foreground">{{ t('about.approachableText') }}</p>
                         </div>
                     </div>
                 </div>
@@ -127,23 +126,20 @@ const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentO
             </div>
 
             <div class="lg:col-span-6">
-                <p class="text-sm font-semibold text-primary">Wat is ATIx Bedrijvendag</p>
+                <p class="text-sm font-semibold text-primary">{{ t('about.whatIs') }}</p>
 
-                <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Een bedrijvendag waar je snel contact legt</h2>
+                <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{{ t('about.title') }}</h2>
 
-                <p class="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-                    Je loopt langs stands, spreekt recruiters en engineers, en krijgt een duidelijk beeld van organisaties, teams en rollen. We maken het makkelijk om je te
-                    oriënteren en je volgende stap te kiezen.
-                </p>
+                <p class="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">{{ t('about.text') }}</p>
 
                 <div class="mt-8 grid gap-4 sm:grid-cols-2">
                     <div class="brand-card rounded-2xl p-5">
-                        <div class="text-sm font-semibold text-foreground">Voor studenten</div>
-                        <p class="mt-2 text-sm text-muted-foreground">Stel vragen, bouw je netwerk en vind kansen voor stage of afstuderen.</p>
+                        <div class="text-sm font-semibold text-foreground">{{ t('about.students') }}</div>
+                        <p class="mt-2 text-sm text-muted-foreground">{{ t('about.studentsText') }}</p>
                     </div>
                     <div class="brand-card rounded-2xl p-5">
-                        <div class="text-sm font-semibold text-foreground">Voor bedrijven</div>
-                        <p class="mt-2 text-sm text-muted-foreground">Ontmoet gemotiveerde studenten en presenteer je organisatie aan toekomstig talent.</p>
+                        <div class="text-sm font-semibold text-foreground">{{ t('about.companies') }}</div>
+                        <p class="mt-2 text-sm text-muted-foreground">{{ t('about.companiesText') }}</p>
                     </div>
                 </div>
             </div>
@@ -154,9 +150,9 @@ const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentO
     <section class="brand-band px-6 py-20 lg:px-16">
         <div class="mx-auto max-w-7xl">
             <div class="mx-auto max-w-3xl text-center">
-                <p class="text-sm font-semibold text-primary">Onze waarden</p>
-                <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Hoe wij het aanpakken</h2>
-                <p class="mt-4 text-base leading-relaxed text-muted-foreground">Duidelijk, praktisch, en met ruimte voor echt gesprek.</p>
+                <p class="text-sm font-semibold text-primary">{{ t('about.values') }}</p>
+                <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{{ t('about.approach') }}</h2>
+                <p class="mt-4 text-base leading-relaxed text-muted-foreground">{{ t('about.approachText') }}</p>
             </div>
 
             <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -164,48 +160,48 @@ const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentO
                     <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15">
                         <Compass class="h-6 w-6 text-primary" />
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">Laagdrempelig</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Een informele sfeer waarin je makkelijk op iemand afstapt.</p>
+                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">{{ t('home.approachable') }}</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('about.approachableValueText') }}</p>
                 </div>
 
                 <div class="brand-card brand-card-hover group rounded-2xl p-8">
                     <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/15">
                         <Lightbulb class="h-6 w-6 text-secondary" />
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">Toekomstgericht</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Focus op stages, traineeships en startersfuncties.</p>
+                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">{{ t('home.future') }}</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('about.futureValueText') }}</p>
                 </div>
 
                 <div class="brand-card brand-card-hover group rounded-2xl p-8">
                     <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-chart-2/15">
                         <Wine class="h-6 w-6 text-chart-2" />
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">Borrelen</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Sluit af met een borrel en praat door buiten de stands.</p>
+                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">{{ t('home.drinks') }}</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('about.drinksValueText') }}</p>
                 </div>
 
                 <div class="brand-card brand-card-hover group rounded-2xl p-8">
                     <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15">
                         <Users class="h-6 w-6 text-primary" />
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">Netwerken</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Leg contact en houd het simpel: kort, helder, en persoonlijk.</p>
+                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">{{ t('home.networking') }}</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('about.networkingValueText') }}</p>
                 </div>
 
                 <div class="brand-card brand-card-hover group rounded-2xl p-8">
                     <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/15">
                         <Building2 class="h-6 w-6 text-secondary" />
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">Inspirerend</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Hoor hoe teams werken en welke stappen je kunt zetten.</p>
+                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">{{ t('home.inspiring') }}</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('about.inspiringValueText') }}</p>
                 </div>
 
                 <div class="brand-card brand-card-hover group rounded-2xl p-8">
                     <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-chart-2/15">
                         <Handshake class="h-6 w-6 text-chart-2" />
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">Samenwerking</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Wij bouwen het event als team en werken samen met partners.</p>
+                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">{{ t('home.collaboration') }}</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('about.collaborationValueText') }}</p>
                 </div>
             </div>
         </div>
@@ -218,10 +214,10 @@ const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentO
         <div class="relative z-10 mx-auto max-w-7xl">
             <div class="flex flex-wrap gap-8 md:flex-nowrap md:items-center md:justify-between">
                 <div class="lg:w-1/2">
-                    <h2 class="mb-4 text-3xl font-semibold text-white lg:text-4xl">Mis de volgende editie niet</h2>
+                    <h2 class="mb-4 text-3xl font-semibold text-white lg:text-4xl">{{ t('about.ctaTitle') }}</h2>
                     <p class="text-white/90">
-                        <template v-if="borrelEnrollmentOpen">Bekijk eerdere edities of meld je aan voor de borrel. Dan houden we je op de hoogte.</template>
-                        <template v-else>Bekijk eerdere edities en ontdek welke bedrijven eerder aansloten.</template>
+                        <template v-if="borrelEnrollmentOpen">{{ t('about.ctaOpen') }}</template>
+                        <template v-else>{{ t('about.ctaClosed') }}</template>
                     </p>
                 </div>
 
@@ -231,14 +227,14 @@ const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentO
                             href="/edities"
                             class="inline-flex items-center justify-center rounded-full bg-white px-7.5 py-3 text-sm font-semibold text-black transition hover:shadow-xl focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
                         >
-                            Bekijk alle edities
+                            {{ t('about.viewAllEditions') }}
                         </Link>
                         <Link
                             v-if="borrelEnrollmentOpen"
                             href="/#borrel"
                             class="inline-flex items-center justify-center rounded-full bg-white/10 px-7.5 py-3 text-sm font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
                         >
-                            Aanmelden borrel
+                            {{ t('home.registerDrinks') }}
                         </Link>
                     </div>
                 </div>

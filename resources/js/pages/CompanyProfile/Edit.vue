@@ -1,14 +1,44 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { CheckCircle2, ExternalLink, Link2, List, ListOrdered, Pilcrow, Plus, Quote, Redo2, RemoveFormatting, Search, Send, SeparatorHorizontal, Type, Underline, Undo2, Upload, X } from 'lucide-vue-next';
+import {
+    CheckCircle2,
+    ExternalLink,
+    Link2,
+    List,
+    ListOrdered,
+    Pilcrow,
+    Plus,
+    Quote,
+    Redo2,
+    RemoveFormatting,
+    Search,
+    Send,
+    SeparatorHorizontal,
+    Type,
+    Underline,
+    Undo2,
+    Upload,
+    X,
+} from 'lucide-vue-next';
 import { computed, nextTick, onMounted, ref } from 'vue';
+import type { Component } from 'vue';
 
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { useTranslations } from '@/i18n';
 
 type Option = {
     id: number;
     name: string;
+};
+
+type ToolbarItem = {
+    label: string;
+    command: string;
+    value?: string;
+    text?: string;
+    class?: string;
+    icon?: Component;
 };
 
 const props = defineProps<{
@@ -29,6 +59,7 @@ const props = defineProps<{
     } | null;
     submitUrl: string;
 }>();
+const { dateLocale, t } = useTranslations();
 
 const logoPreview = ref<string | null>(props.company.logo_url ?? null);
 const saved = ref(false);
@@ -54,37 +85,37 @@ const submittedAt = computed(() => {
     const date = new Date(props.pendingSubmission.submitted_at);
     if (Number.isNaN(date.getTime())) return null;
 
-    return date.toLocaleDateString('nl-NL', {
+    return date.toLocaleDateString(dateLocale.value, {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
     });
 });
 
-const toolbarGroups = [
+const toolbarGroups = computed<ToolbarItem[][]>(() => [
     [
-        { label: 'Vet', command: 'bold', text: 'B', class: 'font-bold' },
-        { label: 'Cursief', command: 'italic', text: 'I', class: 'font-serif italic' },
-        { label: 'Onderstrepen', command: 'underline', icon: Underline },
-        { label: 'Doorhalen', command: 'strikeThrough', text: 'S', class: 'line-through' },
+        { label: t('companyProfile.bold'), command: 'bold', text: 'B', class: 'font-bold' },
+        { label: t('companyProfile.italic'), command: 'italic', text: 'I', class: 'font-serif italic' },
+        { label: t('companyProfile.underline'), command: 'underline', icon: Underline },
+        { label: t('companyProfile.strike'), command: 'strikeThrough', text: 'S', class: 'line-through' },
     ],
     [
-        { label: 'Kop', command: 'formatBlock', value: 'h2', icon: Type },
-        { label: 'Subkop', command: 'formatBlock', value: 'h3', icon: Pilcrow },
-        { label: 'Citaat', command: 'formatBlock', value: 'blockquote', icon: Quote },
+        { label: t('companyProfile.heading'), command: 'formatBlock', value: 'h2', icon: Type },
+        { label: t('companyProfile.subheading'), command: 'formatBlock', value: 'h3', icon: Pilcrow },
+        { label: t('companyProfile.quote'), command: 'formatBlock', value: 'blockquote', icon: Quote },
     ],
     [
-        { label: 'Opsomming', command: 'insertUnorderedList', icon: List },
-        { label: 'Genummerde lijst', command: 'insertOrderedList', icon: ListOrdered },
-        { label: 'Horizontale lijn', command: 'insertHorizontalRule', icon: SeparatorHorizontal },
+        { label: t('companyProfile.bullets'), command: 'insertUnorderedList', icon: List },
+        { label: t('companyProfile.numbered'), command: 'insertOrderedList', icon: ListOrdered },
+        { label: t('companyProfile.line'), command: 'insertHorizontalRule', icon: SeparatorHorizontal },
     ],
     [
-        { label: 'Link invoegen', command: 'createLink', icon: Link2 },
-        { label: 'Opmaak wissen', command: 'removeFormat', icon: RemoveFormatting },
-        { label: 'Ongedaan maken', command: 'undo', icon: Undo2 },
-        { label: 'Opnieuw', command: 'redo', icon: Redo2 },
+        { label: t('companyProfile.insertLink'), command: 'createLink', icon: Link2 },
+        { label: t('companyProfile.clearFormatting'), command: 'removeFormat', icon: RemoveFormatting },
+        { label: t('companyProfile.undo'), command: 'undo', icon: Undo2 },
+        { label: t('companyProfile.redo'), command: 'redo', icon: Redo2 },
     ],
-];
+]);
 
 const filteredSectors = computed(() => {
     const query = sectorSearch.value.trim().toLowerCase();
@@ -172,13 +203,7 @@ function handleEditorPaste(event: ClipboardEvent) {
 
     const html = event.clipboardData?.getData('text/html');
     const text = event.clipboardData?.getData('text/plain') ?? '';
-    const escapeHtml = (value: string) =>
-        value
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+    const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     const fallbackHtml = text
         .split(/\n{2,}/)
         .map((paragraph) => paragraph.trim())
@@ -220,18 +245,16 @@ function submit() {
 </script>
 
 <template>
-    <Head title="Bedrijfsinformatie controleren" />
+    <Head :title="t('companyProfile.head')" />
 
     <AppHeader class="sticky top-0 z-50" />
 
     <main class="brand-hero min-h-screen px-6 py-12 lg:px-16">
         <div class="mx-auto max-w-5xl">
             <div class="max-w-3xl">
-                <p class="brand-eyebrow">Bedrijfsprofiel</p>
-                <h1 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Controleer jullie bedrijfsinformatie</h1>
-                <p class="mt-4 text-base leading-relaxed text-muted-foreground">
-                    Pas de gegevens aan die op de Bedrijvendag website mogen verschijnen. Na versturen controleert de organisatie de wijzigingen voordat ze live gaan.
-                </p>
+                <p class="brand-eyebrow">{{ t('companyProfile.eyebrow') }}</p>
+                <h1 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{{ t('companyProfile.title') }}</h1>
+                <p class="mt-4 text-base leading-relaxed text-muted-foreground">{{ t('companyProfile.intro') }}</p>
             </div>
 
             <div
@@ -243,8 +266,7 @@ function submit() {
                 <div class="flex items-start gap-3">
                     <CheckCircle2 class="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
                     <p>
-                        Jullie wijzigingen zijn ontvangen<span v-if="submittedAt"> op {{ submittedAt }}</span
-                        >. Je mag het formulier opnieuw versturen als je nog iets wilt aanpassen.
+                        {{ t('companyProfile.received', { date: submittedAt ? t('companyProfile.onDate', { date: submittedAt }) : '' }) }}
                     </p>
                 </div>
             </div>
@@ -253,7 +275,9 @@ function submit() {
                 <section class="brand-card rounded-2xl p-6 sm:p-8">
                     <div class="grid gap-6 sm:grid-cols-2">
                         <div>
-                            <label for="contact_name" class="mb-2 block text-sm font-semibold text-foreground">Contactpersoon <span class="text-destructive">*</span></label>
+                            <label for="contact_name" class="mb-2 block text-sm font-semibold text-foreground"
+                                >{{ t('companyProfile.contactPerson') }} <span class="text-destructive">*</span></label
+                            >
                             <input
                                 id="contact_name"
                                 v-model="form.contact_name"
@@ -266,7 +290,9 @@ function submit() {
                         </div>
 
                         <div>
-                            <label for="contact_email" class="mb-2 block text-sm font-semibold text-foreground">Contact e-mail <span class="text-destructive">*</span></label>
+                            <label for="contact_email" class="mb-2 block text-sm font-semibold text-foreground"
+                                >{{ t('companyProfile.contactEmail') }} <span class="text-destructive">*</span></label
+                            >
                             <input
                                 id="contact_email"
                                 v-model="form.contact_email"
@@ -279,7 +305,9 @@ function submit() {
                         </div>
 
                         <div>
-                            <label for="name" class="mb-2 block text-sm font-semibold text-foreground">Bedrijfsnaam <span class="text-destructive">*</span></label>
+                            <label for="name" class="mb-2 block text-sm font-semibold text-foreground"
+                                >{{ t('companyProfile.companyName') }} <span class="text-destructive">*</span></label
+                            >
                             <input
                                 id="name"
                                 v-model="form.name"
@@ -291,7 +319,7 @@ function submit() {
                         </div>
 
                         <div>
-                            <label for="website_url" class="mb-2 block text-sm font-semibold text-foreground">Website</label>
+                            <label for="website_url" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.website') }}</label>
                             <input
                                 id="website_url"
                                 v-model="form.website_url"
@@ -303,7 +331,7 @@ function submit() {
                         </div>
 
                         <div class="sm:col-span-2">
-                            <label for="description" class="mb-2 block text-sm font-semibold text-foreground">Beschrijving</label>
+                            <label for="description" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.description') }}</label>
                             <div class="overflow-hidden rounded-xl ring-1 ring-border focus-within:ring-2 focus-within:ring-ring/40">
                                 <div class="flex flex-wrap gap-1 border-b border-border bg-background/80 p-2">
                                     <template v-for="(group, groupIndex) in toolbarGroups" :key="groupIndex">
@@ -329,31 +357,25 @@ function submit() {
                                     class="rich-editor prose prose-sm min-h-56 max-w-none bg-background p-4 text-foreground outline-none dark:prose-invert"
                                     role="textbox"
                                     aria-multiline="true"
-                                    data-placeholder="Schrijf een korte bedrijfsomschrijving..."
+                                    :data-placeholder="t('companyProfile.descriptionPlaceholder')"
                                     @input="handleEditorInput"
                                     @paste="handleEditorPaste"
                                     @blur="syncDescription"
                                 ></div>
                             </div>
-                            <textarea
-                                v-model="form.description"
-                                name="description"
-                                class="sr-only"
-                                tabindex="-1"
-                                aria-hidden="true"
-                            ></textarea>
-                            <p class="mt-2 text-xs text-muted-foreground">Gebruik de knoppen voor koppen, lijsten, vet, cursief, onderstreept, links en scheidingslijnen.</p>
+                            <textarea v-model="form.description" name="description" class="sr-only" tabindex="-1" aria-hidden="true"></textarea>
+                            <p class="mt-2 text-xs text-muted-foreground">{{ t('companyProfile.editorHelp') }}</p>
                             <p v-if="form.errors.description" class="mt-2 text-sm text-destructive">{{ form.errors.description }}</p>
                         </div>
 
                         <div class="sm:col-span-2">
-                            <p class="text-sm font-semibold text-foreground">Sectoren</p>
+                            <p class="text-sm font-semibold text-foreground">{{ t('common.sectors') }}</p>
                             <div class="relative mt-4">
                                 <Search class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                 <input
                                     v-model="sectorSearch"
                                     type="search"
-                                    placeholder="Zoek sector..."
+                                    :placeholder="t('companyProfile.searchSector')"
                                     class="brand-input w-full rounded-xl py-3 pr-4 pl-10 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 />
                             </div>
@@ -375,18 +397,18 @@ function submit() {
                                     </label>
                                 </div>
 
-                                <p v-if="!filteredSectors.length" class="text-sm text-muted-foreground">Geen bestaande sector gevonden.</p>
+                                <p v-if="!filteredSectors.length" class="text-sm text-muted-foreground">{{ t('companyProfile.noSector') }}</p>
                             </div>
 
                             <div class="mt-4 rounded-xl bg-background/60 p-4 ring-1 ring-border">
-                                <label for="new_sector_name" class="text-sm font-semibold text-foreground">Nieuwe sector voorstellen</label>
+                                <label for="new_sector_name" class="text-sm font-semibold text-foreground">{{ t('companyProfile.newSector') }}</label>
                                 <div class="mt-3 flex flex-col gap-3 sm:flex-row">
                                     <input
                                         id="new_sector_name"
                                         v-model="newSectorName"
                                         type="text"
                                         maxlength="80"
-                                        placeholder="Bijvoorbeeld: Biotechnologie"
+                                        :placeholder="t('companyProfile.newSectorExample')"
                                         class="brand-input min-w-0 flex-1 rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                         @keydown.enter.prevent="addNewSector"
                                     />
@@ -397,10 +419,10 @@ function submit() {
                                         @click="addNewSector"
                                     >
                                         <Plus class="h-4 w-4" />
-                                        Toevoegen
+                                        {{ t('companyProfile.add') }}
                                     </button>
                                 </div>
-                                <p class="mt-2 text-xs text-muted-foreground">Nieuwe sectoren worden eerst door de organisatie gecontroleerd.</p>
+                                <p class="mt-2 text-xs text-muted-foreground">{{ t('companyProfile.newSectorHelp') }}</p>
 
                                 <div v-if="form.new_sector_names.length" class="mt-4 flex flex-wrap gap-2">
                                     <span
@@ -409,7 +431,12 @@ function submit() {
                                         class="inline-flex max-w-full items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm font-semibold whitespace-nowrap text-primary ring-1 ring-primary/20"
                                     >
                                         {{ name }}
-                                        <button type="button" :aria-label="`${name} verwijderen`" class="rounded-md p-0.5 transition hover:bg-primary/10" @click="removeNewSector(name)">
+                                        <button
+                                            type="button"
+                                            :aria-label="t('companyProfile.remove', { name })"
+                                            class="rounded-md p-0.5 transition hover:bg-primary/10"
+                                            @click="removeNewSector(name)"
+                                        >
                                             <X class="h-3.5 w-3.5" />
                                         </button>
                                     </span>
@@ -423,24 +450,24 @@ function submit() {
 
                 <aside class="space-y-8">
                     <section class="brand-card rounded-2xl p-6">
-                        <p class="text-sm font-semibold text-foreground">Logo</p>
+                        <p class="text-sm font-semibold text-foreground">{{ t('companyProfile.logo') }}</p>
                         <div class="mt-4 flex aspect-[4/3] items-center justify-center rounded-xl bg-background/70 p-6 ring-1 ring-border">
                             <img v-if="logoPreview" :src="logoPreview" :alt="form.name" class="max-h-full max-w-full object-contain" />
-                            <span v-else class="text-sm text-muted-foreground">Geen logo</span>
+                            <span v-else class="text-sm text-muted-foreground">{{ t('common.noLogo') }}</span>
                         </div>
                         <label
                             for="logo"
                             class="mt-4 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-background px-4 py-3 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-secondary/10"
                         >
                             <Upload class="h-4 w-4" />
-                            Upload logo
+                            {{ t('companyProfile.uploadLogo') }}
                         </label>
                         <input id="logo" type="file" accept="image/*" class="sr-only" @change="handleLogoChange" />
                         <p v-if="form.errors.logo" class="mt-2 text-sm text-destructive">{{ form.errors.logo }}</p>
                     </section>
 
                     <section class="brand-card rounded-2xl p-6">
-                        <p class="text-sm font-semibold text-foreground">Opleidingen</p>
+                        <p class="text-sm font-semibold text-foreground">{{ t('common.educations') }}</p>
                         <div class="mt-4 space-y-3">
                             <label v-for="education in options.educations" :key="education.id" class="flex items-start gap-3 text-sm text-foreground">
                                 <input
@@ -454,18 +481,17 @@ function submit() {
                         </div>
                         <p v-if="form.errors.education_ids" class="mt-2 text-sm text-destructive">{{ form.errors.education_ids }}</p>
                     </section>
-
                 </aside>
 
                 <div class="brand-card flex flex-col gap-4 rounded-2xl p-6 sm:flex-row sm:items-center sm:justify-between lg:col-span-2">
-                    <p class="text-sm leading-relaxed text-muted-foreground">Na goedkeuring vervangen deze gegevens het huidige bedrijfsprofiel op de website.</p>
+                    <p class="text-sm leading-relaxed text-muted-foreground">{{ t('companyProfile.approval') }}</p>
                     <button
                         type="submit"
                         :disabled="form.processing"
                         class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         <Send class="h-4 w-4" />
-                        {{ form.processing ? 'Versturen...' : 'Verstuur ter controle' }}
+                        {{ form.processing ? t('common.submitting') : t('companyProfile.sendReview') }}
                     </button>
                 </div>
             </form>
@@ -477,7 +503,7 @@ function submit() {
                 rel="noopener noreferrer"
                 class="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80"
             >
-                Huidige website openen
+                {{ t('companyProfile.openWebsite') }}
                 <ExternalLink class="h-4 w-4" />
             </a>
         </div>

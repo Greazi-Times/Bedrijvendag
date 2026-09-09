@@ -4,6 +4,7 @@ import { Beer, Building2, DoorOpen, Info, MapPin, Search, Utensils } from 'lucid
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { useTranslations } from '@/i18n';
 
 type Stand = {
     id: number | string;
@@ -55,6 +56,7 @@ const props = defineProps<{
     educations?: FilterOption[];
     sectors?: FilterOption[];
 }>();
+const { t } = useTranslations();
 
 const query = ref('');
 const selectedStandId = ref<Stand['id'] | null>(null);
@@ -304,7 +306,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <Head :title="`${event.title} - Plattegrond`" />
+    <Head :title="`${event.title} - ${t('map.title')}`" />
 
     <AppHeader />
 
@@ -323,7 +325,7 @@ onUnmounted(() => {
                     </h1>
 
                     <p class="mt-1 text-sm text-muted-foreground">
-                        Zoek je stand, bedrijf of partner op de plattegrond. Klik op een markering of selecteer een stand uit de lijst.
+                        {{ t('map.intro') }}
                     </p>
                 </div>
 
@@ -333,7 +335,7 @@ onUnmounted(() => {
                         :href="backHref"
                         class="inline-flex items-center justify-center rounded-xl border border-border bg-white/80 px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-accent dark:bg-white/10 dark:hover:bg-white/15"
                     >
-                        Terug
+                        {{ t('map.back') }}
                     </Link>
                 </div>
             </div>
@@ -368,7 +370,7 @@ onUnmounted(() => {
                                                   : 'bg-primary ring-white/90'
                                         "
                                         :style="{ left: `${stand.x_percent}%`, top: `${stand.y_percent}%` }"
-                                        :aria-label="`Stand ${standDisplayCode(stand)} ${standDisplayName(stand)}`"
+                                        :aria-label="`${t('common.stand')} ${standDisplayCode(stand)} ${standDisplayName(stand)}`"
                                         :title="standDisplayName(stand)"
                                         @click="selectStand(stand.id)"
                                     >
@@ -404,7 +406,7 @@ onUnmounted(() => {
                                 </template>
 
                                 <div v-else class="flex min-h-[360px] items-center justify-center bg-accent/40 px-6 text-center text-sm text-muted-foreground">
-                                    Er is nog geen plattegrond ingesteld voor dit evenement.
+                                    {{ t('map.noMapConfigured') }}
                                 </div>
                             </div>
                         </div>
@@ -415,12 +417,12 @@ onUnmounted(() => {
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2">
                                         <span class="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">
-                                            Stand
+                                            {{ t('common.stand') }}
                                             {{ standDisplayCode(selectedStand) }}
                                         </span>
                                     </div>
                                     <div class="mt-1 truncate text-sm font-medium text-black dark:text-white">
-                                        {{ selectedStand.company_name ?? 'Geen organisatie ingesteld' }}
+                                        {{ selectedStand.company_name ?? t('map.noOrganisation') }}
                                     </div>
                                 </div>
 
@@ -429,7 +431,7 @@ onUnmounted(() => {
                                     class="inline-flex items-center justify-center rounded-xl border border-border bg-white/80 px-4 py-2 text-sm font-medium text-foreground hover:bg-accent dark:bg-white/10 dark:hover:bg-white/15"
                                     @click="clearSelection"
                                 >
-                                    Sluiten
+                                    {{ t('common.close') }}
                                 </button>
                             </div>
                         </div>
@@ -444,18 +446,18 @@ onUnmounted(() => {
                             <input
                                 v-model="query"
                                 type="text"
-                                placeholder="Zoek op standnummer, bedrijfsnaam of partner…"
+                                :placeholder="t('map.searchPlaceholder')"
                                 class="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                             />
                         </div>
 
                         <div class="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{{ filteredStands.length }} stands</span>
-                            <button v-if="query" type="button" class="hover:underline" @click="query = ''">Wissen</button>
+                            <span>{{ t('map.standCount', { count: filteredStands.length }) }}</span>
+                            <button v-if="query" type="button" class="hover:underline" @click="query = ''">{{ t('common.clear') }}</button>
                         </div>
 
                         <div class="mt-3 flex items-center justify-between gap-2">
-                            <div v-if="activeFilterCount" class="text-xs font-semibold text-muted-foreground">{{ activeFilterCount }} filters actief</div>
+                            <div v-if="activeFilterCount" class="text-xs font-semibold text-muted-foreground">{{ t('companies.activeFilters', { count: activeFilterCount }) }}</div>
                             <div v-else></div>
 
                             <div class="flex items-center gap-2">
@@ -464,7 +466,7 @@ onUnmounted(() => {
                                     class="inline-flex items-center justify-center rounded-xl bg-white/80 px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none dark:bg-white/10 dark:hover:bg-white/15"
                                     @click="openFilters"
                                 >
-                                    Filters
+                                    {{ t('common.filters') }}
                                     <span
                                         v-if="activeFilterCount"
                                         class="ml-2 inline-flex min-w-6 items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground"
@@ -479,7 +481,7 @@ onUnmounted(() => {
                                     class="inline-flex items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground ring-1 ring-border transition hover:bg-accent/70 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                                     @click="clearAll"
                                 >
-                                    Wissen
+                                    {{ t('common.clear') }}
                                 </button>
                             </div>
                         </div>
@@ -521,12 +523,12 @@ onUnmounted(() => {
 
                                     <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-white">
                                         <img v-if="stand.company_logo" :src="stand.company_logo" :alt="stand.company_name ?? stand.code" class="h-full w-full object-contain p-1" />
-                                        <span v-else class="text-xs font-medium text-muted-foreground"> Logo </span>
+                                        <span v-else class="text-xs font-medium text-muted-foreground">{{ t('companyProfile.logo') }}</span>
                                     </div>
 
                                     <div class="min-w-0 flex-1">
                                         <div class="truncate text-sm font-medium text-foreground">
-                                            {{ stand.company_name ?? 'Geen organisatie ingesteld' }}
+                                            {{ stand.company_name ?? t('map.noOrganisation') }}
                                         </div>
                                     </div>
                                 </button>
@@ -535,7 +537,7 @@ onUnmounted(() => {
                                     class="inline-flex items-center justify-center rounded-xl bg-white/85 px-4 py-1.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none dark:bg-white/10 dark:hover:bg-white/15"
                                     @click.stop="openCompany(stand)"
                                 >
-                                    Lees meer
+                                    {{ t('map.readMore') }}
                                 </button>
                             </div>
                         </div>
@@ -546,19 +548,19 @@ onUnmounted(() => {
 
         <Teleport to="body">
             <div v-if="selectedCompany" class="fixed inset-0 z-[110]" aria-modal="true" role="dialog">
-                <button class="absolute inset-0 bg-black/50" type="button" @click="closeCompany" aria-label="Sluiten"></button>
+                <button class="absolute inset-0 bg-black/50" type="button" @click="closeCompany" :aria-label="t('common.close')"></button>
 
                 <div
                     class="absolute top-1/2 left-1/2 flex max-h-[80vh] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl bg-background shadow-2xl ring-1 ring-border"
                 >
                     <div class="flex shrink-0 items-center justify-between gap-4 border-b border-border px-6 py-5">
                         <div class="min-w-0">
-                            <div class="text-sm font-semibold text-muted-foreground">{{ selectedCompany.stand_type === 'partner' ? 'Partner' : 'Bedrijf' }}</div>
+                            <div class="text-sm font-semibold text-muted-foreground">{{ selectedCompany.stand_type === 'partner' ? t('map.partner') : t('common.company') }}</div>
                             <h2 class="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground">
-                                {{ selectedCompany.company_name ?? 'Geen organisatie ingesteld' }}
+                                {{ selectedCompany.company_name ?? t('map.noOrganisation') }}
                             </h2>
                             <div class="mt-2 inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border">
-                                Stand
+                                {{ t('common.stand') }}
                                 {{ standDisplayCode(selectedCompany) }}
                             </div>
                         </div>
@@ -574,7 +576,7 @@ onUnmounted(() => {
                                     decoding="async"
                                     @error="(e) => ((e.target as HTMLImageElement).style.display = 'none')"
                                 />
-                                <span v-else class="text-xs font-semibold text-muted-foreground">Geen logo</span>
+                                <span v-else class="text-xs font-semibold text-muted-foreground">{{ t('common.noLogo') }}</span>
                             </div>
                         </div>
 
@@ -582,7 +584,7 @@ onUnmounted(() => {
                             type="button"
                             class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                             @click="closeCompany"
-                            aria-label="Sluiten"
+                            :aria-label="t('common.close')"
                         >
                             ×
                         </button>
@@ -590,17 +592,17 @@ onUnmounted(() => {
 
                     <div class="flex-1 overflow-y-auto overscroll-contain px-6 py-6">
                         <div>
-                            <div class="text-sm font-semibold text-foreground">Beschrijving</div>
+                            <div class="text-sm font-semibold text-foreground">{{ t('common.description') }}</div>
                             <div
                                 v-if="selectedCompany.company_description"
                                 class="prose prose-sm mt-2 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ol:my-0 prose-ul:my-0 prose-li:my-0"
                                 v-html="sanitizeHtml(selectedCompany.company_description)"
                             ></div>
-                            <p v-else class="mt-2 text-sm text-muted-foreground">Geen beschrijving.</p>
+                            <p v-else class="mt-2 text-sm text-muted-foreground">{{ t('common.noDescription') }}</p>
 
                             <div class="mt-6 grid gap-6" :class="selectedCompany.stand_type !== 'partner' ? 'sm:grid-cols-2' : 'sm:grid-cols-1'">
                                 <div>
-                                    <div class="text-sm font-semibold text-foreground">Opleidingen</div>
+                                    <div class="text-sm font-semibold text-foreground">{{ t('common.educations') }}</div>
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         <span
                                             v-for="n in selectedCompany.company_educations ?? []"
@@ -613,13 +615,13 @@ onUnmounted(() => {
                                             v-if="!(selectedCompany.company_educations ?? []).length"
                                             class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
                                         >
-                                            Geen
+                                            {{ t('common.none') }}
                                         </span>
                                     </div>
                                 </div>
 
                                 <div v-if="selectedCompany.stand_type !== 'partner'">
-                                    <div class="text-sm font-semibold text-foreground">Sectoren</div>
+                                    <div class="text-sm font-semibold text-foreground">{{ t('common.sectors') }}</div>
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         <span
                                             v-for="n in selectedCompany.company_sectors ?? []"
@@ -632,7 +634,7 @@ onUnmounted(() => {
                                             v-if="!(selectedCompany.company_sectors ?? []).length"
                                             class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
                                         >
-                                            Geen
+                                            {{ t('common.none') }}
                                         </span>
                                     </div>
                                 </div>
@@ -649,7 +651,7 @@ onUnmounted(() => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                Website
+                                {{ t('common.website') }}
                             </a>
 
                             <div v-else></div>
@@ -659,7 +661,7 @@ onUnmounted(() => {
                                 class="inline-flex items-center justify-center rounded-xl bg-background px-4 py-2.5 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent"
                                 @click="closeCompany"
                             >
-                                Sluiten
+                                {{ t('common.close') }}
                             </button>
                         </div>
                     </div>
@@ -669,20 +671,20 @@ onUnmounted(() => {
 
         <Teleport to="body">
             <div v-if="isFilterOpen" class="fixed inset-0 z-[100]" aria-modal="true" role="dialog">
-                <button class="absolute inset-0 bg-black/40" type="button" @click="closeFilters" aria-label="Sluiten"></button>
+                <button class="absolute inset-0 bg-black/40" type="button" @click="closeFilters" :aria-label="t('common.close')"></button>
 
                 <div class="absolute top-0 right-0 h-full w-full max-w-md overflow-hidden bg-background shadow-xl ring-1 ring-border">
                     <div class="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
                         <div>
-                            <div class="text-sm font-semibold text-foreground">Filters</div>
-                            <div class="mt-1 text-xs text-muted-foreground">Filter op opleiding en sector.</div>
+                            <div class="text-sm font-semibold text-foreground">{{ t('common.filters') }}</div>
+                            <div class="mt-1 text-xs text-muted-foreground">{{ t('map.filterDescription') }}</div>
                         </div>
 
                         <button
                             type="button"
                             class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                             @click="closeFilters"
-                            aria-label="Sluiten"
+                            :aria-label="t('common.close')"
                         >
                             ×
                         </button>
@@ -690,16 +692,18 @@ onUnmounted(() => {
 
                     <div class="h-full overflow-y-auto px-5 py-5 pb-28">
                         <div class="flex items-center justify-between">
-                            <div class="text-sm font-semibold text-foreground">Geselecteerd: {{ activeFilterCount }}</div>
-                            <button v-if="activeFilterCount" type="button" class="text-sm font-semibold text-primary hover:underline" @click="clearAll">Alles wissen</button>
+                            <div class="text-sm font-semibold text-foreground">{{ t('common.selected', { count: activeFilterCount }) }}</div>
+                            <button v-if="activeFilterCount" type="button" class="text-sm font-semibold text-primary hover:underline" @click="clearAll">
+                                {{ t('common.clearAll') }}
+                            </button>
                         </div>
 
                         <div class="mt-6">
-                            <div class="text-sm font-semibold text-foreground">Opleidingen</div>
+                            <div class="text-sm font-semibold text-foreground">{{ t('common.educations') }}</div>
                             <input
                                 v-model="educationFilterQuery"
                                 type="search"
-                                placeholder="Zoek opleiding…"
+                                :placeholder="t('map.searchEducation')"
                                 class="mt-3 h-10 w-full rounded-xl bg-background px-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                             />
 
@@ -713,16 +717,16 @@ onUnmounted(() => {
                                     <span class="text-sm font-medium text-foreground">{{ name }}</span>
                                 </label>
 
-                                <div v-if="!filteredEducationOptions.length" class="text-sm text-muted-foreground">Geen resultaten.</div>
+                                <div v-if="!filteredEducationOptions.length" class="text-sm text-muted-foreground">{{ t('common.noResults') }}</div>
                             </div>
                         </div>
 
                         <div class="mt-8">
-                            <div class="text-sm font-semibold text-foreground">Sectoren</div>
+                            <div class="text-sm font-semibold text-foreground">{{ t('common.sectors') }}</div>
                             <input
                                 v-model="sectorFilterQuery"
                                 type="search"
-                                placeholder="Zoek sector…"
+                                :placeholder="t('map.searchSector')"
                                 class="mt-3 h-10 w-full rounded-xl bg-background px-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                             />
 
@@ -736,7 +740,7 @@ onUnmounted(() => {
                                     <span class="text-sm font-medium text-foreground">{{ name }}</span>
                                 </label>
 
-                                <div v-if="!filteredSectorOptions.length" class="text-sm text-muted-foreground">Geen resultaten.</div>
+                                <div v-if="!filteredSectorOptions.length" class="text-sm text-muted-foreground">{{ t('common.noResults') }}</div>
                             </div>
                         </div>
                     </div>
@@ -748,14 +752,14 @@ onUnmounted(() => {
                                 class="inline-flex flex-1 items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                                 @click="closeFilters"
                             >
-                                Toon resultaten
+                                {{ t('common.showResults') }}
                             </button>
                             <button
                                 type="button"
                                 class="inline-flex items-center justify-center rounded-xl bg-background px-4 py-2.5 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent"
                                 @click="clearAll"
                             >
-                                Wissen
+                                {{ t('common.clear') }}
                             </button>
                         </div>
                     </div>

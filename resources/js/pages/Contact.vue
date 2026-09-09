@@ -5,6 +5,9 @@ import { onBeforeUnmount, ref } from 'vue';
 
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { useTranslations } from '@/i18n';
+
+const { t } = useTranslations();
 
 const form = useForm({
     name: '',
@@ -33,16 +36,16 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <Head title="Contact" />
+    <Head :title="t('nav.contact')" />
 
     <AppHeader class="sticky top-0 z-50" />
 
     <section id="support" class="brand-hero relative overflow-hidden px-6 py-20 lg:px-16 lg:py-24">
         <div class="relative mx-auto max-w-7xl">
             <div class="mx-auto max-w-3xl text-center">
-                <p class="brand-eyebrow">Contact</p>
-                <h1 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Neem contact op</h1>
-                <p class="mt-4 text-base leading-relaxed text-muted-foreground">Stuur ons een bericht. We reageren zo snel mogelijk.</p>
+                <p class="brand-eyebrow">{{ t('nav.contact') }}</p>
+                <h1 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{{ t('contact.title') }}</h1>
+                <p class="mt-4 text-base leading-relaxed text-muted-foreground">{{ t('contact.intro') }}</p>
             </div>
 
             <div class="mt-12 flex flex-col-reverse gap-7.5 md:flex-row md:items-start md:justify-between lg:mt-20 xl:gap-10">
@@ -54,8 +57,8 @@ onBeforeUnmount(() => {
                                 <MapPin class="h-5 w-5" />
                             </span>
                             <div>
-                                <p class="text-sm font-semibold text-foreground">Adres</p>
-                                <p class="mt-1 text-sm leading-relaxed text-muted-foreground">Lovensdijkstraat 61, 4818 AJ, Breda, Nederland</p>
+                                <p class="text-sm font-semibold text-foreground">{{ t('contact.address') }}</p>
+                                <p class="mt-1 text-sm leading-relaxed text-muted-foreground">{{ t('contact.addressValue') }}</p>
                             </div>
                         </div>
 
@@ -64,7 +67,7 @@ onBeforeUnmount(() => {
                                 <Phone class="h-5 w-5" />
                             </span>
                             <div>
-                                <p class="text-sm font-semibold text-foreground">Telefoon</p>
+                                <p class="text-sm font-semibold text-foreground">{{ t('common.phone') }}</p>
                                 <a class="mt-1 inline-block text-sm text-muted-foreground hover:text-foreground" href="tel:+31885258600">088-5258600</a>
                             </div>
                         </div>
@@ -74,7 +77,7 @@ onBeforeUnmount(() => {
                                 <Mail class="h-5 w-5" />
                             </span>
                             <div>
-                                <p class="text-sm font-semibold text-foreground">E-mail</p>
+                                <p class="text-sm font-semibold text-foreground">{{ t('common.email') }}</p>
                                 <a class="mt-1 inline-block text-sm break-all text-muted-foreground hover:text-foreground" href="mailto:bedrijvendag.atix@avans.nl"
                                     >bedrijvendag.atix@avans.nl</a
                                 >
@@ -84,7 +87,7 @@ onBeforeUnmount(() => {
 
                     <span class="my-8 block h-px bg-border"></span>
 
-                    <p class="text-sm text-muted-foreground">Liever direct contact? Mail of bel ons.</p>
+                    <p class="text-sm text-muted-foreground">{{ t('contact.direct') }}</p>
                 </aside>
 
                 <!-- Right: form -->
@@ -102,14 +105,14 @@ onBeforeUnmount(() => {
                         "
                     >
                         <div>
-                            <label for="name" class="mb-2 block text-sm font-semibold text-foreground">Naam <span class="text-destructive">*</span></label>
+                            <label for="name" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.name') }} <span class="text-destructive">*</span></label>
                             <input
                                 id="name"
                                 v-model="form.name"
                                 type="text"
                                 name="name"
                                 autocomplete="name"
-                                placeholder="Voor- en achternaam"
+                                :placeholder="t('contact.fullName')"
                                 class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 required
                             />
@@ -117,14 +120,14 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div>
-                            <label for="email" class="mb-2 block text-sm font-semibold text-foreground">E-mail <span class="text-destructive">*</span></label>
+                            <label for="email" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.email') }} <span class="text-destructive">*</span></label>
                             <input
                                 id="email"
                                 v-model="form.email"
                                 type="email"
                                 name="email"
                                 autocomplete="email"
-                                placeholder="voorbeeld@mail.com"
+                                :placeholder="t('contact.emailExample')"
                                 class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 required
                             />
@@ -132,7 +135,7 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div>
-                            <label for="phone" class="mb-2 block text-sm font-semibold text-foreground">Telefoon (optioneel)</label>
+                            <label for="phone" class="mb-2 block text-sm font-semibold text-foreground">{{ t('contact.phoneOptional') }}</label>
                             <input
                                 id="phone"
                                 v-model="form.phone"
@@ -146,13 +149,13 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div>
-                            <label for="subject" class="mb-2 block text-sm font-semibold text-foreground">Onderwerp <span class="text-destructive">*</span></label>
+                            <label for="subject" class="mb-2 block text-sm font-semibold text-foreground">{{ t('contact.subject') }} <span class="text-destructive">*</span></label>
                             <input
                                 id="subject"
                                 v-model="form.subject"
                                 type="text"
                                 name="subject"
-                                placeholder="Waar gaat je vraag over?"
+                                :placeholder="t('contact.subjectPlaceholder')"
                                 class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 required
                             />
@@ -160,13 +163,13 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div class="lg:col-span-2">
-                            <label for="message" class="mb-2 block text-sm font-semibold text-foreground">Bericht <span class="text-destructive">*</span></label>
+                            <label for="message" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.message') }} <span class="text-destructive">*</span></label>
                             <textarea
                                 id="message"
                                 v-model="form.message"
                                 name="message"
                                 rows="6"
-                                placeholder="Schrijf je bericht..."
+                                :placeholder="t('contact.messagePlaceholder')"
                                 class="brand-input w-full rounded-xl p-4 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 required
                             ></textarea>
@@ -180,10 +183,10 @@ onBeforeUnmount(() => {
                                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground shadow-lg ring-1 shadow-primary/20 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 <Send class="h-4 w-4" />
-                                {{ form.processing ? 'Versturen...' : 'Verstuur bericht' }}
+                                {{ form.processing ? t('common.submitting') : t('contact.send') }}
                             </button>
 
-                            <p class="text-xs text-muted-foreground">Je gegevens gebruiken we alleen om te reageren.</p>
+                            <p class="text-xs text-muted-foreground">{{ t('contact.privacy') }}</p>
 
                             <div
                                 v-if="showSuccess"
@@ -193,7 +196,7 @@ onBeforeUnmount(() => {
                             >
                                 <div class="flex items-center gap-2">
                                     <CheckCircle2 class="h-5 w-5 shrink-0 text-emerald-600" />
-                                    <span>Bedankt. We hebben je bericht ontvangen.</span>
+                                    <span>{{ t('contact.success') }}</span>
                                 </div>
                             </div>
                         </div>

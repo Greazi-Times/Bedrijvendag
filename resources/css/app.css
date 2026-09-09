@@ -277,6 +277,15 @@
 }
 
 /* Only style lists inside rich text areas (Filament RichEditor output rendered with .prose). */
+.prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+    color: hsl(var(--text-primary));
+}
+
+/* Bold rich-text content should follow its surrounding text color in both themes. */
+.prose :where(strong, b):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+    color: inherit;
+}
+
 .prose ul {
     @apply list-disc space-y-1 pl-6;
 }

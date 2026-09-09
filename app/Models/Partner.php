@@ -2,18 +2,26 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAutomaticTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Partner extends Model
 {
+    use HasAutomaticTranslations;
+
     protected $fillable = [
         'name',
         'url',
         'logo',
         'description',
     ];
+
+    public function automaticTranslationFields(): array
+    {
+        return ['description'];
+    }
 
     public function educations(): BelongsToMany
     {

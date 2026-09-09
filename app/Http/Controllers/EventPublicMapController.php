@@ -15,14 +15,16 @@ class EventPublicMapController extends Controller
         $event = Event::query()
             ->nextOrLatest()
             ->with([
+                'translations',
                 'stands.company' => fn ($q) => $q
                     ->with([
-                        'educations:id,name',
-                        'sectors:id,name',
+                        'educations.translations',
+                        'sectors.translations',
                     ]),
                 'stands.partner' => fn ($q) => $q
                     ->with([
-                        'educations:id,name',
+                        'translations',
+                        'educations.translations',
                     ]),
             ])
             ->firstOrFail();
@@ -30,11 +32,11 @@ class EventPublicMapController extends Controller
         return Inertia::render('Map', [
             'event' => [
                 'id' => $event->id,
-                'title' => $event->name,
+                'title' => $event->translated('name'),
                 'date' => optional($event->date)->toDateString(),
             ],
             'map' => [
-                'title' => $event->name,
+                'title' => $event->translated('name'),
                 'image_url' => PageMedia::eventMapUrl($event->map_path),
             ],
             'stands' => $event->stands
@@ -56,13 +58,15 @@ class EventPublicMapController extends Controller
                         'company_logo' => $isCompany
                             ? ($company?->logo_path ? Storage::url($company->logo_path) : null)
                             : ($partner?->logo ? Storage::url($partner->logo) : null),
-                        'company_description' => $entity?->description,
+                        'company_description' => $isCompany
+                            ? $company?->localizedDescription()
+                            : $partner?->translated('description'),
                         'company_website_url' => $entity?->website_url,
                         'company_educations' => $isCompany
-                            ? $company?->educations?->pluck('name')->filter()->values()->all()
-                            : ($partner?->educations?->pluck('name')->filter()->values()->all() ?? []),
+                            ? $company?->educations?->map(fn ($education) => $education->translated('name'))->filter()->values()->all()
+                            : ($partner?->educations?->map(fn ($education) => $education->translated('name'))->filter()->values()->all() ?? []),
                         'company_sectors' => $isCompany
-                            ? $company?->sectors?->pluck('name')->filter()->values()->all()
+                            ? $company?->sectors?->map(fn ($sector) => $sector->translated('name'))->filter()->values()->all()
                             : [],
                         'x_percent' => $stand->x_percent !== null ? (float) $stand->x_percent : null,
                         'y_percent' => $stand->y_percent !== null ? (float) $stand->y_percent : null,
@@ -92,11 +96,11 @@ class EventPublicMapController extends Controller
     private function formatMapPointLabel(EventMapPoint $point): string
     {
         return match ($point->type) {
-            'bar' => 'Bar',
-            'info' => 'Info',
-            'lunch' => 'Lunch',
-            'entrance' => 'Entrance',
-            default => 'Other',
+            'bar' => __('messages.map_points.bar'),
+            'info' => __('messages.map_points.info'),
+            'lunch' => __('messages.map_points.lunch'),
+            'entrance' => __('messages.map_points.entrance'),
+            default => __('messages.map_points.other'),
         };
     }
 }

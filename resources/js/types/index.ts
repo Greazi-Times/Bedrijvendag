@@ -7,6 +7,8 @@ import type { Auth } from './auth';
 export type AppPageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
     name: string;
     deploymentVersion: string;
+    locale: 'nl' | 'en';
+    supportedLocales: Array<'nl' | 'en'>;
     auth: Auth;
     media: {
         siteLogo: string;

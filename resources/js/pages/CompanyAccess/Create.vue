@@ -5,6 +5,7 @@ import { computed, ref, watch } from 'vue';
 
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { useTranslations } from '@/i18n';
 
 type CompanyOption = {
     id: number;
@@ -16,6 +17,7 @@ const props = defineProps<{
     companies: CompanyOption[];
     submitUrl: string;
 }>();
+const { t } = useTranslations();
 
 const mode = ref<'existing' | 'new'>('existing');
 const query = ref('');
@@ -36,9 +38,7 @@ const filteredCompanies = computed(() => {
 
     if (!value) return props.companies.slice(0, 12);
 
-    return props.companies
-        .filter((company) => [company.name, company.website_url ?? ''].join(' ').toLowerCase().includes(value))
-        .slice(0, 20);
+    return props.companies.filter((company) => [company.name, company.website_url ?? ''].join(' ').toLowerCase().includes(value)).slice(0, 20);
 });
 
 const selectedCompany = computed(() => props.companies.find((company) => company.id === form.company_id) ?? null);
@@ -76,29 +76,22 @@ function submit() {
 </script>
 
 <template>
-    <Head title="Bedrijfstoegang aanvragen" />
+    <Head :title="t('companyAccess.head')" />
 
     <AppHeader class="sticky top-0 z-50" />
 
     <main class="brand-hero min-h-screen px-6 py-12 lg:px-16">
         <div class="mx-auto max-w-5xl">
             <div class="max-w-3xl">
-                <p class="brand-eyebrow">Bedrijfstoegang</p>
-                <h1 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Vraag toegang tot jullie bedrijfsprofiel aan</h1>
-                <p class="mt-4 text-base leading-relaxed text-muted-foreground">
-                    Zoek eerst of jullie bedrijf al in de lijst staat. De organisatie controleert elke aanvraag voordat er een persoonlijke bewerklink wordt gedeeld.
-                </p>
+                <p class="brand-eyebrow">{{ t('companyAccess.eyebrow') }}</p>
+                <h1 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{{ t('companyAccess.title') }}</h1>
+                <p class="mt-4 text-base leading-relaxed text-muted-foreground">{{ t('companyAccess.intro') }}</p>
             </div>
 
-            <div
-                v-if="saved"
-                class="mt-8 rounded-xl bg-emerald-500/15 p-4 text-sm text-emerald-900 ring-1 ring-emerald-500/25"
-                role="status"
-                aria-live="polite"
-            >
+            <div v-if="saved" class="mt-8 rounded-xl bg-emerald-500/15 p-4 text-sm text-emerald-900 ring-1 ring-emerald-500/25" role="status" aria-live="polite">
                 <div class="flex items-start gap-3">
                     <CheckCircle2 class="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-                    <p>Je aanvraag is ontvangen. De organisatie controleert deze voordat er toegang wordt gegeven.</p>
+                    <p>{{ t('companyAccess.success') }}</p>
                 </div>
             </div>
 
@@ -111,7 +104,7 @@ function submit() {
                         @click="mode = 'existing'"
                     >
                         <Building2 class="h-5 w-5 shrink-0" />
-                        Mijn bedrijf staat in de lijst
+                        {{ t('companyAccess.existing') }}
                     </button>
                     <button
                         type="button"
@@ -120,14 +113,14 @@ function submit() {
                         @click="mode = 'new'"
                     >
                         <PlusCircle class="h-5 w-5 shrink-0" />
-                        Mijn bedrijf staat er nog niet bij
+                        {{ t('companyAccess.new') }}
                     </button>
                 </div>
 
                 <div class="mt-8 grid gap-6 lg:grid-cols-2">
                     <template v-if="mode === 'existing'">
                         <div class="lg:col-span-2">
-                            <label for="company_search" class="mb-2 block text-sm font-semibold text-foreground">Zoek bedrijf</label>
+                            <label for="company_search" class="mb-2 block text-sm font-semibold text-foreground">{{ t('companyAccess.searchCompany') }}</label>
                             <div class="relative">
                                 <Search class="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                 <input
@@ -135,7 +128,7 @@ function submit() {
                                     v-model="query"
                                     type="search"
                                     autocomplete="off"
-                                    placeholder="Typ de bedrijfsnaam..."
+                                    :placeholder="t('companyAccess.searchPlaceholder')"
                                     class="brand-input w-full rounded-xl py-3 pr-4 pl-11 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 />
                             </div>
@@ -152,17 +145,19 @@ function submit() {
                                     <span class="font-semibold">{{ company.name }}</span>
                                     <span v-if="company.website_url" class="mt-1 block text-xs text-muted-foreground">{{ company.website_url }}</span>
                                 </button>
-                                <p v-if="!filteredCompanies.length" class="px-4 py-5 text-sm text-muted-foreground">Geen bedrijf gevonden. Gebruik de optie om een nieuw bedrijf aan te vragen.</p>
+                                <p v-if="!filteredCompanies.length" class="px-4 py-5 text-sm text-muted-foreground">{{ t('companyAccess.notFound') }}</p>
                             </div>
 
-                            <p v-if="selectedCompany" class="mt-2 text-xs text-muted-foreground">Geselecteerd: {{ selectedCompany.name }}</p>
+                            <p v-if="selectedCompany" class="mt-2 text-xs text-muted-foreground">{{ t('companyAccess.selectedCompany', { name: selectedCompany.name }) }}</p>
                             <p v-if="form.errors.company_id" class="mt-2 text-sm text-destructive">{{ form.errors.company_id }}</p>
                         </div>
                     </template>
 
                     <template v-else>
                         <div>
-                            <label for="company_name" class="mb-2 block text-sm font-semibold text-foreground">Bedrijfsnaam <span class="text-destructive">*</span></label>
+                            <label for="company_name" class="mb-2 block text-sm font-semibold text-foreground"
+                                >{{ t('companyAccess.companyName') }} <span class="text-destructive">*</span></label
+                            >
                             <input
                                 id="company_name"
                                 v-model="form.company_name"
@@ -173,7 +168,7 @@ function submit() {
                         </div>
 
                         <div>
-                            <label for="website_url" class="mb-2 block text-sm font-semibold text-foreground">Website</label>
+                            <label for="website_url" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.website') }}</label>
                             <input
                                 id="website_url"
                                 v-model="form.website_url"
@@ -186,7 +181,9 @@ function submit() {
                     </template>
 
                     <div>
-                        <label for="contact_name" class="mb-2 block text-sm font-semibold text-foreground">Contactpersoon <span class="text-destructive">*</span></label>
+                        <label for="contact_name" class="mb-2 block text-sm font-semibold text-foreground"
+                            >{{ t('companyAccess.contactPerson') }} <span class="text-destructive">*</span></label
+                        >
                         <input
                             id="contact_name"
                             v-model="form.contact_name"
@@ -198,7 +195,9 @@ function submit() {
                     </div>
 
                     <div>
-                        <label for="contact_email" class="mb-2 block text-sm font-semibold text-foreground">Zakelijk e-mailadres <span class="text-destructive">*</span></label>
+                        <label for="contact_email" class="mb-2 block text-sm font-semibold text-foreground"
+                            >{{ t('companyAccess.businessEmail') }} <span class="text-destructive">*</span></label
+                        >
                         <input
                             id="contact_email"
                             v-model="form.contact_email"
@@ -210,7 +209,7 @@ function submit() {
                     </div>
 
                     <div class="lg:col-span-2">
-                        <label for="message" class="mb-2 block text-sm font-semibold text-foreground">Bericht</label>
+                        <label for="message" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.message') }}</label>
                         <textarea
                             id="message"
                             v-model="form.message"
@@ -222,14 +221,14 @@ function submit() {
                 </div>
 
                 <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="text-sm leading-relaxed text-muted-foreground">De persoonlijke bewerklink wordt nooit openbaar getoond.</p>
+                    <p class="text-sm leading-relaxed text-muted-foreground">{{ t('companyAccess.privateLink') }}</p>
                     <button
                         type="submit"
                         :disabled="form.processing"
                         class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         <Send class="h-4 w-4" />
-                        {{ form.processing ? 'Versturen...' : 'Aanvraag versturen' }}
+                        {{ form.processing ? t('common.submitting') : t('companyAccess.sendRequest') }}
                     </button>
                 </div>
             </form>

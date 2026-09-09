@@ -31,7 +31,8 @@ class CompanyForm
                     ->label('Profile contact email')
                     ->email()
                     ->default(null),
-                RichEditor::make('description')
+                RichEditor::make('description_nl')
+                    ->label('Description')
                     ->toolbarButtons([
                         'bold',
                         'italic',

@@ -3,6 +3,7 @@ import { Beer, DoorOpen, Info, MapPin, Utensils } from 'lucide-vue-next';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import { useTranslations } from '@/i18n';
 
 interface Company {
     id: number;
@@ -51,6 +52,7 @@ const props = defineProps<{
     stands: Stand[];
     mapPoints?: MapPoint[];
 }>();
+const { dateLocale, t } = useTranslations();
 
 const sortedCompanies = computed(() => {
     const toNum = (v: Company['stand_number']) => {
@@ -111,7 +113,7 @@ function standDisplayCode(stand: Stand) {
 }
 
 function standDisplayName(stand: Stand) {
-    return stand.company_name ?? 'Geen organisatie ingesteld';
+    return stand.company_name ?? t('map.noOrganisation');
 }
 
 function mapPointIcon(point: MapPoint) {
@@ -162,14 +164,14 @@ onBeforeUnmount(() => {
 });
 
 function formatDateRange(start: string | null, end: string | null) {
-    if (!start && !end) return 'Onbekende datum';
+    if (!start && !end) return t('common.unknownDate');
 
-    const fmt = new Intl.DateTimeFormat('nl-NL', { day: '2-digit', month: 'short', year: 'numeric' });
+    const fmt = new Intl.DateTimeFormat(dateLocale.value, { day: '2-digit', month: 'short', year: 'numeric' });
     const s = start ? fmt.format(new Date(start)) : null;
     const e = end ? fmt.format(new Date(end)) : null;
 
-    if (s && e && s !== e) return `${s} t/m ${e}`;
-    return s ?? e ?? 'Onbekende datum';
+    if (s && e && s !== e) return `${s} – ${e}`;
+    return s ?? e ?? t('common.unknownDate');
 }
 </script>
 
@@ -198,16 +200,16 @@ function formatDateRange(start: string | null, end: string | null) {
                     rel="noreferrer"
                     class="inline-flex shrink-0 items-center justify-center rounded-xl bg-white/80 px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none dark:bg-white/10 dark:hover:bg-white/15"
                 >
-                    Fotoalbum
+                    {{ t('events.gallery') }}
                 </a>
             </div>
 
             <div class="mt-8 space-y-6">
                 <!-- Description / info first (full width) -->
                 <div class="brand-card rounded-3xl p-6">
-                    <h2 class="text-sm font-medium">Beschrijving</h2>
+                    <h2 class="text-sm font-medium">{{ t('common.description') }}</h2>
                     <div v-if="event.description_html" class="prose prose-sm mt-4 max-w-none dark:prose-invert" v-html="event.description_html" />
-                    <p v-else class="mt-4 text-sm text-muted-foreground">Geen beschrijving beschikbaar.</p>
+                    <p v-else class="mt-4 text-sm text-muted-foreground">{{ t('common.noDescriptionAvailable') }}</p>
                 </div>
 
                 <!-- Map left, companies right -->
@@ -215,7 +217,7 @@ function formatDateRange(start: string | null, end: string | null) {
                     <div class="lg:col-span-3 lg:h-full">
                         <div class="brand-card flex h-full min-h-0 flex-col rounded-3xl p-6">
                             <div class="flex h-6 items-center justify-between">
-                                <h2 class="text-sm font-medium">Plattegrond</h2>
+                                <h2 class="text-sm font-medium">{{ t('map.floorPlan') }}</h2>
                                 <span class="text-xs text-muted-foreground">&nbsp;</span>
                             </div>
 
@@ -229,7 +231,7 @@ function formatDateRange(start: string | null, end: string | null) {
                                     class="group absolute z-10 flex h-6 min-w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full px-1.5 text-[11px] font-bold text-white shadow-md ring-2 ring-white/90 transition hover:z-20 hover:scale-110 focus-visible:z-20 focus-visible:ring-4 focus-visible:ring-primary/40 focus-visible:outline-none"
                                     :class="stand.stand_type === 'partner' ? 'bg-secondary text-secondary-foreground ring-white/90' : 'bg-primary ring-white/90'"
                                     :style="{ left: `${stand.x_percent}%`, top: `${stand.y_percent}%` }"
-                                    :aria-label="`Stand ${standDisplayCode(stand)} ${standDisplayName(stand)}`"
+                                    :aria-label="`${t('common.stand')} ${standDisplayCode(stand)} ${standDisplayName(stand)}`"
                                     :title="standDisplayName(stand)"
                                 >
                                     {{ standDisplayCode(stand) }}
@@ -259,14 +261,14 @@ function formatDateRange(start: string | null, end: string | null) {
                                 </button>
                             </div>
 
-                            <p v-else class="mt-4 text-sm text-muted-foreground">Geen plattegrond beschikbaar.</p>
+                            <p v-else class="mt-4 text-sm text-muted-foreground">{{ t('map.noMap') }}</p>
                         </div>
                     </div>
 
                     <aside class="lg:col-span-2 lg:h-full">
                         <div class="brand-card flex h-full min-h-0 flex-col rounded-3xl p-6">
                             <div class="flex h-6 items-center justify-between">
-                                <h2 class="text-sm font-medium">Bedrijven</h2>
+                                <h2 class="text-sm font-medium">{{ t('map.companies') }}</h2>
                                 <span class="text-xs text-muted-foreground">{{ companies.length }}</span>
                             </div>
 
@@ -289,7 +291,7 @@ function formatDateRange(start: string | null, end: string | null) {
                                                 v-if="c.stand_number"
                                                 class="shrink-0 rounded-full bg-background px-2.5 py-1 text-[11px] font-semibold text-foreground ring-1 ring-border"
                                             >
-                                                Stand {{ c.stand_number }}
+                                                {{ t('common.stand') }} {{ c.stand_number }}
                                             </span>
                                         </div>
                                         <p v-if="c.website_url" class="truncate text-xs text-muted-foreground">{{ c.website_url }}</p>
@@ -303,12 +305,12 @@ function formatDateRange(start: string | null, end: string | null) {
                                         rel="noreferrer"
                                         class="shrink-0 rounded-xl bg-background px-3 py-2 text-xs font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                                     >
-                                        Website
+                                        {{ t('common.website') }}
                                     </a>
                                 </button>
                             </div>
 
-                            <p v-else class="mt-4 text-sm text-muted-foreground">Nog geen bedrijven gekoppeld.</p>
+                            <p v-else class="mt-4 text-sm text-muted-foreground">{{ t('map.noCompanies') }}</p>
                         </div>
                     </aside>
                 </div>
@@ -317,7 +319,7 @@ function formatDateRange(start: string | null, end: string | null) {
     </main>
 
     <Teleport to="body">
-        <div v-if="isCompanyModalOpen" class="fixed inset-0 z-50 bg-black/60" aria-label="Sluiten" @click="closeCompany">
+        <div v-if="isCompanyModalOpen" class="fixed inset-0 z-50 bg-black/60" :aria-label="t('common.close')" @click="closeCompany">
             <div class="absolute inset-0 flex items-center justify-center px-4 py-8">
                 <div
                     class="flex max-h-[80vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-background shadow-xl ring-1 ring-border"
@@ -341,7 +343,7 @@ function formatDateRange(start: string | null, end: string | null) {
                             class="rounded-xl bg-background px-4 py-2 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                             @click="closeCompany"
                         >
-                            Sluiten
+                            {{ t('common.close') }}
                         </button>
                     </div>
 
@@ -365,7 +367,7 @@ function formatDateRange(start: string | null, end: string | null) {
                         </div>
 
                         <div v-if="selectedCompany?.description_html" class="prose prose-sm mt-5 max-w-none dark:prose-invert" v-html="selectedCompany.description_html" />
-                        <p v-else class="mt-5 text-sm text-muted-foreground">Geen extra informatie beschikbaar.</p>
+                        <p v-else class="mt-5 text-sm text-muted-foreground">{{ t('common.noExtraInformation') }}</p>
 
                         <div class="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
                             <a
@@ -375,7 +377,7 @@ function formatDateRange(start: string | null, end: string | null) {
                                 rel="noreferrer"
                                 class="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                             >
-                                Website
+                                {{ t('common.website') }}
                             </a>
                         </div>
                     </div>

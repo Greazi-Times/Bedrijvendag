@@ -28,7 +28,9 @@ class CompanyInfolist
                     ->copyable()
                     ->copyMessage('Verification link copied')
                     ->columnSpanFull(),
-                TextEntry::make('description')
+                TextEntry::make('description_nl')
+                    ->label('Description')
+                    ->html()
                     ->placeholder('No description has been provided')
                     ->columnSpanFull(),
                 TextEntry::make('sectors.name')
