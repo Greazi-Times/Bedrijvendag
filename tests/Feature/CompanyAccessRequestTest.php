@@ -3,23 +3,30 @@
 use App\Mail\CompanyAccessApprovedMail;
 use App\Models\Company;
 use App\Models\CompanyAccessRequest;
+use App\Models\Event;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Testing\AssertableInertia as Assert;
 
-test('company access page lists companies without exposing verification links', function () {
-    $company = Company::create([
-        'name' => 'Acme',
-        'website_url' => 'https://acme.example',
+test('company interest page does not expose company or verification data', function () {
+    $this->get(route('company-access.create'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('CompanyAccess/Create')
+            ->missing('companies')
+        );
+});
+
+test('company access page shows the next event to prospective companies', function () {
+    Event::create([
+        'name' => 'ATIx Bedrijvendag 2027',
+        'date' => today()->addMonth(),
     ]);
 
     $this->get(route('company-access.create'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('CompanyAccess/Create')
-            ->where('companies.0.id', $company->id)
-            ->where('companies.0.name', 'Acme')
-            ->missing('companies.0.profile_token')
-            ->missing('companies.0.profile_verification_url')
+            ->where('upcomingEvent.name', 'ATIx Bedrijvendag 2027')
+            ->where('upcomingEvent.date', today()->addMonth()->toDateString())
         );
 });
 
@@ -30,8 +37,7 @@ test('existing company access request does not reveal or edit the company', func
     ]);
 
     $this->post(route('company-access.store'), [
-        'type' => CompanyAccessRequest::TYPE_EXISTING,
-        'company_id' => $company->id,
+        'company_name' => 'ACME',
         'contact_name' => 'Jane Doe',
         'contact_email' => 'jane@acme.example',
         'message' => 'Please send access.',
@@ -84,7 +90,6 @@ test('new company request only creates a company after approval', function () {
     Mail::fake();
 
     $this->post(route('company-access.store'), [
-        'type' => CompanyAccessRequest::TYPE_NEW,
         'company_name' => 'New Company',
         'website_url' => 'https://new.example',
         'contact_name' => 'John Doe',
@@ -111,6 +116,14 @@ test('new company request only creates a company after approval', function () {
         return $mail->hasTo('john@new.example')
             && $mail->accessRequest->verificationUrl() !== null;
     });
+});
+
+test('company name is required for an interest request', function () {
+    $this->post(route('company-access.store'), [
+        'contact_name' => 'Jane Doe',
+        'contact_email' => 'jane@acme.example',
+        'message' => 'We would like to attend.',
+    ])->assertSessionHasErrors('company_name');
 });
 
 test('access request stays pending when the approval email fails', function () {
