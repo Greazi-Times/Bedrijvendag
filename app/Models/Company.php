@@ -65,7 +65,7 @@ class Company extends Model
             return false;
         }
 
-        TranslateCompanyDescription::dispatch($this->getKey(), TranslationContent::hash($description))->afterCommit();
+        TranslateCompanyDescription::dispatch($this->getKey(), TranslationContent::hash($description))->afterResponse();
 
         return true;
     }

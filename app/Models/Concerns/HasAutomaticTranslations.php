@@ -118,7 +118,7 @@ trait HasAutomaticTranslations
             }
 
             if ($hashes !== []) {
-                TranslateModelContent::dispatch(static::class, $this->getKey(), $targetLocale, $hashes)->afterCommit();
+                TranslateModelContent::dispatch(static::class, $this->getKey(), $targetLocale, $hashes)->afterResponse();
                 $queued++;
             }
         }
