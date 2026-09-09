@@ -16,7 +16,7 @@ class SyncContentTranslations extends Command
 {
     protected $signature = 'translations:sync {--force : Regenerate translations even when the source has not changed}';
 
-    protected $description = 'Queue missing or outdated translations for public database content';
+    protected $description = 'Process missing or outdated translations for public database content';
 
     /** @var list<class-string<Model>> */
     private array $models = [
@@ -59,7 +59,7 @@ class SyncContentTranslations extends Command
             );
         }
 
-        $this->info("Queued {$jobs} translation job(s).");
+        $this->info("Processed {$jobs} translation(s).");
 
         return self::SUCCESS;
     }

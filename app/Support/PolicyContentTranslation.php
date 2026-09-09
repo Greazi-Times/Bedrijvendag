@@ -41,7 +41,7 @@ class PolicyContentTranslation
             return false;
         }
 
-        TranslatePolicyContent::dispatch($settingsClass, $sourceHash)->afterCommit();
+        TranslatePolicyContent::dispatch($settingsClass, $sourceHash)->afterResponse();
 
         return true;
     }
