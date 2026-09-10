@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\CompanyAccessRequest;
-use App\Models\Event;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,41 +14,52 @@ class CompanyAccessController extends Controller
 {
     public function create(): Response
     {
-        $upcomingEvent = Event::query()
-            ->with('translations')
-            ->whereDate('date', '>=', today())
-            ->orderBy('date')
-            ->first();
-
         return Inertia::render('CompanyAccess/Create', [
+            'companies' => Company::query()
+                ->orderBy('name')
+                ->get(['id', 'name', 'website_url'])
+                ->map(fn (Company $company): array => [
+                    'id' => $company->id,
+                    'name' => $company->name,
+                    'website_url' => $company->website_url,
+                ]),
             'submitUrl' => route('company-access.store'),
-            'upcomingEvent' => $upcomingEvent ? [
-                'name' => $upcomingEvent->translated('name'),
-                'date' => $upcomingEvent->date?->toDateString(),
-            ] : null,
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'company_name' => ['required', 'string', 'max:255'],
+            'type' => ['required', Rule::in([CompanyAccessRequest::TYPE_EXISTING, CompanyAccessRequest::TYPE_NEW])],
+            'company_id' => [
+                Rule::requiredIf(fn (): bool => $request->input('type') === CompanyAccessRequest::TYPE_EXISTING),
+                'nullable',
+                'integer',
+                Rule::exists('companies', 'id'),
+            ],
+            'company_name' => [
+                Rule::requiredIf(fn (): bool => $request->input('type') === CompanyAccessRequest::TYPE_NEW),
+                'nullable',
+                'string',
+                'max:255',
+            ],
             'website_url' => ['nullable', 'url', 'max:255'],
             'contact_name' => ['required', 'string', 'max:255'],
             'contact_email' => ['required', 'email', 'max:255'],
             'message' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $companyName = trim($validated['company_name']);
-        $company = Company::query()
-            ->whereRaw('LOWER(name) = ?', [mb_strtolower($companyName)])
-            ->first();
+        $company = null;
+
+        if ($validated['type'] === CompanyAccessRequest::TYPE_EXISTING) {
+            $company = Company::query()->findOrFail($validated['company_id']);
+        }
 
         CompanyAccessRequest::query()->create([
-            'type' => $company ? CompanyAccessRequest::TYPE_EXISTING : CompanyAccessRequest::TYPE_NEW,
+            'type' => $validated['type'],
             'status' => CompanyAccessRequest::STATUS_PENDING,
             'company_id' => $company?->id,
-            'company_name' => $company?->name ?? $companyName,
+            'company_name' => $company?->name ?? $validated['company_name'],
             'website_url' => $company?->website_url ?? ($validated['website_url'] ?? null),
             'contact_name' => $validated['contact_name'],
             'contact_email' => $validated['contact_email'],

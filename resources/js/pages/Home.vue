@@ -212,7 +212,7 @@ const triggerBorrelSuccess = () => {
 
                         <Link
                             class="inline-flex items-center justify-center rounded-xl bg-secondary px-6 py-3 text-sm font-semibold text-secondary-foreground shadow-lg ring-1 shadow-secondary/20 ring-secondary/25 transition hover:bg-secondary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                            href="/bedrijf-toegang"
+                            href="/voor-bedrijven"
                         >
                             {{ t('home.companyEnrollment') }}
                         </Link>

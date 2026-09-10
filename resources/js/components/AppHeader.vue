@@ -40,7 +40,7 @@ const mainNavItems = computed<NavItem[]>(() => [
     },
     {
         title: t('nav.forCompanies'),
-        href: '/bedrijf-toegang',
+        href: '/voor-bedrijven',
     },
     {
         title: t('nav.partners'),

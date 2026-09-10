@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\CompanyAccessController;
+use App\Http\Controllers\CompanyInterestController;
 use App\Http\Controllers\CompanyProfileController;
 use App\Http\Controllers\CookiePolicyController;
 use App\Http\Controllers\EventController;
@@ -35,6 +36,13 @@ Route::post('/locale', function (Request $request) {
 Route::get('/plattegrond', [EventPublicMapController::class, 'show'])->name('map');
 
 Route::get('/bedrijven', [CompaniesController::class, 'index'])->name('companies');
+
+Route::get('/voor-bedrijven', [CompanyInterestController::class, 'create'])
+    ->name('company-interest.create');
+
+Route::post('/voor-bedrijven', [CompanyInterestController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('company-interest.store');
 
 Route::get('/bedrijf-toegang', [CompanyAccessController::class, 'create'])
     ->name('company-access.create');
