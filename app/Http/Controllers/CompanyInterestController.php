@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CompanyInterestMessageMail;
 use App\Models\CompanyInterestRequest;
 use App\Models\Event;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -43,12 +45,15 @@ class CompanyInterestController extends Controller
             ->orderBy('date')
             ->first();
 
-        CompanyInterestRequest::query()->create([
+        $interestRequest = CompanyInterestRequest::query()->create([
             ...$validated,
             'event_id' => $upcomingEvent?->id,
             'company_name' => trim($validated['company_name']),
             'message' => strip_tags($validated['message'] ?? ''),
         ]);
+
+        Mail::to(config('mail.contact_to.address'))
+            ->send(new CompanyInterestMessageMail($interestRequest));
 
         return back()->with('success', __('messages.company_interest_success'));
     }
