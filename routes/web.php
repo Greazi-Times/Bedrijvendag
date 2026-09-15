@@ -4,6 +4,7 @@ use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\CompanyAccessController;
 use App\Http\Controllers\CompanyInterestController;
 use App\Http\Controllers\CompanyProfileController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CookiePolicyController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventPublicMapController;
@@ -76,9 +77,11 @@ Route::get('/over-ons', function () {
     ]);
 })->name('about');
 
-Route::get('/contact', function () {
-    return Inertia::render('Contact');
-})->name('contact');
+Route::get('/contact', [ContactController::class, 'create'])->name('contact');
+
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('contact.store');
 
 Route::get('/privacy-policy', PrivacyPolicyController::class)->name('privacy-policy');
 
