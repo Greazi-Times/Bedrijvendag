@@ -14,7 +14,7 @@ class CompanyAccessController extends Controller
 {
     public function create(): Response
     {
-        return Inertia::render('CompanyAccess/Create', [
+        return Inertia::render('CompanyAccess/RequestCompanyAccess', [
             'companies' => Company::query()
                 ->orderBy('name')
                 ->get(['id', 'name', 'website_url'])

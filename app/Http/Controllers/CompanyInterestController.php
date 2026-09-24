@@ -21,7 +21,7 @@ class CompanyInterestController extends Controller
             ->orderBy('date')
             ->first();
 
-        return Inertia::render('CompanyInterest/Create', [
+        return Inertia::render('CompanyInterest/RegisterCompanyInterest', [
             'submitUrl' => route('company-interest.store'),
             'upcomingEvent' => $upcomingEvent ? [
                 'name' => $upcomingEvent->translated('name'),
