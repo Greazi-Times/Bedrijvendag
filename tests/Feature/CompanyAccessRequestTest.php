@@ -15,7 +15,7 @@ test('company access page lists companies without exposing verification links', 
     $this->get(route('company-access.create'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('CompanyAccess/Create')
+            ->component('CompanyAccess/RequestCompanyAccess')
             ->where('companies.0.id', $company->id)
             ->where('companies.0.name', 'Acme')
             ->missing('companies.0.profile_token')

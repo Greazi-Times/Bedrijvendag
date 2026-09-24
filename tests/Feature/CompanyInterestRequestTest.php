@@ -15,7 +15,7 @@ test('company interest page shows the next edition', function () {
     $this->get(route('company-interest.create'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('CompanyInterest/Create')
+            ->component('CompanyInterest/RegisterCompanyInterest')
             ->where('upcomingEvent.name', 'ATIx Bedrijvendag 2027')
             ->where('upcomingEvent.date', $event->date->toDateString())
         );
