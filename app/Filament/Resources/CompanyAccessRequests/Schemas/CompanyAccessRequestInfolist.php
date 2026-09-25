@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CompanyAccessRequests\Schemas;
 
 use App\Models\CompanyAccessRequest;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -49,6 +50,28 @@ class CompanyAccessRequestInfolist
                             ->copyMessage('Email copied'),
                         TextEntry::make('message')
                             ->placeholder('No message')
+                            ->columnSpanFull(),
+                    ]),
+                Section::make('Proposed company profile')
+                    ->visible(fn (CompanyAccessRequest $record): bool => $record->type === CompanyAccessRequest::TYPE_NEW)
+                    ->columns(2)
+                    ->schema([
+                        ImageEntry::make('logo_path')
+                            ->label('Logo')
+                            ->disk('public')
+                            ->height(120)
+                            ->placeholder('No logo'),
+                        TextEntry::make('description')
+                            ->label('Description')
+                            ->placeholder('No description')
+                            ->columnSpanFull(),
+                        TextEntry::make('proposedEducationNames')
+                            ->label('Educations')
+                            ->getStateUsing(fn (CompanyAccessRequest $record): string => $record->proposedEducationNames())
+                            ->columnSpanFull(),
+                        TextEntry::make('proposedSectorNames')
+                            ->label('Sectors')
+                            ->getStateUsing(fn (CompanyAccessRequest $record): string => $record->proposedSectorNames())
                             ->columnSpanFull(),
                     ]),
                 Section::make('Private verification link')

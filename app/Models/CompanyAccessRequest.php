@@ -29,6 +29,11 @@ class CompanyAccessRequest extends Model
         'company_id',
         'company_name',
         'website_url',
+        'logo_path',
+        'description',
+        'education_ids',
+        'sector_ids',
+        'new_sector_names',
         'contact_name',
         'contact_email',
         'message',
@@ -41,6 +46,9 @@ class CompanyAccessRequest extends Model
     protected $casts = [
         'submitted_at' => 'datetime',
         'reviewed_at' => 'datetime',
+        'education_ids' => 'array',
+        'sector_ids' => 'array',
+        'new_sector_names' => 'array',
     ];
 
     public function company(): BelongsTo
@@ -64,9 +72,14 @@ class CompanyAccessRequest extends Model
                 if ($this->type === self::TYPE_NEW && ! $this->company_id) {
                     $company = Company::query()->create([
                         'name' => $this->company_name,
+                        'logo_path' => $this->logo_path,
                         'website_url' => $this->website_url,
                         'profile_contact_email' => $this->contact_email,
+                        'description_nl' => $this->descriptionHtml(),
                     ]);
+
+                    $company->educations()->sync($this->education_ids ?? []);
+                    $company->sectors()->sync($this->approvedSectorIds());
 
                     $this->company()->associate($company);
                 }
@@ -116,5 +129,66 @@ class CompanyAccessRequest extends Model
     public function verificationUrl(): ?string
     {
         return $this->company?->profileVerificationUrl();
+    }
+
+    public function proposedEducationNames(): string
+    {
+        return Education::query()
+            ->whereIn('id', $this->education_ids ?? [])
+            ->orderBy('name')
+            ->pluck('name')
+            ->implode(', ') ?: 'Geen';
+    }
+
+    public function proposedSectorNames(): string
+    {
+        $existing = Sector::query()
+            ->whereIn('id', $this->sector_ids ?? [])
+            ->orderBy('name')
+            ->pluck('name');
+
+        return $existing
+            ->merge(collect($this->new_sector_names ?? [])->map(fn (string $name): string => "{$name} (new)"))
+            ->filter()
+            ->implode(', ') ?: 'Geen';
+    }
+
+    private function descriptionHtml(): ?string
+    {
+        $description = trim((string) $this->description);
+
+        if ($description === '') {
+            return null;
+        }
+
+        return collect(preg_split("/\R{2,}/", $description) ?: [])
+            ->map(fn (string $paragraph): string => trim($paragraph))
+            ->filter()
+            ->map(fn (string $paragraph): string => '<p>'.nl2br(e($paragraph), false).'</p>')
+            ->implode('') ?: null;
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function approvedSectorIds(): array
+    {
+        $sectorIds = collect($this->sector_ids ?? [])
+            ->map(fn (int|string $id): int => (int) $id)
+            ->filter()
+            ->values();
+
+        collect($this->new_sector_names ?? [])
+            ->map(fn (string $name): string => trim(preg_replace('/\s+/', ' ', $name) ?? $name))
+            ->filter()
+            ->each(function (string $name) use ($sectorIds): void {
+                $sector = Sector::query()
+                    ->whereRaw('lower(name) = ?', [mb_strtolower($name)])
+                    ->first() ?: Sector::query()->create(['name' => $name]);
+
+                $sectorIds->push($sector->id);
+            });
+
+        return $sectorIds->unique()->values()->all();
     }
 }

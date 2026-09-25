@@ -3,7 +3,11 @@
 use App\Mail\CompanyAccessApprovedMail;
 use App\Models\Company;
 use App\Models\CompanyAccessRequest;
+use App\Models\Education;
+use App\Models\Sector;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
 test('company access page lists companies without exposing verification links', function () {
@@ -11,6 +15,8 @@ test('company access page lists companies without exposing verification links', 
         'name' => 'Acme',
         'website_url' => 'https://acme.example',
     ]);
+    $education = Education::create(['name' => 'Mechatronica']);
+    $sector = Sector::create(['name' => 'Techniek']);
 
     $this->get(route('company-access.create'))
         ->assertOk()
@@ -18,6 +24,8 @@ test('company access page lists companies without exposing verification links', 
             ->component('CompanyAccess/RequestCompanyAccess')
             ->where('companies.0.id', $company->id)
             ->where('companies.0.name', 'Acme')
+            ->where('options.educations.0.id', $education->id)
+            ->where('options.sectors.0.id', $sector->id)
             ->missing('companies.0.profile_token')
             ->missing('companies.0.profile_verification_url')
         );
@@ -82,11 +90,20 @@ test('approving an existing company access request can set the profile contact e
 
 test('new company request only creates a company after approval', function () {
     Mail::fake();
+    Storage::fake('public');
+
+    $education = Education::create(['name' => 'Mechatronica']);
+    $sector = Sector::create(['name' => 'Techniek']);
 
     $this->post(route('company-access.store'), [
         'type' => CompanyAccessRequest::TYPE_NEW,
         'company_name' => 'New Company',
         'website_url' => 'https://new.example',
+        'logo' => UploadedFile::fake()->image('logo.png'),
+        'description' => "Slimme oplossingen voor de industrie.\n\nWij werken aan robotica.",
+        'education_ids' => [$education->id],
+        'sector_ids' => [$sector->id],
+        'new_sector_names' => ['Robotica'],
         'contact_name' => 'John Doe',
         'contact_email' => 'john@new.example',
     ])->assertRedirect();
@@ -97,6 +114,14 @@ test('new company request only creates a company after approval', function () {
 
     $request = CompanyAccessRequest::query()->firstOrFail();
 
+    expect($request->description)->toContain('Slimme oplossingen')
+        ->and($request->education_ids)->toBe([$education->id])
+        ->and($request->sector_ids)->toBe([$sector->id])
+        ->and($request->new_sector_names)->toBe(['Robotica'])
+        ->and($request->logo_path)->not->toBeNull();
+
+    Storage::disk('public')->assertExists($request->logo_path);
+
     $request->approve();
 
     $company = Company::query()->where('name', 'New Company')->firstOrFail();
@@ -104,6 +129,10 @@ test('new company request only creates a company after approval', function () {
     expect($request->fresh()->status)->toBe(CompanyAccessRequest::STATUS_APPROVED)
         ->and($request->fresh()->company_id)->toBe($company->id)
         ->and($company->website_url)->toBe('https://new.example')
+        ->and($company->logo_path)->toBe($request->logo_path)
+        ->and($company->description_nl)->toContain('<p>Slimme oplossingen voor de industrie.</p>')
+        ->and($company->educations()->pluck('education.id')->all())->toBe([$education->id])
+        ->and($company->sectors()->pluck('sectors.name')->all())->toContain('Techniek', 'Robotica')
         ->and($company->profile_contact_email)->toBe('john@new.example')
         ->and($company->profile_token)->not->toBeNull();
 
@@ -111,6 +140,19 @@ test('new company request only creates a company after approval', function () {
         return $mail->hasTo('john@new.example')
             && $mail->accessRequest->verificationUrl() !== null;
     });
+});
+
+test('new company request requires the public profile information', function () {
+    $this->post(route('company-access.store'), [
+        'type' => CompanyAccessRequest::TYPE_NEW,
+        'company_name' => 'Incomplete Company',
+        'contact_name' => 'John Doe',
+        'contact_email' => 'john@new.example',
+    ])->assertSessionHasErrors(['logo', 'description', 'education_ids']);
+
+    $this->assertDatabaseMissing('company_access_requests', [
+        'company_name' => 'Incomplete Company',
+    ]);
 });
 
 test('access request stays pending when the approval email fails', function () {
