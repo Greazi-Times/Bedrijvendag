@@ -5,6 +5,35 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
+.profile-diff-text {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.profile-diff-del,
+.profile-diff-ins {
+    border-radius: 3px;
+    padding: 1px 2px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    color: inherit;
+}
+
+.profile-diff-del {
+    background: rgb(239 68 68 / 20%);
+    text-decoration: line-through;
+    text-decoration-color: #dc2626;
+}
+
+.profile-diff-ins {
+    background: rgb(34 197 94 / 22%);
+    text-decoration: underline;
+    text-decoration-color: #16a34a;
+}
+
+.dark .profile-diff-del { background: rgb(248 113 113 / 25%); }
+.dark .profile-diff-ins { background: rgb(74 222 128 / 25%); }
+
 :root {
     --dashboard-navy: var(--brand-ink);
     --dashboard-blue: var(--brand-blue);
