@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CompanyProfileSubmissions\Schemas;
 
 use App\Models\CompanyProfileSubmission;
+use App\Support\ProfileDiff;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -37,6 +38,8 @@ class CompanyProfileSubmissionInfolist
                             ->placeholder('Not reviewed yet'),
                     ]),
                 Section::make('Proposed public profile')
+                    ->visible(fn (CompanyProfileSubmission $record): bool => $record->status !== CompanyProfileSubmission::STATUS_PENDING && $record->comparison_snapshot === null)
+                    ->description('This older submission has no saved original values. Only the submitted profile is available.')
                     ->columns(2)
                     ->schema([
                         TextEntry::make('proposed_name')
@@ -69,6 +72,56 @@ class CompanyProfileSubmissionInfolist
                             ->placeholder('No new sectors proposed')
                             ->columnSpanFull(),
                     ]),
+                Section::make('Profile changes')
+                    ->columnSpanFull()
+                    ->visible(fn (CompanyProfileSubmission $record): bool => $record->status === CompanyProfileSubmission::STATUS_PENDING || $record->comparison_snapshot !== null)
+                    ->description(fn (CompanyProfileSubmission $record): string => $record->status === CompanyProfileSubmission::STATUS_PENDING
+                        ? 'Red / strikethrough = removed. Green / underline = added. Changes are applied only after approval.'
+                        : 'Saved comparison at review. Red / strikethrough = removed. Green / underline = added.')
+                    ->schema(function (CompanyProfileSubmission $record): array {
+                        $sections = [];
+
+                        foreach ($record->profileComparison() as $field => $change) {
+                            $highlighted = $field === 'logo' ? $change : ProfileDiff::render($field, $change);
+                            $entries = [];
+                            foreach (['before', 'after'] as $side) {
+                                $label = $side === 'before'
+                                    ? ($record->status === CompanyProfileSubmission::STATUS_PENDING ? 'Current' : 'Before review')
+                                    : ($record->status === CompanyProfileSubmission::STATUS_APPROVED ? 'Approved' : 'Proposed');
+                                $entry = $field === 'logo'
+                                    ? ImageEntry::make("comparison_{$field}_{$side}")->disk('public')->height(120)
+                                    : TextEntry::make("comparison_{$field}_{$side}");
+
+                                $entries[] = $entry->label($label)
+                                    ->getStateUsing(fn () => trim(strip_tags((string) $highlighted[$side])) === '' ? null : $highlighted[$side])
+                                    ->placeholder('Not provided');
+                            }
+
+                            if ($field === 'description') {
+                                $entries[] = Section::make('Formatted description preview')
+                                    ->description('Expand to inspect formatting and links as well as the text changes above.')
+                                    ->columnSpanFull()->columns(2)->collapsible()->collapsed()
+                                    ->schema([
+                                        TextEntry::make('formatted_before')->label('Before')->getStateUsing(fn () => $change['before'])->html()->placeholder('Not provided'),
+                                        TextEntry::make('formatted_after')->label('After')->getStateUsing(fn () => $change['after'])->html()->placeholder('Not provided'),
+                                    ]);
+                            }
+
+                            $sections[] = Section::make(match ($field) {
+                                'name' => 'Company name',
+                                'educations' => 'Study programmes',
+                                default => ucfirst($field),
+                            })
+                                ->description($change['changed'] ? 'Changed' : 'Unchanged')
+                                ->icon($change['changed'] ? 'heroicon-o-pencil-square' : 'heroicon-o-check')
+                                ->columns(2)
+                                ->collapsible()
+                                ->collapsed(! $change['changed'])
+                                ->schema($entries);
+                        }
+
+                        return $sections;
+                    }),
                 Section::make('Review')
                     ->columns(2)
                     ->schema([

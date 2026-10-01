@@ -11,6 +11,42 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
+test('review page shows changed and unchanged fields with their current and proposed values', function () {
+    $company = Company::create(['name' => 'Original company', 'logo_path' => 'company-logos/original.png']);
+    $submission = CompanyProfileSubmission::create([
+        'company_id' => $company->id,
+        'status' => CompanyProfileSubmission::STATUS_PENDING,
+        'proposed_name' => 'Proposed company',
+        'proposed_description' => '<p>New description</p>',
+    ]);
+
+    $comparison = $submission->profileComparison();
+    expect($comparison['logo']['changed'])->toBeFalse()
+        ->and($comparison['logo']['after'])->toBe('company-logos/original.png')
+        ->and($comparison['name']['changed'])->toBeTrue();
+
+    $this->actingAs(\App\Models\User::factory()->create());
+    \Livewire\Livewire::test(\App\Filament\Resources\CompanyProfileSubmissions\Pages\ViewCompanyProfileSubmission::class, [
+        'record' => $submission->id,
+    ])->assertSuccessful()
+        ->assertSee('Original company')
+        ->assertSeeHtml('class="profile-diff-ins" title="Added">Proposed</ins> company')
+        ->assertSee('Changed')
+        ->assertSee('Unchanged')
+        ->assertSee('New description');
+});
+
+test('older reviewed submissions do not pretend the current profile is the original', function () {
+    $company = Company::create(['name' => 'Already changed']);
+    $submission = CompanyProfileSubmission::create([
+        'company_id' => $company->id,
+        'status' => CompanyProfileSubmission::STATUS_APPROVED,
+        'proposed_name' => 'Already changed',
+    ]);
+
+    expect($submission->profileComparison())->toBe([]);
+});
+
 test('company can open its verification form with a token', function () {
     $education = Education::create(['name' => 'Informatica']);
     $sector = Sector::create(['name' => 'Software']);
@@ -208,6 +244,14 @@ test('approving a submission updates the company profile', function () {
 
     expect($submission->fresh()->status)->toBe(CompanyProfileSubmission::STATUS_APPROVED);
 
+    $comparison = $submission->fresh()->profileComparison();
+    expect($comparison['name'])->toBe(['before' => 'Before', 'after' => 'After', 'changed' => true])
+        ->and($comparison['description']['before'])->toBe('<p>Before description</p>')
+        ->and($comparison['educations']['after'])->toBe('Elektrotechniek');
+
+    $company->update(['name' => 'Later change']);
+    expect($submission->fresh()->profileComparison())->toBe($comparison);
+
     Mail::assertSent(CompanyProfileApprovedMail::class, fn (CompanyProfileApprovedMail $mail): bool => $mail->hasTo('profile@example.com'));
 });
 
@@ -229,6 +273,7 @@ test('rejecting a submission emails the company contact', function () {
     $submission->reject('Please shorten the description.');
 
     expect($submission->fresh()->status)->toBe(CompanyProfileSubmission::STATUS_REJECTED);
+    expect($submission->fresh()->profileComparison()['name']['changed'])->toBeFalse();
 
     Mail::assertSent(CompanyProfileRejectedMail::class, function (CompanyProfileRejectedMail $mail): bool {
         return $mail->hasTo('fallback@example.com')

@@ -40,6 +40,7 @@ class CompanyProfileSubmission extends Model
     ];
 
     protected $casts = [
+        'comparison_snapshot' => 'array',
         'proposed_education_ids' => 'array',
         'proposed_sector_ids' => 'array',
         'proposed_new_sector_names' => 'array',
@@ -140,6 +141,49 @@ class CompanyProfileSubmission extends Model
         return $this->contact_email ?: $this->company?->profile_contact_email;
     }
 
+    public function profileComparison(): array
+    {
+        if ($this->status !== self::STATUS_PENDING && $this->comparison_snapshot !== null) {
+            return $this->comparison_snapshot;
+        }
+
+        // The original profile cannot be reconstructed for older reviewed submissions.
+        if ($this->status !== self::STATUS_PENDING) {
+            return [];
+        }
+
+        $company = $this->company()->with(['educations', 'sectors'])->firstOrFail();
+        $names = fn ($values): array => collect($values)->sort()->values()->all();
+        $values = [
+            'name' => [$company->name, $this->proposed_name],
+            'website' => [$company->website_url, $this->proposed_website_url],
+            'logo' => [$company->logo_path, $this->proposed_logo_path ?: $company->logo_path],
+            'description' => [$company->description_nl, $this->descriptionHtml()],
+            'educations' => [
+                $names($company->educations->pluck('name')),
+                $names(Education::whereIn('id', $this->proposed_education_ids ?? [])->pluck('name')),
+            ],
+            'sectors' => [
+                $names($company->sectors->pluck('name')),
+                $names(Sector::whereIn('id', $this->proposed_sector_ids ?? [])->pluck('name')->merge($this->proposed_new_sector_names ?? [])->unique()),
+            ],
+        ];
+
+        return collect($values)->map(function (array $pair): array {
+            if (is_array($pair[0])) {
+                return [
+                    'before' => implode(', ', $pair[0]),
+                    'after' => implode(', ', $pair[1]),
+                    'before_items' => $pair[0],
+                    'after_items' => $pair[1],
+                    'changed' => $pair[0] !== $pair[1],
+                ];
+            }
+
+            return ['before' => $pair[0], 'after' => $pair[1], 'changed' => trim((string) $pair[0]) !== trim((string) $pair[1])];
+        })->all();
+    }
+
     private function descriptionHtml(): ?string
     {
         $description = trim((string) $this->proposed_description);
@@ -163,6 +207,7 @@ class CompanyProfileSubmission extends Model
     {
         try {
             DB::transaction(function () use ($email, $note): void {
+                $this->comparison_snapshot = $this->profileComparison();
                 $this->company->update([
                     'name' => $this->proposed_name,
                     'logo_path' => $this->proposed_logo_path ?: $this->company->logo_path,
@@ -199,6 +244,7 @@ class CompanyProfileSubmission extends Model
     {
         try {
             DB::transaction(function () use ($email, $note): void {
+                $this->comparison_snapshot = $this->profileComparison();
                 $this->forceFill([
                     'review_note' => $note,
                 ]);
