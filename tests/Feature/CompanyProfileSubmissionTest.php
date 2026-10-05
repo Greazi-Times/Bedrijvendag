@@ -109,6 +109,42 @@ test('company rich text submission keeps safe formatting and removes unsafe mark
         ->toContain('<u>underline</u>');
 });
 
+test('company description length is measured on visible text instead of html markup', function () {
+    $company = Company::create([
+        'name' => 'Pasted Description Company',
+    ]);
+
+    $paragraph = '<p style="margin:0cm;font-family:Calibri,sans-serif;font-size:11pt;line-height:115%"><span style="font-size:11pt;color:#000000">'.str_repeat('a', 170).'</span></p>';
+
+    $this->post(route('company-profile.update', $company->profile_token), [
+        'name' => 'Pasted Description Company',
+        'contact_name' => 'Jane Doe',
+        'contact_email' => 'profile@example.com',
+        'description' => str_repeat($paragraph, 10),
+        'education_ids' => [],
+        'sector_ids' => [],
+    ])->assertSessionHasNoErrors();
+
+    expect(CompanyProfileSubmission::query()->count())->toBe(1);
+});
+
+test('company description longer than 5000 visible characters is rejected', function () {
+    $company = Company::create([
+        'name' => 'Long Description Company',
+    ]);
+
+    $this->post(route('company-profile.update', $company->profile_token), [
+        'name' => 'Long Description Company',
+        'contact_name' => 'Jane Doe',
+        'contact_email' => 'profile@example.com',
+        'description' => '<p>'.str_repeat('a', 5001).'</p>',
+        'education_ids' => [],
+        'sector_ids' => [],
+    ])->assertSessionHasErrors('description');
+
+    expect(CompanyProfileSubmission::query()->count())->toBe(0);
+});
+
 test('company profile submission requires contact details', function () {
     $company = Company::create([
         'name' => 'Required Contact Company',
