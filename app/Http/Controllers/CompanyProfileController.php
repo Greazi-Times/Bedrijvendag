@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\CompanyProfileSubmission;
 use App\Models\Education;
 use App\Models\Sector;
+use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,8 @@ use Inertia\Response;
 
 class CompanyProfileController extends Controller
 {
+    private const DESCRIPTION_MAX_LENGTH = 5000;
+
     public function edit(string $token): Response
     {
         $company = $this->findCompanyForToken($token);
@@ -56,7 +59,16 @@ class CompanyProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'max:4096'],
             'website_url' => ['nullable', 'url', 'max:255'],
-            'description' => ['nullable', 'string', 'max:5000'],
+            'description' => [
+                'nullable',
+                'string',
+                'max:60000',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if ($this->visibleTextLength($value) > self::DESCRIPTION_MAX_LENGTH) {
+                        $fail('validation.max.string')->translate(['max' => self::DESCRIPTION_MAX_LENGTH]);
+                    }
+                },
+            ],
             'education_ids' => ['array'],
             'education_ids.*' => ['integer', Rule::exists('education', 'id')],
             'sector_ids' => ['array'],
@@ -127,6 +139,17 @@ class CompanyProfileController extends Controller
         }
 
         return null;
+    }
+
+    private function visibleTextLength(mixed $html): int
+    {
+        if (! is_string($html)) {
+            return 0;
+        }
+
+        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return mb_strlen(trim($text));
     }
 
     private function sanitizeSubmittedDescription(?string $description): ?string

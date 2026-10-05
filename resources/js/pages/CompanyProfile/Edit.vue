@@ -64,6 +64,8 @@ const { dateLocale, t } = useTranslations();
 const logoPreview = ref<string | null>(props.company.logo_url ?? null);
 const saved = ref(false);
 const editor = ref<HTMLElement | null>(null);
+const descriptionMaxLength = 5000;
+const allowedEditorTags = new Set(['A', 'B', 'BLOCKQUOTE', 'BR', 'EM', 'H2', 'H3', 'HR', 'I', 'LI', 'OL', 'P', 'S', 'STRONG', 'U', 'UL']);
 const sectorSearch = ref('');
 const newSectorName = ref('');
 
@@ -137,6 +139,12 @@ const canAddNewSector = computed(() => {
     return !alreadyExists && !alreadyProposed && form.new_sector_names.length < 10;
 });
 
+const descriptionLength = computed(() => {
+    const text = form.description.replace(/<[^>]*>/g, '').replace(/&(#\d+|#x[\da-f]+|[a-z\d]+);/gi, ' ');
+
+    return [...text.trim()].length;
+});
+
 const sectorError = computed(() => {
     return form.errors.sector_ids || form.errors.new_sector_names || Object.entries(form.errors).find(([key]) => key.startsWith('new_sector_names.'))?.[1];
 });
@@ -198,6 +206,44 @@ function handleEditorInput() {
     syncDescription();
 }
 
+function cleanPastedHtml(html: string) {
+    const source = new DOMParser().parseFromString(html, 'text/html');
+    const output = document.createElement('div');
+
+    const appendCleaned = (node: Node, parent: Node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            parent.appendChild(document.createTextNode(node.textContent ?? ''));
+            return;
+        }
+
+        if (!(node instanceof Element) || ['SCRIPT', 'STYLE', 'META', 'LINK', 'TITLE'].includes(node.tagName)) return;
+
+        let target: Node = parent;
+
+        if (allowedEditorTags.has(node.tagName)) {
+            const element = document.createElement(node.tagName.toLowerCase());
+            const href = node.getAttribute('href');
+
+            if (node.tagName === 'A' && href && /^(https?:\/\/|mailto:)/i.test(href)) {
+                element.setAttribute('href', href);
+            }
+
+            parent.appendChild(element);
+            target = element;
+        } else if (['DIV', 'H1', 'H4', 'H5', 'H6'].includes(node.tagName)) {
+            const element = document.createElement('p');
+            parent.appendChild(element);
+            target = element;
+        }
+
+        node.childNodes.forEach((child) => appendCleaned(child, target));
+    };
+
+    source.body.childNodes.forEach((child) => appendCleaned(child, output));
+
+    return output.innerHTML;
+}
+
 function handleEditorPaste(event: ClipboardEvent) {
     event.preventDefault();
 
@@ -211,7 +257,7 @@ function handleEditorPaste(event: ClipboardEvent) {
         .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br>')}</p>`)
         .join('');
 
-    document.execCommand('insertHTML', false, html || fallbackHtml);
+    document.execCommand('insertHTML', false, html ? cleanPastedHtml(html) : fallbackHtml);
 
     nextTick(syncDescription);
 }
@@ -364,7 +410,12 @@ function submit() {
                                 ></div>
                             </div>
                             <textarea v-model="form.description" name="description" class="sr-only" tabindex="-1" aria-hidden="true"></textarea>
-                            <p class="mt-2 text-xs text-muted-foreground">{{ t('companyProfile.editorHelp') }}</p>
+                            <div class="mt-2 flex items-start justify-between gap-4 text-xs text-muted-foreground">
+                                <p>{{ t('companyProfile.editorHelp') }}</p>
+                                <p class="shrink-0 tabular-nums" :class="{ 'text-destructive': descriptionLength > descriptionMaxLength }">
+                                    {{ descriptionLength }} / {{ descriptionMaxLength }}
+                                </p>
+                            </div>
                             <p v-if="form.errors.description" class="mt-2 text-sm text-destructive">{{ form.errors.description }}</p>
                         </div>
 
