@@ -1,19 +1,15 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import { Github, Menu } from 'lucide-vue-next';
-import { computed } from 'vue';
-import AppLogo from '@/components/AppLogo.vue';
+import { Link, router } from '@inertiajs/vue3';
+import { PhArrowUpRight, PhGithubLogo, PhList, PhMapTrifold, PhX } from '@phosphor-icons/vue';
+import { DialogClose } from 'reka-ui';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
-import { Button } from '@/components/ui/button';
-import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { useTranslations } from '@/i18n';
-import { toUrl } from '@/lib/utils';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -24,165 +20,155 @@ const props = withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
 });
 
-const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+const { currentUrl } = useCurrentUrl();
 const { t } = useTranslations();
 
-const activeItemStyles = 'bg-primary/10 text-primary ring-1 ring-primary/15 dark:bg-primary/20 dark:text-white';
+const repositoryUrl = 'https://github.com/Greazi-Times/Bedrijvendag';
+const isMenuOpen = ref(false);
+
+// Close the mobile menu whenever Inertia navigates.
+const removeNavigateListener = router.on('navigate', () => {
+    isMenuOpen.value = false;
+});
+onBeforeUnmount(() => removeNavigateListener());
+
+const mapItem = computed<NavItem>(() => ({ title: t('nav.map'), href: '/plattegrond' }));
 
 const mainNavItems = computed<NavItem[]>(() => [
-    {
-        title: t('nav.map'),
-        href: '/plattegrond',
-    },
-    {
-        title: t('nav.companies'),
-        href: '/bedrijven',
-    },
-    {
-        title: t('nav.forCompanies'),
-        href: '/voor-bedrijven',
-    },
-    {
-        title: t('nav.partners'),
-        href: '/partners',
-    },
-    {
-        title: t('nav.editions'),
-        href: '/edities',
-    },
-    {
-        title: t('nav.about'),
-        href: '/over-ons',
-    },
-    {
-        title: t('nav.contact'),
-        href: '/contact',
-    },
+    { title: t('nav.companies'), href: '/bedrijven' },
+    { title: t('nav.forCompanies'), href: '/voor-bedrijven' },
+    { title: t('nav.partners'), href: '/partners' },
+    { title: t('nav.editions'), href: '/edities' },
+    { title: t('nav.about'), href: '/over-ons' },
+    { title: t('nav.contact'), href: '/contact' },
 ]);
 
-const rightNavItems = computed<NavItem[]>(() => [
-    {
-        title: t('nav.repository'),
-        href: 'https://github.com/Greazi-Times/Bedrijvendag',
-        icon: Github,
-    },
-]);
+// A section stays active on its detail pages too (e.g. /edities/12).
+const isActive = (href: NavItem['href']) => {
+    const path = String(href);
+    return currentUrl.value === path || currentUrl.value.startsWith(`${path}/`);
+};
 </script>
 
 <template>
-    <div>
-        <div class="border-b border-white/70 bg-background/86 shadow-sm shadow-slate-900/5 backdrop-blur-xl dark:border-white/10">
-            <div class="relative mx-auto flex h-20 items-center px-4 md:max-w-7xl">
-                <!-- Mobile Menu -->
-                <div class="lg:hidden">
-                    <Sheet>
-                        <SheetTrigger :as-child="true">
-                            <Button variant="ghost" size="icon" class="mr-2 h-9 w-9 rounded-xl bg-white/70 ring-1 ring-border/70 dark:bg-white/5">
-                                <Menu class="h-5 w-5" />
-                            </Button>
+    <header class="sticky top-0 z-40">
+        <a
+            href="#main"
+            class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-[var(--radius-input)] focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:text-canvas"
+        >
+            {{ t('nav.skip') }}
+        </a>
+
+        <div class="border-b border-hairline bg-canvas/90 backdrop-blur-xl backdrop-saturate-150">
+            <div class="site-container flex h-16 items-center gap-6">
+                <Link href="/" class="-ml-1 flex min-w-0 items-center gap-2.5 rounded-[var(--radius-input)] py-1 pr-2 pl-1" :aria-label="`ATIx Bedrijvendag, ${t('nav.home')}`">
+                    <AppLogoIcon class="size-8 shrink-0" alt="" />
+                    <span class="truncate text-[0.9375rem] font-semibold tracking-[-0.02em] text-ink lg:max-xl:hidden" translate="no">ATIx Bedrijvendag</span>
+                </Link>
+
+                <nav :aria-label="t('nav.menu')" class="hidden flex-1 justify-center lg:flex">
+                    <ul class="flex items-center">
+                        <li v-for="item in mainNavItems" :key="item.title">
+                            <Link
+                                :href="item.href"
+                                :aria-current="isActive(item.href) ? 'page' : undefined"
+                                class="inline-flex h-9 items-center rounded-[var(--radius-input)] px-3 text-sm font-medium whitespace-nowrap text-ink-muted transition-colors hover:bg-surface hover:text-ink aria-[current=page]:bg-surface aria-[current=page]:text-ink"
+                            >
+                                {{ item.title }}
+                            </Link>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="ml-auto flex items-center gap-1 lg:ml-0">
+                    <LanguageSwitcher />
+                    <ThemeToggle class="max-sm:hidden" />
+                    <a
+                        :href="repositoryUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="hidden size-9 items-center justify-center rounded-[var(--radius-input)] text-ink-muted transition-colors hover:bg-surface hover:text-ink xl:inline-flex"
+                        :aria-label="t('nav.repository')"
+                        :title="t('nav.repository')"
+                    >
+                        <PhGithubLogo :size="18" aria-hidden="true" />
+                    </a>
+
+                    <Link :href="mapItem.href" :aria-current="isActive(mapItem.href) ? 'page' : undefined" class="btn btn-primary btn-sm ml-2 hidden lg:inline-flex">
+                        <PhMapTrifold :size="16" weight="bold" aria-hidden="true" />
+                        {{ mapItem.title }}
+                    </Link>
+
+                    <Sheet v-model:open="isMenuOpen">
+                        <SheetTrigger as-child>
+                            <button type="button" class="btn btn-ghost btn-icon -mr-2 lg:hidden" :aria-label="t('nav.openMenu')">
+                                <PhList :size="22" aria-hidden="true" />
+                            </button>
                         </SheetTrigger>
-                        <SheetContent side="left" class="w-[300px] p-6">
+                        <SheetContent side="top" class="h-[100dvh] gap-0 border-0 bg-canvas p-0 shadow-none [&>button:last-child]:hidden">
                             <SheetTitle class="sr-only">{{ t('nav.menu') }}</SheetTitle>
-                            <SheetHeader class="flex justify-start text-left">
-                                <AppLogoIcon class="size-6 fill-current text-black dark:text-white" />
-                            </SheetHeader>
-                            <div class="flex h-full flex-1 flex-col justify-between space-y-4 py-6">
-                                <nav class="-mx-3 space-y-1">
-                                    <Link
-                                        v-for="item in mainNavItems"
-                                        :key="item.title"
-                                        :href="item.href"
-                                        class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent"
-                                        :class="whenCurrentUrl(item.href, activeItemStyles)"
-                                    >
-                                        <component v-if="item.icon" :is="item.icon" class="h-5 w-5" />
-                                        {{ item.title }}
-                                    </Link>
-                                </nav>
-                                <div class="flex flex-col space-y-4">
-                                    <a
-                                        v-for="item in rightNavItems"
-                                        :key="item.title"
-                                        :href="toUrl(item.href)"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="flex items-center space-x-2 text-sm font-medium"
-                                    >
-                                        <component v-if="item.icon" :is="item.icon" class="h-5 w-5" />
-                                        <span>{{ item.title }}</span>
-                                    </a>
+                            <SheetDescription class="sr-only">ATIx Bedrijvendag</SheetDescription>
+
+                            <div class="site-container flex h-16 shrink-0 items-center justify-between border-b border-hairline">
+                                <Link href="/" class="flex items-center gap-2.5">
+                                    <AppLogoIcon class="size-8 shrink-0" alt="" />
+                                    <span class="text-[0.9375rem] font-semibold tracking-[-0.02em] text-ink" translate="no">ATIx Bedrijvendag</span>
+                                </Link>
+                                <DialogClose class="btn btn-ghost btn-icon -mr-2" :aria-label="t('common.close')">
+                                    <PhX :size="22" aria-hidden="true" />
+                                </DialogClose>
+                            </div>
+
+                            <nav :aria-label="t('nav.menu')" class="site-container flex-1 overflow-y-auto py-6">
+                                <ul class="divide-y divide-hairline">
+                                    <li>
+                                        <Link
+                                            href="/"
+                                            :aria-current="currentUrl === '/' ? 'page' : undefined"
+                                            class="flex items-center justify-between py-4 text-[1.625rem] font-semibold tracking-[-0.03em] text-ink-muted transition-colors hover:text-ink aria-[current=page]:text-ink"
+                                        >
+                                            {{ t('nav.home') }}
+                                        </Link>
+                                    </li>
+                                    <li v-for="item in [mapItem, ...mainNavItems]" :key="item.title">
+                                        <Link
+                                            :href="item.href"
+                                            :aria-current="isActive(item.href) ? 'page' : undefined"
+                                            class="flex items-center justify-between py-4 text-[1.625rem] font-semibold tracking-[-0.03em] text-ink-muted transition-colors hover:text-ink aria-[current=page]:text-ink"
+                                        >
+                                            {{ item.title }}
+                                            <span v-if="isActive(item.href)" class="size-2 rounded-full bg-brand" aria-hidden="true"></span>
+                                        </Link>
+                                    </li>
+                                </ul>
+                            </nav>
+
+                            <div class="site-container flex shrink-0 items-center justify-between border-t border-hairline py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                                <a
+                                    :href="repositoryUrl"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="inline-flex items-center gap-2 text-sm font-medium text-ink-muted hover:text-ink"
+                                >
+                                    <PhGithubLogo :size="18" aria-hidden="true" />
+                                    {{ t('nav.repository') }}
+                                    <PhArrowUpRight :size="14" aria-hidden="true" />
+                                </a>
+                                <div class="flex items-center gap-1">
+                                    <LanguageSwitcher />
+                                    <ThemeToggle />
                                 </div>
                             </div>
                         </SheetContent>
                     </Sheet>
                 </div>
-
-                <Link href="/" class="relative z-20 flex items-center gap-x-2">
-                    <AppLogo />
-                </Link>
-
-                <!-- Desktop Menu -->
-                <div class="pointer-events-none hidden h-full lg:absolute lg:inset-x-0 lg:flex lg:justify-center">
-                    <NavigationMenu class="pointer-events-auto ml-10 flex h-full items-stretch">
-                        <NavigationMenuList class="flex h-full items-stretch space-x-2">
-                            <NavigationMenuItem v-for="(item, index) in mainNavItems" :key="index" class="relative flex h-full items-center">
-                                <Link
-                                    :class="[
-                                        navigationMenuTriggerStyle(),
-                                        whenCurrentUrl(item.href, activeItemStyles),
-                                        'h-9 cursor-pointer rounded-xl px-3 transition hover:bg-primary/10 hover:text-primary',
-                                    ]"
-                                    :href="item.href"
-                                >
-                                    <component v-if="item.icon" :is="item.icon" class="mr-2 h-4 w-4" />
-                                    {{ item.title }}
-                                </Link>
-                                <div
-                                    v-if="isCurrentUrl(item.href)"
-                                    class="absolute right-3 bottom-0 left-3 h-0.5 translate-y-px rounded-full bg-gradient-to-r from-primary to-secondary"
-                                ></div>
-                            </NavigationMenuItem>
-                        </NavigationMenuList>
-                    </NavigationMenu>
-                </div>
-
-                <div class="ml-auto flex items-center space-x-2">
-                    <LanguageSwitcher />
-                    <ThemeToggle />
-                    <div class="relative flex items-center space-x-1">
-                        <div class="hidden space-x-1 lg:flex">
-                            <template v-for="item in rightNavItems" :key="item.title">
-                                <TooltipProvider :delay-duration="0">
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                            <Button variant="ghost" size="icon" as-child class="group h-9 w-9 cursor-pointer">
-                                                <a
-                                                    :href="toUrl(item.href)"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    class="rounded-xl bg-white/60 ring-1 ring-border/70 dark:bg-white/5"
-                                                >
-                                                    <span class="sr-only">{{ item.title }}</span>
-                                                    <component :is="item.icon" class="size-5 opacity-80 group-hover:opacity-100" />
-                                                </a>
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{{ item.title }}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            </template>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <div v-if="props.breadcrumbs.length > 1" class="flex w-full border-b border-sidebar-border/70">
-            <div class="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl">
+        <div v-if="props.breadcrumbs.length > 1" class="border-b border-hairline bg-canvas">
+            <div class="site-container flex h-11 items-center text-ink-muted">
                 <Breadcrumbs :breadcrumbs="breadcrumbs" />
             </div>
         </div>
-    </div>
+    </header>
 </template>

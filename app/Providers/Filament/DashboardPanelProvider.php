@@ -35,11 +35,13 @@ class DashboardPanelProvider extends PanelProvider
             ->id('dashboard')
             ->path('dashboard')
             ->viteTheme('resources/css/filament/dashboard/theme.css')
-            ->brandName('ATIx-Bedrijvendag')
+            ->brandName('ATIx Bedrijvendag')
             ->brandLogo(asset('favicon.svg'))
-            ->brandLogoHeight('2.5rem')
+            ->brandLogoHeight('2rem')
             ->favicon(asset('favicon.svg'))
             ->defaultThemeMode(ThemeMode::Light)
+            ->font('Geist')
+            ->sidebarCollapsibleOnDesktop()
             ->renderHook(
                 PanelsRenderHook::HEAD_START,
                 fn (): string => view('filament.theme-cookie-sync')->render(),
@@ -58,11 +60,12 @@ class DashboardPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
+            // Daily work first, configuration last.
             ->navigationGroups([
-                'Settings',
-                'Catalog',
                 'Edition',
                 'Company',
+                'Catalog',
+                'Settings',
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([

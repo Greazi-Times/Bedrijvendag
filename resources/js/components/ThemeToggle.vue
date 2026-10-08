@@ -1,7 +1,6 @@
 <script setup lang="ts">
+import { PhMoon, PhSun } from '@phosphor-icons/vue';
 import { computed } from 'vue';
-import { Moon, Sun } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
 import { useAppearance } from '@/composables/useAppearance';
 import { useTranslations } from '@/i18n';
 
@@ -17,16 +16,14 @@ const toggleTheme = () => {
 </script>
 
 <template>
-    <Button
+    <button
         type="button"
-        variant="ghost"
-        size="icon"
-        class="h-9 w-9 cursor-pointer rounded-xl bg-white/60 ring-1 ring-border/70 dark:bg-white/5"
+        class="inline-flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-input)] text-ink-muted transition-colors hover:bg-surface hover:text-ink"
         :aria-label="label"
         :title="label"
         @click="toggleTheme"
     >
-        <Sun v-if="isDark" class="size-5" aria-hidden="true" />
-        <Moon v-else class="size-5" aria-hidden="true" />
-    </Button>
+        <PhSun v-if="isDark" :size="18" aria-hidden="true" />
+        <PhMoon v-else :size="18" aria-hidden="true" />
+    </button>
 </template>

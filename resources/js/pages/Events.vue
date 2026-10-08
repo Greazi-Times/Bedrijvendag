@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { Head } from '@inertiajs/vue3';
+import { PhArrowRight, PhArrowUpRight, PhCalendarBlank, PhImages } from '@phosphor-icons/vue';
+import { computed, ref } from 'vue';
 
-import AppFooter from '@/components/AppFooter.vue';
-import AppHeader from '@/components/AppHeader.vue';
+import EmptyState from '@/components/site/EmptyState.vue';
+import PageIntro from '@/components/site/PageIntro.vue';
+import SiteDialog from '@/components/site/SiteDialog.vue';
+import SiteImage from '@/components/site/SiteImage.vue';
+import SiteLayout from '@/components/site/SiteLayout.vue';
 import { useTranslations } from '@/i18n';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 type EventItem = {
     id: number;
@@ -38,17 +44,14 @@ const props = defineProps<Props>();
 const { dateLocale, t } = useTranslations();
 
 const selected = ref<EventItem | null>(null);
-const isModalOpen = computed(() => selected.value !== null);
+const isModalOpen = ref(false);
 
 const featuredUpcoming = computed(() => props.upcoming[0] ?? null);
 const otherUpcoming = computed(() => props.upcoming.slice(1));
 
-function closeModal() {
-    selected.value = null;
-}
-
 function openModal(event: EventItem) {
     selected.value = event;
+    isModalOpen.value = true;
 }
 
 function formatDateRange(startsAt: string | null, endsAt: string | null) {
@@ -63,254 +66,151 @@ function formatDateRange(startsAt: string | null, endsAt: string | null) {
     const start = startsAt ? fmt.format(new Date(startsAt)) : null;
     const end = endsAt ? fmt.format(new Date(endsAt)) : null;
 
-    if (start && end && start !== end) return `${start} – ${end}`;
+    if (start && end && start !== end) return `${start} - ${end}`;
     return start ?? end ?? t('common.unknownDate');
 }
 
-function onKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape') closeModal();
+function dayOf(value: string | null) {
+    if (!value) return '?';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? '?' : new Intl.DateTimeFormat(dateLocale.value, { day: 'numeric' }).format(date);
 }
 
-onMounted(() => {
-    window.addEventListener('keydown', onKeydown);
-});
+function monthMeta(event: EventItem) {
+    const date = event.starts_at ? new Date(event.starts_at) : null;
+    const month = date && !Number.isNaN(date.getTime()) ? new Intl.DateTimeFormat(dateLocale.value, { month: 'long', year: 'numeric' }).format(date) : t('common.unknownDate');
+    return event.location ? `${month} · ${event.location}` : month;
+}
 
-onBeforeUnmount(() => {
-    window.removeEventListener('keydown', onKeydown);
-});
+function eventMeta(event: EventItem) {
+    const date = formatDateRange(event.starts_at, event.ends_at);
+    return event.location ? `${date} · ${event.location}` : date;
+}
 </script>
 
 <template>
-    <AppHeader class="sticky top-0 z-50" />
+    <Head :title="t('events.title')" />
 
-    <main class="relative">
-        <section class="brand-hero relative overflow-hidden px-6 py-16 sm:py-20 lg:px-16">
-            <div class="relative mx-auto w-full max-w-7xl">
-                <div class="flex flex-col gap-3">
-                    <p class="brand-eyebrow w-fit">{{ t('events.eyebrow') }}</p>
-                    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">{{ t('events.title') }}</h1>
-                    <p class="max-w-2xl text-base leading-relaxed text-muted-foreground">{{ t('events.intro') }}</p>
-                </div>
+    <SiteLayout>
+        <PageIntro :eyebrow="t('events.eyebrow')" :title="t('events.title')" :lead="t('events.intro')" />
 
-                <div class="mt-10 space-y-10">
-                    <!-- Featured upcoming -->
-                    <section>
-                        <div class="flex items-baseline justify-between">
-                            <h2 class="text-xl font-semibold">{{ t('events.upcoming') }}</h2>
-                            <span class="text-sm text-muted-foreground">{{ t('events.eventCount', { count: props.upcoming.length }) }}</span>
-                        </div>
+        <!-- Upcoming -->
+        <section class="site-container pt-14 pb-20 md:pt-20 md:pb-28" aria-labelledby="upcoming-heading">
+            <div class="flex items-baseline justify-between gap-4 border-b border-hairline pb-5">
+                <h2 id="upcoming-heading" class="t-h3 text-ink">{{ t('events.upcoming') }}</h2>
+                <span class="text-sm text-ink-muted">{{ t('events.eventCount', { count: props.upcoming.length }) }}</span>
+            </div>
 
-                        <div v-if="featuredUpcoming" class="mt-4">
-                            <button type="button" class="brand-card brand-card-hover group w-full overflow-hidden rounded-3xl text-left" @click="openModal(featuredUpcoming)">
-                                <div class="grid grid-cols-1 gap-0 lg:grid-cols-5">
-                                    <div class="lg:col-span-3">
-                                        <div class="relative">
-                                            <div class="h-56 w-full bg-gradient-to-br from-secondary/12 via-white/50 to-primary/10 sm:h-72">
-                                                <img
-                                                    v-if="featuredUpcoming.header_image_url"
-                                                    :src="featuredUpcoming.header_image_url"
-                                                    :alt="featuredUpcoming.title"
-                                                    class="h-full w-full object-cover"
-                                                />
-                                            </div>
-                                            <div
-                                                class="absolute top-5 left-5 inline-flex items-center gap-2 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border"
-                                            >
-                                                <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                                                {{ t('events.nextEdition') }}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="lg:col-span-2">
-                                        <div class="flex h-full flex-col justify-between p-6">
-                                            <div>
-                                                <p class="text-sm text-muted-foreground">
-                                                    {{ formatDateRange(featuredUpcoming.starts_at, featuredUpcoming.ends_at) }}
-                                                    <span v-if="featuredUpcoming.location">• {{ featuredUpcoming.location }}</span>
-                                                </p>
-                                                <h3 class="mt-2 text-2xl font-semibold tracking-tight">
-                                                    {{ featuredUpcoming.title }}
-                                                </h3>
-                                                <p v-if="featuredUpcoming.short_description" class="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                                                    {{ featuredUpcoming.short_description }}
-                                                </p>
-                                            </div>
-
-                                            <div class="mt-6 flex items-center justify-between">
-                                                <span class="text-sm text-muted-foreground">{{ t('events.clickDetails') }}</span>
-                                                <span
-                                                    class="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition group-hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                                >
-                                                    {{ t('common.details') }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+            <template v-if="featuredUpcoming">
+                <article v-reveal class="theme-dark group relative isolate mt-8 grid grid-cols-1 overflow-hidden rounded-[var(--radius-panel)] lg:grid-cols-12">
+                    <div class="aurora opacity-80" aria-hidden="true"></div>
+                    <div class="media media-zoom relative aspect-[16/10] rounded-none lg:col-span-7 lg:aspect-auto lg:min-h-[30rem]">
+                        <SiteImage :src="featuredUpcoming.header_image_url" :alt="featuredUpcoming.title" loading="eager" />
+                    </div>
+                    <div class="relative flex flex-col p-7 sm:p-10 lg:col-span-5 lg:p-12">
+                        <p class="chip chip-brand self-start bg-brand text-[#0b0f19] shadow-none">{{ t('events.nextEdition') }}</p>
+                        <p class="mt-auto pt-10 text-[5.5rem] leading-none font-semibold tracking-[-0.06em] text-ink sm:text-[7rem]">{{ dayOf(featuredUpcoming.starts_at) }}</p>
+                        <p class="mt-2 text-sm text-ink-muted first-letter:uppercase">{{ monthMeta(featuredUpcoming) }}</p>
+                        <h3 class="t-h2 mt-6 text-ink">
+                            <button type="button" class="text-left after:absolute after:inset-0 after:rounded-[var(--radius-panel)]" @click="openModal(featuredUpcoming)">
+                                {{ featuredUpcoming.title }}
                             </button>
+                        </h3>
+                        <p v-if="featuredUpcoming.short_description" class="t-body mt-4 line-clamp-3">{{ featuredUpcoming.short_description }}</p>
+                        <p class="mt-8 inline-flex items-center gap-1.5 text-sm font-medium text-brand">
+                            {{ t('events.clickDetails') }}
+                            <PhArrowRight :size="14" weight="bold" class="transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
+                        </p>
+                    </div>
+                </article>
 
-                            <div v-if="otherUpcoming.length" class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                <button
-                                    v-for="event in otherUpcoming"
-                                    :key="event.id"
-                                    type="button"
-                                    class="brand-card brand-card-hover group overflow-hidden rounded-2xl text-left"
-                                    @click="openModal(event)"
-                                >
-                                    <div class="h-40 w-full bg-gradient-to-br from-secondary/12 via-white/50 to-primary/10">
-                                        <img v-if="event.header_image_url" :src="event.header_image_url" :alt="event.title" class="h-full w-full object-cover" />
-                                    </div>
-                                    <div class="p-5">
-                                        <p class="text-xs text-muted-foreground">
-                                            {{ formatDateRange(event.starts_at, event.ends_at) }}
-                                            <span v-if="event.location">• {{ event.location }}</span>
-                                        </p>
-                                        <h3 class="mt-2 line-clamp-2 text-base font-semibold">{{ event.title }}</h3>
-                                        <p v-if="event.short_description" class="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-                                            {{ event.short_description }}
-                                        </p>
-                                    </div>
-                                </button>
-                            </div>
+                <ul v-if="otherUpcoming.length" class="mt-14 grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+                    <li v-for="(event, index) in otherUpcoming" :key="event.id" v-reveal="(index % 3) * 60" class="group relative">
+                        <div class="media media-zoom aspect-[4/3]">
+                            <SiteImage :src="event.header_image_url" :alt="event.title" />
                         </div>
-
-                        <div v-else class="mt-4 rounded-2xl border border-dashed border-border bg-background/40 px-5 py-6 text-sm text-muted-foreground">
-                            {{ t('events.noneUpcoming') }}
-                        </div>
-                    </section>
-
-                    <!-- Past editions -->
-                    <section>
-                        <div class="flex items-baseline justify-between">
-                            <h2 class="text-xl font-semibold">{{ t('events.previous') }}</h2>
-                            <span class="text-sm text-muted-foreground">{{ t('events.editionCount', { count: props.past.length }) }}</span>
-                        </div>
-
-                        <div v-if="props.past.length" class="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            <button
-                                v-for="event in props.past"
-                                :key="event.id"
-                                type="button"
-                                class="brand-card brand-card-hover group overflow-hidden rounded-2xl text-left"
-                                @click="openModal(event)"
-                            >
-                                <div class="h-44 w-full bg-gradient-to-br from-secondary/12 via-white/50 to-primary/10 sm:h-48">
-                                    <img v-if="event.header_image_url" :src="event.header_image_url" :alt="event.title" class="h-full w-full object-cover" />
-                                </div>
-
-                                <div class="p-5">
-                                    <div class="flex items-center gap-3 text-xs text-muted-foreground">
-                                        <span class="inline-flex items-center gap-2">
-                                            <span class="inline-flex h-2 w-2 rounded-full bg-gray-400" />
-                                            {{ t('events.earlier') }}
-                                        </span>
-                                        <span class="truncate">
-                                            {{ formatDateRange(event.starts_at, event.ends_at) }}
-                                            <span v-if="event.location">• {{ event.location }}</span>
-                                        </span>
-                                    </div>
-
-                                    <h3 class="mt-2 line-clamp-2 text-base font-semibold">
-                                        {{ event.title }}
-                                    </h3>
-
-                                    <p v-if="event.short_description" class="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-                                        {{ event.short_description }}
-                                    </p>
-
-                                    <p v-else class="mt-2 line-clamp-2 text-sm text-muted-foreground">{{ t('events.clickMore') }}</p>
-
-                                    <div class="mt-4 flex items-center justify-between">
-                                        <span class="text-sm text-muted-foreground">{{ t('common.details') }}</span>
-                                        <span class="text-sm font-medium text-foreground">{{ t('common.open') }}</span>
-                                    </div>
-                                </div>
+                        <p class="t-mono mt-4 text-sm text-ink-muted">{{ eventMeta(event) }}</p>
+                        <h3 class="t-h4 mt-2 line-clamp-2 text-ink">
+                            <button type="button" class="text-left after:absolute after:inset-0 after:rounded-[var(--radius-card)]" @click="openModal(event)">
+                                {{ event.title }}
                             </button>
-                        </div>
+                        </h3>
+                        <p v-if="event.short_description" class="t-small mt-2 line-clamp-2">{{ event.short_description }}</p>
+                    </li>
+                </ul>
+            </template>
 
-                        <div v-else class="mt-4 rounded-2xl border border-dashed border-border bg-background/40 px-5 py-6 text-sm text-muted-foreground">
-                            {{ t('events.nonePrevious') }}
-                        </div>
-                    </section>
-                </div>
+            <div v-else class="mt-8">
+                <EmptyState :icon="PhCalendarBlank" :title="t('events.noneUpcoming')" />
             </div>
         </section>
 
-        <!-- Modal -->
-        <teleport to="body">
-            <div v-if="isModalOpen" class="fixed inset-0 z-50 bg-black/60" :aria-label="t('common.close')" @click="closeModal">
-                <div class="absolute inset-0 flex items-center justify-center px-4 py-8">
-                    <div
-                        class="flex max-h-[80vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-background shadow-xl ring-1 ring-border"
-                        role="dialog"
-                        aria-modal="true"
-                        @click.stop
+        <!-- Past -->
+        <section class="border-t border-hairline bg-surface/60 py-20 md:py-28" aria-labelledby="past-heading">
+            <div class="site-container">
+                <div class="flex items-baseline justify-between gap-4 border-b border-hairline pb-5">
+                    <h2 id="past-heading" class="t-h3 text-ink">{{ t('events.previous') }}</h2>
+                    <span class="text-sm text-ink-muted">{{ t('events.editionCount', { count: props.past.length }) }}</span>
+                </div>
+
+                <ul v-if="props.past.length" class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <li
+                        v-for="(event, index) in props.past"
+                        :key="event.id"
+                        v-reveal="(index % 3) * 60"
+                        class="theme-dark group card-lift relative isolate flex min-h-[24rem] flex-col justify-end overflow-hidden rounded-[var(--radius-card)] p-6 text-white sm:p-7"
                     >
-                        <div class="flex shrink-0 items-start justify-between gap-4 border-b border-border px-6 py-5">
-                            <div class="min-w-0">
-                                <p class="text-sm text-muted-foreground">
-                                    {{ formatDateRange(selected?.starts_at ?? null, selected?.ends_at ?? null) }}
-                                    <span v-if="selected?.location">• {{ selected.location }}</span>
-                                </p>
-                                <h3 class="mt-1 truncate text-xl font-semibold">{{ selected?.title }}</h3>
-                            </div>
+                        <div
+                            class="absolute inset-0 -z-10 [&>*]:size-full [&>img]:object-cover [&>img]:transition-transform [&>img]:duration-[1200ms] [&>img]:ease-[var(--ease-out-expo)] group-hover:[&>img]:scale-[1.05]"
+                        >
+                            <SiteImage :src="event.header_image_url" :alt="event.title" />
                         </div>
+                        <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_top,rgb(5_6_9/0.92)_0%,rgb(5_6_9/0.35)_55%,rgb(5_6_9/0.05)_100%)]" aria-hidden="true"></div>
+                        <PhArrowUpRight
+                            :size="20"
+                            weight="bold"
+                            class="absolute top-6 right-6 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
+                            aria-hidden="true"
+                        />
+                        <p class="text-[4.5rem] leading-none font-semibold tracking-[-0.06em]">{{ dayOf(event.starts_at) }}</p>
+                        <p class="mt-2 text-sm text-white/70 first-letter:uppercase">{{ monthMeta(event) }}</p>
+                        <h3 class="t-h4 mt-4 border-t border-white/20 pt-4">
+                            <button type="button" class="text-left after:absolute after:inset-0" @click="openModal(event)">{{ event.title }}</button>
+                        </h3>
+                        <p class="mt-1 line-clamp-2 text-sm text-white/70">{{ event.short_description || t('events.clickMore') }}</p>
+                    </li>
+                </ul>
 
-                        <div class="flex-1 overflow-y-auto overscroll-contain px-6 py-6">
-                            <div class="max-w-none">
-                                <div v-if="selected?.header_image_url" class="overflow-hidden rounded-2xl ring-1 ring-border">
-                                    <img :src="selected.header_image_url" :alt="selected.title" class="h-56 w-full object-cover sm:h-64" />
-                                </div>
-
-                                <div class="mt-4">
-                                    <p class="text-sm font-semibold text-foreground">{{ t('common.description') }}</p>
-
-                                    <div v-if="selected?.description_html" class="prose prose-sm mt-2 max-w-none dark:prose-invert" v-html="selected.description_html" />
-
-                                    <p v-else class="mt-2 text-sm text-muted-foreground">{{ t('common.noDescription') }}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="shrink-0 border-t border-border px-6 py-5">
-                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <p class="text-xs text-muted-foreground">{{ t('events.modalHint') }}</p>
-
-                                <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                                    <a
-                                        v-if="selected?.edition_url"
-                                        :href="selected.edition_url"
-                                        class="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                    >
-                                        {{ t('events.viewFull') }}
-                                    </a>
-
-                                    <a
-                                        v-if="selected?.gallery_url"
-                                        :href="selected.gallery_url"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        class="inline-flex items-center justify-center rounded-xl bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                    >
-                                        {{ t('events.viewPhotos') }}
-                                    </a>
-
-                                    <button
-                                        type="button"
-                                        class="inline-flex items-center justify-center rounded-xl bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                        @click="closeModal"
-                                    >
-                                        {{ t('common.close') }}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div v-else class="mt-8">
+                    <EmptyState :icon="PhImages" :title="t('events.nonePrevious')" />
                 </div>
             </div>
-        </teleport>
-    </main>
+        </section>
+    </SiteLayout>
 
-    <AppFooter />
+    <SiteDialog v-if="selected" v-model:open="isModalOpen" :title="selected.title" :meta="eventMeta(selected)" size="lg">
+        <div v-if="selected.header_image_url" class="media aspect-[16/9]">
+            <SiteImage :src="selected.header_image_url" :alt="selected.title" loading="eager" />
+        </div>
+        <div :class="selected.header_image_url ? 'mt-6' : ''">
+            <div v-if="selected.description_html" class="rich" v-html="sanitizeHtml(selected.description_html)" />
+            <p v-else class="t-body">{{ t('common.noDescription') }}</p>
+        </div>
+
+        <template #footer>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p class="t-small">{{ t('events.modalHint') }}</p>
+                <div class="flex flex-wrap gap-2">
+                    <a v-if="selected.gallery_url" :href="selected.gallery_url" target="_blank" rel="noreferrer" class="btn btn-secondary">
+                        {{ t('events.viewPhotos') }}
+                        <PhArrowUpRight :size="16" weight="bold" aria-hidden="true" />
+                    </a>
+                    <a v-if="selected.edition_url" :href="selected.edition_url" class="btn btn-primary">
+                        {{ t('events.viewFull') }}
+                        <PhArrowRight :size="16" weight="bold" aria-hidden="true" />
+                    </a>
+                </div>
+            </div>
+        </template>
+    </SiteDialog>
 </template>

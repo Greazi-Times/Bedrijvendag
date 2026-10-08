@@ -4,6 +4,8 @@ import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import '../css/app.css';
 import { initializeTheme } from './composables/useAppearance';
+import { reveal } from './lib/reveal';
+import { spotlight } from './lib/spotlight';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -13,10 +15,12 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })
             .use(plugin)
+            .directive('reveal', reveal)
+            .directive('spotlight', spotlight)
             .mount(el);
     },
     progress: {
-        color: '#4B5563',
+        color: '#FF6A00',
     },
 });
 

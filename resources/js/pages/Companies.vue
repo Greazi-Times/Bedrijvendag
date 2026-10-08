@@ -1,8 +1,17 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
-import AppFooter from '@/components/AppFooter.vue';
-import AppHeader from '@/components/AppHeader.vue';
+import { Head } from '@inertiajs/vue3';
+import { PhArrowUpRight, PhBuildings, PhFunnelSimple, PhMagnifyingGlass, PhPlus } from '@phosphor-icons/vue';
+import { computed, ref } from 'vue';
+import ActiveFilterChips from '@/components/site/ActiveFilterChips.vue';
+import CompanyDialog from '@/components/site/CompanyDialog.vue';
+import EmptyState from '@/components/site/EmptyState.vue';
+import FilterSheet from '@/components/site/FilterSheet.vue';
+import PageIntro from '@/components/site/PageIntro.vue';
+import SearchField from '@/components/site/SearchField.vue';
+import SiteLayout from '@/components/site/SiteLayout.vue';
 import { useTranslations } from '@/i18n';
+import { htmlToText } from '@/lib/sanitize';
+import type { CompanyDialogData } from '@/types/site';
 
 type EventDto = {
     id: number;
@@ -39,39 +48,36 @@ const props = defineProps<{
 }>();
 const { dateLocale, t } = useTranslations();
 
+const educationsPreview = (company: CompanyDto) => (company.educations ?? []).slice(0, 2);
+
 const q = ref('');
 const selectedEducations = ref<string[]>([]);
 const selectedSectors = ref<string[]>([]);
 
 const isFilterOpen = ref(false);
-const educationFilterQuery = ref('');
-const sectorFilterQuery = ref('');
 
 const selectedCompany = ref<CompanyDto | null>(null);
+const isCompanyOpen = ref(false);
 
 const openCompany = (company: CompanyDto) => {
     selectedCompany.value = company;
-    document.body.style.overflow = 'hidden';
+    isCompanyOpen.value = true;
 };
 
-const closeCompany = () => {
-    selectedCompany.value = null;
-    // Only unlock scroll if filters are not open
-    if (!isFilterOpen.value) document.body.style.overflow = '';
-};
+const companyDialogData = computed<CompanyDialogData | null>(() => {
+    const c = selectedCompany.value;
+    if (!c) return null;
 
-const onKeydown = (e: KeyboardEvent) => {
-    if (e.key !== 'Escape') return;
-    if (selectedCompany.value) return closeCompany();
-    if (isFilterOpen.value) return closeFilters();
-};
-
-onMounted(() => {
-    window.addEventListener('keydown', onKeydown);
-});
-
-onUnmounted(() => {
-    window.removeEventListener('keydown', onKeydown);
+    return {
+        name: c.name,
+        kind: t('common.company'),
+        stand: c.booth,
+        logoUrl: c.logo_url,
+        description: c.description,
+        educations: c.educations,
+        sectors: c.sectors,
+        websiteUrl: c.website_url,
+    };
 });
 
 const eventDateLabel = computed(() => {
@@ -114,44 +120,9 @@ const sectorOptions = computed<string[]>(() => {
     return Array.from(set).sort((a, b) => a.localeCompare(b, 'nl'));
 });
 
-const filteredEducationOptions = computed(() => {
-    const query = educationFilterQuery.value.trim().toLowerCase();
-    if (!query) return educationOptions.value;
-    return educationOptions.value.filter((n) => n.toLowerCase().includes(query));
-});
-
-const filteredSectorOptions = computed(() => {
-    const query = sectorFilterQuery.value.trim().toLowerCase();
-    if (!query) return sectorOptions.value;
-    return sectorOptions.value.filter((n) => n.toLowerCase().includes(query));
-});
-
-const toggle = (arr: string[], value: string) => {
-    const i = arr.indexOf(value);
-    if (i >= 0) arr.splice(i, 1);
-    else arr.push(value);
-};
-
-const clearFilters = () => {
+const clearAll = () => {
     selectedEducations.value = [];
     selectedSectors.value = [];
-};
-
-const openFilters = () => {
-    isFilterOpen.value = true;
-    document.body.style.overflow = 'hidden';
-};
-
-const closeFilters = () => {
-    isFilterOpen.value = false;
-    // Only unlock scroll if company modal is not open
-    if (!selectedCompany.value) document.body.style.overflow = '';
-};
-
-const clearAll = () => {
-    clearFilters();
-    educationFilterQuery.value = '';
-    sectorFilterQuery.value = '';
 };
 
 const filteredCompanies = computed(() => {
@@ -190,489 +161,125 @@ const scrollToNewsletter = () => {
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     window.setTimeout(() => el.focus(), 250);
 };
-
-const sanitizeHtml = (value: string) => {
-    // Company descriptions are stored as rich text (HTML). We still need to guard against XSS.
-    // Best practice: sanitize server-side too, but this adds a client-side safety net.
-    try {
-        const doc = new DOMParser().parseFromString(String(value ?? ''), 'text/html');
-
-        // Remove dangerous elements
-        doc.querySelectorAll('script, style, iframe, object, embed, link, meta').forEach((el) => el.remove());
-
-        // Remove dangerous attributes and JS URLs
-        const all = doc.body.querySelectorAll('*');
-        for (const el of all) {
-            for (const attr of Array.from(el.attributes)) {
-                const name = attr.name.toLowerCase();
-                const val = (attr.value ?? '').trim().toLowerCase();
-
-                // event handlers like onclick, onerror, etc.
-                if (name.startsWith('on')) {
-                    el.removeAttribute(attr.name);
-                    continue;
-                }
-
-                // javascript: URLs in href/src
-                if ((name === 'href' || name === 'src') && val.startsWith('javascript:')) {
-                    el.removeAttribute(attr.name);
-                    continue;
-                }
-            }
-        }
-
-        return doc.body.innerHTML;
-    } catch {
-        return String(value ?? '');
-    }
-};
 </script>
 
 <template>
-    <AppHeader />
+    <Head :title="t('companies.title')" />
 
-    <main class="brand-hero min-h-screen overflow-hidden px-6 py-16 lg:px-16">
-        <div class="relative z-10 mx-auto max-w-7xl">
-            <header class="mx-auto max-w-3xl text-center">
-                <p class="brand-eyebrow">{{ t('companies.eyebrow') }}</p>
-                <h1 class="mt-4 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">{{ t('companies.title') }}</h1>
-                <p class="mt-4 text-base leading-relaxed text-muted-foreground">
-                    {{ headerSubtitle }}
-                </p>
+    <SiteLayout>
+        <PageIntro :eyebrow="t('companies.eyebrow')" :title="t('companies.title')" :lead="headerSubtitle" />
 
-                <div class="mt-10">
-                    <div class="mx-auto max-w-2xl">
-                        <input
-                            v-model="q"
-                            type="search"
-                            :placeholder="t('companies.searchPlaceholder')"
-                            class="brand-input h-12 w-full rounded-xl px-4 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                        />
-                    </div>
-
-                    <div class="mx-auto mt-5 flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div class="flex items-center justify-center gap-3 sm:justify-start">
-                            <div class="inline-flex items-center gap-2 rounded-xl bg-accent px-3 py-2 text-xs font-semibold text-accent-foreground ring-1 ring-border">
-                                <span class="h-2 w-2 rounded-full bg-primary"></span>
-                                <span>{{ t('companies.companyCount', { count: filteredCompanies.length }) }}</span>
-                            </div>
-
-                            <div v-if="activeFilterCount" class="text-xs font-semibold text-muted-foreground">{{ t('companies.activeFilters', { count: activeFilterCount }) }}</div>
-                        </div>
-
-                        <div class="flex items-center justify-center gap-2 sm:justify-end">
-                            <button
-                                type="button"
-                                class="inline-flex items-center justify-center rounded-xl bg-white/80 px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none dark:bg-white/10 dark:hover:bg-white/15"
-                                @click="openFilters"
-                            >
-                                {{ t('common.filters') }}
-                                <span
-                                    v-if="activeFilterCount"
-                                    class="ml-2 inline-flex min-w-6 items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground"
-                                >
-                                    {{ activeFilterCount }}
-                                </span>
-                            </button>
-
-                            <button
-                                v-if="activeFilterCount"
-                                type="button"
-                                class="inline-flex items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground ring-1 ring-border transition hover:bg-accent/70 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                @click="clearAll"
-                            >
-                                {{ t('common.clear') }}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div v-if="activeFilterCount" class="mx-auto mt-4 flex max-w-4xl flex-wrap justify-center gap-2">
-                        <span
-                            v-for="n in selectedEducations"
-                            :key="'sel-edu-' + n"
-                            class="inline-flex items-center gap-2 rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-700 ring-1 ring-orange-500/30 dark:text-orange-300"
-                        >
-                            {{ n }}
-                            <button type="button" class="text-muted-foreground hover:text-foreground" @click="toggle(selectedEducations, n)">×</button>
-                        </span>
-
-                        <span
-                            v-for="n in selectedSectors"
-                            :key="'sel-sec-' + n"
-                            class="inline-flex items-center gap-2 rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-500/30 dark:text-blue-300"
-                        >
-                            {{ n }}
-                            <button type="button" class="text-muted-foreground hover:text-foreground" @click="toggle(selectedSectors, n)">×</button>
-                        </span>
-                    </div>
+        <section class="site-container pt-10 pb-24 md:pt-14 md:pb-32">
+            <div class="flex flex-col gap-4 border-b border-hairline pb-6 md:flex-row md:items-center">
+                <div class="w-full md:max-w-md">
+                    <SearchField id="company-search" v-model="q" :label="t('common.search')" :placeholder="t('companies.searchPlaceholder')" />
                 </div>
-            </header>
+                <div class="flex items-center justify-between gap-3 md:flex-1">
+                    <button type="button" class="btn btn-secondary" @click="isFilterOpen = true">
+                        <PhFunnelSimple :size="18" aria-hidden="true" />
+                        {{ t('common.filters') }}
+                        <span v-if="activeFilterCount" class="flex min-w-5 items-center justify-center rounded-full bg-ink px-1.5 text-[0.6875rem] leading-5 text-canvas">
+                            {{ activeFilterCount }}
+                        </span>
+                    </button>
+                    <p class="text-sm text-ink-muted" aria-live="polite">{{ t('companies.companyCount', { count: filteredCompanies.length }) }}</p>
+                </div>
+            </div>
 
-            <section v-if="filteredCompanies.length" class="mt-14 grid grid-cols-1 gap-8 md:grid-cols-2">
-                <article
-                    v-for="company in filteredCompanies"
+            <div v-if="activeFilterCount" class="flex flex-wrap items-center gap-3 pt-5">
+                <ActiveFilterChips v-model:educations="selectedEducations" v-model:sectors="selectedSectors" />
+                <button type="button" class="text-sm font-medium text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink" @click="clearAll">
+                    {{ t('common.clearAll') }}
+                </button>
+            </div>
+
+            <ul v-if="filteredCompanies.length" class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <li
+                    v-for="(company, index) in filteredCompanies"
                     :key="company.id"
-                    role="button"
-                    tabindex="0"
-                    class="brand-card brand-card-hover group cursor-pointer overflow-hidden rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-                    @click="openCompany(company)"
-                    @keydown.enter.prevent="openCompany(company)"
-                    @keydown.space.prevent="openCompany(company)"
+                    v-reveal="(index % 3) * 60"
+                    v-spotlight
+                    class="spot card-lift group relative flex flex-col p-2.5"
                 >
-                    <div class="relative aspect-[16/7] w-full bg-gradient-to-br from-secondary/12 via-white/50 to-primary/10">
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <img
-                                v-if="company.logo_url"
-                                :src="company.logo_url"
-                                :alt="company.name"
-                                class="max-h-20 w-full max-w-[320px] object-contain px-8 opacity-90"
-                                loading="lazy"
-                                decoding="async"
-                            />
-                            <div v-else class="text-sm text-muted-foreground">{{ t('common.noLogo') }}</div>
-                        </div>
-
-                        <div
-                            v-if="company.booth"
-                            class="absolute top-4 left-4 inline-flex items-center rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border"
-                        >
+                    <div class="relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-[var(--radius-input)] bg-canvas p-10 ring-1 ring-hairline">
+                        <img
+                            v-if="company.logo_url"
+                            :src="company.logo_url"
+                            :alt="company.name"
+                            class="max-h-20 w-auto max-w-[70%] object-contain transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:scale-[1.08]"
+                            loading="lazy"
+                            decoding="async"
+                        />
+                        <span v-else class="text-5xl font-semibold tracking-[-0.05em] text-ink-subtle" aria-hidden="true">{{ company.name.charAt(0) }}</span>
+                        <span v-if="company.booth" class="t-mono absolute top-3 left-3 rounded-[var(--radius-chip)] bg-ink px-2.5 py-1 text-xs font-medium text-canvas">
                             {{ t('common.stand') }} {{ company.booth }}
-                        </div>
+                        </span>
+                        <span
+                            class="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full bg-brand text-[#0b0f19] opacity-0 transition-opacity duration-300 group-focus-within:opacity-100 group-hover:opacity-100 max-md:opacity-100"
+                            aria-hidden="true"
+                        >
+                            <PhPlus :size="16" weight="bold" />
+                        </span>
                     </div>
 
-                    <div class="p-6">
-                        <h2 class="text-xl font-semibold tracking-tight text-foreground">
-                            {{ company.name }}
+                    <div class="flex flex-1 flex-col px-3 pt-5 pb-3">
+                        <p v-if="(company.sectors ?? []).length" class="truncate text-sm text-ink-muted">{{ (company.sectors ?? []).join(', ') }}</p>
+
+                        <h2 class="t-h3 mt-1 text-ink">
+                            <button
+                                type="button"
+                                class="text-left after:absolute after:inset-0 after:rounded-[var(--radius-card)] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-brand"
+                                @click="openCompany(company)"
+                            >
+                                {{ company.name }}
+                            </button>
                         </h2>
 
-                        <div
-                            v-if="company.description"
-                            class="prose prose-sm mt-3 line-clamp-2 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ol:my-0 prose-ul:my-0 prose-li:my-0"
-                            v-html="sanitizeHtml(company.description)"
-                        ></div>
-                        <p v-else class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('common.noDescription') }}</p>
+                        <p class="t-small mt-2 line-clamp-2">{{ htmlToText(company.description) || t('common.noDescription') }}</p>
 
-                        <div class="mt-5 grid gap-4 sm:grid-cols-2">
-                            <div>
-                                <div class="text-xs font-semibold text-muted-foreground">{{ t('common.educations') }}</div>
-                                <div class="mt-2 flex flex-wrap gap-2">
-                                    <span
-                                        v-for="n in (company.educations ?? []).slice(0, 4)"
-                                        :key="company.id + '-e-' + n"
-                                        class="inline-flex items-center rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-700 ring-1 ring-orange-500/30 dark:text-orange-300"
-                                    >
-                                        {{ n }}
-                                    </span>
+                        <ul v-if="educationsPreview(company).length" class="mt-4 flex flex-wrap gap-1.5">
+                            <li v-for="n in educationsPreview(company)" :key="company.id + '-e-' + n" class="chip chip-brand">{{ n }}</li>
+                            <li v-if="(company.educations ?? []).length > 2" class="chip">+{{ (company.educations ?? []).length - 2 }}</li>
+                        </ul>
 
-                                    <span
-                                        v-if="!(company.educations ?? []).length"
-                                        class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
-                                    >
-                                        {{ t('common.none') }}
-                                    </span>
-
-                                    <span
-                                        v-else-if="(company.educations ?? []).length > 4"
-                                        class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
-                                    >
-                                        +{{ (company.educations ?? []).length - 4 }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div class="text-xs font-semibold text-muted-foreground">{{ t('common.sectors') }}</div>
-                                <div class="mt-2 flex flex-wrap gap-2">
-                                    <span
-                                        v-for="n in (company.sectors ?? []).slice(0, 4)"
-                                        :key="company.id + '-s-' + n"
-                                        class="inline-flex items-center rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-500/30 dark:text-blue-300"
-                                    >
-                                        {{ n }}
-                                    </span>
-
-                                    <span
-                                        v-if="!(company.sectors ?? []).length"
-                                        class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
-                                    >
-                                        {{ t('common.none') }}
-                                    </span>
-
-                                    <span
-                                        v-else-if="(company.sectors ?? []).length > 4"
-                                        class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
-                                    >
-                                        +{{ (company.sectors ?? []).length - 4 }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-6 flex flex-wrap items-center gap-3">
+                        <div class="mt-auto pt-5">
                             <a
                                 v-if="company.website_url"
-                                class="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
                                 :href="company.website_url"
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                class="relative z-10 inline-flex items-center gap-1.5 text-sm font-medium text-ink hover:text-brand-ink"
                             >
                                 {{ t('common.website') }}
+                                <PhArrowUpRight :size="14" weight="bold" aria-hidden="true" />
                             </a>
-
-                            <span
-                                v-else
-                                class="inline-flex items-center justify-center rounded-xl bg-background px-5 py-2.5 text-sm font-semibold text-foreground ring-1 ring-border"
-                            >
-                                {{ t('common.noWebsite') }}
-                            </span>
+                            <span v-else class="text-sm text-ink-subtle">{{ t('common.noWebsite') }}</span>
                         </div>
                     </div>
-                </article>
-            </section>
+                </li>
+            </ul>
 
-            <section v-else class="brand-card mx-auto mt-14 max-w-3xl rounded-2xl p-10 text-center">
-                <template v-if="!(props.companies ?? []).length">
-                    <h2 class="text-base font-semibold text-foreground">{{ t('companies.finishing') }}</h2>
-                    <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{{ t('companies.finishingDescription') }}</p>
-                    <button
-                        type="button"
-                        class="mt-6 inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                        @click="scrollToNewsletter"
-                    >
-                        {{ t('companies.subscribe') }}
-                    </button>
-                </template>
-                <template v-else>
-                    <h2 class="text-base font-semibold text-foreground">{{ t('companies.noneFound') }}</h2>
-                    <p class="mt-2 text-sm text-muted-foreground">{{ t('companies.adjustFilters') }}</p>
-                </template>
-            </section>
-        </div>
-        <Teleport to="body">
-            <div v-if="isFilterOpen" class="fixed inset-0 z-[100]" aria-modal="true" role="dialog">
-                <button class="absolute inset-0 bg-black/40" type="button" @click="closeFilters" :aria-label="t('common.close')"></button>
-
-                <div class="absolute top-0 right-0 h-full w-full max-w-md overflow-hidden bg-background shadow-xl ring-1 ring-border">
-                    <div class="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
-                        <div>
-                            <div class="text-sm font-semibold text-foreground">{{ t('common.filters') }}</div>
-                            <div class="mt-1 text-xs text-muted-foreground">{{ t('companies.filterDescription') }}</div>
-                        </div>
-
-                        <button
-                            type="button"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                            @click="closeFilters"
-                            :aria-label="t('common.close')"
-                        >
-                            ×
-                        </button>
-                    </div>
-
-                    <div class="h-full overflow-y-auto px-5 py-5 pb-28">
-                        <div class="flex items-center justify-between">
-                            <div class="text-sm font-semibold text-foreground">{{ t('common.selected', { count: activeFilterCount }) }}</div>
-                            <button v-if="activeFilterCount" type="button" class="text-sm font-semibold text-primary hover:underline" @click="clearAll">
-                                {{ t('common.clearAll') }}
-                            </button>
-                        </div>
-
-                        <div class="mt-6">
-                            <div class="text-sm font-semibold text-foreground">{{ t('common.educations') }}</div>
-                            <input
-                                v-model="educationFilterQuery"
-                                type="search"
-                                :placeholder="t('companies.searchEducation')"
-                                class="mt-3 h-10 w-full rounded-xl bg-background px-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                            />
-
-                            <div class="mt-4 space-y-2">
-                                <label
-                                    v-for="name in filteredEducationOptions"
-                                    :key="'f-edu-' + name"
-                                    class="flex items-center gap-3 rounded-xl bg-accent/40 px-3 py-2 ring-1 ring-border/70"
-                                >
-                                    <input type="checkbox" class="h-4 w-4" :checked="selectedEducations.includes(name)" @change="toggle(selectedEducations, name)" />
-                                    <span class="text-sm font-medium text-foreground">{{ name }}</span>
-                                </label>
-
-                                <div v-if="!filteredEducationOptions.length" class="text-sm text-muted-foreground">{{ t('common.noResults') }}</div>
-                            </div>
-                        </div>
-
-                        <div class="mt-8">
-                            <div class="text-sm font-semibold text-foreground">{{ t('common.sectors') }}</div>
-                            <input
-                                v-model="sectorFilterQuery"
-                                type="search"
-                                :placeholder="t('companies.searchSector')"
-                                class="mt-3 h-10 w-full rounded-xl bg-background px-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                            />
-
-                            <div class="mt-4 space-y-2">
-                                <label
-                                    v-for="name in filteredSectorOptions"
-                                    :key="'f-sec-' + name"
-                                    class="flex items-center gap-3 rounded-xl bg-accent/40 px-3 py-2 ring-1 ring-border/70"
-                                >
-                                    <input type="checkbox" class="h-4 w-4" :checked="selectedSectors.includes(name)" @change="toggle(selectedSectors, name)" />
-                                    <span class="text-sm font-medium text-foreground">{{ name }}</span>
-                                </label>
-
-                                <div v-if="!filteredSectorOptions.length" class="text-sm text-muted-foreground">{{ t('common.noResults') }}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="absolute right-0 bottom-0 left-0 border-t border-border bg-background px-5 py-4">
-                        <div class="flex items-center gap-3">
-                            <button
-                                type="button"
-                                class="inline-flex flex-1 items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                @click="closeFilters"
-                            >
-                                {{ t('common.showResults') }}
-                            </button>
-                            <button
-                                type="button"
-                                class="inline-flex items-center justify-center rounded-xl bg-background px-4 py-2.5 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent"
-                                @click="clearAll"
-                            >
-                                {{ t('common.clear') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <div v-else class="mt-10">
+                <EmptyState v-if="!(props.companies ?? []).length" :icon="PhBuildings" :title="t('companies.finishing')" :text="t('companies.finishingDescription')">
+                    <button type="button" class="btn btn-ink" @click="scrollToNewsletter">{{ t('companies.subscribe') }}</button>
+                </EmptyState>
+                <EmptyState v-else :icon="PhMagnifyingGlass" :title="t('companies.noneFound')" :text="t('companies.adjustFilters')">
+                    <button type="button" class="btn btn-secondary" @click="(clearAll(), (q = ''))">{{ t('common.clearAll') }}</button>
+                </EmptyState>
             </div>
-        </Teleport>
+        </section>
+    </SiteLayout>
 
-        <Teleport to="body">
-            <div v-if="selectedCompany" class="fixed inset-0 z-[110]" aria-modal="true" role="dialog">
-                <button class="absolute inset-0 bg-black/50" type="button" @click="closeCompany" :aria-label="t('common.close')"></button>
+    <FilterSheet
+        v-model:open="isFilterOpen"
+        v-model:educations="selectedEducations"
+        v-model:sectors="selectedSectors"
+        :education-options="educationOptions"
+        :sector-options="sectorOptions"
+        :description="t('companies.filterDescription')"
+        :education-placeholder="t('companies.searchEducation')"
+        :sector-placeholder="t('companies.searchSector')"
+    />
 
-                <div
-                    class="absolute top-1/2 left-1/2 flex max-h-[80vh] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl bg-background shadow-2xl ring-1 ring-border"
-                >
-                    <div class="flex shrink-0 items-center justify-between gap-4 border-b border-border px-6 py-5">
-                        <div class="min-w-0">
-                            <div class="text-sm font-semibold text-muted-foreground">{{ t('common.company') }}</div>
-                            <h2 class="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground">
-                                {{ selectedCompany.name }}
-                            </h2>
-                            <div
-                                v-if="selectedCompany.booth"
-                                class="mt-2 inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border"
-                            >
-                                {{ t('common.stand') }} {{ selectedCompany.booth }}
-                            </div>
-                        </div>
-
-                        <div class="flex flex-1 items-center justify-center">
-                            <div class="flex h-14 w-full max-w-[320px] items-center justify-center rounded-lg bg-accent/20 p-[5px] ring-1 ring-border">
-                                <img
-                                    v-if="selectedCompany.logo_url"
-                                    :src="selectedCompany.logo_url"
-                                    :alt="selectedCompany.name"
-                                    class="h-full w-full object-contain"
-                                    loading="lazy"
-                                    decoding="async"
-                                    @error="(e) => ((e.target as HTMLImageElement).style.display = 'none')"
-                                />
-                                <span v-else class="text-xs font-semibold text-muted-foreground">{{ t('common.noLogo') }}</span>
-                            </div>
-                        </div>
-
-                        <button
-                            type="button"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                            @click="closeCompany"
-                            :aria-label="t('common.close')"
-                        >
-                            ×
-                        </button>
-                    </div>
-
-                    <div class="flex-1 overflow-y-auto overscroll-contain px-6 py-6">
-                        <div>
-                            <div class="text-sm font-semibold text-foreground">{{ t('common.description') }}</div>
-                            <div
-                                v-if="selectedCompany.description"
-                                class="prose prose-sm mt-2 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ol:my-0 prose-ul:my-0 prose-li:my-0"
-                                v-html="sanitizeHtml(selectedCompany.description)"
-                            ></div>
-                            <p v-else class="mt-2 text-sm text-muted-foreground">{{ t('common.noDescription') }}</p>
-
-                            <div class="mt-6 grid gap-6 sm:grid-cols-2">
-                                <div>
-                                    <div class="text-sm font-semibold text-foreground">{{ t('common.educations') }}</div>
-                                    <div class="mt-3 flex flex-wrap gap-2">
-                                        <span
-                                            v-for="n in selectedCompany.educations ?? []"
-                                            :key="'m-edu-' + n"
-                                            class="inline-flex items-center rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-700 ring-1 ring-orange-500/30 dark:text-orange-300"
-                                        >
-                                            {{ n }}
-                                        </span>
-                                        <span
-                                            v-if="!(selectedCompany.educations ?? []).length"
-                                            class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
-                                        >
-                                            {{ t('common.none') }}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div class="text-sm font-semibold text-foreground">{{ t('common.sectors') }}</div>
-                                    <div class="mt-3 flex flex-wrap gap-2">
-                                        <span
-                                            v-for="n in selectedCompany.sectors ?? []"
-                                            :key="'m-sec-' + n"
-                                            class="inline-flex items-center rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-500/30 dark:text-blue-300"
-                                        >
-                                            {{ n }}
-                                        </span>
-                                        <span
-                                            v-if="!(selectedCompany.sectors ?? []).length"
-                                            class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
-                                        >
-                                            {{ t('common.none') }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="shrink-0 border-t border-border px-6 py-4">
-                        <div class="flex items-center justify-between gap-3">
-                            <a
-                                v-if="selectedCompany.website_url"
-                                class="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                :href="selectedCompany.website_url"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                {{ t('common.website') }}
-                            </a>
-
-                            <div v-else></div>
-
-                            <button
-                                type="button"
-                                class="inline-flex items-center justify-center rounded-xl bg-background px-4 py-2.5 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent"
-                                @click="closeCompany"
-                            >
-                                {{ t('common.close') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </Teleport>
-    </main>
-
-    <AppFooter />
+    <CompanyDialog v-model:open="isCompanyOpen" :company="companyDialogData" />
 </template>
-
-<style scoped></style>
