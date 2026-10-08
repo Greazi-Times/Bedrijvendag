@@ -5,6 +5,340 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
+/*
+ * ATIx admin theme: a calm, Linear-style work surface in the public site's
+ * brand. Flat surfaces separated by hairlines, 8px controls, 12px cards,
+ * orange reserved for primary actions, focus and the active nav item.
+ * Colours are the public site's tokens (--site-* in theme.css), so light and
+ * dark mode match the website.
+ */
+:root {
+    --admin-page: var(--site-surface);
+    --admin-card: var(--site-canvas);
+    --admin-raised: var(--site-canvas);
+    --admin-ink: var(--site-ink);
+    --admin-muted: var(--site-ink-muted);
+    --admin-line: var(--site-hairline);
+    --admin-hover: var(--site-surface);
+    --admin-accent: var(--site-brand);
+    --admin-accent-ink: var(--site-brand-ink);
+    --admin-accent-soft: color-mix(in srgb, var(--site-brand) 10%, transparent);
+    --admin-radius-sm: 6px;
+    --admin-radius: 8px;
+    --admin-radius-lg: 12px;
+    --admin-shadow: 0 1px 2px rgb(var(--site-scrim) / 0.06);
+    --admin-shadow-lg: 0 12px 32px -8px rgb(var(--site-scrim) / 0.22);
+}
+
+/* Dark: the navy ATIx surfaces from theme.css, so the admin keeps its own deep-blue night mode. */
+.dark {
+    --admin-page: hsl(var(--surface-page));
+    --admin-card: hsl(var(--surface-card));
+    --admin-raised: hsl(var(--surface-elevated));
+    --admin-hover: hsl(var(--surface-section));
+    --admin-line: hsl(var(--border-default));
+    --admin-ink: hsl(var(--text-primary));
+    --admin-muted: hsl(var(--text-muted));
+    --admin-shadow: none;
+    --admin-shadow-lg: 0 16px 40px -8px hsl(var(--shadow-color) / 0.6);
+}
+
+/* Layout */
+.fi-body,
+.fi-simple-layout {
+    background: var(--admin-page);
+    color: var(--admin-ink);
+}
+
+.fi-topbar {
+    background: var(--admin-card);
+    border-bottom: 1px solid var(--admin-line);
+    box-shadow: none;
+}
+
+.fi-sidebar {
+    background: var(--admin-card);
+    border-right: 1px solid var(--admin-line);
+    box-shadow: none;
+}
+
+.fi-sidebar-header {
+    border-bottom: 1px solid var(--admin-line);
+}
+
+.fi-sidebar-nav {
+    padding-inline: 0.75rem;
+}
+
+.fi-sidebar-nav-groups {
+    gap: 1.25rem;
+}
+
+.fi-sidebar-group-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--admin-muted);
+}
+
+.fi-sidebar-group-items {
+    gap: 1px;
+}
+
+.fi-sidebar-item-btn {
+    min-height: 2.25rem;
+    border-radius: var(--admin-radius);
+    transition: background-color 120ms ease;
+}
+
+.fi-sidebar-item-btn:hover {
+    background: var(--admin-hover);
+}
+
+.fi-sidebar-item-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+    background: var(--admin-accent-soft);
+    box-shadow: inset 2px 0 0 var(--admin-accent);
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-label {
+    color: var(--admin-ink);
+    font-weight: 600;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon {
+    color: var(--admin-accent);
+}
+
+/*
+ * Aside sections (profile, settings): a narrow description column beside the
+ * form card, without wrapping both in a second card.
+ */
+.fi-section.fi-aside.fi-aside {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding-inline: 0;
+    gap: 0.75rem 2rem;
+}
+
+@media (min-width: 1024px) {
+    .fi-section.fi-aside.fi-aside {
+        grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr);
+    }
+
+    .fi-section.fi-aside.fi-aside > .fi-section-content-ctn {
+        grid-column: auto;
+    }
+}
+
+.fi-section.fi-aside > .fi-section-header {
+    padding: 0.25rem 0 0;
+}
+
+.fi-section.fi-aside > .fi-section-content-ctn {
+    max-width: 48rem;
+    background: var(--admin-card);
+    border: 1px solid var(--admin-line);
+    border-radius: var(--admin-radius-lg);
+    box-shadow: var(--admin-shadow);
+}
+
+/* Page header */
+.fi-header-heading {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--admin-ink);
+}
+
+.fi-header-subheading,
+.fi-section-header-description {
+    color: var(--admin-muted);
+}
+
+.fi-breadcrumbs-item-label {
+    font-size: 0.8125rem;
+}
+
+.fi-section-header-heading {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--admin-ink);
+}
+
+/* Surfaces: cards, tables, stats, modals */
+.fi-section:not(.fi-section-not-contained),
+.fi-ta-ctn,
+.fi-wi-stats-overview-stat,
+.fi-simple-main {
+    background: var(--admin-card);
+    border: 1px solid var(--admin-line);
+    border-radius: var(--admin-radius-lg);
+    box-shadow: var(--admin-shadow);
+    --tw-ring-shadow: 0 0 #0000;
+}
+
+.fi-wi-stats-overview-stat {
+    min-height: 0;
+    transition: border-color 120ms ease;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    border-color: color-mix(in srgb, var(--admin-accent) 40%, transparent);
+}
+
+.fi-wi-stats-overview-stat-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--admin-muted);
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--admin-ink);
+}
+
+.fi-dropdown-panel,
+.fi-modal-window {
+    background: var(--admin-raised);
+    border: 1px solid var(--admin-line);
+    border-radius: var(--admin-radius-lg);
+    box-shadow: var(--admin-shadow-lg);
+}
+
+.fi-modal-heading {
+    font-size: 1.0625rem;
+    font-weight: 600;
+}
+
+/* Tables */
+.fi-ta-table thead th {
+    background: var(--admin-hover);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--admin-muted);
+}
+
+.fi-ta-row {
+    transition: background-color 100ms ease;
+}
+
+.fi-ta-row:hover {
+    background: var(--admin-hover);
+}
+
+.fi-ta-text {
+    font-size: 0.875rem;
+}
+
+/* Row and table-header actions stay quiet: neutral outline buttons, so the page's
+   one primary action (create) is the only filled orange button. */
+.fi-ta-header .fi-btn,
+.fi-ta-actions .fi-btn {
+    background: var(--admin-card);
+    color: var(--admin-ink);
+    box-shadow: inset 0 0 0 1px var(--admin-line);
+    font-weight: 500;
+}
+
+.fi-ta-header .fi-btn:hover,
+.fi-ta-actions .fi-btn:hover {
+    background: var(--admin-hover);
+}
+
+.fi-ta-actions .fi-btn.fi-color-danger {
+    color: var(--color-danger-600);
+}
+
+.dark .fi-ta-actions .fi-btn.fi-color-danger {
+    color: var(--color-danger-400);
+}
+
+.fi-pagination-overview {
+    font-size: 0.8125rem;
+    color: var(--admin-muted);
+}
+
+/* Controls */
+.fi-btn {
+    border-radius: var(--admin-radius);
+    font-weight: 500;
+    box-shadow: none;
+    transition:
+        background-color 120ms ease,
+        box-shadow 120ms ease;
+}
+
+.fi-icon-btn {
+    border-radius: var(--admin-radius);
+}
+
+/* Uncoloured buttons (cancel, "create another") get an edge so they read as buttons. */
+.fi-btn:not(.fi-color) {
+    background: var(--admin-card);
+    box-shadow: inset 0 0 0 1px var(--admin-line);
+}
+
+.fi-btn:not(.fi-color):hover {
+    background: var(--admin-hover);
+}
+
+.fi-input-wrp,
+.fi-select-input,
+.fi-ta-search-field .fi-input-wrp {
+    background: var(--admin-card);
+    border-radius: var(--admin-radius);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--admin-ink) 18%, transparent);
+}
+
+.fi-input-wrp:hover {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--admin-ink) 30%, transparent);
+}
+
+.fi-input-wrp:focus-within {
+    box-shadow:
+        inset 0 0 0 1px var(--admin-accent),
+        0 0 0 3px color-mix(in srgb, var(--admin-accent) 18%, transparent);
+}
+
+.fi-checkbox-input,
+.fi-radio-input {
+    border-radius: 4px;
+}
+
+.fi-radio-input {
+    border-radius: 9999px;
+}
+
+.fi-badge {
+    border-radius: var(--admin-radius-sm);
+    font-weight: 500;
+}
+
+.fi-fo-file-upload .filepond--panel-root {
+    border-radius: var(--admin-radius);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fi-sidebar-item-btn,
+    .fi-ta-row,
+    .fi-btn,
+    .fi-wi-stats-overview-stat {
+        transition: none;
+    }
+}
+
+/* Profile submission diff (company profile review) */
 .profile-diff-text {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
@@ -31,367 +365,15 @@
     text-decoration-color: #16a34a;
 }
 
-.dark .profile-diff-del { background: rgb(248 113 113 / 25%); }
-.dark .profile-diff-ins { background: rgb(74 222 128 / 25%); }
-
-:root {
-    --dashboard-navy: var(--brand-ink);
-    --dashboard-blue: var(--brand-blue);
-    --dashboard-orange: var(--brand-orange);
-    --dashboard-ink: var(--text-primary);
-    --dashboard-muted: var(--text-muted);
-    --dashboard-border: var(--border-default);
-    --dashboard-card: var(--surface-card);
+.dark .profile-diff-del {
+    background: rgb(248 113 113 / 25%);
 }
 
-.fi-body,
-.fi-simple-layout {
-    background:
-        linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.07), transparent 34%), linear-gradient(315deg, hsl(var(--dashboard-orange) / 0.07), transparent 36%),
-        linear-gradient(180deg, hsl(var(--surface-page)) 0%, hsl(30 100% 99%) 52%, hsl(var(--surface-page)) 100%);
-    color: hsl(var(--dashboard-ink));
+.dark .profile-diff-ins {
+    background: rgb(74 222 128 / 25%);
 }
 
-.dark .fi-body,
-.dark .fi-simple-layout {
-    background:
-        linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.12), transparent 34%), linear-gradient(315deg, hsl(var(--dashboard-orange) / 0.1), transparent 36%),
-        hsl(var(--surface-page));
-}
-
-.fi-layout {
-    min-height: 100vh;
-}
-
-.fi-main {
-    --tw-ring-color: hsl(var(--dashboard-orange) / 0.25);
-}
-
-.fi-main-ctn {
-    background: transparent;
-}
-
-.fi-topbar {
-    background: hsl(var(--surface-elevated) / 0.9);
-    border-bottom: 1px solid hsl(var(--dashboard-border) / 0.75);
-    box-shadow: 0 10px 28px hsl(var(--dashboard-navy) / 0.045);
-    backdrop-filter: blur(18px);
-}
-
-.dark .fi-topbar {
-    background: hsl(var(--surface-elevated) / 0.9);
-    border-bottom-color: hsl(var(--dashboard-border) / 0.7);
-}
-
-.fi-sidebar {
-    background:
-        linear-gradient(180deg, hsl(var(--surface-card) / 0.94), hsl(var(--surface-section) / 0.86)),
-        linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.05), hsl(var(--dashboard-orange) / 0.05));
-    border-right: 1px solid hsl(var(--dashboard-border) / 0.76);
-    box-shadow: 14px 0 44px hsl(var(--dashboard-navy) / 0.055);
-    backdrop-filter: blur(22px);
-}
-
-.dark .fi-sidebar {
-    background:
-        linear-gradient(180deg, hsl(var(--surface-elevated) / 0.94), hsl(var(--surface-card) / 0.9)),
-        linear-gradient(135deg, hsl(var(--dashboard-blue) / 0.09), hsl(var(--dashboard-orange) / 0.08));
-    border-right-color: hsl(var(--dashboard-border) / 0.74);
-}
-
-.fi-sidebar::before {
-    display: none;
-}
-
-.fi-sidebar-header {
-    border-bottom: 1px solid hsl(var(--dashboard-border) / 0.72);
-}
-
-.dark .fi-sidebar-header {
-    border-bottom-color: hsl(var(--dashboard-border) / 0.74);
-}
-
-.fi-logo {
-    color: hsl(var(--dashboard-ink));
-    font-weight: 750;
-    letter-spacing: 0;
-}
-
-.fi-sidebar-nav {
-    padding-inline: 0.75rem;
-}
-
-.fi-sidebar-nav-groups {
-    gap: 0.75rem;
-}
-
-.fi-sidebar-group {
-    gap: 0.35rem;
-}
-
-.fi-sidebar-group-items,
-.fi-sidebar-item-group {
-    gap: 0.2rem;
-}
-
-.fi-sidebar-item-button {
-    border-radius: 0.875rem;
-    min-height: 2.5rem;
-    transition:
-        background-color 160ms ease,
-        color 160ms ease,
-        transform 160ms ease,
-        box-shadow 160ms ease;
-}
-
-.fi-sidebar-item-button:hover {
-    background: hsl(var(--dashboard-blue) / 0.08);
-    color: hsl(var(--dashboard-ink));
-    transform: translateX(2px);
-}
-
-.fi-sidebar-item-active > .fi-sidebar-item-button,
-.fi-sidebar-item-button[aria-current='page'] {
-    background: linear-gradient(135deg, hsl(var(--dashboard-orange) / 0.13), hsl(var(--dashboard-blue) / 0.11));
-    color: hsl(var(--dashboard-ink));
-    box-shadow:
-        inset 0 0 0 1px hsl(var(--dashboard-orange) / 0.18),
-        0 10px 24px hsl(var(--dashboard-navy) / 0.055);
-}
-
-.fi-sidebar-item-active .fi-sidebar-item-icon,
-.fi-sidebar-item-button[aria-current='page'] .fi-sidebar-item-icon {
-    color: hsl(var(--dashboard-orange));
-}
-
-.fi-section:not(.fi-section-not-contained),
-.fi-ta,
-.fi-wi-stats-overview-stat,
-.fi-simple-main {
-    background: hsl(var(--dashboard-card) / 0.88);
-    border: 1px solid hsl(var(--dashboard-border) / 0.78);
-    box-shadow: 0 14px 38px hsl(var(--dashboard-navy) / 0.055);
-    backdrop-filter: blur(18px);
-}
-
-.fi-section:not(.fi-section-not-contained),
-.fi-ta,
-.fi-wi-stats-overview-stat,
-.fi-simple-main {
-    border-radius: 1.25rem;
-}
-
-.fi-wi-chart {
-    background: transparent;
-    border: 0;
-    box-shadow: none;
-}
-
-.fi-wi-chart > .fi-section {
-    overflow: hidden;
-}
-
-.fi-wi-chart .fi-section-content {
-    padding: 1.25rem 1.5rem 1.5rem;
-}
-
-.fi-wi-stats-overview {
-    gap: 1rem;
-}
-
-.fi-wi-stats-overview-stat {
-    min-height: 8.75rem;
-    background: linear-gradient(145deg, hsl(var(--surface-card) / 0.9), hsl(var(--surface-section) / 0.8));
-    box-shadow: 0 12px 32px hsl(var(--dashboard-navy) / 0.05);
-}
-
-.dark .fi-wi-stats-overview-stat {
-    background: linear-gradient(145deg, hsl(var(--surface-elevated) / 0.9), hsl(var(--surface-card) / 0.78));
-    border-color: hsl(var(--dashboard-border) / 0.68);
-    box-shadow: 0 12px 28px hsl(221 52% 7% / 0.16);
-}
-
-.fi-wi-stats-overview-stat-label-ctn {
-    gap: 0.75rem;
-    color: hsl(var(--dashboard-muted));
-}
-
-.fi-wi-stats-overview-stat-label {
-    color: hsl(var(--dashboard-muted));
-    font-weight: 650;
-}
-
-.fi-wi-stats-overview-stat:hover {
-    border-color: hsl(var(--dashboard-orange) / 0.38);
-    box-shadow: 0 18px 42px hsl(var(--dashboard-navy) / 0.08);
-}
-
-.fi-section-header {
-    background: transparent;
-}
-
-.fi-section.fi-aside {
-    gap: 1.5rem;
-    padding: 1.5rem;
-}
-
-.fi-section.fi-aside > .fi-section-header {
-    align-self: start;
-    border: 0;
-    padding: 0;
-}
-
-.fi-section.fi-aside > .fi-section-header .fi-section-header-text-ctn {
-    gap: 0.35rem;
-}
-
-.fi-section.fi-aside > .fi-section-content-ctn {
-    background: hsl(var(--surface-elevated) / 0.76);
-    border: 1px solid hsl(var(--dashboard-border) / 0.76);
-    border-radius: 1rem;
-    box-shadow: 0 10px 28px hsl(var(--dashboard-navy) / 0.04);
-}
-
-.dark .fi-section.fi-aside > .fi-section-content-ctn {
-    background: hsl(var(--surface-elevated) / 0.72);
-    border-color: hsl(var(--dashboard-border) / 0.7);
-}
-
-.fi-section.fi-aside > .fi-section-content-ctn > .fi-section-content {
-    padding: 1.5rem;
-}
-
-.fi-section-header-heading,
-.fi-header-heading {
-    color: hsl(var(--dashboard-ink));
-    font-weight: 750;
-    letter-spacing: 0;
-}
-
-.fi-header-subheading,
-.fi-section-header-description,
-.fi-ta-text,
-.fi-wi-stats-overview-stat-description {
-    color: hsl(var(--dashboard-muted));
-}
-
-.fi-btn {
-    border-radius: 0.875rem;
-    box-shadow: 0 8px 18px hsl(var(--dashboard-navy) / 0.06);
-    transition:
-        transform 160ms ease,
-        box-shadow 160ms ease,
-        background-color 160ms ease;
-}
-
-.fi-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 26px hsl(var(--dashboard-navy) / 0.09);
-}
-
-.fi-input-wrp,
-.fi-select-input,
-.fi-ta-search-field {
-    background: hsl(var(--surface-elevated) / 0.88);
-    border-color: hsl(var(--dashboard-border) / 0.86);
-    border-radius: 0.875rem;
-    box-shadow: 0 10px 24px hsl(var(--dashboard-navy) / 0.04);
-}
-
-.dark .fi-input-wrp,
-.dark .fi-select-input,
-.dark .fi-ta-search-field {
-    background: hsl(var(--surface-elevated) / 0.92);
-    border-color: hsl(var(--dashboard-border) / 0.82);
-}
-
-.fi-input-wrp:focus-within,
-.fi-ta-search-field:focus-within {
-    border-color: hsl(var(--dashboard-orange) / 0.65);
-    box-shadow:
-        0 0 0 3px hsl(var(--dashboard-orange) / 0.14),
-        0 14px 30px hsl(var(--dashboard-navy) / 0.07);
-}
-
-.fi-ta-header,
-.fi-ta-content,
-.fi-ta-footer {
-    background: transparent;
-}
-
-.fi-ta {
-    overflow: hidden;
-}
-
-.fi-ta-header {
-    border-bottom-color: hsl(var(--dashboard-border) / 0.72);
-}
-
-.fi-ta-filter-indicators,
-.fi-ta-pagination {
-    background: hsl(var(--surface-elevated) / 0.5);
-}
-
-.dark .fi-ta-filter-indicators,
-.dark .fi-ta-pagination {
-    background: hsl(var(--surface-elevated) / 0.5);
-}
-
-.fi-ta-row {
-    transition:
-        background-color 140ms ease,
-        box-shadow 140ms ease;
-}
-
-.fi-ta-row:hover {
-    background: linear-gradient(90deg, hsl(var(--dashboard-blue) / 0.055), hsl(var(--dashboard-orange) / 0.04));
-}
-
-.fi-badge {
-    border-radius: 999px;
-    font-weight: 650;
-}
-
-.fi-wi-stats-overview-stat-value {
-    color: hsl(var(--dashboard-ink));
-    font-weight: 780;
-    letter-spacing: 0;
-}
-
-.fi-dropdown-panel,
-.fi-modal-window {
-    background: hsl(var(--dashboard-card) / 0.94);
-    border: 1px solid hsl(var(--dashboard-border) / 0.8);
-    border-radius: 1rem;
-    box-shadow: 0 20px 54px hsl(var(--dashboard-navy) / 0.12);
-    backdrop-filter: blur(18px);
-}
-
-/*
- * Table record action modals are emitted inside the table markup. Because the
- * table card uses backdrop-filter, browsers treat it as the containing block
- * for fixed children. Disable that filter while a Filament modal lives inside
- * the table so the overlay can cover the full viewport.
- */
-.fi-ta:has(.fi-modal) {
-    backdrop-filter: none;
-}
-
-.fi-ta .fi-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 70;
-}
-
-/*
- * A backdrop filter creates a containing block for fixed descendants. Since
- * Filament renders the image editor inside the section, the editor would
- * otherwise be positioned against that card and overflow the viewport.
- */
-.fi-section:has(.fi-fo-file-upload-editor) {
-    backdrop-filter: none;
-}
-
+/* Logo image editor: keep the editor inside the viewport. */
 .fi-fo-file-upload-editor {
     display: grid;
     place-items: center;
@@ -405,9 +387,9 @@
     height: min(48rem, 100%);
     max-height: 100%;
     margin: 0;
-    border: 1px solid hsl(var(--dashboard-border) / 0.8);
-    border-radius: 1.25rem;
-    box-shadow: 0 28px 80px hsl(var(--dashboard-navy) / 0.28);
+    border: 1px solid var(--admin-line);
+    border-radius: var(--admin-radius-lg);
+    box-shadow: var(--admin-shadow-lg);
 }
 
 .fi-fo-file-upload-editor .fi-fo-file-upload-editor-image-ctn,

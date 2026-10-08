@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { Mail, MapPin, Phone, Send, CheckCircle2 } from 'lucide-vue-next';
+import { PhArrowUpRight, PhCheckCircle, PhEnvelopeSimple, PhMapPin, PhPaperPlaneTilt, PhPhone } from '@phosphor-icons/vue';
 import { onBeforeUnmount, ref } from 'vue';
 
-import AppFooter from '@/components/AppFooter.vue';
-import AppHeader from '@/components/AppHeader.vue';
+import PageIntro from '@/components/site/PageIntro.vue';
+import SiteLayout from '@/components/site/SiteLayout.vue';
 import { useTranslations } from '@/i18n';
+import { focusFirstError } from '@/lib/forms';
 
 const { t } = useTranslations();
 
@@ -33,180 +34,143 @@ const triggerSuccess = () => {
 onBeforeUnmount(() => {
     if (successTimeout) window.clearTimeout(successTimeout);
 });
+
+const submit = () => {
+    form.post('/contact', {
+        preserveScroll: true,
+        onError: focusFirstError,
+        onSuccess: () => {
+            triggerSuccess();
+            form.reset('name', 'email', 'phone', 'subject', 'message');
+        },
+    });
+};
+
+const fields = [
+    { id: 'name', type: 'text', autocomplete: 'name', label: 'common.name', placeholder: 'contact.fullName', required: true },
+    { id: 'email', type: 'email', autocomplete: 'email', label: 'common.email', placeholder: 'contact.emailExample', required: true },
+    { id: 'phone', type: 'tel', autocomplete: 'tel', label: 'contact.phoneOptional', placeholder: null, required: false },
+    { id: 'subject', type: 'text', autocomplete: 'off', label: 'contact.subject', placeholder: 'contact.subjectPlaceholder', required: true },
+] as const;
 </script>
 
 <template>
     <Head :title="t('nav.contact')" />
 
-    <AppHeader class="sticky top-0 z-50" />
-
-    <section id="support" class="brand-hero relative overflow-hidden px-6 py-20 lg:px-16 lg:py-24">
-        <div class="relative mx-auto max-w-7xl">
-            <div class="mx-auto max-w-3xl text-center">
-                <p class="brand-eyebrow">{{ t('nav.contact') }}</p>
-                <h1 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{{ t('contact.title') }}</h1>
-                <p class="mt-4 text-base leading-relaxed text-muted-foreground">{{ t('contact.intro') }}</p>
-            </div>
-
-            <div class="mt-12 flex flex-col-reverse gap-7.5 md:flex-row md:items-start md:justify-between lg:mt-20 xl:gap-10">
-                <!-- Left: contact info -->
-                <aside class="brand-card relative w-full overflow-hidden rounded-2xl p-7.5 md:w-2/5 lg:w-1/3 xl:p-10">
-                    <div class="space-y-7">
-                        <div class="flex items-start gap-4">
-                            <span class="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                                <MapPin class="h-5 w-5" />
+    <SiteLayout>
+        <PageIntro :eyebrow="t('nav.contact')" :title="t('contact.title')" :lead="t('contact.intro')">
+            <template #aside>
+                <ul class="grid gap-2">
+                    <li>
+                        <a
+                            href="mailto:bedrijvendag.atix@avans.nl"
+                            class="group flex items-center gap-4 rounded-[var(--radius-card)] bg-canvas p-4 shadow-raised ring-1 ring-hairline transition-colors hover:bg-surface"
+                        >
+                            <span class="tile-sunset flex size-11 shrink-0 items-center justify-center rounded-xl"
+                                ><PhEnvelopeSimple :size="20" weight="bold" aria-hidden="true"
+                            /></span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block text-sm text-ink-muted">{{ t('common.email') }}</span>
+                                <span class="block truncate font-medium text-ink">bedrijvendag.atix@avans.nl</span>
                             </span>
-                            <div>
-                                <p class="text-sm font-semibold text-foreground">{{ t('contact.address') }}</p>
-                                <p class="mt-1 text-sm leading-relaxed text-muted-foreground">{{ t('contact.addressValue') }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start gap-4">
-                            <span class="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                                <Phone class="h-5 w-5" />
+                            <PhArrowUpRight
+                                :size="16"
+                                weight="bold"
+                                class="text-ink-muted transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                                aria-hidden="true"
+                            />
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="tel:+31885258600"
+                            class="group flex items-center gap-4 rounded-[var(--radius-card)] bg-canvas p-4 shadow-raised ring-1 ring-hairline transition-colors hover:bg-surface"
+                        >
+                            <span class="tile-electric flex size-11 shrink-0 items-center justify-center rounded-xl"><PhPhone :size="20" weight="bold" aria-hidden="true" /></span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block text-sm text-ink-muted">{{ t('common.phone') }}</span>
+                                <span class="t-mono block font-medium text-ink">088-5258600</span>
                             </span>
-                            <div>
-                                <p class="text-sm font-semibold text-foreground">{{ t('common.phone') }}</p>
-                                <a class="mt-1 inline-block text-sm text-muted-foreground hover:text-foreground" href="tel:+31885258600">088-5258600</a>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start gap-4">
-                            <span class="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                                <Mail class="h-5 w-5" />
-                            </span>
-                            <div>
-                                <p class="text-sm font-semibold text-foreground">{{ t('common.email') }}</p>
-                                <a class="mt-1 inline-block text-sm break-all text-muted-foreground hover:text-foreground" href="mailto:bedrijvendag.atix@avans.nl"
-                                    >bedrijvendag.atix@avans.nl</a
-                                >
-                            </div>
-                        </div>
-                    </div>
-
-                    <span class="my-8 block h-px bg-border"></span>
-
-                    <p class="text-sm text-muted-foreground">{{ t('contact.direct') }}</p>
-                </aside>
-
-                <!-- Right: form -->
-                <div class="brand-card relative w-full overflow-hidden rounded-2xl p-7.5 md:w-3/5 lg:w-2/3 xl:p-12">
-                    <form
-                        class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-10 lg:gap-y-6"
-                        @submit.prevent="
-                            form.post('/contact', {
-                                preserveScroll: true,
-                                onSuccess: () => {
-                                    triggerSuccess();
-                                    form.reset('name', 'email', 'phone', 'subject', 'message');
-                                },
-                            })
-                        "
-                    >
-                        <div>
-                            <label for="name" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.name') }} <span class="text-destructive">*</span></label>
-                            <input
-                                id="name"
-                                v-model="form.name"
-                                type="text"
-                                name="name"
-                                autocomplete="name"
-                                :placeholder="t('contact.fullName')"
-                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                                required
+                            <PhArrowUpRight
+                                :size="16"
+                                weight="bold"
+                                class="text-ink-muted transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                                aria-hidden="true"
                             />
-                            <p v-if="form.errors.name" class="mt-2 text-sm text-destructive">{{ form.errors.name }}</p>
-                        </div>
+                        </a>
+                    </li>
+                    <li class="flex items-center gap-4 rounded-[var(--radius-card)] bg-canvas p-4 shadow-raised ring-1 ring-hairline">
+                        <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface text-ink"
+                            ><PhMapPin :size="20" weight="bold" aria-hidden="true"
+                        /></span>
+                        <span class="min-w-0 flex-1">
+                            <span class="block text-sm text-ink-muted">{{ t('contact.address') }}</span>
+                            <span class="block font-medium text-ink">{{ t('contact.addressValue') }}</span>
+                        </span>
+                    </li>
+                </ul>
+            </template>
+        </PageIntro>
 
-                        <div>
-                            <label for="email" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.email') }} <span class="text-destructive">*</span></label>
+        <section id="support" class="site-container pt-16 pb-24 md:pt-24 md:pb-32">
+            <div class="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
+                <div v-reveal class="lg:col-span-4">
+                    <h2 class="t-h2 text-ink">{{ t('common.message') }}</h2>
+                    <p class="t-lead mt-5">{{ t('contact.direct') }}</p>
+                </div>
+
+                <div v-reveal="80" class="card p-6 sm:p-10 lg:col-span-8">
+                    <form class="grid gap-6 sm:grid-cols-2" @submit.prevent="submit">
+                        <div v-for="field in fields" :key="field.id" class="field">
+                            <label :for="field.id" class="field-label"> {{ t(field.label) }}<span v-if="field.required" class="text-danger" aria-hidden="true"> *</span> </label>
                             <input
-                                id="email"
-                                v-model="form.email"
-                                type="email"
-                                name="email"
-                                autocomplete="email"
-                                :placeholder="t('contact.emailExample')"
-                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                                required
+                                :id="field.id"
+                                v-model="form[field.id]"
+                                :type="field.type"
+                                :name="field.id"
+                                :autocomplete="field.autocomplete"
+                                :placeholder="field.placeholder ? t(field.placeholder) : '+31 6 12345678'"
+                                :required="field.required"
+                                :aria-invalid="form.errors[field.id] ? 'true' : undefined"
+                                :aria-describedby="form.errors[field.id] ? `${field.id}-error` : undefined"
+                                class="input"
                             />
-                            <p v-if="form.errors.email" class="mt-2 text-sm text-destructive">{{ form.errors.email }}</p>
+                            <p v-if="form.errors[field.id]" :id="`${field.id}-error`" class="field-error">{{ form.errors[field.id] }}</p>
                         </div>
 
-                        <div>
-                            <label for="phone" class="mb-2 block text-sm font-semibold text-foreground">{{ t('contact.phoneOptional') }}</label>
-                            <input
-                                id="phone"
-                                v-model="form.phone"
-                                type="text"
-                                name="phone"
-                                autocomplete="tel"
-                                placeholder="+31 6 12345678"
-                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                            />
-                            <p v-if="form.errors.phone" class="mt-2 text-sm text-destructive">{{ form.errors.phone }}</p>
-                        </div>
-
-                        <div>
-                            <label for="subject" class="mb-2 block text-sm font-semibold text-foreground">{{ t('contact.subject') }} <span class="text-destructive">*</span></label>
-                            <input
-                                id="subject"
-                                v-model="form.subject"
-                                type="text"
-                                name="subject"
-                                :placeholder="t('contact.subjectPlaceholder')"
-                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                                required
-                            />
-                            <p v-if="form.errors.subject" class="mt-2 text-sm text-destructive">{{ form.errors.subject }}</p>
-                        </div>
-
-                        <div class="lg:col-span-2">
-                            <label for="message" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.message') }} <span class="text-destructive">*</span></label>
+                        <div class="field sm:col-span-2">
+                            <label for="message" class="field-label">{{ t('common.message') }}<span class="text-danger" aria-hidden="true"> *</span></label>
                             <textarea
                                 id="message"
                                 v-model="form.message"
                                 name="message"
                                 rows="6"
                                 :placeholder="t('contact.messagePlaceholder')"
-                                class="brand-input w-full rounded-xl p-4 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
                                 required
+                                :aria-invalid="form.errors.message ? 'true' : undefined"
+                                :aria-describedby="form.errors.message ? 'message-error' : undefined"
+                                class="input"
                             ></textarea>
-                            <p v-if="form.errors.message" class="mt-2 text-sm text-destructive">{{ form.errors.message }}</p>
+                            <p v-if="form.errors.message" id="message-error" class="field-error">{{ form.errors.message }}</p>
                         </div>
 
-                        <div class="flex flex-col items-center gap-4 lg:col-span-2">
-                            <button
-                                type="submit"
-                                :disabled="form.processing"
-                                class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground shadow-lg ring-1 shadow-primary/20 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                <Send class="h-4 w-4" />
+                        <div class="flex flex-col gap-4 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
+                            <p class="field-help">{{ t('contact.privacy') }}</p>
+                            <button type="submit" :disabled="form.processing" class="btn btn-primary btn-lg">
+                                <PhPaperPlaneTilt :size="18" weight="bold" aria-hidden="true" />
                                 {{ form.processing ? t('common.submitting') : t('contact.send') }}
                             </button>
+                        </div>
 
-                            <p class="text-xs text-muted-foreground">{{ t('contact.privacy') }}</p>
-
-                            <div
-                                v-if="showSuccess"
-                                class="w-full max-w-xl rounded-xl bg-emerald-500/15 p-4 text-sm text-emerald-900 ring-1 ring-emerald-500/25"
-                                role="status"
-                                aria-live="polite"
-                            >
-                                <div class="flex items-center gap-2">
-                                    <CheckCircle2 class="h-5 w-5 shrink-0 text-emerald-600" />
-                                    <span>{{ t('contact.success') }}</span>
-                                </div>
-                            </div>
+                        <div aria-live="polite" class="sm:col-span-2">
+                            <p v-if="showSuccess" class="alert alert-success" role="status">
+                                <PhCheckCircle :size="20" weight="fill" class="shrink-0 text-success" aria-hidden="true" />
+                                {{ t('contact.success') }}
+                            </p>
                         </div>
                     </form>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <AppFooter />
+        </section>
+    </SiteLayout>
 </template>
-
-<style scoped></style>

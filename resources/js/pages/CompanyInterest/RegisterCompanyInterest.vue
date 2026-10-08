@@ -1,29 +1,31 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
 import {
-    ArrowDown,
-    Blocks,
-    BookOpenCheck,
-    BriefcaseBusiness,
-    CalendarDays,
-    Check,
-    CheckCircle2,
-    Cpu,
-    ExternalLink,
-    FileText,
-    GraduationCap,
-    Info,
-    Lightbulb,
-    MessagesSquare,
-    Route,
-    Send,
-    Wrench,
-} from 'lucide-vue-next';
+    PhArrowDown,
+    PhArrowUpRight,
+    PhBookOpenText,
+    PhBriefcase,
+    PhCalendarBlank,
+    PhChatsCircle,
+    PhCheck,
+    PhCheckCircle,
+    PhCpu,
+    PhCube,
+    PhFileText,
+    PhGraduationCap,
+    PhInfo,
+    PhLightning,
+    PhPaperPlaneTilt,
+    PhPath,
+    PhWrench,
+} from '@phosphor-icons/vue';
 import { computed, ref } from 'vue';
+import type { Component } from 'vue';
 
-import AppFooter from '@/components/AppFooter.vue';
-import AppHeader from '@/components/AppHeader.vue';
+import PageIntro from '@/components/site/PageIntro.vue';
+import SiteLayout from '@/components/site/SiteLayout.vue';
 import { useTranslations } from '@/i18n';
+import { focusFirstError } from '@/lib/forms';
 
 type UpcomingEvent = {
     name: string;
@@ -34,7 +36,7 @@ type InternshipPhase = 'education' | 'orientation' | 'internship' | 'graduation'
 
 type InternshipProgram = {
     id: string;
-    icon: typeof Cpu;
+    icon: Component;
     sourceUrl: string;
     phases: InternshipPhase[];
 };
@@ -42,37 +44,37 @@ type InternshipProgram = {
 const internshipPrograms: InternshipProgram[] = [
     {
         id: 'mechatronics',
-        icon: Blocks,
+        icon: PhCube,
         sourceUrl: 'https://www.avans.nl/studeren/opleidingen/bachelor/mechatronica-voltijd',
         phases: ['education', 'education', 'education', 'education', 'internship', 'education', 'education', 'graduation'],
     },
     {
         id: 'mechanical',
-        icon: Wrench,
+        icon: PhWrench,
         sourceUrl: 'https://www.avans.nl/studeren/opleidingen/bachelor/werktuigbouwkunde-voltijd',
         phases: ['education', 'education', 'education', 'education', 'internship', 'education', 'education', 'graduation'],
     },
     {
         id: 'electrical',
-        icon: Lightbulb,
+        icon: PhLightning,
         sourceUrl: 'https://www.avans.nl/studeren/opleidingen/bachelor/elektrotechniek-voltijd',
         phases: ['education', 'education', 'education', 'education', 'internship', 'education', 'education', 'graduation'],
     },
     {
         id: 'ict',
-        icon: Cpu,
+        icon: PhCpu,
         sourceUrl: 'https://www.avans.nl/studeren/opleidingen/bachelor/ict-voltijd',
         phases: ['education', 'education', 'education', 'education', 'internship', 'education', 'education', 'graduation'],
     },
     {
         id: 'businessIt',
-        icon: BriefcaseBusiness,
+        icon: PhBriefcase,
         sourceUrl: 'https://www.avans.nl/studeren/opleidingen/bachelor/business-it-en-management-voltijd',
         phases: ['education', 'education', 'education', 'education', 'internship', 'education', 'education', 'graduation'],
     },
     {
         id: 'industrial',
-        icon: Route,
+        icon: PhPath,
         sourceUrl: 'https://www.avans.nl/studeren/opleidingen/bachelor/technische-bedrijfskunde-voltijd',
         phases: ['education', 'orientation', 'education', 'education', 'internship', 'education', 'education', 'graduation'],
     },
@@ -88,15 +90,29 @@ const saved = ref(false);
 const selectedProgramId = ref(internshipPrograms[0].id);
 const selectedProgram = computed(() => internshipPrograms.find((program) => program.id === selectedProgramId.value) ?? internshipPrograms[0]);
 
+// Roving tabindex: arrow keys move between programme tabs (WAI-ARIA tabs pattern).
+function onTabKeydown(event: KeyboardEvent) {
+    const keys = ['ArrowRight', 'ArrowLeft', 'Home', 'End'];
+    if (!keys.includes(event.key)) return;
+    event.preventDefault();
+
+    const index = internshipPrograms.findIndex((program) => program.id === selectedProgramId.value);
+    const last = internshipPrograms.length - 1;
+    const next = { ArrowRight: index === last ? 0 : index + 1, ArrowLeft: index === 0 ? last : index - 1, Home: 0, End: last }[event.key] ?? index;
+
+    selectedProgramId.value = internshipPrograms[next].id;
+    document.getElementById(`internship-tab-${internshipPrograms[next].id}`)?.focus();
+}
+
 function internshipPhaseAt(year: number, halfYear: number): InternshipPhase {
     return selectedProgram.value.phases[(year - 1) * 2 + (halfYear - 1)] ?? 'education';
 }
 
 const internshipPhaseClasses: Record<InternshipPhase, string> = {
-    education: 'bg-muted/70 text-muted-foreground ring-border',
-    orientation: 'bg-secondary/15 text-secondary ring-secondary/30',
-    internship: 'bg-primary text-primary-foreground ring-primary shadow-sm',
-    graduation: 'bg-emerald-600 text-white ring-emerald-600 dark:bg-emerald-700 dark:ring-emerald-700',
+    education: 'bg-surface text-ink-muted ring-hairline',
+    orientation: 'bg-brand-blue/12 text-brand-blue ring-brand-blue/30',
+    internship: 'tile-sunset ring-transparent',
+    graduation: 'tile-electric ring-transparent',
 };
 
 const form = useForm({
@@ -121,109 +137,98 @@ const formattedEventDate = computed(() => {
 function submit() {
     form.post(props.submitUrl, {
         preserveScroll: true,
+        onError: focusFirstError,
         onSuccess: () => {
             saved.value = true;
             form.reset();
         },
     });
 }
+
+const educationPoints: Component[] = [PhBookOpenText, PhCube, PhPath, PhGraduationCap];
+const processSteps: Component[] = [PhPaperPlaneTilt, PhChatsCircle, PhFileText];
 </script>
 
 <template>
     <Head :title="t('companyInterest.head')" />
 
-    <AppHeader class="sticky top-0 z-50" />
+    <SiteLayout>
+        <PageIntro :eyebrow="t('companyInterest.eyebrow')" :title="t('companyInterest.title')" :lead="t('companyInterest.intro')">
+            <div class="flex flex-wrap gap-3">
+                <a href="#enroll" class="btn btn-primary btn-lg">
+                    {{ t('companyInterest.startEnrollment') }}
+                    <PhArrowDown :size="18" weight="bold" aria-hidden="true" />
+                </a>
+                <a href="#new-education" class="btn btn-secondary btn-lg">{{ t('companyInterest.educationCta') }}</a>
+            </div>
 
-    <main class="brand-hero min-h-screen">
-        <section class="relative px-6 py-14 sm:py-20 lg:px-16">
-            <div class="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
-                <div class="max-w-3xl">
-                    <p class="brand-eyebrow">{{ t('companyInterest.eyebrow') }}</p>
-                    <h1 class="mt-5 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">{{ t('companyInterest.title') }}</h1>
-                    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">{{ t('companyInterest.intro') }}</p>
-
-                    <div class="mt-8 flex flex-wrap gap-3">
-                        <a
-                            href="#enroll"
-                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg ring-1 shadow-primary/20 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                        >
-                            {{ t('companyInterest.startEnrollment') }}
-                            <ArrowDown class="h-4 w-4" />
-                        </a>
-                        <a
-                            href="#new-education"
-                            class="inline-flex items-center justify-center rounded-xl bg-white/80 px-6 py-3 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border/80 transition hover:bg-accent dark:bg-white/10"
-                        >
-                            {{ t('companyInterest.educationCta') }}
-                        </a>
-                    </div>
-                </div>
-
-                <aside class="brand-card rounded-3xl p-6 sm:p-8" aria-labelledby="next-event-title">
+            <template #aside>
+                <aside class="rounded-[var(--radius-card)] bg-canvas p-6 shadow-raised ring-1 ring-hairline" aria-labelledby="next-event-title">
                     <div class="flex items-start gap-4">
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-secondary/15 ring-1 ring-secondary/20">
-                            <CalendarDays class="h-6 w-6 text-secondary" />
-                        </div>
+                        <span class="tile-sunset flex size-11 shrink-0 items-center justify-center rounded-xl"
+                            ><PhCalendarBlank :size="20" weight="bold" aria-hidden="true"
+                        /></span>
                         <div>
-                            <p id="next-event-title" class="text-sm font-semibold text-muted-foreground">{{ t('companyInterest.nextEvent') }}</p>
+                            <p id="next-event-title" class="text-sm text-ink-muted">{{ t('companyInterest.nextEvent') }}</p>
                             <template v-if="props.upcomingEvent">
-                                <h2 class="mt-1 text-xl font-semibold text-foreground">{{ props.upcomingEvent.name }}</h2>
-                                <p class="mt-2 text-sm text-muted-foreground capitalize">{{ formattedEventDate }}</p>
+                                <h2 class="mt-1 text-lg font-semibold text-ink">{{ props.upcomingEvent.name }}</h2>
+                                <p class="mt-1 text-sm text-brand-ink first-letter:uppercase">{{ formattedEventDate }}</p>
                             </template>
                             <template v-else>
-                                <h2 class="mt-1 text-xl font-semibold text-foreground">{{ t('companyInterest.dateComingSoon') }}</h2>
-                                <p class="mt-2 text-sm text-muted-foreground">{{ t('companyInterest.stillInterested') }}</p>
+                                <h2 class="mt-1 text-lg font-semibold text-ink">{{ t('companyInterest.dateComingSoon') }}</h2>
+                                <p class="mt-1 text-sm text-ink-muted">{{ t('companyInterest.stillInterested') }}</p>
                             </template>
                         </div>
                     </div>
-                    <ul class="mt-6 space-y-3 border-t border-border pt-6">
-                        <li v-for="benefit in ['audience', 'format', 'opportunities']" :key="benefit" class="flex gap-3 text-sm leading-relaxed text-muted-foreground">
-                            <Check class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                    <ul class="mt-6 space-y-3 border-t border-hairline pt-6">
+                        <li v-for="benefit in ['audience', 'format', 'opportunities']" :key="benefit" class="flex gap-3 text-sm leading-relaxed text-ink-muted">
+                            <PhCheck :size="16" weight="bold" class="mt-0.5 shrink-0 text-brand-ink" aria-hidden="true" />
                             {{ t(`companyInterest.${benefit}`) }}
                         </li>
                     </ul>
                 </aside>
-            </div>
-        </section>
+            </template>
+        </PageIntro>
 
-        <section id="new-education" class="brand-section relative scroll-mt-24 border-y border-border px-6 py-16 lg:px-16">
-            <div class="mx-auto max-w-7xl">
-                <div class="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
-                    <div>
-                        <p class="brand-eyebrow">{{ t('companyInterest.educationEyebrow') }}</p>
-                        <h2 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">{{ t('companyInterest.educationTitle') }}</h2>
-                        <p class="mt-5 text-base leading-relaxed text-muted-foreground">{{ t('companyInterest.educationIntro') }}</p>
-
-                        <a
-                            href="https://www.avans.nl/over-avans/organisatie/ambitie"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-primary/80"
-                        >
+        <!-- New education -->
+        <section id="new-education" class="scroll-mt-24 py-20 md:py-28">
+            <div class="site-container">
+                <div class="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
+                    <div class="lg:col-span-5">
+                        <p v-reveal class="t-eyebrow">{{ t('companyInterest.educationEyebrow') }}</p>
+                        <h2 v-reveal="40" class="t-h2 mt-5 text-ink">{{ t('companyInterest.educationTitle') }}</h2>
+                        <p v-reveal="80" class="t-lead mt-6">{{ t('companyInterest.educationIntro') }}</p>
+                        <a v-reveal="120" href="https://www.avans.nl/over-avans/organisatie/ambitie" target="_blank" rel="noopener noreferrer" class="btn btn-secondary mt-8">
                             {{ t('companyInterest.readAvans') }}
-                            <ExternalLink class="h-4 w-4" />
+                            <PhArrowUpRight :size="16" weight="bold" aria-hidden="true" />
                         </a>
                     </div>
 
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <article v-for="(icon, index) in [BookOpenCheck, Blocks, Route, GraduationCap]" :key="index" class="brand-card rounded-2xl p-5 sm:p-6">
-                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/15 text-secondary ring-1 ring-secondary/20">
-                                <component :is="icon" class="h-5 w-5" />
-                            </div>
-                            <h3 class="mt-4 text-lg font-semibold">{{ t(`companyInterest.educationPoint${index + 1}Title`) }}</h3>
-                            <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{{ t(`companyInterest.educationPoint${index + 1}Text`) }}</p>
+                    <div class="grid gap-3 sm:grid-cols-2 lg:col-span-7">
+                        <article
+                            v-for="(icon, index) in educationPoints"
+                            :key="index"
+                            v-reveal="(index % 2) * 80"
+                            class="card-lift flex flex-col rounded-[var(--radius-card)] p-7"
+                            :class="[index === 0 ? 'tile-sunset' : index === 3 ? 'tile-electric' : 'card-muted', index % 2 === 1 ? 'sm:translate-y-8' : '']"
+                        >
+                            <component :is="icon" :size="30" weight="fill" :class="index === 0 || index === 3 ? '' : 'text-brand-ink'" aria-hidden="true" />
+                            <h3 class="t-h4 mt-auto pt-10" :class="index === 0 || index === 3 ? '' : 'text-ink'">{{ t(`companyInterest.educationPoint${index + 1}Title`) }}</h3>
+                            <p class="mt-2 text-[0.9375rem] leading-relaxed" :class="index === 0 ? 'text-[#0b0f19]/80' : index === 3 ? 'text-white/80' : 'text-ink-muted'">
+                                {{ t(`companyInterest.educationPoint${index + 1}Text`) }}
+                            </p>
                         </article>
                     </div>
                 </div>
 
-                <div class="brand-card mt-8 grid gap-7 rounded-3xl p-6 sm:p-8 lg:grid-cols-[0.7fr_1.3fr]">
-                    <div>
-                        <p class="brand-eyebrow">{{ t('companyInterest.forEmployersEyebrow') }}</p>
-                        <h3 class="mt-4 text-2xl font-semibold tracking-tight">{{ t('companyInterest.forEmployersTitle') }}</h3>
+                <div v-reveal class="tile-blue-soft mt-16 grid grid-cols-1 gap-8 rounded-[var(--radius-panel)] p-8 sm:p-10 lg:grid-cols-12 lg:p-12">
+                    <div class="lg:col-span-4">
+                        <p class="t-eyebrow">{{ t('companyInterest.forEmployersEyebrow') }}</p>
+                        <h3 class="t-h3 mt-4 text-ink">{{ t('companyInterest.forEmployersTitle') }}</h3>
                     </div>
-                    <ul class="grid gap-4 sm:grid-cols-3">
-                        <li v-for="index in 3" :key="index" class="flex gap-3 text-sm leading-relaxed text-muted-foreground">
-                            <CheckCircle2 class="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                    <ul class="grid gap-6 sm:grid-cols-3 lg:col-span-8">
+                        <li v-for="index in 3" :key="index" class="border-t border-[color-mix(in_srgb,var(--site-brand-blue)_25%,transparent)] pt-5 text-[0.9375rem] leading-relaxed text-ink-muted">
+                            <PhCheckCircle :size="22" weight="fill" class="mb-4 text-brand-blue" aria-hidden="true" />
                             {{ t(`companyInterest.employerTip${index}`) }}
                         </li>
                     </ul>
@@ -231,18 +236,22 @@ function submit() {
             </div>
         </section>
 
-        <section id="internships" class="relative scroll-mt-24 px-6 py-16 sm:py-20 lg:px-16">
-            <div class="mx-auto max-w-7xl">
+        <!-- Internships per programme -->
+        <section id="internships" class="scroll-mt-24 py-20 md:py-28">
+            <div class="site-container">
                 <div class="max-w-3xl">
-                    <p class="brand-eyebrow">{{ t('companyInterest.internshipEyebrow') }}</p>
-                    <h2 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">{{ t('companyInterest.internshipTitle') }}</h2>
-                    <p class="mt-4 text-base leading-relaxed text-muted-foreground">{{ t('companyInterest.internshipIntro') }}</p>
+                    <p v-reveal class="t-eyebrow">{{ t('companyInterest.internshipEyebrow') }}</p>
+                    <h2 v-reveal="40" class="t-h2 mt-5 text-ink">{{ t('companyInterest.internshipTitle') }}</h2>
+                    <p v-reveal="80" class="t-lead mt-5">{{ t('companyInterest.internshipIntro') }}</p>
                 </div>
 
-                <div class="mt-9">
-                    <div class="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" :aria-label="t('companyInterest.chooseProgram')">
-                        <span class="sr-only">{{ t('companyInterest.chooseProgram') }}</span>
-                        <div class="flex min-w-max items-end gap-1.5 lg:min-w-0">
+                <div class="mt-12">
+                    <div
+                        class="-mx-5 overflow-x-auto px-5 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden"
+                        role="tablist"
+                        :aria-label="t('companyInterest.chooseProgram')"
+                    >
+                        <div class="inline-flex min-w-max gap-1 rounded-[var(--radius-card)] bg-canvas p-1.5 ring-1 ring-hairline">
                             <button
                                 v-for="program in internshipPrograms"
                                 :id="`internship-tab-${program.id}`"
@@ -251,49 +260,33 @@ function submit() {
                                 role="tab"
                                 :aria-selected="selectedProgramId === program.id"
                                 :aria-controls="`internship-panel-${program.id}`"
-                                class="group relative flex min-h-16 min-w-44 items-center justify-center gap-2.5 rounded-t-2xl border px-4 py-3 text-center text-sm font-semibold transition focus-visible:z-20 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none lg:min-w-0 lg:flex-1"
-                                :class="
-                                    selectedProgramId === program.id
-                                        ? 'brand-card z-10 translate-y-px border-b-transparent text-primary shadow-none'
-                                        : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
-                                "
+                                :tabindex="selectedProgramId === program.id ? 0 : -1"
+                                class="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-input)] px-4 text-sm font-medium whitespace-nowrap transition-colors"
+                                :class="selectedProgramId === program.id ? 'bg-ink text-canvas' : 'text-ink-muted hover:bg-surface hover:text-ink'"
                                 @click="selectedProgramId = program.id"
+                                @keydown="onTabKeydown"
                             >
-                                <span
-                                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ring-1 transition"
-                                    :class="selectedProgramId === program.id ? 'bg-primary/10 text-primary ring-primary/20' : 'bg-background/60 text-secondary ring-border'"
-                                >
-                                    <component :is="program.icon" class="h-4 w-4" />
-                                </span>
-                                <span class="max-w-36 leading-tight">{{ t(`companyInterest.internshipProgram.${program.id}.name`) }}</span>
+                                <component :is="program.icon" :size="16" weight="bold" aria-hidden="true" />
+                                {{ t(`companyInterest.internshipProgram.${program.id}.name`) }}
                             </button>
                         </div>
                     </div>
 
                     <article
                         :id="`internship-panel-${selectedProgram.id}`"
-                        class="brand-card -mt-px overflow-hidden rounded-3xl"
-                        :class="{
-                            'rounded-tl-none': selectedProgramId === internshipPrograms[0].id,
-                            'rounded-tr-none': selectedProgramId === internshipPrograms[internshipPrograms.length - 1].id,
-                        }"
+                        :key="selectedProgram.id"
+                        class="card mt-4 overflow-hidden"
                         role="tabpanel"
                         :aria-labelledby="`internship-tab-${selectedProgram.id}`"
                     >
-                        <div class="border-b border-border p-6 sm:p-8">
-                            <div>
-                                <h3 class="text-2xl font-semibold tracking-tight">
-                                    {{ t(`companyInterest.internshipProgram.${selectedProgram.id}.name`) }}
-                                </h3>
-                                <p class="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-                                    {{ t(`companyInterest.internshipProgram.${selectedProgram.id}.summary`) }}
-                                </p>
-                            </div>
+                        <div class="border-b border-hairline p-6 sm:p-10">
+                            <h3 class="t-h2 text-ink">{{ t(`companyInterest.internshipProgram.${selectedProgram.id}.name`) }}</h3>
+                            <p class="t-lead mt-4 max-w-3xl">{{ t(`companyInterest.internshipProgram.${selectedProgram.id}.summary`) }}</p>
 
-                            <div class="mt-8" :aria-label="t('companyInterest.timelineLabel')">
+                            <div class="mt-10" :aria-label="t('companyInterest.timelineLabel')">
                                 <div class="hidden sm:block">
                                     <div class="grid grid-cols-4 gap-2">
-                                        <div v-for="year in 4" :key="year" class="text-center text-xs font-semibold text-muted-foreground">
+                                        <div v-for="year in 4" :key="year" class="t-mono text-center text-xs font-medium text-ink-muted">
                                             {{ t('companyInterest.year') }} {{ year }}
                                         </div>
                                     </div>
@@ -301,7 +294,7 @@ function submit() {
                                         <div
                                             v-for="(phase, index) in selectedProgram.phases"
                                             :key="index"
-                                            class="flex min-h-20 items-center justify-center rounded-lg px-1 text-center text-xs leading-tight font-semibold ring-1"
+                                            class="flex min-h-24 items-center justify-center rounded-xl px-1 text-center text-xs leading-tight font-semibold ring-1"
                                             :class="internshipPhaseClasses[phase]"
                                             :title="t(`companyInterest.phase.${phase}`)"
                                         >
@@ -310,9 +303,9 @@ function submit() {
                                     </div>
                                 </div>
 
-                                <div class="space-y-2.5 sm:hidden">
+                                <div class="space-y-2 sm:hidden">
                                     <div v-for="year in 4" :key="year" class="grid grid-cols-[3.5rem_1fr_1fr] items-stretch gap-2">
-                                        <div class="flex items-center text-sm font-semibold text-muted-foreground">{{ t('companyInterest.year') }} {{ year }}</div>
+                                        <div class="t-mono flex items-center text-xs font-medium text-ink-muted">{{ t('companyInterest.year') }} {{ year }}</div>
                                         <div
                                             v-for="halfYear in 2"
                                             :key="halfYear"
@@ -325,41 +318,34 @@ function submit() {
                                     </div>
                                 </div>
 
-                                <div class="mt-4 hidden flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground sm:flex">
+                                <div class="mt-5 hidden flex-wrap gap-x-6 gap-y-2 text-xs text-ink-muted sm:flex">
                                     <span v-for="phase in ['internship', 'orientation', 'graduation'] as InternshipPhase[]" :key="phase" class="inline-flex items-center gap-2">
-                                        <span class="h-2.5 w-2.5 rounded-full ring-1" :class="internshipPhaseClasses[phase]"></span>
+                                        <span class="size-3 rounded-full ring-1" :class="internshipPhaseClasses[phase]"></span>
                                         {{ t(`companyInterest.phase.${phase}`) }}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="grid gap-6 p-6 sm:p-8 md:grid-cols-2">
+                        <div class="grid gap-8 p-6 sm:p-10 md:grid-cols-2">
                             <div>
-                                <h4 class="font-semibold">{{ t('companyInterest.assignmentTitle') }}</h4>
-                                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
-                                    {{ t(`companyInterest.internshipProgram.${selectedProgram.id}.assignment`) }}
-                                </p>
+                                <h4 class="t-h4 text-ink">{{ t('companyInterest.assignmentTitle') }}</h4>
+                                <p class="t-body mt-2">{{ t(`companyInterest.internshipProgram.${selectedProgram.id}.assignment`) }}</p>
                             </div>
                             <div>
-                                <h4 class="font-semibold">{{ t('companyInterest.guidanceTitle') }}</h4>
-                                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{{ t('companyInterest.guidanceText') }}</p>
+                                <h4 class="t-h4 text-ink">{{ t('companyInterest.guidanceTitle') }}</h4>
+                                <p class="t-body mt-2">{{ t('companyInterest.guidanceText') }}</p>
                             </div>
                         </div>
 
-                        <div class="flex flex-col gap-4 border-t border-border bg-muted/30 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-                            <p class="flex max-w-2xl gap-2 text-xs leading-relaxed text-muted-foreground">
-                                <Info class="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+                        <div class="flex flex-col gap-4 border-t border-hairline bg-surface/70 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-10">
+                            <p class="flex max-w-2xl gap-2 text-sm leading-relaxed text-ink-muted">
+                                <PhInfo :size="18" class="mt-0.5 shrink-0 text-brand-blue" aria-hidden="true" />
                                 {{ t('companyInterest.internshipDisclaimer') }}
                             </p>
-                            <a
-                                :href="selectedProgram.sourceUrl"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-primary transition hover:text-primary/80"
-                            >
+                            <a :href="selectedProgram.sourceUrl" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm shrink-0">
                                 {{ t('companyInterest.viewProgram') }}
-                                <ExternalLink class="h-4 w-4" />
+                                <PhArrowUpRight :size="14" weight="bold" aria-hidden="true" />
                             </a>
                         </div>
                     </article>
@@ -367,133 +353,134 @@ function submit() {
             </div>
         </section>
 
-        <section id="how-it-works" class="brand-section relative border-y border-border px-6 py-14 lg:px-16">
-            <div class="mx-auto max-w-7xl">
+        <!-- Process -->
+        <section id="how-it-works" class="border-y border-hairline bg-surface py-20 md:py-28">
+            <div class="site-container">
                 <div class="max-w-2xl">
-                    <p class="brand-eyebrow">{{ t('companyInterest.processEyebrow') }}</p>
-                    <h2 class="mt-4 text-3xl font-semibold tracking-tight">{{ t('companyInterest.processTitle') }}</h2>
-                    <p class="mt-3 leading-relaxed text-muted-foreground">{{ t('companyInterest.processIntro') }}</p>
+                    <p v-reveal class="t-eyebrow">{{ t('companyInterest.processEyebrow') }}</p>
+                    <h2 v-reveal="40" class="t-h2 mt-5 text-ink">{{ t('companyInterest.processTitle') }}</h2>
+                    <p v-reveal="80" class="t-lead mt-5">{{ t('companyInterest.processIntro') }}</p>
                 </div>
 
-                <ol class="mt-9 grid gap-5 md:grid-cols-3">
-                    <li v-for="(icon, index) in [Send, MessagesSquare, FileText]" :key="index" class="brand-card rounded-2xl p-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                                <component :is="icon" class="h-5 w-5" />
-                            </div>
-                            <span class="text-sm font-semibold text-muted-foreground">0{{ index + 1 }}</span>
-                        </div>
-                        <h3 class="mt-5 text-lg font-semibold">{{ t(`companyInterest.step${index + 1}Title`) }}</h3>
-                        <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{{ t(`companyInterest.step${index + 1}Text`) }}</p>
+                <ol class="mt-14 grid gap-3 md:grid-cols-3">
+                    <li v-for="(icon, index) in processSteps" :key="index" v-reveal="index * 80" v-spotlight class="spot card-lift relative bg-canvas p-7 md:p-8">
+                        <span
+                            class="pointer-events-none absolute -top-6 right-4 text-[5.5rem] leading-none font-semibold tracking-[-0.04em] text-ink/[0.06] select-none"
+                            aria-hidden="true"
+                        >
+                            {{ index + 1 }}
+                        </span>
+                        <span class="flex size-12 items-center justify-center rounded-[var(--radius-input)]" :class="index === 1 ? 'tile-electric' : 'tile-sunset'">
+                            <component :is="icon" :size="22" weight="bold" aria-hidden="true" />
+                        </span>
+                        <h3 class="t-h3 mt-10 text-ink">{{ t(`companyInterest.step${index + 1}Title`) }}</h3>
+                        <p class="t-body mt-2">{{ t(`companyInterest.step${index + 1}Text`) }}</p>
                     </li>
                 </ol>
             </div>
         </section>
 
-        <section id="enroll" class="relative scroll-mt-24 px-6 py-14 sm:py-20 lg:px-16">
-            <div class="mx-auto max-w-5xl">
-                <div class="max-w-3xl">
-                    <p class="brand-eyebrow">{{ t('companyInterest.formEyebrow') }}</p>
-                    <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground">{{ t('companyInterest.formTitle') }}</h2>
-                    <p class="mt-3 text-base leading-relaxed text-muted-foreground">{{ t('companyInterest.formIntro') }}</p>
+        <!-- Form -->
+        <section id="enroll" class="scroll-mt-24 py-20 md:py-28">
+            <div class="site-container grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
+                <div class="lg:col-span-4">
+                    <p v-reveal class="t-eyebrow">{{ t('companyInterest.formEyebrow') }}</p>
+                    <h2 v-reveal="40" class="mt-5 text-[clamp(2rem,1.4rem+2vw,3rem)] leading-[1.02] font-semibold tracking-[-0.045em] text-ink">
+                        {{ t('companyInterest.formTitle') }}
+                    </h2>
+                    <p v-reveal="80" class="t-lead mt-5">{{ t('companyInterest.formIntro') }}</p>
                 </div>
 
-                <div
-                    v-if="saved"
-                    class="mt-8 rounded-xl bg-emerald-500/15 p-4 text-sm text-emerald-900 ring-1 ring-emerald-500/25 dark:text-emerald-100"
-                    role="status"
-                    aria-live="polite"
-                >
-                    <div class="flex items-start gap-3">
-                        <CheckCircle2 class="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-                        <p>{{ t('companyInterest.success') }}</p>
+                <div class="lg:col-span-8">
+                    <div aria-live="polite">
+                        <p v-if="saved" class="alert alert-success mb-6" role="status">
+                            <PhCheckCircle :size="20" weight="fill" class="shrink-0 text-success" aria-hidden="true" />
+                            {{ t('companyInterest.success') }}
+                        </p>
                     </div>
-                </div>
 
-                <form class="brand-card mt-8 rounded-2xl p-6 sm:p-8" @submit.prevent="submit">
-                    <div class="grid gap-6 lg:grid-cols-2">
-                        <div>
-                            <label for="company_name" class="mb-2 block text-sm font-semibold text-foreground"
-                                >{{ t('companyInterest.companyName') }} <span class="text-destructive">*</span></label
-                            >
+                    <form v-reveal="80" class="card grid gap-6 p-6 sm:grid-cols-2 sm:p-10" @submit.prevent="submit">
+                        <div class="field">
+                            <label for="company_name" class="field-label">{{ t('companyInterest.companyName') }}<span class="text-danger" aria-hidden="true"> *</span></label>
                             <input
                                 id="company_name"
                                 v-model="form.company_name"
                                 type="text"
                                 autocomplete="organization"
                                 :placeholder="t('companyInterest.companyPlaceholder')"
-                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                class="input"
+                                :aria-invalid="form.errors.company_name ? 'true' : undefined"
+                                :aria-describedby="form.errors.company_name ? 'company_name-error' : undefined"
                             />
-                            <p v-if="form.errors.company_name" class="mt-2 text-sm text-destructive">{{ form.errors.company_name }}</p>
+                            <p v-if="form.errors.company_name" id="company_name-error" class="field-error">{{ form.errors.company_name }}</p>
                         </div>
 
-                        <div>
-                            <label for="website_url" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.website') }}</label>
+                        <div class="field">
+                            <label for="website_url" class="field-label">{{ t('common.website') }}</label>
                             <input
                                 id="website_url"
                                 v-model="form.website_url"
                                 type="url"
                                 placeholder="https://example.com"
-                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                class="input"
+                                :aria-invalid="form.errors.website_url ? 'true' : undefined"
+                                :aria-describedby="form.errors.website_url ? 'website_url-error' : undefined"
                             />
-                            <p v-if="form.errors.website_url" class="mt-2 text-sm text-destructive">{{ form.errors.website_url }}</p>
+                            <p v-if="form.errors.website_url" id="website_url-error" class="field-error">{{ form.errors.website_url }}</p>
                         </div>
 
-                        <div>
-                            <label for="contact_name" class="mb-2 block text-sm font-semibold text-foreground"
-                                >{{ t('companyInterest.contactPerson') }} <span class="text-destructive">*</span></label
-                            >
+                        <div class="field">
+                            <label for="contact_name" class="field-label">{{ t('companyInterest.contactPerson') }}<span class="text-danger" aria-hidden="true"> *</span></label>
                             <input
                                 id="contact_name"
                                 v-model="form.contact_name"
                                 type="text"
                                 autocomplete="name"
-                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                class="input"
+                                :aria-invalid="form.errors.contact_name ? 'true' : undefined"
+                                :aria-describedby="form.errors.contact_name ? 'contact_name-error' : undefined"
                             />
-                            <p v-if="form.errors.contact_name" class="mt-2 text-sm text-destructive">{{ form.errors.contact_name }}</p>
+                            <p v-if="form.errors.contact_name" id="contact_name-error" class="field-error">{{ form.errors.contact_name }}</p>
                         </div>
 
-                        <div>
-                            <label for="contact_email" class="mb-2 block text-sm font-semibold text-foreground"
-                                >{{ t('companyInterest.businessEmail') }} <span class="text-destructive">*</span></label
-                            >
+                        <div class="field">
+                            <label for="contact_email" class="field-label">{{ t('companyInterest.businessEmail') }}<span class="text-danger" aria-hidden="true"> *</span></label>
                             <input
                                 id="contact_email"
                                 v-model="form.contact_email"
                                 type="email"
                                 autocomplete="email"
-                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                spellcheck="false"
+                                class="input"
+                                :aria-invalid="form.errors.contact_email ? 'true' : undefined"
+                                :aria-describedby="form.errors.contact_email ? 'contact_email-error' : undefined"
                             />
-                            <p v-if="form.errors.contact_email" class="mt-2 text-sm text-destructive">{{ form.errors.contact_email }}</p>
+                            <p v-if="form.errors.contact_email" id="contact_email-error" class="field-error">{{ form.errors.contact_email }}</p>
                         </div>
 
-                        <div class="lg:col-span-2">
-                            <label for="message" class="mb-2 block text-sm font-semibold text-foreground">{{ t('companyInterest.editionQuestion') }}</label>
+                        <div class="field sm:col-span-2">
+                            <label for="message" class="field-label">{{ t('companyInterest.editionQuestion') }}</label>
                             <textarea
                                 id="message"
                                 v-model="form.message"
                                 rows="4"
                                 :placeholder="t('companyInterest.messagePlaceholder')"
-                                class="brand-input w-full rounded-xl p-4 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
+                                class="input"
+                                :aria-invalid="form.errors.message ? 'true' : undefined"
+                                :aria-describedby="form.errors.message ? 'message-error' : undefined"
                             ></textarea>
-                            <p v-if="form.errors.message" class="mt-2 text-sm text-destructive">{{ form.errors.message }}</p>
+                            <p v-if="form.errors.message" id="message-error" class="field-error">{{ form.errors.message }}</p>
                         </div>
-                    </div>
 
-                    <div class="mt-8 flex justify-end">
-                        <button
-                            type="submit"
-                            :disabled="form.processing"
-                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            <Send class="h-4 w-4" />
-                            {{ form.processing ? t('common.submitting') : t('companyInterest.sendRequest') }}
-                        </button>
-                    </div>
-                </form>
+                        <div class="flex justify-end sm:col-span-2">
+                            <button type="submit" :disabled="form.processing" class="btn btn-primary btn-lg">
+                                <PhPaperPlaneTilt :size="18" weight="bold" aria-hidden="true" />
+                                {{ form.processing ? t('common.submitting') : t('companyInterest.sendRequest') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </section>
-    </main>
-
-    <AppFooter />
+    </SiteLayout>
 </template>

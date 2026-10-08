@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { Building2, CheckCircle2, Plus, PlusCircle, Search, Send, Upload, X } from 'lucide-vue-next';
+import { PhBuildings, PhCheckCircle, PhMagnifyingGlass, PhPaperPlaneTilt, PhPlus, PhPlusCircle, PhUploadSimple, PhX } from '@phosphor-icons/vue';
 import { computed, ref, watch } from 'vue';
 
-import AppFooter from '@/components/AppFooter.vue';
-import AppHeader from '@/components/AppHeader.vue';
+import PageIntro from '@/components/site/PageIntro.vue';
+import SiteLayout from '@/components/site/SiteLayout.vue';
 import { useTranslations } from '@/i18n';
 
 type CompanyOption = {
@@ -162,299 +162,245 @@ function submit() {
 <template>
     <Head :title="t('companyAccess.head')" />
 
-    <AppHeader class="sticky top-0 z-50" />
+    <SiteLayout>
+        <PageIntro :eyebrow="t('companyAccess.eyebrow')" :title="t('companyAccess.title')" :lead="t('companyAccess.intro')" />
 
-    <main class="brand-hero min-h-screen px-6 py-12 lg:px-16">
-        <div class="mx-auto max-w-5xl">
-            <div class="max-w-3xl">
-                <p class="brand-eyebrow">{{ t('companyAccess.eyebrow') }}</p>
-                <h1 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{{ t('companyAccess.title') }}</h1>
-                <p class="mt-4 text-base leading-relaxed text-muted-foreground">{{ t('companyAccess.intro') }}</p>
-            </div>
-
-            <div v-if="saved" class="mt-8 rounded-xl bg-emerald-500/15 p-4 text-sm text-emerald-900 ring-1 ring-emerald-500/25" role="status" aria-live="polite">
-                <div class="flex items-start gap-3">
-                    <CheckCircle2 class="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-                    <p>{{ t('companyAccess.success') }}</p>
-                </div>
-            </div>
-
-            <form class="brand-card mt-10 rounded-2xl p-6 sm:p-8" @submit.prevent="submit">
-                <div class="grid gap-3 sm:grid-cols-2">
-                    <button
-                        type="button"
-                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold ring-1 transition"
-                        :class="mode === 'existing' ? 'bg-primary text-primary-foreground ring-primary' : 'bg-background text-foreground ring-border hover:bg-secondary/10'"
-                        @click="mode = 'existing'"
-                    >
-                        <Building2 class="h-5 w-5 shrink-0" />
-                        {{ t('companyAccess.existing') }}
-                    </button>
-                    <button
-                        type="button"
-                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold ring-1 transition"
-                        :class="mode === 'new' ? 'bg-primary text-primary-foreground ring-primary' : 'bg-background text-foreground ring-border hover:bg-secondary/10'"
-                        @click="mode = 'new'"
-                    >
-                        <PlusCircle class="h-5 w-5 shrink-0" />
-                        {{ t('companyAccess.new') }}
-                    </button>
+        <section class="site-container pt-14 pb-24 md:pt-20 md:pb-32">
+            <div class="mx-auto max-w-4xl">
+                <div v-if="saved" class="alert alert-success mt-0 mb-8" role="status" aria-live="polite">
+                    <div class="flex items-start gap-3">
+                        <PhCheckCircle class="mt-0.5 h-5 w-5 shrink-0 text-success" />
+                        <p>{{ t('companyAccess.success') }}</p>
+                    </div>
                 </div>
 
-                <div class="mt-8 grid gap-6 lg:grid-cols-2">
-                    <template v-if="mode === 'existing'">
-                        <div class="lg:col-span-2">
-                            <label for="company_search" class="mb-2 block text-sm font-semibold text-foreground">{{ t('companyAccess.searchCompany') }}</label>
-                            <div class="relative">
-                                <Search class="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                <input
-                                    id="company_search"
-                                    v-model="query"
-                                    type="search"
-                                    autocomplete="off"
-                                    :placeholder="t('companyAccess.searchPlaceholder')"
-                                    class="brand-input w-full rounded-xl py-3 pr-4 pl-11 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                                />
-                            </div>
+                <form class="card p-6 sm:p-10" @submit.prevent="submit">
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <button
+                            type="button"
+                            class="flex items-center gap-3 rounded-[var(--radius-input)] px-4 py-3 text-left text-sm font-semibold ring-1 transition"
+                            :class="mode === 'existing' ? 'bg-ink text-canvas ring-ink' : 'bg-canvas text-ink ring-hairline hover:bg-surface'"
+                            @click="mode = 'existing'"
+                        >
+                            <PhBuildings class="h-5 w-5 shrink-0" />
+                            {{ t('companyAccess.existing') }}
+                        </button>
+                        <button
+                            type="button"
+                            class="flex items-center gap-3 rounded-[var(--radius-input)] px-4 py-3 text-left text-sm font-semibold ring-1 transition"
+                            :class="mode === 'new' ? 'bg-ink text-canvas ring-ink' : 'bg-canvas text-ink ring-hairline hover:bg-surface'"
+                            @click="mode = 'new'"
+                        >
+                            <PhPlusCircle class="h-5 w-5 shrink-0" />
+                            {{ t('companyAccess.new') }}
+                        </button>
+                    </div>
 
-                            <div class="mt-3 max-h-72 overflow-y-auto rounded-xl bg-background/70 ring-1 ring-border">
-                                <button
-                                    v-for="company in filteredCompanies"
-                                    :key="company.id"
-                                    type="button"
-                                    class="block w-full border-b border-border px-4 py-3 text-left text-sm transition last:border-b-0 hover:bg-secondary/10"
-                                    :class="form.company_id === company.id ? 'bg-primary/10 text-primary' : 'text-foreground'"
-                                    @click="selectCompany(company)"
-                                >
-                                    <span class="font-semibold">{{ company.name }}</span>
-                                    <span v-if="company.website_url" class="mt-1 block text-xs text-muted-foreground">{{ company.website_url }}</span>
-                                </button>
-                                <p v-if="!filteredCompanies.length" class="px-4 py-5 text-sm text-muted-foreground">{{ t('companyAccess.notFound') }}</p>
-                            </div>
-
-                            <p v-if="selectedCompany" class="mt-2 text-xs text-muted-foreground">{{ t('companyAccess.selectedCompany', { name: selectedCompany.name }) }}</p>
-                            <p v-if="form.errors.company_id" class="mt-2 text-sm text-destructive">{{ form.errors.company_id }}</p>
-                        </div>
-                    </template>
-
-                    <template v-else>
-                        <div class="lg:col-span-2">
-                            <h2 class="text-xl font-semibold text-foreground">{{ t('companyAccess.newCompanyTitle') }}</h2>
-                            <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{{ t('companyAccess.newCompanyHelp') }}</p>
-                        </div>
-
-                        <div>
-                            <label for="company_name" class="mb-2 block text-sm font-semibold text-foreground"
-                                >{{ t('companyAccess.companyName') }} <span class="text-destructive">*</span></label
-                            >
-                            <input
-                                id="company_name"
-                                v-model="form.company_name"
-                                type="text"
-                                required
-                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                            />
-                            <p v-if="form.errors.company_name" class="mt-2 text-sm text-destructive">{{ form.errors.company_name }}</p>
-                        </div>
-
-                        <div>
-                            <label for="website_url" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.website') }}</label>
-                            <input
-                                id="website_url"
-                                v-model="form.website_url"
-                                type="url"
-                                placeholder="https://example.com"
-                                class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                            />
-                            <p v-if="form.errors.website_url" class="mt-2 text-sm text-destructive">{{ form.errors.website_url }}</p>
-                        </div>
-
-                        <div class="lg:col-span-2">
-                            <label for="description" class="mb-2 block text-sm font-semibold text-foreground"
-                                >{{ t('common.description') }} <span class="text-destructive">*</span></label
-                            >
-                            <textarea
-                                id="description"
-                                v-model="form.description"
-                                rows="6"
-                                required
-                                maxlength="5000"
-                                :placeholder="t('companyProfile.descriptionPlaceholder')"
-                                class="brand-input w-full rounded-xl p-4 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                            ></textarea>
-                            <p v-if="form.errors.description" class="mt-2 text-sm text-destructive">{{ form.errors.description }}</p>
-                        </div>
-
-                        <div class="lg:col-span-2">
-                            <p class="text-sm font-semibold text-foreground">{{ t('companyProfile.logo') }} <span class="text-destructive">*</span></p>
-                            <div class="mt-3 flex flex-col gap-4 rounded-xl bg-background/50 p-4 ring-1 ring-border sm:flex-row sm:items-center">
-                                <div class="flex h-32 w-full shrink-0 items-center justify-center rounded-xl bg-background p-4 ring-1 ring-border sm:w-48">
-                                    <img v-if="logoPreview" :src="logoPreview" :alt="form.company_name" class="max-h-full max-w-full object-contain" />
-                                    <span v-else class="text-sm text-muted-foreground">{{ t('common.noLogo') }}</span>
-                                </div>
-                                <div>
-                                    <label
-                                        for="logo"
-                                        class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-background px-4 py-3 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-secondary/10"
-                                    >
-                                        <Upload class="h-4 w-4" />
-                                        {{ t('companyProfile.uploadLogo') }}
-                                    </label>
-                                    <input id="logo" type="file" accept="image/*" required class="sr-only" @change="handleLogoChange" />
-                                    <p class="mt-2 text-xs text-muted-foreground">{{ t('companyAccess.logoHelp') }}</p>
-                                    <p v-if="form.errors.logo" class="mt-2 text-sm text-destructive">{{ form.errors.logo }}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="lg:col-span-2">
-                            <p class="text-sm font-semibold text-foreground">{{ t('common.educations') }} <span class="text-destructive">*</span></p>
-                            <p class="mt-1 text-xs text-muted-foreground">{{ t('companyAccess.educationsHelp') }}</p>
-                            <div class="mt-3 grid gap-3 rounded-xl bg-background/40 p-4 ring-1 ring-border sm:grid-cols-2">
-                                <label v-for="education in options.educations" :key="education.id" class="flex items-start gap-3 text-sm text-foreground">
+                    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+                        <template v-if="mode === 'existing'">
+                            <div class="lg:col-span-2">
+                                <label for="company_search" class="field-label mb-2 block">{{ t('companyAccess.searchCompany') }}</label>
+                                <div class="relative">
+                                    <PhMagnifyingGlass class="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-ink-muted" />
                                     <input
-                                        type="checkbox"
-                                        class="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-ring/40"
-                                        :checked="form.education_ids.includes(education.id)"
-                                        @change="toggleValue(form.education_ids, education.id)"
+                                        id="company_search"
+                                        v-model="query"
+                                        type="search"
+                                        autocomplete="off"
+                                        :placeholder="t('companyAccess.searchPlaceholder')"
+                                        class="input pl-11"
                                     />
-                                    <span>{{ education.name }}</span>
-                                </label>
-                            </div>
-                            <p v-if="form.errors.education_ids" class="mt-2 text-sm text-destructive">{{ form.errors.education_ids }}</p>
-                        </div>
+                                </div>
 
-                        <div class="lg:col-span-2">
-                            <p class="text-sm font-semibold text-foreground">{{ t('common.sectors') }}</p>
-                            <div class="relative mt-3">
-                                <Search class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                <input
-                                    v-model="sectorSearch"
-                                    type="search"
-                                    :placeholder="t('companyProfile.searchSector')"
-                                    class="brand-input w-full rounded-xl py-3 pr-4 pl-10 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                                />
-                            </div>
-
-                            <div class="mt-3 max-h-56 overflow-y-auto rounded-xl bg-background/40 p-3 ring-1 ring-border">
-                                <div class="flex flex-wrap gap-3">
-                                    <label
-                                        v-for="sector in filteredSectors"
-                                        :key="sector.id"
-                                        class="inline-flex max-w-full items-center gap-3 rounded-lg bg-background/80 px-3 py-2 text-sm whitespace-nowrap text-foreground ring-1 ring-border"
+                                <div class="mt-3 max-h-72 overflow-y-auto rounded-[var(--radius-input)] bg-canvas ring-1 ring-hairline">
+                                    <button
+                                        v-for="company in filteredCompanies"
+                                        :key="company.id"
+                                        type="button"
+                                        class="block w-full border-b border-hairline px-4 py-3 text-left text-sm transition last:border-b-0 hover:bg-surface"
+                                        :class="form.company_id === company.id ? 'bg-brand/10 text-brand-ink' : 'text-ink'"
+                                        @click="selectCompany(company)"
                                     >
+                                        <span class="font-semibold">{{ company.name }}</span>
+                                        <span v-if="company.website_url" class="mt-1 block text-xs text-ink-muted">{{ company.website_url }}</span>
+                                    </button>
+                                    <p v-if="!filteredCompanies.length" class="px-4 py-5 text-sm text-ink-muted">{{ t('companyAccess.notFound') }}</p>
+                                </div>
+
+                                <p v-if="selectedCompany" class="mt-2 text-xs text-ink-muted">{{ t('companyAccess.selectedCompany', { name: selectedCompany.name }) }}</p>
+                                <p v-if="form.errors.company_id" class="field-error mt-2">{{ form.errors.company_id }}</p>
+                            </div>
+                        </template>
+
+                        <template v-else>
+                            <div class="lg:col-span-2">
+                                <h2 class="text-xl font-semibold text-ink">{{ t('companyAccess.newCompanyTitle') }}</h2>
+                                <p class="mt-2 text-sm leading-relaxed text-ink-muted">{{ t('companyAccess.newCompanyHelp') }}</p>
+                            </div>
+
+                            <div>
+                                <label for="company_name" class="field-label mb-2 block"
+                                    >{{ t('companyAccess.companyName') }} <span class="text-danger" aria-hidden="true">*</span></label
+                                >
+                                <input id="company_name" v-model="form.company_name" type="text" required class="input" />
+                                <p v-if="form.errors.company_name" class="field-error mt-2">{{ form.errors.company_name }}</p>
+                            </div>
+
+                            <div>
+                                <label for="website_url" class="field-label mb-2 block">{{ t('common.website') }}</label>
+                                <input id="website_url" v-model="form.website_url" type="url" placeholder="https://example.com" class="input" />
+                                <p v-if="form.errors.website_url" class="field-error mt-2">{{ form.errors.website_url }}</p>
+                            </div>
+
+                            <div class="lg:col-span-2">
+                                <label for="description" class="field-label mb-2 block">{{ t('common.description') }} <span class="text-danger" aria-hidden="true">*</span></label>
+                                <textarea
+                                    id="description"
+                                    v-model="form.description"
+                                    rows="6"
+                                    required
+                                    maxlength="5000"
+                                    :placeholder="t('companyProfile.descriptionPlaceholder')"
+                                    class="input"
+                                ></textarea>
+                                <p v-if="form.errors.description" class="field-error mt-2">{{ form.errors.description }}</p>
+                            </div>
+
+                            <div class="lg:col-span-2">
+                                <p class="text-sm font-semibold text-ink">{{ t('companyProfile.logo') }} <span class="text-danger" aria-hidden="true">*</span></p>
+                                <div class="mt-3 flex flex-col gap-4 rounded-[var(--radius-input)] bg-surface p-4 ring-1 ring-hairline sm:flex-row sm:items-center">
+                                    <div class="flex h-32 w-full shrink-0 items-center justify-center rounded-[var(--radius-input)] bg-canvas p-4 ring-1 ring-hairline sm:w-48">
+                                        <img v-if="logoPreview" :src="logoPreview" :alt="form.company_name" class="max-h-full max-w-full object-contain" />
+                                        <span v-else class="text-sm text-ink-muted">{{ t('common.noLogo') }}</span>
+                                    </div>
+                                    <div>
+                                        <label for="logo" class="btn btn-secondary cursor-pointer">
+                                            <PhUploadSimple class="h-4 w-4" />
+                                            {{ t('companyProfile.uploadLogo') }}
+                                        </label>
+                                        <input id="logo" type="file" accept="image/*" required class="sr-only" @change="handleLogoChange" />
+                                        <p class="mt-2 text-xs text-ink-muted">{{ t('companyAccess.logoHelp') }}</p>
+                                        <p v-if="form.errors.logo" class="field-error mt-2">{{ form.errors.logo }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="lg:col-span-2">
+                                <p class="text-sm font-semibold text-ink">{{ t('common.educations') }} <span class="text-danger" aria-hidden="true">*</span></p>
+                                <p class="mt-1 text-xs text-ink-muted">{{ t('companyAccess.educationsHelp') }}</p>
+                                <div class="mt-3 grid gap-3 rounded-[var(--radius-input)] bg-surface p-4 ring-1 ring-hairline sm:grid-cols-2">
+                                    <label v-for="education in options.educations" :key="education.id" class="flex items-start gap-3 text-sm text-ink">
                                         <input
                                             type="checkbox"
-                                            class="h-4 w-4 shrink-0 rounded border-border text-primary focus:ring-ring/40"
-                                            :checked="form.sector_ids.includes(sector.id)"
-                                            @change="toggleValue(form.sector_ids, sector.id)"
+                                            class="mt-0.5 h-4 w-4 rounded border-hairline text-brand-ink focus:ring-ring/40"
+                                            :checked="form.education_ids.includes(education.id)"
+                                            @change="toggleValue(form.education_ids, education.id)"
                                         />
-                                        <span>{{ sector.name }}</span>
+                                        <span>{{ education.name }}</span>
                                     </label>
                                 </div>
-                                <p v-if="!filteredSectors.length" class="text-sm text-muted-foreground">{{ t('companyProfile.noSector') }}</p>
+                                <p v-if="form.errors.education_ids" class="field-error mt-2">{{ form.errors.education_ids }}</p>
                             </div>
 
-                            <div class="mt-4 rounded-xl bg-background/60 p-4 ring-1 ring-border">
-                                <label for="new_sector_name" class="text-sm font-semibold text-foreground">{{ t('companyProfile.newSector') }}</label>
-                                <div class="mt-3 flex flex-col gap-3 sm:flex-row">
-                                    <input
-                                        id="new_sector_name"
-                                        v-model="newSectorName"
-                                        type="text"
-                                        maxlength="80"
-                                        :placeholder="t('companyProfile.newSectorExample')"
-                                        class="brand-input min-w-0 flex-1 rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                                        @keydown.enter.prevent="addNewSector"
-                                    />
-                                    <button
-                                        type="button"
-                                        :disabled="!canAddNewSector"
-                                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-                                        @click="addNewSector"
-                                    >
-                                        <Plus class="h-4 w-4" />
-                                        {{ t('companyProfile.add') }}
-                                    </button>
+                            <div class="lg:col-span-2">
+                                <p class="text-sm font-semibold text-ink">{{ t('common.sectors') }}</p>
+                                <div class="relative mt-3">
+                                    <PhMagnifyingGlass class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+                                    <input v-model="sectorSearch" type="search" :placeholder="t('companyProfile.searchSector')" class="input pl-11" />
                                 </div>
-                                <p class="mt-2 text-xs text-muted-foreground">{{ t('companyProfile.newSectorHelp') }}</p>
 
-                                <div v-if="form.new_sector_names.length" class="mt-4 flex flex-wrap gap-2">
-                                    <span
-                                        v-for="name in form.new_sector_names"
-                                        :key="name"
-                                        class="inline-flex max-w-full items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm font-semibold whitespace-nowrap text-primary ring-1 ring-primary/20"
-                                    >
-                                        {{ name }}
-                                        <button
-                                            type="button"
-                                            :aria-label="t('companyProfile.remove', { name })"
-                                            class="rounded-md p-0.5 transition hover:bg-primary/10"
-                                            @click="removeNewSector(name)"
+                                <div class="mt-3 max-h-56 overflow-y-auto rounded-[var(--radius-input)] bg-surface p-3 ring-1 ring-hairline">
+                                    <div class="flex flex-wrap gap-3">
+                                        <label
+                                            v-for="sector in filteredSectors"
+                                            :key="sector.id"
+                                            class="inline-flex max-w-full items-center gap-3 rounded-lg bg-canvas px-3 py-2 text-sm whitespace-nowrap text-ink ring-1 ring-hairline"
                                         >
-                                            <X class="h-3.5 w-3.5" />
-                                        </button>
-                                    </span>
+                                            <input
+                                                type="checkbox"
+                                                class="h-4 w-4 shrink-0 rounded border-hairline text-brand-ink focus:ring-ring/40"
+                                                :checked="form.sector_ids.includes(sector.id)"
+                                                @change="toggleValue(form.sector_ids, sector.id)"
+                                            />
+                                            <span>{{ sector.name }}</span>
+                                        </label>
+                                    </div>
+                                    <p v-if="!filteredSectors.length" class="text-sm text-ink-muted">{{ t('companyProfile.noSector') }}</p>
                                 </div>
+
+                                <div class="mt-4 rounded-[var(--radius-input)] bg-surface p-4 ring-1 ring-hairline">
+                                    <label for="new_sector_name" class="text-sm font-semibold text-ink">{{ t('companyProfile.newSector') }}</label>
+                                    <div class="mt-3 flex flex-col gap-3 sm:flex-row">
+                                        <input
+                                            id="new_sector_name"
+                                            v-model="newSectorName"
+                                            type="text"
+                                            maxlength="80"
+                                            :placeholder="t('companyProfile.newSectorExample')"
+                                            class="input min-w-0 flex-1"
+                                            @keydown.enter.prevent="addNewSector"
+                                        />
+                                        <button type="button" :disabled="!canAddNewSector" class="btn btn-primary" @click="addNewSector">
+                                            <PhPlus class="h-4 w-4" />
+                                            {{ t('companyProfile.add') }}
+                                        </button>
+                                    </div>
+                                    <p class="mt-2 text-xs text-ink-muted">{{ t('companyProfile.newSectorHelp') }}</p>
+
+                                    <div v-if="form.new_sector_names.length" class="mt-4 flex flex-wrap gap-2">
+                                        <span
+                                            v-for="name in form.new_sector_names"
+                                            :key="name"
+                                            class="inline-flex max-w-full items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm font-semibold whitespace-nowrap text-brand-ink ring-1 ring-brand/25"
+                                        >
+                                            {{ name }}
+                                            <button
+                                                type="button"
+                                                :aria-label="t('companyProfile.remove', { name })"
+                                                class="rounded-md p-0.5 transition hover:bg-primary/10"
+                                                @click="removeNewSector(name)"
+                                            >
+                                                <PhX class="h-3.5 w-3.5" />
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                                <p v-if="sectorError" class="field-error mt-2">{{ sectorError }}</p>
                             </div>
-                            <p v-if="sectorError" class="mt-2 text-sm text-destructive">{{ sectorError }}</p>
+                        </template>
+
+                        <div>
+                            <label for="contact_name" class="field-label mb-2 block"
+                                >{{ t('companyAccess.contactPerson') }} <span class="text-danger" aria-hidden="true">*</span></label
+                            >
+                            <input id="contact_name" v-model="form.contact_name" type="text" autocomplete="name" class="input" />
+                            <p v-if="form.errors.contact_name" class="field-error mt-2">{{ form.errors.contact_name }}</p>
                         </div>
-                    </template>
 
-                    <div>
-                        <label for="contact_name" class="mb-2 block text-sm font-semibold text-foreground"
-                            >{{ t('companyAccess.contactPerson') }} <span class="text-destructive">*</span></label
-                        >
-                        <input
-                            id="contact_name"
-                            v-model="form.contact_name"
-                            type="text"
-                            autocomplete="name"
-                            class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                        />
-                        <p v-if="form.errors.contact_name" class="mt-2 text-sm text-destructive">{{ form.errors.contact_name }}</p>
+                        <div>
+                            <label for="contact_email" class="field-label mb-2 block"
+                                >{{ t('companyAccess.businessEmail') }} <span class="text-danger" aria-hidden="true">*</span></label
+                            >
+                            <input id="contact_email" v-model="form.contact_email" type="email" autocomplete="email" class="input" />
+                            <p v-if="form.errors.contact_email" class="field-error mt-2">{{ form.errors.contact_email }}</p>
+                        </div>
+
+                        <div class="lg:col-span-2">
+                            <label for="message" class="field-label mb-2 block">{{ t('common.message') }}</label>
+                            <textarea id="message" v-model="form.message" rows="4" class="input"></textarea>
+                            <p v-if="form.errors.message" class="field-error mt-2">{{ form.errors.message }}</p>
+                        </div>
                     </div>
 
-                    <div>
-                        <label for="contact_email" class="mb-2 block text-sm font-semibold text-foreground"
-                            >{{ t('companyAccess.businessEmail') }} <span class="text-destructive">*</span></label
-                        >
-                        <input
-                            id="contact_email"
-                            v-model="form.contact_email"
-                            type="email"
-                            autocomplete="email"
-                            class="brand-input w-full rounded-xl px-4 py-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                        />
-                        <p v-if="form.errors.contact_email" class="mt-2 text-sm text-destructive">{{ form.errors.contact_email }}</p>
+                    <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-sm leading-relaxed text-ink-muted">{{ t('companyAccess.privateLink') }}</p>
+                        <button type="submit" :disabled="form.processing" class="btn btn-primary">
+                            <PhPaperPlaneTilt class="h-4 w-4" />
+                            {{ form.processing ? t('common.submitting') : t('companyAccess.sendRequest') }}
+                        </button>
                     </div>
-
-                    <div class="lg:col-span-2">
-                        <label for="message" class="mb-2 block text-sm font-semibold text-foreground">{{ t('common.message') }}</label>
-                        <textarea
-                            id="message"
-                            v-model="form.message"
-                            rows="4"
-                            class="brand-input w-full rounded-xl p-4 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                        ></textarea>
-                        <p v-if="form.errors.message" class="mt-2 text-sm text-destructive">{{ form.errors.message }}</p>
-                    </div>
-                </div>
-
-                <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="text-sm leading-relaxed text-muted-foreground">{{ t('companyAccess.privateLink') }}</p>
-                    <button
-                        type="submit"
-                        :disabled="form.processing"
-                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        <Send class="h-4 w-4" />
-                        {{ form.processing ? t('common.submitting') : t('companyAccess.sendRequest') }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </main>
-
-    <AppFooter />
+                </form>
+            </div>
+        </section>
+    </SiteLayout>
 </template>

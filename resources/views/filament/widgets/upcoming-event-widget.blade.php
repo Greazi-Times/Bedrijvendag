@@ -18,9 +18,14 @@
                     </div>
                 </div>
 
-                <div class="shrink-0 text-right">
-                    <div class="text-3xl font-semibold italic tracking-tight text-gray-800 dark:text-white/55">event</div>
-                    <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                <div class="shrink-0 rounded-lg border border-gray-200 px-4 py-3 text-center dark:border-white/10">
+                    <div class="text-xs font-medium uppercase tracking-wide text-primary-600 dark:text-primary-400">
+                        {{ \Illuminate\Support\Carbon::parse($event->date)->locale(app()->getLocale())->isoFormat('MMM') }}
+                    </div>
+                    <div class="text-3xl font-semibold tabular-nums leading-none">
+                        {{ \Illuminate\Support\Carbon::parse($event->date)->format('j') }}
+                    </div>
+                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         {{ \Illuminate\Support\Carbon::parse($event->date)->locale(app()->getLocale())->isoFormat('dddd') }}
                     </div>
                 </div>
@@ -33,9 +38,6 @@
                     <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">Even the calendar doesn't know.</div>
                 </div>
 
-                <div class="shrink-0 text-right">
-                    <div class="text-3xl font-semibold italic tracking-tight text-gray-800 dark:text-white/55">event</div>
-                </div>
             </div>
         @endif
     </x-filament::section>

@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { Beer, Building2, DoorOpen, Info, MapPin, Search, Utensils } from 'lucide-vue-next';
+import { PhArrowLeft, PhFunnelSimple, PhMapPin, PhMapTrifold, PhX } from '@phosphor-icons/vue';
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
-import AppFooter from '@/components/AppFooter.vue';
-import AppHeader from '@/components/AppHeader.vue';
+import ActiveFilterChips from '@/components/site/ActiveFilterChips.vue';
+import CompanyDialog from '@/components/site/CompanyDialog.vue';
+import FilterSheet from '@/components/site/FilterSheet.vue';
+import PageIntro from '@/components/site/PageIntro.vue';
+import SearchField from '@/components/site/SearchField.vue';
+import SiteLayout from '@/components/site/SiteLayout.vue';
 import { useTranslations } from '@/i18n';
+import { formatDate } from '@/lib/date';
+import { mapPointIcon, mapPointMarkerClass, standBadgeClass, standDisplayCode } from '@/lib/floorplan';
+import type { CompanyDialogData } from '@/types/site';
 
 type Stand = {
     id: number | string;
@@ -56,20 +63,22 @@ const props = defineProps<{
     educations?: FilterOption[];
     sectors?: FilterOption[];
 }>();
-const { t } = useTranslations();
+const { t, dateLocale } = useTranslations();
+
+const eventDate = computed(() => formatDate(props.event.date, dateLocale.value, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
 
 const query = ref('');
 const selectedStandId = ref<Stand['id'] | null>(null);
 const selectedCompany = ref<Stand | null>(null);
 const mapImageRef = ref<HTMLImageElement | null>(null);
+const mapPanelRef = ref<HTMLElement | null>(null);
+const isCompanyOpen = ref(false);
 const mapImageHeight = ref(0);
 
 const selectedEducations = ref<string[]>([]);
 const selectedSectors = ref<string[]>([]);
 
 const isFilterOpen = ref(false);
-const educationFilterQuery = ref('');
-const sectorFilterQuery = ref('');
 
 const normalizedQuery = computed(() => query.value.trim().toLowerCase());
 
@@ -87,18 +96,6 @@ const sectorOptions = computed<string[]>(() => {
     const set = new Set<string>();
     for (const stand of props.stands) for (const n of stand.company_sectors ?? []) set.add(n);
     return Array.from(set).sort((a, b) => a.localeCompare(b, 'nl'));
-});
-
-const filteredEducationOptions = computed(() => {
-    const q = educationFilterQuery.value.trim().toLowerCase();
-    if (!q) return educationOptions.value;
-    return educationOptions.value.filter((n) => n.toLowerCase().includes(q));
-});
-
-const filteredSectorOptions = computed(() => {
-    const q = sectorFilterQuery.value.trim().toLowerCase();
-    if (!q) return sectorOptions.value;
-    return sectorOptions.value.filter((n) => n.toLowerCase().includes(q));
 });
 
 const filteredStands = computed(() => {
@@ -161,85 +158,32 @@ const selectedStand = computed(() => {
     return props.stands.find((s) => s.id === selectedStandId.value) ?? null;
 });
 
+// The stand list matches the map height only when they sit side by side.
+const isDesktop = ref(false);
+
 const updateMapImageHeight = () => {
     mapImageHeight.value = mapImageRef.value?.clientHeight ?? 0;
+    isDesktop.value = window.matchMedia('(min-width: 1024px)').matches;
 };
 
-const toggle = (arr: string[], value: string) => {
-    const i = arr.indexOf(value);
-    if (i >= 0) arr.splice(i, 1);
-    else arr.push(value);
-};
-
-const clearFilters = () => {
+const clearAll = () => {
     selectedEducations.value = [];
     selectedSectors.value = [];
 };
 
-const openFilters = () => {
-    isFilterOpen.value = true;
-    document.body.style.overflow = 'hidden';
-};
-
-const closeFilters = () => {
-    isFilterOpen.value = false;
-    if (!selectedCompany.value) document.body.style.overflow = '';
-};
-
-const clearAll = () => {
-    clearFilters();
-    educationFilterQuery.value = '';
-    sectorFilterQuery.value = '';
-};
-
 const activeFilterCount = computed(() => selectedEducations.value.length + selectedSectors.value.length);
-
-function standDisplayCode(stand: Stand) {
-    const code = String(stand.code).replace(/^P/i, '');
-
-    return stand.stand_type === 'partner' ? `P${code}` : code;
-}
 
 function standDisplayName(stand: Stand) {
     return stand.company_name ?? t('map.noOrganisation');
 }
 
-function standBadgeClass(stand: Stand) {
-    return stand.stand_type === 'partner'
-        ? 'bg-sky-100 text-sky-950 ring-sky-200 dark:bg-sky-400/20 dark:text-sky-100 dark:ring-sky-300/30'
-        : 'bg-orange-100 text-orange-950 ring-orange-200 dark:bg-orange-400/20 dark:text-orange-100 dark:ring-orange-300/30';
-}
-
-function standRowClass(stand: Stand) {
-    return selectedStandId.value === stand.id
-        ? 'border-primary/35 bg-primary/5 shadow-sm ring-1 ring-primary/20'
-        : 'border-border/70 bg-white/55 hover:border-primary/25 hover:bg-white/90 dark:bg-white/5 dark:hover:bg-white/10';
-}
-
-function mapPointIcon(point: MapPoint) {
-    return (
-        {
-            bar: Beer,
-            info: Info,
-            lunch: Utensils,
-            entrance: DoorOpen,
-        }[point.type] ?? MapPin
-    );
-}
-
-function mapPointMarkerClass(point: MapPoint) {
-    return (
-        {
-            bar: 'bg-amber-500 text-amber-950 ring-white/95',
-            info: '!h-7 !w-7 !min-w-7 !px-0 bg-sky-500 text-white ring-white/95 [&_svg]:h-4 [&_svg]:w-4',
-            lunch: 'bg-emerald-500 text-white ring-white/95',
-            entrance: 'bg-violet-500 text-white ring-white/95',
-        }[point.type] ?? 'bg-slate-600 text-white ring-white/95'
-    );
-}
-
-function selectStand(id: Stand['id']) {
+function selectStand(id: Stand['id'], reveal = false) {
     selectedStandId.value = id;
+
+    // On stacked (mobile/tablet) layouts the list sits below the map; bring the marker into view.
+    if (reveal && window.matchMedia('(max-width: 1023px)').matches) {
+        mapPanelRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 function clearSelection() {
@@ -248,533 +192,205 @@ function clearSelection() {
 
 const openCompany = (stand: Stand) => {
     selectedCompany.value = stand;
-    document.body.style.overflow = 'hidden';
+    isCompanyOpen.value = true;
 };
 
-const closeCompany = () => {
-    selectedCompany.value = null;
-    if (!isFilterOpen.value) document.body.style.overflow = '';
-};
+const companyDialogData = computed<CompanyDialogData | null>(() => {
+    const s = selectedCompany.value;
+    if (!s) return null;
 
-const onKeydown = (e: KeyboardEvent) => {
-    if (e.key !== 'Escape') return;
-    if (selectedCompany.value) return closeCompany();
-    if (isFilterOpen.value) return closeFilters();
-};
-
-const sanitizeHtml = (value: string) => {
-    try {
-        const doc = new DOMParser().parseFromString(String(value ?? ''), 'text/html');
-
-        doc.querySelectorAll('script, style, iframe, object, embed, link, meta').forEach((el) => el.remove());
-
-        const all = doc.body.querySelectorAll('*');
-        for (const el of all) {
-            for (const attr of Array.from(el.attributes)) {
-                const name = attr.name.toLowerCase();
-                const val = (attr.value ?? '').trim().toLowerCase();
-
-                if (name.startsWith('on')) {
-                    el.removeAttribute(attr.name);
-                    continue;
-                }
-
-                if ((name === 'href' || name === 'src') && val.startsWith('javascript:')) {
-                    el.removeAttribute(attr.name);
-                    continue;
-                }
-            }
-        }
-
-        return doc.body.innerHTML;
-    } catch {
-        return String(value ?? '');
-    }
-};
+    return {
+        name: standDisplayName(s),
+        kind: s.stand_type === 'partner' ? t('map.partner') : t('common.company'),
+        stand: standDisplayCode(s),
+        logoUrl: s.company_logo,
+        description: s.company_description,
+        educations: s.company_educations,
+        sectors: s.company_sectors,
+        showSectors: s.stand_type !== 'partner',
+        websiteUrl: s.company_website_url,
+    };
+});
 
 onMounted(() => {
-    window.addEventListener('keydown', onKeydown);
     window.addEventListener('resize', updateMapImageHeight);
     nextTick(updateMapImageHeight);
 });
 
 onUnmounted(() => {
-    window.removeEventListener('keydown', onKeydown);
     window.removeEventListener('resize', updateMapImageHeight);
-    document.body.style.overflow = '';
 });
 </script>
 
 <template>
     <Head :title="`${event.title} - ${t('map.title')}`" />
 
-    <AppHeader />
+    <SiteLayout>
+        <PageIntro :eyebrow="eventDate ? `${t('map.title')} · ${eventDate}` : t('map.title')" :title="event.title" :lead="t('map.intro')">
+            <Link v-if="backHref" :href="backHref" class="btn btn-secondary btn-sm">
+                <PhArrowLeft :size="16" aria-hidden="true" />
+                {{ t('map.back') }}
+            </Link>
+        </PageIntro>
 
-    <section class="brand-hero px-4 py-10 md:px-8">
-        <div class="relative z-10 mx-auto flex max-w-10/12 flex-col gap-6">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div class="min-w-0">
-                    <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Building2 class="h-4 w-4" />
-                        <span v-if="event.date" class="hidden sm:inline">•</span>
-                        <span v-if="event.date" class="hidden sm:inline">{{ event.date }}</span>
-                    </div>
-
-                    <h1 class="mt-1 text-2xl font-semibold tracking-tight text-black dark:text-white">
-                        {{ event.title }}
-                    </h1>
-
-                    <p class="mt-1 text-sm text-muted-foreground">
-                        {{ t('map.intro') }}
-                    </p>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <Link
-                        v-if="backHref"
-                        :href="backHref"
-                        class="inline-flex items-center justify-center rounded-xl border border-border bg-white/80 px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-accent dark:bg-white/10 dark:hover:bg-white/15"
-                    >
-                        {{ t('map.back') }}
-                    </Link>
-                </div>
-            </div>
-
-            <div class="grid items-stretch gap-6 lg:grid-cols-12">
+        <section class="site-container pt-10 pb-24 md:pt-14 md:pb-32">
+            <div class="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:items-start">
                 <!-- Map -->
-                <div class="lg:col-span-8">
-                    <div class="brand-card relative overflow-hidden rounded-2xl">
+                <div ref="mapPanelRef" class="min-w-0 scroll-mt-20 lg:col-span-8">
+                    <div class="overflow-hidden rounded-[var(--radius-card)] border border-hairline bg-white">
                         <div class="relative">
-                            <!-- zoom layer -->
-                            <div class="relative">
-                                <template v-if="map.image_url">
-                                    <img
-                                        ref="mapImageRef"
-                                        :src="map.image_url"
-                                        :alt="t('map.imageAlt', { event: event.title })"
-                                        class="block h-auto w-full select-none"
-                                        draggable="false"
-                                        @load="updateMapImageHeight"
-                                    />
-
-                                    <button
-                                        v-for="stand in standsWithCoords"
-                                        :key="`marker-${stand.id}`"
-                                        type="button"
-                                        class="group absolute z-10 flex h-6 min-w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full px-1.5 text-[11px] font-bold text-white shadow-md ring-2 ring-white/90 transition hover:z-20 hover:scale-110 focus-visible:z-20 focus-visible:ring-4 focus-visible:ring-primary/40 focus-visible:outline-none"
-                                        :class="
-                                            selectedStandId === stand.id
-                                                ? 'bg-blue-600 ring-blue-200'
-                                                : stand.stand_type === 'partner'
-                                                  ? 'bg-secondary text-secondary-foreground ring-white/90'
-                                                  : 'bg-primary ring-white/90'
-                                        "
-                                        :style="{ left: `${stand.x_percent}%`, top: `${stand.y_percent}%` }"
-                                        :aria-label="`${t('common.stand')} ${standDisplayCode(stand)} ${standDisplayName(stand)}`"
-                                        :title="standDisplayName(stand)"
-                                        @click="selectStand(stand.id)"
-                                    >
-                                        <span
-                                            v-if="selectedStandId === stand.id"
-                                            class="pointer-events-none absolute inset-0 -z-10 animate-ping rounded-full bg-blue-500/70"
-                                        ></span>
-                                        {{ standDisplayCode(stand) }}
-                                        <span
-                                            class="pointer-events-none absolute bottom-full left-1/2 mb-2 hidden max-w-56 -translate-x-1/2 rounded-lg bg-gray-950 px-3 py-1.5 text-center text-xs leading-snug font-semibold text-white shadow-xl ring-1 ring-white/10 group-hover:block group-focus-visible:block"
-                                        >
-                                            {{ standDisplayName(stand) }}
-                                        </span>
-                                    </button>
-
-                                    <button
-                                        v-for="point in mapPointsWithCoords"
-                                        :key="`map-point-${point.id}`"
-                                        type="button"
-                                        class="group absolute z-10 flex h-9 min-w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full px-2 text-xs font-bold shadow-lg ring-2 transition hover:z-20 hover:scale-110 focus-visible:z-20 focus-visible:ring-4 focus-visible:ring-primary/40 focus-visible:outline-none"
-                                        :class="mapPointMarkerClass(point)"
-                                        :style="{ left: `${point.x_percent}%`, top: `${point.y_percent}%` }"
-                                        :aria-label="point.label"
-                                        :title="point.label"
-                                    >
-                                        <component :is="mapPointIcon(point)" class="h-5 w-5" aria-hidden="true" />
-                                        <span
-                                            class="pointer-events-none absolute bottom-full left-1/2 mb-2 hidden max-w-56 -translate-x-1/2 rounded-lg bg-gray-950 px-3 py-1.5 text-center text-xs leading-snug font-semibold text-white shadow-xl ring-1 ring-white/10 group-hover:block group-focus-visible:block"
-                                        >
-                                            {{ point.label }}
-                                        </span>
-                                    </button>
-                                </template>
-
-                                <div v-else class="flex min-h-[360px] items-center justify-center bg-accent/40 px-6 text-center text-sm text-muted-foreground">
-                                    {{ t('map.noMapConfigured') }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Selected stand card -->
-                        <div v-if="selectedStand" class="border-stroke dark:border-strokedark border-t p-4">
-                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <div class="min-w-0">
-                                    <div class="flex items-center gap-2">
-                                        <span class="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">
-                                            {{ t('common.stand') }}
-                                            {{ standDisplayCode(selectedStand) }}
-                                        </span>
-                                    </div>
-                                    <div class="mt-1 truncate text-sm font-medium text-black dark:text-white">
-                                        {{ selectedStand.company_name ?? t('map.noOrganisation') }}
-                                    </div>
-                                </div>
+                            <template v-if="map.image_url">
+                                <img
+                                    ref="mapImageRef"
+                                    :src="map.image_url"
+                                    :alt="t('map.imageAlt', { event: event.title })"
+                                    class="block h-auto w-full select-none"
+                                    draggable="false"
+                                    @load="updateMapImageHeight"
+                                />
 
                                 <button
+                                    v-for="stand in standsWithCoords"
+                                    :key="`marker-${stand.id}`"
                                     type="button"
-                                    class="inline-flex items-center justify-center rounded-xl border border-border bg-white/80 px-4 py-2 text-sm font-medium text-foreground hover:bg-accent dark:bg-white/10 dark:hover:bg-white/15"
-                                    @click="clearSelection"
+                                    class="group absolute z-10 flex h-6 min-w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold shadow-[0_2px_6px_rgb(11_15_25/0.3)] ring-2 ring-white transition-transform duration-200 hover:z-20 hover:scale-115 focus-visible:z-20 focus-visible:scale-115 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b0f19] sm:h-7 sm:min-w-7 sm:text-xs"
+                                    :class="selectedStandId === stand.id ? 'z-20 scale-125 bg-[#0b0f19] text-white' : standBadgeClass(stand)"
+                                    :style="{ left: `${stand.x_percent}%`, top: `${stand.y_percent}%` }"
+                                    :aria-label="`${t('common.stand')} ${standDisplayCode(stand)} ${standDisplayName(stand)}`"
+                                    :aria-pressed="selectedStandId === stand.id"
+                                    @click="selectStand(stand.id)"
                                 >
-                                    {{ t('common.close') }}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sidebar -->
-                <aside class="lg:col-span-4 lg:h-full">
-                    <div class="brand-card flex min-h-0 flex-col rounded-2xl p-4" :style="mapImageHeight > 0 ? { height: `${mapImageHeight}px` } : undefined">
-                        <div class="flex items-center gap-2">
-                            <Search class="h-4 w-4 text-muted-foreground" />
-                            <input
-                                v-model="query"
-                                type="text"
-                                :placeholder="t('map.searchPlaceholder')"
-                                class="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-                            />
-                        </div>
-
-                        <div class="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{{ t('map.standCount', { count: filteredStands.length }) }}</span>
-                            <button v-if="query" type="button" class="hover:underline" @click="query = ''">{{ t('common.clear') }}</button>
-                        </div>
-
-                        <div class="mt-3 flex items-center justify-between gap-2">
-                            <div v-if="activeFilterCount" class="text-xs font-semibold text-muted-foreground">{{ t('companies.activeFilters', { count: activeFilterCount }) }}</div>
-                            <div v-else></div>
-
-                            <div class="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    class="inline-flex items-center justify-center rounded-xl bg-white/80 px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none dark:bg-white/10 dark:hover:bg-white/15"
-                                    @click="openFilters"
-                                >
-                                    {{ t('common.filters') }}
                                     <span
-                                        v-if="activeFilterCount"
-                                        class="ml-2 inline-flex min-w-6 items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground"
+                                        v-if="selectedStandId === stand.id"
+                                        class="pointer-events-none absolute inset-0 -z-10 rounded-full bg-[#0b0f19]/50 motion-safe:animate-ping"
+                                        aria-hidden="true"
+                                    ></span>
+                                    {{ standDisplayCode(stand) }}
+                                    <span
+                                        class="pointer-events-none absolute bottom-full left-1/2 mb-2 hidden w-max max-w-56 -translate-x-1/2 rounded-lg bg-[#0b0f19] px-3 py-1.5 text-center text-xs leading-snug font-medium text-white shadow-xl group-hover:block group-focus-visible:block"
+                                        aria-hidden="true"
                                     >
-                                        {{ activeFilterCount }}
+                                        {{ standDisplayName(stand) }}
                                     </span>
                                 </button>
 
-                                <button
-                                    v-if="activeFilterCount"
-                                    type="button"
-                                    class="inline-flex items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground ring-1 ring-border transition hover:bg-accent/70 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                    @click="clearAll"
+                                <span
+                                    v-for="point in mapPointsWithCoords"
+                                    :key="`map-point-${point.id}`"
+                                    tabindex="0"
+                                    role="img"
+                                    class="group absolute z-10 flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full shadow-[0_2px_8px_rgb(11_15_25/0.3)] ring-2 transition-transform hover:z-20 hover:scale-110 focus-visible:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b0f19] sm:size-9"
+                                    :class="mapPointMarkerClass(point)"
+                                    :style="{ left: `${point.x_percent}%`, top: `${point.y_percent}%` }"
+                                    :aria-label="point.label"
                                 >
-                                    {{ t('common.clear') }}
-                                </button>
+                                    <component :is="mapPointIcon(point)" :size="18" weight="bold" aria-hidden="true" />
+                                    <span
+                                        class="pointer-events-none absolute bottom-full left-1/2 mb-2 hidden w-max max-w-56 -translate-x-1/2 rounded-lg bg-[#0b0f19] px-3 py-1.5 text-center text-xs leading-snug font-medium text-white shadow-xl group-hover:block group-focus-visible:block"
+                                        aria-hidden="true"
+                                    >
+                                        {{ point.label }}
+                                    </span>
+                                </span>
+                            </template>
+
+                            <div v-else class="flex min-h-[360px] flex-col items-center justify-center gap-4 bg-surface px-6 text-center">
+                                <PhMapTrifold :size="32" class="text-ink-muted" aria-hidden="true" />
+                                <p class="t-small">{{ t('map.noMapConfigured') }}</p>
                             </div>
                         </div>
+                    </div>
 
-                        <div v-if="activeFilterCount" class="mt-4 flex flex-wrap gap-2">
-                            <span
-                                v-for="n in selectedEducations"
-                                :key="'sel-edu-' + n"
-                                class="inline-flex items-center gap-2 rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-700 ring-1 ring-orange-500/30 dark:text-orange-300"
-                            >
-                                {{ n }}
-                                <button type="button" class="text-muted-foreground hover:text-foreground" @click="toggle(selectedEducations, n)">×</button>
-                            </span>
+                    <!-- Selected stand -->
+                    <div v-if="selectedStand" class="card mt-3 flex items-center gap-3 p-3 pl-4" aria-live="polite">
+                        <span class="flex h-9 min-w-9 shrink-0 items-center justify-center rounded-full px-2 text-sm font-semibold" :class="standBadgeClass(selectedStand)">
+                            {{ standDisplayCode(selectedStand) }}
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs text-ink-muted">{{ selectedStand.stand_type === 'partner' ? t('map.partner') : t('common.stand') }}</p>
+                            <p class="truncate font-medium text-ink">{{ standDisplayName(selectedStand) }}</p>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" @click="openCompany(selectedStand)">{{ t('map.readMore') }}</button>
+                        <button type="button" class="btn btn-ghost btn-icon size-9 min-h-9" :aria-label="t('common.close')" @click="clearSelection">
+                            <PhX :size="18" aria-hidden="true" />
+                        </button>
+                    </div>
+                </div>
 
-                            <span
-                                v-for="n in selectedSectors"
-                                :key="'sel-sec-' + n"
-                                class="inline-flex items-center gap-2 rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-500/30 dark:text-blue-300"
-                            >
-                                {{ n }}
-                                <button type="button" class="text-muted-foreground hover:text-foreground" @click="toggle(selectedSectors, n)">×</button>
-                            </span>
+                <!-- Stand list -->
+                <aside class="min-w-0 lg:col-span-4" :aria-label="t('map.companies')">
+                    <div class="card flex min-h-0 flex-col p-3 sm:p-4" :style="mapImageHeight > 0 && isDesktop ? { height: `${mapImageHeight + 2}px` } : undefined">
+                        <SearchField id="stand-search" v-model="query" :label="t('common.search')" :placeholder="t('map.searchPlaceholder')" />
+
+                        <div class="mt-3 flex items-center justify-between gap-3 px-1">
+                            <p class="text-sm text-ink-muted" aria-live="polite">{{ t('map.standCount', { count: filteredStands.length }) }}</p>
+                            <button type="button" class="btn btn-ghost btn-sm -mr-2" @click="isFilterOpen = true">
+                                <PhFunnelSimple :size="16" aria-hidden="true" />
+                                {{ t('common.filters') }}
+                                <span v-if="activeFilterCount" class="flex min-w-5 items-center justify-center rounded-full bg-ink px-1.5 text-[0.6875rem] leading-5 text-canvas">
+                                    {{ activeFilterCount }}
+                                </span>
+                            </button>
                         </div>
 
-                        <div class="mt-4 min-h-0 flex-1 overflow-auto pr-1">
-                            <div
+                        <div v-if="activeFilterCount" class="mt-2 flex flex-wrap items-center gap-2 px-1">
+                            <ActiveFilterChips v-model:educations="selectedEducations" v-model:sectors="selectedSectors" />
+                            <button type="button" class="text-sm font-medium text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink" @click="clearAll">
+                                {{ t('common.clear') }}
+                            </button>
+                        </div>
+
+                        <ul class="-mx-1 mt-3 min-h-0 flex-1 space-y-0.5 overflow-y-auto overscroll-contain px-1 max-lg:max-h-[30rem]">
+                            <li
                                 v-for="stand in filteredStands"
                                 :key="stand.id"
-                                class="mb-2 flex items-center gap-3 rounded-xl border px-3 py-2 transition last:mb-0"
-                                :class="standRowClass(stand)"
+                                class="flex items-center gap-2 rounded-[var(--radius-input)] p-1.5 pr-1 transition-colors"
+                                :class="selectedStandId === stand.id ? 'bg-surface-2' : 'hover:bg-surface'"
                             >
-                                <button type="button" class="flex min-w-0 flex-1 items-center gap-3 text-left" @click="selectStand(stand.id)">
-                                    <div
-                                        class="flex h-10 min-w-10 shrink-0 items-center justify-center rounded-full px-2 text-sm font-semibold ring-1"
-                                        :class="standBadgeClass(stand)"
-                                    >
+                                <button
+                                    type="button"
+                                    class="flex min-w-0 flex-1 items-center gap-3 rounded-lg py-0.5 text-left focus-visible:outline-offset-1"
+                                    :aria-pressed="selectedStandId === stand.id"
+                                    @click="selectStand(stand.id, true)"
+                                >
+                                    <span class="flex h-8 min-w-8 shrink-0 items-center justify-center rounded-full px-1.5 text-xs font-semibold" :class="standBadgeClass(stand)">
                                         {{ standDisplayCode(stand) }}
-                                    </div>
-
-                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-white">
-                                        <img v-if="stand.company_logo" :src="stand.company_logo" :alt="stand.company_name ?? stand.code" class="h-full w-full object-contain p-1" />
-                                        <span v-else class="text-xs font-medium text-muted-foreground">{{ t('companyProfile.logo') }}</span>
-                                    </div>
-
-                                    <div class="min-w-0 flex-1">
-                                        <div class="truncate text-sm font-medium text-foreground">
-                                            {{ stand.company_name ?? t('map.noOrganisation') }}
-                                        </div>
-                                    </div>
+                                    </span>
+                                    <span class="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-hairline">
+                                        <img v-if="stand.company_logo" :src="stand.company_logo" alt="" class="size-full object-contain p-1" loading="lazy" />
+                                        <PhMapPin v-else :size="16" class="text-[#6b7180]" aria-hidden="true" />
+                                    </span>
+                                    <span class="min-w-0 flex-1 truncate text-sm font-medium" :class="stand.company_name ? 'text-ink' : 'text-ink-subtle'">
+                                        {{ standDisplayName(stand) }}
+                                    </span>
                                 </button>
                                 <button
                                     type="button"
-                                    class="inline-flex items-center justify-center rounded-xl bg-white/85 px-4 py-1.5 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border transition hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none dark:bg-white/10 dark:hover:bg-white/15"
+                                    class="min-h-9 shrink-0 rounded-[var(--radius-input)] px-3 text-[0.8125rem] font-medium text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
+                                    :aria-label="`${t('map.readMore')}: ${standDisplayName(stand)}`"
                                     @click.stop="openCompany(stand)"
                                 >
                                     {{ t('map.readMore') }}
                                 </button>
-                            </div>
-                        </div>
+                            </li>
+                            <li v-if="!filteredStands.length" class="t-small px-2 py-10 text-center">{{ t('common.noResults') }}</li>
+                        </ul>
                     </div>
                 </aside>
             </div>
-        </div>
+        </section>
+    </SiteLayout>
 
-        <Teleport to="body">
-            <div v-if="selectedCompany" class="fixed inset-0 z-[110]" aria-modal="true" role="dialog">
-                <button class="absolute inset-0 bg-black/50" type="button" @click="closeCompany" :aria-label="t('common.close')"></button>
+    <FilterSheet
+        v-model:open="isFilterOpen"
+        v-model:educations="selectedEducations"
+        v-model:sectors="selectedSectors"
+        :education-options="educationOptions"
+        :sector-options="sectorOptions"
+        :description="t('map.filterDescription')"
+        :education-placeholder="t('map.searchEducation')"
+        :sector-placeholder="t('map.searchSector')"
+    />
 
-                <div
-                    class="absolute top-1/2 left-1/2 flex max-h-[80vh] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl bg-background shadow-2xl ring-1 ring-border"
-                >
-                    <div class="flex shrink-0 items-center justify-between gap-4 border-b border-border px-6 py-5">
-                        <div class="min-w-0">
-                            <div class="text-sm font-semibold text-muted-foreground">{{ selectedCompany.stand_type === 'partner' ? t('map.partner') : t('common.company') }}</div>
-                            <h2 class="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground">
-                                {{ selectedCompany.company_name ?? t('map.noOrganisation') }}
-                            </h2>
-                            <div class="mt-2 inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground ring-1 ring-border">
-                                {{ t('common.stand') }}
-                                {{ standDisplayCode(selectedCompany) }}
-                            </div>
-                        </div>
-
-                        <div class="flex flex-1 items-center justify-center">
-                            <div class="flex h-14 w-full max-w-[320px] items-center justify-center rounded-lg bg-accent/20 p-[5px] ring-1 ring-border">
-                                <img
-                                    v-if="selectedCompany.company_logo"
-                                    :src="selectedCompany.company_logo"
-                                    :alt="selectedCompany.company_name ?? selectedCompany.code"
-                                    class="h-full w-full object-contain"
-                                    loading="lazy"
-                                    decoding="async"
-                                    @error="(e) => ((e.target as HTMLImageElement).style.display = 'none')"
-                                />
-                                <span v-else class="text-xs font-semibold text-muted-foreground">{{ t('common.noLogo') }}</span>
-                            </div>
-                        </div>
-
-                        <button
-                            type="button"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                            @click="closeCompany"
-                            :aria-label="t('common.close')"
-                        >
-                            ×
-                        </button>
-                    </div>
-
-                    <div class="flex-1 overflow-y-auto overscroll-contain px-6 py-6">
-                        <div>
-                            <div class="text-sm font-semibold text-foreground">{{ t('common.description') }}</div>
-                            <div
-                                v-if="selectedCompany.company_description"
-                                class="prose prose-sm mt-2 max-w-none text-muted-foreground dark:prose-invert prose-p:my-0 prose-ol:my-0 prose-ul:my-0 prose-li:my-0"
-                                v-html="sanitizeHtml(selectedCompany.company_description)"
-                            ></div>
-                            <p v-else class="mt-2 text-sm text-muted-foreground">{{ t('common.noDescription') }}</p>
-
-                            <div class="mt-6 grid gap-6" :class="selectedCompany.stand_type !== 'partner' ? 'sm:grid-cols-2' : 'sm:grid-cols-1'">
-                                <div>
-                                    <div class="text-sm font-semibold text-foreground">{{ t('common.educations') }}</div>
-                                    <div class="mt-3 flex flex-wrap gap-2">
-                                        <span
-                                            v-for="n in selectedCompany.company_educations ?? []"
-                                            :key="'m-edu-' + n"
-                                            class="inline-flex items-center rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-700 ring-1 ring-orange-500/30 dark:text-orange-300"
-                                        >
-                                            {{ n }}
-                                        </span>
-                                        <span
-                                            v-if="!(selectedCompany.company_educations ?? []).length"
-                                            class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
-                                        >
-                                            {{ t('common.none') }}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div v-if="selectedCompany.stand_type !== 'partner'">
-                                    <div class="text-sm font-semibold text-foreground">{{ t('common.sectors') }}</div>
-                                    <div class="mt-3 flex flex-wrap gap-2">
-                                        <span
-                                            v-for="n in selectedCompany.company_sectors ?? []"
-                                            :key="'m-sec-' + n"
-                                            class="inline-flex items-center rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-500/30 dark:text-blue-300"
-                                        >
-                                            {{ n }}
-                                        </span>
-                                        <span
-                                            v-if="!(selectedCompany.company_sectors ?? []).length"
-                                            class="inline-flex items-center rounded-full bg-background px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border"
-                                        >
-                                            {{ t('common.none') }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="shrink-0 border-t border-border px-6 py-4">
-                        <div class="flex items-center justify-between gap-3">
-                            <a
-                                v-if="selectedCompany.company_website_url"
-                                class="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                :href="selectedCompany.company_website_url"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                {{ t('common.website') }}
-                            </a>
-
-                            <div v-else></div>
-
-                            <button
-                                type="button"
-                                class="inline-flex items-center justify-center rounded-xl bg-background px-4 py-2.5 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent"
-                                @click="closeCompany"
-                            >
-                                {{ t('common.close') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </Teleport>
-
-        <Teleport to="body">
-            <div v-if="isFilterOpen" class="fixed inset-0 z-[100]" aria-modal="true" role="dialog">
-                <button class="absolute inset-0 bg-black/40" type="button" @click="closeFilters" :aria-label="t('common.close')"></button>
-
-                <div class="absolute top-0 right-0 h-full w-full max-w-md overflow-hidden bg-background shadow-xl ring-1 ring-border">
-                    <div class="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
-                        <div>
-                            <div class="text-sm font-semibold text-foreground">{{ t('common.filters') }}</div>
-                            <div class="mt-1 text-xs text-muted-foreground">{{ t('map.filterDescription') }}</div>
-                        </div>
-
-                        <button
-                            type="button"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground ring-1 ring-border transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                            @click="closeFilters"
-                            :aria-label="t('common.close')"
-                        >
-                            ×
-                        </button>
-                    </div>
-
-                    <div class="h-full overflow-y-auto px-5 py-5 pb-28">
-                        <div class="flex items-center justify-between">
-                            <div class="text-sm font-semibold text-foreground">{{ t('common.selected', { count: activeFilterCount }) }}</div>
-                            <button v-if="activeFilterCount" type="button" class="text-sm font-semibold text-primary hover:underline" @click="clearAll">
-                                {{ t('common.clearAll') }}
-                            </button>
-                        </div>
-
-                        <div class="mt-6">
-                            <div class="text-sm font-semibold text-foreground">{{ t('common.educations') }}</div>
-                            <input
-                                v-model="educationFilterQuery"
-                                type="search"
-                                :placeholder="t('map.searchEducation')"
-                                class="mt-3 h-10 w-full rounded-xl bg-background px-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                            />
-
-                            <div class="mt-4 space-y-2">
-                                <label
-                                    v-for="name in filteredEducationOptions"
-                                    :key="'f-edu-' + name"
-                                    class="flex items-center gap-3 rounded-xl bg-accent/40 px-3 py-2 ring-1 ring-border/70"
-                                >
-                                    <input type="checkbox" class="h-4 w-4" :checked="selectedEducations.includes(name)" @change="toggle(selectedEducations, name)" />
-                                    <span class="text-sm font-medium text-foreground">{{ name }}</span>
-                                </label>
-
-                                <div v-if="!filteredEducationOptions.length" class="text-sm text-muted-foreground">{{ t('common.noResults') }}</div>
-                            </div>
-                        </div>
-
-                        <div class="mt-8">
-                            <div class="text-sm font-semibold text-foreground">{{ t('common.sectors') }}</div>
-                            <input
-                                v-model="sectorFilterQuery"
-                                type="search"
-                                :placeholder="t('map.searchSector')"
-                                class="mt-3 h-10 w-full rounded-xl bg-background px-3 text-sm text-foreground ring-1 ring-border transition focus:ring-2 focus:ring-ring/40 focus:outline-none"
-                            />
-
-                            <div class="mt-4 space-y-2">
-                                <label
-                                    v-for="name in filteredSectorOptions"
-                                    :key="'f-sec-' + name"
-                                    class="flex items-center gap-3 rounded-xl bg-accent/40 px-3 py-2 ring-1 ring-border/70"
-                                >
-                                    <input type="checkbox" class="h-4 w-4" :checked="selectedSectors.includes(name)" @change="toggle(selectedSectors, name)" />
-                                    <span class="text-sm font-medium text-foreground">{{ name }}</span>
-                                </label>
-
-                                <div v-if="!filteredSectorOptions.length" class="text-sm text-muted-foreground">{{ t('common.noResults') }}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="absolute right-0 bottom-0 left-0 border-t border-border bg-background px-5 py-4">
-                        <div class="flex items-center gap-3">
-                            <button
-                                type="button"
-                                class="inline-flex flex-1 items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                @click="closeFilters"
-                            >
-                                {{ t('common.showResults') }}
-                            </button>
-                            <button
-                                type="button"
-                                class="inline-flex items-center justify-center rounded-xl bg-background px-4 py-2.5 text-sm font-semibold text-foreground ring-1 ring-border transition hover:bg-accent"
-                                @click="clearAll"
-                            >
-                                {{ t('common.clear') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </Teleport>
-    </section>
-
-    <AppFooter />
+    <CompanyDialog v-model:open="isCompanyOpen" :company="companyDialogData" />
 </template>
-
-<style scoped>
-/* Optional: make marker text a bit crisper on scaled images */
-button {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-</style>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
+import { PhArrowRight, PhCheckCircle, PhGithubLogo, PhWarningCircle } from '@phosphor-icons/vue';
+import { computed, ref } from 'vue';
 
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { useTranslations } from '@/i18n';
@@ -9,9 +10,33 @@ type FlashType = 'success' | 'error';
 
 const newsletterEmail = ref('');
 const newsletterFlash = ref<{ type: FlashType; message: string } | null>(null);
+const isSubscribing = ref(false);
 const page = usePage();
 const { t } = useTranslations();
 let newsletterFlashTimeout: number | null = null;
+
+const year = new Date().getFullYear();
+
+const pageLinks = computed(() => [
+    { label: t('nav.home'), href: '/' },
+    { label: t('footer.events'), href: '/edities' },
+    { label: t('nav.companies'), href: '/bedrijven' },
+    { label: t('nav.map'), href: '/plattegrond' },
+    { label: t('nav.contact'), href: '/contact' },
+]);
+
+const infoLinks = computed(() => [
+    { label: t('footer.programme'), href: '/edities' },
+    { label: t('footer.location'), href: '/contact' },
+    { label: t('nav.partners'), href: '/partners' },
+    { label: t('nav.forCompanies'), href: '/voor-bedrijven' },
+]);
+
+const legalLinks = computed(() => [
+    { label: t('footer.privacy'), href: '/privacy-policy' },
+    { label: t('footer.terms'), href: '/terms-of-service' },
+    { label: t('footer.cookies'), href: '/cookie-policy' },
+]);
 
 function setNewsletterFlash(type: FlashType, message: string) {
     newsletterFlash.value = { type, message };
@@ -28,6 +53,8 @@ async function submitNewsletter() {
         setNewsletterFlash('error', t('footer.emailRequired'));
         return;
     }
+
+    isSubscribing.value = true;
 
     try {
         const csrf = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
@@ -54,153 +81,126 @@ async function submitNewsletter() {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
         setNewsletterFlash('error', t('footer.subscribeFailed'));
+    } finally {
+        isSubscribing.value = false;
     }
 }
 </script>
 
 <template>
-    <footer class="brand-dark-cta relative overflow-hidden text-white">
-        <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-primary via-white/40 to-secondary"></div>
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <!-- Top Section -->
-            <div class="py-20">
-                <div class="grid grid-cols-1 gap-12 lg:grid-cols-4">
-                    <!-- Logo + Description -->
-                    <div>
-                        <a href="/" class="flex items-center gap-3">
-                            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-black/20">
-                                <AppLogoIcon class="h-9" />
-                            </span>
-                            <span class="text-xl font-semibold text-white"> ATIx Bedrijvendag </span>
-                        </a>
+    <footer class="theme-dark relative isolate overflow-hidden">
+        <div class="grid-lines opacity-60" aria-hidden="true"></div>
+        <div class="pointer-events-none absolute -top-40 left-1/2 -z-10 h-80 w-[60rem] -translate-x-1/2 rounded-full bg-brand/20 blur-[120px]" aria-hidden="true"></div>
 
-                        <p class="mt-6 leading-relaxed text-white/70">{{ t('footer.description') }}</p>
+        <div class="site-container relative pt-16 md:pt-24">
+            <!-- Newsletter call-out -->
+            <div class="grid grid-cols-1 gap-10 border-b border-hairline pb-16 md:pb-20 lg:grid-cols-12 lg:items-end">
+                <div class="lg:col-span-7">
+                    <h2 class="t-h2 text-ink">{{ t('about.ctaTitle') }}</h2>
+                    <p class="t-lead mt-5 max-w-lg">{{ t('footer.newsletterDescription') }}</p>
+                </div>
+                <div class="lg:col-span-5">
+                    <form class="flex gap-2 rounded-[var(--radius-card)] bg-white/[0.06] p-1.5 ring-1 ring-white/10 focus-within:ring-brand/60" novalidate @submit.prevent="submitNewsletter">
+                        <label for="newsletter-email" class="sr-only">{{ t('footer.emailPlaceholder') }}</label>
+                        <input
+                            id="newsletter-email"
+                            v-model="newsletterEmail"
+                            type="email"
+                            name="email"
+                            autocomplete="email"
+                            spellcheck="false"
+                            :placeholder="t('footer.emailPlaceholder')"
+                            class="min-h-12 w-full min-w-0 bg-transparent px-5 text-base text-ink placeholder:text-ink-subtle focus:outline-none"
+                            :aria-invalid="newsletterFlash?.type === 'error' ? 'true' : undefined"
+                            aria-describedby="newsletter-feedback"
+                            required
+                        />
+                        <button type="submit" class="btn btn-primary shrink-0" :disabled="isSubscribing">
+                            {{ t('footer.newsletter') }}
+                            <PhArrowRight :size="16" weight="bold" aria-hidden="true" />
+                        </button>
+                    </form>
 
-                        <div class="mt-6 flex gap-4">
-                            <a href="#" class="text-white/45 transition hover:text-primary">
-                                <i class="lucide lucide-facebook h-5 w-5"></i>
-                            </a>
-                            <a href="#" class="text-white/45 transition hover:text-primary">
-                                <i class="lucide lucide-twitter h-5 w-5"></i>
-                            </a>
-                            <a href="#" class="text-white/45 transition hover:text-primary">
-                                <i class="lucide lucide-linkedin h-5 w-5"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Pages -->
-                    <div>
-                        <h4 class="mb-6 text-lg font-semibold text-white">{{ t('footer.pages') }}</h4>
-                        <ul class="space-y-3 text-white/68">
-                            <li><a href="/" class="transition hover:text-primary">Home</a></li>
-                            <li>
-                                <a href="/edities" class="transition hover:text-primary">{{ t('footer.events') }}</a>
-                            </li>
-                            <li>
-                                <a href="/bedrijven" class="transition hover:text-primary">{{ t('nav.companies') }}</a>
-                            </li>
-                            <li>
-                                <a href="/contact" class="transition hover:text-primary">{{ t('nav.contact') }}</a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Info -->
-                    <div>
-                        <h4 class="mb-6 text-lg font-semibold text-white">{{ t('footer.information') }}</h4>
-                        <ul class="space-y-3 text-white/68">
-                            <li>
-                                <a href="/edities" class="transition hover:text-primary">{{ t('footer.programme') }}</a>
-                            </li>
-                            <li>
-                                <a href="/contact" class="transition hover:text-primary">{{ t('footer.location') }}</a>
-                            </li>
-                            <li>
-                                <a href="/partners" class="transition hover:text-primary">{{ t('nav.partners') }}</a>
-                            </li>
-                            <li><a href="/dashboard" class="transition hover:text-primary">Dashboard</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Newsletter -->
-                    <div>
-                        <h4 class="mb-6 text-lg font-semibold text-white">{{ t('footer.newsletter') }}</h4>
-
-                        <p class="mb-4 text-white/68">{{ t('footer.newsletterDescription') }}</p>
-
-                        <div
+                    <div id="newsletter-feedback" aria-live="polite">
+                        <p
                             v-if="newsletterFlash"
-                            class="mb-4 rounded-lg border px-4 py-3 text-sm"
-                            :class="
-                                newsletterFlash.type === 'success'
-                                    ? 'border-green-300 bg-green-50 text-green-800 dark:border-green-800/40 dark:bg-green-900/20 dark:text-green-200'
-                                    : 'border-red-300 bg-red-50 text-red-800 dark:border-red-800/40 dark:bg-red-900/20 dark:text-red-200'
-                            "
+                            class="mt-3 flex items-center gap-2 px-5 text-sm font-medium"
+                            :class="newsletterFlash.type === 'success' ? 'text-success' : 'text-danger'"
                         >
-                            <div class="flex items-center gap-2">
-                                <svg
-                                    v-if="newsletterFlash.type === 'success'"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    class="h-4 w-4"
-                                >
-                                    <path d="M20 6 9 17l-5-5" />
-                                </svg>
-                                <span>{{ newsletterFlash.message }}</span>
-                            </div>
-                        </div>
-
-                        <form class="relative" @submit.prevent="submitNewsletter">
-                            <input
-                                v-model="newsletterEmail"
-                                type="email"
-                                id="newsletter-email"
-                                :placeholder="t('footer.emailPlaceholder')"
-                                class="w-full rounded-full border border-white/15 bg-white/10 py-3 pr-14 pl-6 text-sm text-white placeholder:text-white/45 focus:border-primary focus:outline-none"
-                                required
-                            />
-                            <button
-                                type="submit"
-                                class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-primary p-2 text-white shadow-lg shadow-primary/25 transition hover:bg-primary/90"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 6l6 6-6 6" />
-                                </svg>
-                            </button>
-                        </form>
+                            <PhCheckCircle v-if="newsletterFlash.type === 'success'" :size="16" weight="fill" aria-hidden="true" />
+                            <PhWarningCircle v-else :size="16" weight="fill" aria-hidden="true" />
+                            {{ newsletterFlash.message }}
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Bottom Section -->
-            <div class="border-t border-white/10 py-8">
-                <div class="flex flex-col items-center justify-between gap-4 lg:flex-row">
-                    <ul class="flex flex-wrap justify-center gap-6 text-sm text-white/62">
-                        <li>
-                            <a href="/privacy-policy" class="transition hover:text-primary">{{ t('footer.privacy') }}</a>
-                        </li>
-                        <li>
-                            <a href="/terms-of-service" class="transition hover:text-primary">{{ t('footer.terms') }}</a>
-                        </li>
-                        <li>
-                            <a href="/cookie-policy" class="transition hover:text-primary">{{ t('footer.cookies') }}</a>
+            <!-- Links -->
+            <div class="grid grid-cols-1 gap-12 py-16 md:grid-cols-12 md:gap-8">
+                <div class="md:col-span-12 lg:col-span-5">
+                    <Link href="/" class="inline-flex items-center gap-2.5">
+                        <AppLogoIcon class="size-9" alt="" />
+                        <span class="text-base font-semibold tracking-[-0.02em] text-ink" translate="no">ATIx Bedrijvendag</span>
+                    </Link>
+                    <p class="t-small mt-5 max-w-sm">{{ t('footer.description') }}</p>
+                </div>
+
+                <nav class="md:col-span-4 lg:col-span-2" :aria-label="t('footer.pages')">
+                    <h2 class="text-sm font-semibold text-ink">{{ t('footer.pages') }}</h2>
+                    <ul class="mt-4 space-y-3">
+                        <li v-for="link in pageLinks" :key="link.href + link.label">
+                            <Link :href="link.href" class="text-sm text-ink-muted transition-colors hover:text-brand">{{ link.label }}</Link>
                         </li>
                     </ul>
+                </nav>
 
-                    <div class="text-center text-sm text-white/55 lg:text-right">
-                        <p>© {{ new Date().getFullYear() }} ATIx Bedrijvendag. {{ t('footer.rights') }}</p>
-                        <p class="mt-1 text-xs text-white/40">{{ page.props.deploymentVersion }}</p>
-                    </div>
-                </div>
+                <nav class="md:col-span-4 lg:col-span-2" :aria-label="t('footer.information')">
+                    <h2 class="text-sm font-semibold text-ink">{{ t('footer.information') }}</h2>
+                    <ul class="mt-4 space-y-3">
+                        <li v-for="link in infoLinks" :key="link.href + link.label">
+                            <Link :href="link.href" class="text-sm text-ink-muted transition-colors hover:text-brand">{{ link.label }}</Link>
+                        </li>
+                        <li>
+                            <a href="/dashboard" class="text-sm text-ink-muted transition-colors hover:text-brand">Dashboard</a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <nav class="md:col-span-4 lg:col-span-3" :aria-label="t('footer.legal')">
+                    <h2 class="text-sm font-semibold text-ink">{{ t('footer.legal') }}</h2>
+                    <ul class="mt-4 space-y-3">
+                        <li v-for="link in legalLinks" :key="link.href">
+                            <Link :href="link.href" class="text-sm text-ink-muted transition-colors hover:text-brand">{{ link.label }}</Link>
+                        </li>
+                        <li>
+                            <a
+                                href="https://github.com/Greazi-Times/Bedrijvendag"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-brand"
+                            >
+                                <PhGithubLogo :size="15" aria-hidden="true" />
+                                {{ t('nav.repository') }}
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
+        </div>
+
+        <!-- Oversized wordmark -->
+        <div class="relative overflow-hidden" aria-hidden="true">
+            <p
+                class="site-container t-mega bg-[linear-gradient(180deg,rgb(255_255_255/0.16)_0%,rgb(255_255_255/0.02)_85%)] bg-clip-text pb-[0.06em] text-center whitespace-nowrap text-transparent select-none"
+                style="font-size: clamp(3rem, 0.4rem + 13.2vw, 13.5rem); letter-spacing: -0.05em"
+            >
+                Bedrijvendag
+            </p>
+        </div>
+
+        <div class="site-container relative flex flex-col gap-3 border-t border-hairline py-6 text-[0.8125rem] text-ink-muted md:flex-row md:items-center md:justify-between">
+            <p>© {{ year }} ATIx Bedrijvendag. {{ t('footer.rights') }}</p>
+            <p v-if="page.props.deploymentVersion" class="t-mono text-xs text-ink-subtle">{{ page.props.deploymentVersion }}</p>
         </div>
     </footer>
 </template>
-
-<style scoped></style>

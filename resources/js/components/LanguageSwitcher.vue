@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router, usePage } from '@inertiajs/vue3';
-import { Languages } from 'lucide-vue-next';
+import { PhTranslate } from '@phosphor-icons/vue';
 import { computed, ref } from 'vue';
 import { useTranslations } from '@/i18n';
 
@@ -28,13 +28,13 @@ function switchLocale() {
 <template>
     <button
         type="button"
-        class="flex h-9 items-center gap-1.5 rounded-xl bg-white/60 px-2.5 text-sm font-semibold ring-1 ring-border/70 transition hover:bg-accent disabled:opacity-60 dark:bg-white/5"
+        class="inline-flex h-9 items-center gap-1.5 rounded-[var(--radius-input)] px-2.5 text-[0.8125rem] font-semibold text-ink-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-60"
         :aria-label="`${t('language.label')}: ${nextLocale === 'en' ? t('language.english') : t('language.dutch')}`"
         :title="nextLocale === 'en' ? t('language.english') : t('language.dutch')"
         :disabled="changing"
         @click="switchLocale"
     >
-        <Languages class="size-4" aria-hidden="true" />
+        <PhTranslate :size="17" aria-hidden="true" />
         <span class="uppercase">{{ locale }}</span>
     </button>
 </template>

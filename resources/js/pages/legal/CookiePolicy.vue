@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import AppFooter from '@/components/AppFooter.vue';
-import AppHeader from '@/components/AppHeader.vue';
+import LegalPage from '@/components/site/LegalPage.vue';
 import { useTranslations } from '@/i18n';
 
 const { dateLocale, t } = useTranslations();
@@ -26,21 +26,11 @@ const updatedAt = computed(() => {
 </script>
 
 <template>
-    <AppHeader class="sticky top-0 z-50" />
-
-    <main class="brand-hero relative overflow-hidden px-6 py-14 lg:px-16">
-        <div class="relative mx-auto max-w-5xl">
-            <div class="brand-card rounded-3xl p-6">
-                <div class="flex flex-col gap-1">
-                    <p v-if="updatedAt" class="text-sm text-muted-foreground">{{ t('legal.lastModified', { date: updatedAt }) }}</p>
-                    <h1 class="text-3xl font-semibold">{{ t('legal.cookies') }}</h1>
-                </div>
-
-                <div v-if="policy?.policyHtml" class="prose-m prose mt-6 max-w-none dark:prose-invert" v-html="policy.policyHtml"></div>
-                <p v-else class="mt-5 text-sm text-muted-foreground">{{ t('legal.cookiesEmpty') }}</p>
-            </div>
-        </div>
-    </main>
-
-    <AppFooter />
+    <Head :title="t('legal.cookies')" />
+    <LegalPage
+        :title="t('legal.cookies')"
+        :html="policy.policyHtml"
+        :meta="updatedAt ? t('legal.lastModified', { date: updatedAt }) : null"
+        :empty-text="t('legal.cookiesEmpty')"
+    />
 </template>

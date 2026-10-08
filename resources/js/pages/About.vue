@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { Users, Building2, Compass, Handshake, Lightbulb, Wine, ArrowRight } from 'lucide-vue-next';
+import { PhArrowDown, PhArrowRight, PhBuildings, PhCompass, PhHandshake, PhLightbulb, PhMicrophoneStage, PhStudent, PhUsersThree, PhWine } from '@phosphor-icons/vue';
 import { computed } from 'vue';
 
-import AppFooter from '@/components/AppFooter.vue';
-import AppHeader from '@/components/AppHeader.vue';
+import SiteLayout from '@/components/site/SiteLayout.vue';
 import { useTranslations } from '@/i18n';
 
 type AboutImages = {
@@ -21,226 +20,170 @@ const props = defineProps<{
 const page = usePage();
 const { t } = useTranslations();
 const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentOpen));
+
+const facts = computed(() => [
+    { label: t('about.goal'), title: t('about.connect'), text: t('about.connectText'), tone: 'tile-sunset' },
+    { label: t('about.focus'), title: t('about.explore'), text: t('about.exploreText'), tone: 'tile-electric' },
+    { label: t('about.atmosphere'), title: t('about.approachable'), text: t('about.approachableText'), tone: 'bg-canvas text-ink ring-1 ring-hairline dark:bg-surface' },
+]);
+
+const values = computed(() => [
+    { icon: PhCompass, title: t('home.approachable'), text: t('about.approachableValueText') },
+    { icon: PhLightbulb, title: t('home.future'), text: t('about.futureValueText') },
+    { icon: PhWine, title: t('home.drinks'), text: t('about.drinksValueText') },
+    { icon: PhUsersThree, title: t('home.networking'), text: t('about.networkingValueText') },
+    { icon: PhMicrophoneStage, title: t('home.inspiring'), text: t('about.inspiringValueText') },
+    { icon: PhHandshake, title: t('home.collaboration'), text: t('about.collaborationValueText') },
+]);
+
+// Two-tone statement: first clause in ink, the rest steps back.
+const statement = computed(() => {
+    const text = t('about.title');
+    const words = text.split(' ');
+    const cut = Math.ceil(words.length / 2);
+    return { lead: words.slice(0, cut).join(' '), rest: ` ${words.slice(cut).join(' ')}` };
+});
 </script>
 
 <template>
     <Head :title="t('nav.about')" />
 
-    <AppHeader class="sticky top-0 z-50" />
+    <SiteLayout>
+        <!-- Hero -->
+        <section class="relative isolate overflow-hidden border-b border-hairline bg-surface">
+            <div class="aurora aurora-soft" aria-hidden="true"></div>
+            <div class="grid-lines grid-lines-ink" aria-hidden="true"></div>
 
-    <!-- Hero -->
-    <header class="brand-hero overflow-hidden px-6 pt-14 pb-16 lg:px-16">
-        <div class="relative z-10 mx-auto max-w-7xl">
-            <div class="grid items-center gap-10 lg:grid-cols-12">
-                <div class="lg:col-span-7">
-                    <p class="brand-eyebrow">{{ t('about.eyebrow') }}</p>
-
-                    <h1 class="mt-6 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">ATIx Bedrijvendag</h1>
-
-                    <p class="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">{{ t('about.heroText') }}</p>
-
-                    <div class="mt-8 flex flex-wrap items-center gap-3">
-                        <Link
-                            href="/edities"
-                            class="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg ring-1 shadow-primary/20 ring-primary/20 transition hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                        >
+            <div class="site-container relative pt-16 md:pt-24">
+                <p class="enter chip chip-brand">{{ t('about.eyebrow') }}</p>
+                <h1 class="enter t-display mt-6 text-ink" style="--enter-delay: 60ms">
+                    ATIx<br />
+                    <span class="t-accent">Bedrijvendag</span>
+                </h1>
+                <div class="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">
+                    <p class="enter t-lead lg:col-span-6" style="--enter-delay: 120ms">{{ t('about.heroText') }}</p>
+                    <div class="enter flex flex-wrap gap-3 lg:col-span-6 lg:justify-end" style="--enter-delay: 180ms">
+                        <Link href="/edities" class="btn btn-primary btn-lg">
                             {{ t('about.viewEditions') }}
-                            <ArrowRight class="ml-2 h-4 w-4" />
+                            <PhArrowRight :size="18" weight="bold" aria-hidden="true" />
                         </Link>
+                        <Link v-if="borrelEnrollmentOpen" href="/#borrel" class="btn btn-secondary btn-lg">{{ t('home.registerDrinks') }}</Link>
+                    </div>
+                </div>
 
-                        <Link
-                            v-if="borrelEnrollmentOpen"
-                            href="/#borrel"
-                            class="inline-flex items-center justify-center rounded-xl bg-white/80 px-6 py-3 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border/80 backdrop-blur transition hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none dark:bg-white/10 dark:hover:bg-white/15"
+                <div class="enter-media relative mt-14 md:mt-20">
+                    <div class="overflow-hidden rounded-t-[var(--radius-panel)]">
+                        <img :src="props.aboutImages.hero" alt="ATIx Bedrijvendag" class="aspect-[16/10] w-full object-cover md:aspect-[21/9]" fetchpriority="high" />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Facts overlap the photo edge -->
+        <section class="site-container relative z-10 -mt-12 md:-mt-24">
+            <ul class="grid gap-3 md:grid-cols-3">
+                <li
+                    v-for="(fact, index) in facts"
+                    :key="fact.label"
+                    v-reveal="index * 80"
+                    class="card-lift shadow-raised rounded-[var(--radius-card)] p-6 lg:p-7"
+                    :class="fact.tone"
+                >
+                    <p class="text-sm font-medium opacity-75">{{ fact.label }}</p>
+                    <p class="t-h3 mt-6">{{ fact.title }}</p>
+                    <p class="mt-2 text-[0.9375rem] leading-relaxed opacity-80">{{ fact.text }}</p>
+                </li>
+            </ul>
+        </section>
+
+        <!-- What is it -->
+        <section class="py-20 md:py-28">
+            <div class="site-container">
+                <p v-reveal class="t-eyebrow">{{ t('about.whatIs') }}</p>
+                <h2 v-reveal="40" class="t-h2 mt-5 max-w-5xl">
+                    <span class="text-ink">{{ statement.lead }}</span
+                    ><span class="t-quiet">{{ statement.rest }}</span>
+                </h2>
+
+                <div class="mt-14 grid grid-cols-1 gap-4 lg:grid-cols-12">
+                    <div class="grid grid-cols-2 gap-3 lg:col-span-7">
+                        <div v-reveal class="media col-span-2 aspect-[16/9]">
+                            <img :src="props.aboutImages.infoThird" :alt="t('about.companiesImageAlt')" loading="lazy" decoding="async" />
+                        </div>
+                        <div v-reveal="60" class="media aspect-square">
+                            <img :src="props.aboutImages.infoFirst" :alt="t('about.atmosphereImageAlt')" loading="lazy" decoding="async" />
+                        </div>
+                        <div v-reveal="120" class="media aspect-square">
+                            <img :src="props.aboutImages.infoSecond" :alt="t('about.studentsImageAlt')" loading="lazy" decoding="async" />
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-4 lg:col-span-5">
+                        <p v-reveal class="t-lead lg:pt-2">{{ t('about.text') }}</p>
+                        <div v-reveal="60" class="tile-sunset card-lift flex flex-1 flex-col rounded-[var(--radius-card)] p-7 lg:p-8">
+                            <PhStudent :size="32" weight="fill" aria-hidden="true" />
+                            <h3 class="t-h3 mt-auto pt-10">{{ t('about.students') }}</h3>
+                            <p class="mt-2 text-[0.9375rem] leading-relaxed text-[#0b0f19]/80">{{ t('about.studentsText') }}</p>
+                        </div>
+                        <div v-reveal="120" class="tile-blue-soft card-lift flex flex-1 flex-col rounded-[var(--radius-card)] p-7 lg:p-8">
+                            <PhBuildings :size="32" weight="fill" class="text-brand-blue" aria-hidden="true" />
+                            <h3 class="t-h3 mt-auto pt-10">{{ t('about.companies') }}</h3>
+                            <p class="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">{{ t('about.companiesText') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Values: typographic rows that light up on hover -->
+        <section class="border-y border-hairline bg-surface py-20 md:py-28">
+            <div class="site-container">
+                <div class="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-end">
+                    <div class="lg:col-span-7">
+                        <p v-reveal class="t-eyebrow">{{ t('about.values') }}</p>
+                        <h2 v-reveal="40" class="t-h2 mt-5 text-ink">{{ t('about.approach') }}</h2>
+                    </div>
+                    <p v-reveal="80" class="t-lead lg:col-span-4 lg:col-start-9">{{ t('about.approachText') }}</p>
+                </div>
+
+                <ul class="mt-14 border-t border-hairline">
+                    <li
+                        v-for="(value, index) in values"
+                        :key="value.title"
+                        v-reveal="index * 40"
+                        class="group grid grid-cols-1 items-center gap-x-8 gap-y-2 border-b border-hairline py-7 transition-colors duration-300 md:grid-cols-12 md:py-9"
+                    >
+                        <span
+                            class="flex size-12 items-center justify-center rounded-[var(--radius-input)] bg-canvas text-ink ring-1 ring-hairline transition-colors duration-300 group-hover:bg-brand group-hover:text-[#0b0f19] md:col-span-1"
                         >
-                            {{ t('home.registerDrinks') }}
-                        </Link>
-                    </div>
-
-                    <div class="mt-10 grid gap-4 sm:grid-cols-3">
-                        <div class="brand-card rounded-2xl p-5">
-                            <div class="text-xs font-semibold text-muted-foreground">{{ t('about.goal') }}</div>
-                            <div class="mt-2 text-sm font-semibold text-foreground">{{ t('about.connect') }}</div>
-                            <p class="mt-1 text-sm text-muted-foreground">{{ t('about.connectText') }}</p>
-                        </div>
-                        <div class="brand-card rounded-2xl p-5">
-                            <div class="text-xs font-semibold text-muted-foreground">{{ t('about.focus') }}</div>
-                            <div class="mt-2 text-sm font-semibold text-foreground">{{ t('about.explore') }}</div>
-                            <p class="mt-1 text-sm text-muted-foreground">{{ t('about.exploreText') }}</p>
-                        </div>
-                        <div class="brand-card rounded-2xl p-5">
-                            <div class="text-xs font-semibold text-muted-foreground">{{ t('about.atmosphere') }}</div>
-                            <div class="mt-2 text-sm font-semibold text-foreground">{{ t('about.approachable') }}</div>
-                            <p class="mt-1 text-sm text-muted-foreground">{{ t('about.approachableText') }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-5">
-                    <div class="relative mx-auto w-full max-w-md">
-                        <div class="pointer-events-none absolute -top-5 right-8 h-8 w-52 rounded-full bg-secondary/25 blur-sm"></div>
-                        <div class="pointer-events-none absolute bottom-8 -left-6 h-8 w-44 rounded-full bg-primary/25 blur-sm"></div>
-
-                        <div class="brand-card relative overflow-hidden rounded-3xl p-3">
-                            <img :src="props.aboutImages.hero" alt="ATIx Bedrijvendag" class="h-[420px] w-full rounded-2xl object-cover object-center" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- What is it -->
-    <section class="brand-section px-6 py-20 lg:px-16">
-        <div class="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-12">
-            <div class="lg:col-span-6">
-                <div class="relative mx-auto max-w-xl">
-                    <div class="pointer-events-none absolute -top-10 -left-8 h-20 w-20 rounded-full bg-secondary/25"></div>
-                    <div class="pointer-events-none absolute -top-2 right-10 h-10 w-10 rounded-full bg-accent"></div>
-                    <div class="pointer-events-none absolute -bottom-10 left-10 h-32 w-32 rounded-t-full bg-primary/25"></div>
-
-                    <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
-                        <div class="flex flex-col gap-6 sm:w-5/12">
-                            <div class="brand-card overflow-hidden rounded-3xl p-2">
-                                <div class="aspect-[3/4] w-full">
-                                    <img :src="props.aboutImages.infoFirst" :alt="t('about.atmosphereImageAlt')" class="h-full w-full rounded-2xl object-cover" />
-                                </div>
-                            </div>
-
-                            <div class="brand-card overflow-hidden rounded-3xl p-2">
-                                <div class="aspect-[3/4] w-full">
-                                    <img :src="props.aboutImages.infoSecond" :alt="t('about.studentsImageAlt')" class="h-full w-full rounded-2xl object-cover" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="sm:w-7/12">
-                            <div class="brand-card overflow-hidden rounded-3xl p-2">
-                                <div class="aspect-[3/4] w-full">
-                                    <img :src="props.aboutImages.infoThird" :alt="t('about.companiesImageAlt')" class="h-full w-full rounded-2xl object-cover object-center" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-6">
-                <p class="text-sm font-semibold text-primary">{{ t('about.whatIs') }}</p>
-
-                <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{{ t('about.title') }}</h2>
-
-                <p class="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">{{ t('about.text') }}</p>
-
-                <div class="mt-8 grid gap-4 sm:grid-cols-2">
-                    <div class="brand-card rounded-2xl p-5">
-                        <div class="text-sm font-semibold text-foreground">{{ t('about.students') }}</div>
-                        <p class="mt-2 text-sm text-muted-foreground">{{ t('about.studentsText') }}</p>
-                    </div>
-                    <div class="brand-card rounded-2xl p-5">
-                        <div class="text-sm font-semibold text-foreground">{{ t('about.companies') }}</div>
-                        <p class="mt-2 text-sm text-muted-foreground">{{ t('about.companiesText') }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Values -->
-    <section class="brand-band px-6 py-20 lg:px-16">
-        <div class="mx-auto max-w-7xl">
-            <div class="mx-auto max-w-3xl text-center">
-                <p class="text-sm font-semibold text-primary">{{ t('about.values') }}</p>
-                <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{{ t('about.approach') }}</h2>
-                <p class="mt-4 text-base leading-relaxed text-muted-foreground">{{ t('about.approachText') }}</p>
-            </div>
-
-            <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div class="brand-card brand-card-hover group rounded-2xl p-8">
-                    <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15">
-                        <Compass class="h-6 w-6 text-primary" />
-                    </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">{{ t('home.approachable') }}</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('about.approachableValueText') }}</p>
-                </div>
-
-                <div class="brand-card brand-card-hover group rounded-2xl p-8">
-                    <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/15">
-                        <Lightbulb class="h-6 w-6 text-secondary" />
-                    </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">{{ t('home.future') }}</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('about.futureValueText') }}</p>
-                </div>
-
-                <div class="brand-card brand-card-hover group rounded-2xl p-8">
-                    <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-chart-2/15">
-                        <Wine class="h-6 w-6 text-chart-2" />
-                    </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">{{ t('home.drinks') }}</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('about.drinksValueText') }}</p>
-                </div>
-
-                <div class="brand-card brand-card-hover group rounded-2xl p-8">
-                    <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15">
-                        <Users class="h-6 w-6 text-primary" />
-                    </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">{{ t('home.networking') }}</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('about.networkingValueText') }}</p>
-                </div>
-
-                <div class="brand-card brand-card-hover group rounded-2xl p-8">
-                    <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/15">
-                        <Building2 class="h-6 w-6 text-secondary" />
-                    </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">{{ t('home.inspiring') }}</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('about.inspiringValueText') }}</p>
-                </div>
-
-                <div class="brand-card brand-card-hover group rounded-2xl p-8">
-                    <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-chart-2/15">
-                        <Handshake class="h-6 w-6 text-chart-2" />
-                    </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-foreground">{{ t('home.collaboration') }}</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ t('about.collaborationValueText') }}</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="brand-dark-cta relative overflow-hidden px-6 py-16 lg:px-16 lg:py-20">
-        <img alt="" loading="lazy" width="1660" height="337" decoding="async" class="pointer-events-none absolute right-0 bottom-0" src="/images/shape/shape-16.svg" />
-
-        <div class="relative z-10 mx-auto max-w-7xl">
-            <div class="flex flex-wrap gap-8 md:flex-nowrap md:items-center md:justify-between">
-                <div class="lg:w-1/2">
-                    <h2 class="mb-4 text-3xl font-semibold text-white lg:text-4xl">{{ t('about.ctaTitle') }}</h2>
-                    <p class="text-white/90">
-                        <template v-if="borrelEnrollmentOpen">{{ t('about.ctaOpen') }}</template>
-                        <template v-else>{{ t('about.ctaClosed') }}</template>
-                    </p>
-                </div>
-
-                <div class="shrink-0">
-                    <div class="flex flex-wrap items-center gap-3">
-                        <Link
-                            href="/edities"
-                            class="inline-flex items-center justify-center rounded-full bg-white px-7.5 py-3 text-sm font-semibold text-black transition hover:shadow-xl focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
+                            <component :is="value.icon" :size="22" weight="bold" aria-hidden="true" />
+                        </span>
+                        <h3
+                            class="text-[clamp(1.5rem,1.2rem+1.2vw,2.25rem)] leading-tight font-semibold tracking-[-0.03em] text-ink transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:translate-x-2 md:col-span-5"
                         >
+                            {{ value.title }}
+                        </h3>
+                        <p class="t-body md:col-span-6">{{ value.text }}</p>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- CTA band -->
+        <section class="py-20 md:py-28">
+            <div class="site-container">
+                <div class="tile-sunset panel relative isolate overflow-hidden p-8 sm:p-12 lg:p-14">
+                    <PhArrowDown :size="220" weight="bold" class="pointer-events-none absolute -right-8 -bottom-10 -z-10 rotate-[-30deg] opacity-15" aria-hidden="true" />
+                    <h2 v-reveal class="t-h2 max-w-4xl">{{ borrelEnrollmentOpen ? t('about.ctaOpen') : t('about.ctaClosed') }}</h2>
+                    <div v-reveal="80" class="mt-10 flex flex-wrap gap-3">
+                        <Link href="/edities" class="btn btn-ink btn-lg">
                             {{ t('about.viewAllEditions') }}
+                            <PhArrowRight :size="18" weight="bold" aria-hidden="true" />
                         </Link>
-                        <Link
-                            v-if="borrelEnrollmentOpen"
-                            href="/#borrel"
-                            class="inline-flex items-center justify-center rounded-full bg-white/10 px-7.5 py-3 text-sm font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
-                        >
-                            {{ t('home.registerDrinks') }}
-                        </Link>
+                        <Link v-if="borrelEnrollmentOpen" href="/#borrel" class="btn btn-lg bg-white/30 text-[#0b0f19] hover:bg-white/45">{{ t('home.registerDrinks') }}</Link>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <AppFooter />
+        </section>
+    </SiteLayout>
 </template>
