@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\EventMapPoint;
 use App\Support\PageMedia;
+use App\Support\RichText;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -60,7 +61,7 @@ class EventPublicMapController extends Controller
                             : ($partner?->logo ? Storage::url($partner->logo) : null),
                         'company_description' => $isCompany
                             ? $company?->localizedDescription()
-                            : $partner?->translated('description'),
+                            : RichText::sanitize($partner?->translated('description')),
                         'company_website_url' => $entity?->website_url,
                         'company_educations' => $isCompany
                             ? $company?->educations?->map(fn ($education) => $education->translated('name'))->filter()->values()->all()

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { PhArrowDown, PhArrowRight, PhBuildings, PhCompass, PhHandshake, PhLightbulb, PhMicrophoneStage, PhStudent, PhUsersThree, PhWine } from '@phosphor-icons/vue';
+import { PhArrowRight, PhBuildings, PhCompass, PhHandshake, PhLightbulb, PhMicrophoneStage, PhStudent, PhUsersThree, PhWine } from '@phosphor-icons/vue';
 import { computed } from 'vue';
 
 import SiteLayout from '@/components/site/SiteLayout.vue';
@@ -22,9 +22,9 @@ const { t } = useTranslations();
 const borrelEnrollmentOpen = computed(() => Boolean(page.props.borrelEnrollmentOpen));
 
 const facts = computed(() => [
-    { label: t('about.goal'), title: t('about.connect'), text: t('about.connectText'), tone: 'tile-sunset' },
-    { label: t('about.focus'), title: t('about.explore'), text: t('about.exploreText'), tone: 'tile-electric' },
-    { label: t('about.atmosphere'), title: t('about.approachable'), text: t('about.approachableText'), tone: 'bg-canvas text-ink ring-1 ring-hairline dark:bg-surface' },
+    { label: t('about.goal'), title: t('about.connect'), text: t('about.connectText') },
+    { label: t('about.focus'), title: t('about.explore'), text: t('about.exploreText') },
+    { label: t('about.atmosphere'), title: t('about.approachable'), text: t('about.approachableText') },
 ]);
 
 const values = computed(() => [
@@ -35,14 +35,6 @@ const values = computed(() => [
     { icon: PhMicrophoneStage, title: t('home.inspiring'), text: t('about.inspiringValueText') },
     { icon: PhHandshake, title: t('home.collaboration'), text: t('about.collaborationValueText') },
 ]);
-
-// Two-tone statement: first clause in ink, the rest steps back.
-const statement = computed(() => {
-    const text = t('about.title');
-    const words = text.split(' ');
-    const cut = Math.ceil(words.length / 2);
-    return { lead: words.slice(0, cut).join(' '), rest: ` ${words.slice(cut).join(' ')}` };
-});
 </script>
 
 <template>
@@ -50,13 +42,10 @@ const statement = computed(() => {
 
     <SiteLayout>
         <!-- Hero -->
-        <section class="relative isolate overflow-hidden border-b border-hairline bg-surface">
-            <div class="aurora aurora-soft" aria-hidden="true"></div>
-            <div class="grid-lines grid-lines-ink" aria-hidden="true"></div>
-
-            <div class="site-container relative pt-16 md:pt-24">
-                <p class="enter chip chip-brand">{{ t('about.eyebrow') }}</p>
-                <h1 class="enter t-display mt-6 text-ink" style="--enter-delay: 60ms">
+        <section class="bg-intro border-b border-hairline">
+            <div class="site-container pt-12 md:pt-16">
+                <p class="enter t-eyebrow">{{ t('about.eyebrow') }}</p>
+                <h1 class="enter t-display mt-4 text-ink" style="--enter-delay: 60ms">
                     ATIx<br />
                     <span class="t-accent">Bedrijvendag</span>
                 </h1>
@@ -86,12 +75,11 @@ const statement = computed(() => {
                     v-for="(fact, index) in facts"
                     :key="fact.label"
                     v-reveal="index * 80"
-                    class="card-lift shadow-raised rounded-[var(--radius-card)] p-6 lg:p-7"
-                    :class="fact.tone"
+                    class="shadow-raised rounded-[var(--radius-card)] bg-canvas p-6 text-ink ring-1 ring-hairline lg:p-7 dark:bg-surface"
                 >
-                    <p class="text-sm font-medium opacity-75">{{ fact.label }}</p>
+                    <p class="t-eyebrow">{{ fact.label }}</p>
                     <p class="t-h3 mt-6">{{ fact.title }}</p>
-                    <p class="mt-2 text-[0.9375rem] leading-relaxed opacity-80">{{ fact.text }}</p>
+                    <p class="t-body mt-2 text-[0.9375rem]">{{ fact.text }}</p>
                 </li>
             </ul>
         </section>
@@ -100,9 +88,8 @@ const statement = computed(() => {
         <section class="py-20 md:py-28">
             <div class="site-container">
                 <p v-reveal class="t-eyebrow">{{ t('about.whatIs') }}</p>
-                <h2 v-reveal="40" class="t-h2 mt-5 max-w-5xl">
-                    <span class="text-ink">{{ statement.lead }}</span
-                    ><span class="t-quiet">{{ statement.rest }}</span>
+                <h2 v-reveal="40" class="t-h2 mt-4 max-w-4xl text-ink">
+                    {{ t('about.title') }}
                 </h2>
 
                 <div class="mt-14 grid grid-cols-1 gap-4 lg:grid-cols-12">
@@ -120,22 +107,22 @@ const statement = computed(() => {
 
                     <div class="flex flex-col gap-4 lg:col-span-5">
                         <p v-reveal class="t-lead lg:pt-2">{{ t('about.text') }}</p>
-                        <div v-reveal="60" class="tile-sunset card-lift flex flex-1 flex-col rounded-[var(--radius-card)] p-7 lg:p-8">
-                            <PhStudent :size="32" weight="fill" aria-hidden="true" />
+                        <div v-reveal="60" class="flex flex-1 flex-col rounded-[var(--radius-card)] bg-surface p-7 ring-1 ring-hairline lg:p-8">
+                            <PhStudent :size="28" class="text-brand-ink" aria-hidden="true" />
                             <h3 class="t-h3 mt-auto pt-10">{{ t('about.students') }}</h3>
-                            <p class="mt-2 text-[0.9375rem] leading-relaxed text-[#0b0f19]/80">{{ t('about.studentsText') }}</p>
+                            <p class="t-body mt-2 text-[0.9375rem]">{{ t('about.studentsText') }}</p>
                         </div>
-                        <div v-reveal="120" class="tile-blue-soft card-lift flex flex-1 flex-col rounded-[var(--radius-card)] p-7 lg:p-8">
-                            <PhBuildings :size="32" weight="fill" class="text-brand-blue" aria-hidden="true" />
+                        <div v-reveal="120" class="flex flex-1 flex-col rounded-[var(--radius-card)] bg-surface p-7 ring-1 ring-hairline lg:p-8">
+                            <PhBuildings :size="28" class="text-brand-ink" aria-hidden="true" />
                             <h3 class="t-h3 mt-auto pt-10">{{ t('about.companies') }}</h3>
-                            <p class="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">{{ t('about.companiesText') }}</p>
+                            <p class="t-body mt-2 text-[0.9375rem]">{{ t('about.companiesText') }}</p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Values: typographic rows that light up on hover -->
+        <!-- Values: typographic rows -->
         <section class="border-y border-hairline bg-surface py-20 md:py-28">
             <div class="site-container">
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-end">
@@ -151,18 +138,12 @@ const statement = computed(() => {
                         v-for="(value, index) in values"
                         :key="value.title"
                         v-reveal="index * 40"
-                        class="group grid grid-cols-1 items-center gap-x-8 gap-y-2 border-b border-hairline py-7 transition-colors duration-300 md:grid-cols-12 md:py-9"
+                        class="grid grid-cols-1 items-center gap-x-8 gap-y-2 border-b border-hairline py-6 md:grid-cols-12 md:py-7"
                     >
-                        <span
-                            class="flex size-12 items-center justify-center rounded-[var(--radius-input)] bg-canvas text-ink ring-1 ring-hairline transition-colors duration-300 group-hover:bg-brand group-hover:text-[#0b0f19] md:col-span-1"
-                        >
+                        <span class="flex size-11 items-center justify-center rounded-[var(--radius-input)] bg-canvas text-brand-ink ring-1 ring-hairline md:col-span-1">
                             <component :is="value.icon" :size="22" weight="bold" aria-hidden="true" />
                         </span>
-                        <h3
-                            class="text-[clamp(1.5rem,1.2rem+1.2vw,2.25rem)] leading-tight font-semibold tracking-[-0.03em] text-ink transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:translate-x-2 md:col-span-5"
-                        >
-                            {{ value.title }}
-                        </h3>
+                        <h3 class="t-h3 text-ink md:col-span-5">{{ value.title }}</h3>
                         <p class="t-body md:col-span-6">{{ value.text }}</p>
                     </li>
                 </ul>
@@ -172,15 +153,14 @@ const statement = computed(() => {
         <!-- CTA band -->
         <section class="py-20 md:py-28">
             <div class="site-container">
-                <div class="tile-sunset panel relative isolate overflow-hidden p-8 sm:p-12 lg:p-14">
-                    <PhArrowDown :size="220" weight="bold" class="pointer-events-none absolute -right-8 -bottom-10 -z-10 rotate-[-30deg] opacity-15" aria-hidden="true" />
-                    <h2 v-reveal class="t-h2 max-w-4xl">{{ borrelEnrollmentOpen ? t('about.ctaOpen') : t('about.ctaClosed') }}</h2>
-                    <div v-reveal="80" class="mt-10 flex flex-wrap gap-3">
+                <div class="tile-sunset panel p-8 sm:p-12 lg:p-14">
+                    <h2 v-reveal class="t-h2 max-w-3xl">{{ borrelEnrollmentOpen ? t('about.ctaOpen') : t('about.ctaClosed') }}</h2>
+                    <div v-reveal="80" class="mt-8 flex flex-wrap gap-3">
                         <Link href="/edities" class="btn btn-ink btn-lg">
                             {{ t('about.viewAllEditions') }}
                             <PhArrowRight :size="18" weight="bold" aria-hidden="true" />
                         </Link>
-                        <Link v-if="borrelEnrollmentOpen" href="/#borrel" class="btn btn-lg bg-white/30 text-[#0b0f19] hover:bg-white/45">{{ t('home.registerDrinks') }}</Link>
+                        <Link v-if="borrelEnrollmentOpen" href="/#borrel" class="btn btn-secondary btn-lg">{{ t('home.registerDrinks') }}</Link>
                     </div>
                 </div>
             </div>

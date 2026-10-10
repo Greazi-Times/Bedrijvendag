@@ -172,7 +172,6 @@ function formatDateRange(start: string | null, end: string | null) {
                 :class="event.header_image_url ? 'bg-[linear-gradient(to_top,rgb(5_6_9/0.95)_5%,rgb(5_6_9/0.55)_55%,rgb(5_6_9/0.35)_100%)]' : ''"
                 aria-hidden="true"
             ></div>
-            <div v-if="!event.header_image_url" class="aurora" aria-hidden="true"></div>
 
             <div class="site-container flex min-h-[26rem] flex-col justify-end pt-24 pb-14 md:min-h-[34rem] md:pb-20">
                 <p class="enter chip chip-glass self-start">

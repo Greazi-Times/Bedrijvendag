@@ -6,7 +6,9 @@ use App\Models\Company;
 use App\Models\CompanyProfileSubmission;
 use App\Models\Education;
 use App\Models\Sector;
+use App\Support\RichText;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -92,12 +94,15 @@ test('company rich text submission keeps safe formatting and removes unsafe mark
 
     $submission = CompanyProfileSubmission::query()->firstOrFail();
 
+    // Headings above h3 are lowered to h3; underline is not part of the policy, its text stays.
     expect($submission->proposed_description)
-        ->toContain('<h2>Summary</h2>')
+        ->toContain('<h3>Summary</h3>')
         ->toContain('<strong>Bold</strong>')
         ->toContain('<em>italic</em>')
-        ->toContain('<u>underline</u>')
+        ->toContain('with underline.')
         ->toContain('<ul><li>One</li></ul>')
+        ->not->toContain('<h2>')
+        ->not->toContain('<u>')
         ->not->toContain('javascript:')
         ->not->toContain('onclick')
         ->not->toContain('<script>');
@@ -106,7 +111,40 @@ test('company rich text submission keeps safe formatting and removes unsafe mark
 
     expect($company->refresh()->description_nl)
         ->toContain('<strong>Bold</strong>')
-        ->toContain('<u>underline</u>');
+        ->toContain('<h3>Summary</h3>');
+});
+
+test('pasted word and web formatting is normalized to the description policy', function () {
+    $html = RichText::sanitize(
+        '<p class="MsoNormal" style="font-size:28pt;font-family:Calibri;color:red"><b><span style="font-size:36pt">Groot</span></b><o:p></o:p></p>'
+        .'<p>&nbsp;</p><h1 style="font-size:60px">Titel</h1><h6>Klein</h6>'
+        .'<table><tr><td>Cel</td></tr></table><div><span style="background:yellow">Blok</span></div>'
+        .'<p>Een<br><br><br><br>twee</p><a href="https://example.com" style="color:red">Site</a>'
+        .'<img src="x" onerror="alert(1)"><iframe src="https://example.com"></iframe>'
+    );
+
+    expect($html)->toBe(
+        '<p><b>Groot</b></p><h3>Titel</h3><h4>Klein</h4><p>Cel</p><p>Blok</p><p>Een<br /><br />twee</p>'
+        .'<a href="https://example.com" target="_blank" rel="noopener noreferrer">Site</a>'
+    );
+    expect(RichText::sanitize('<p> &nbsp; </p>'))->toBeNull();
+});
+
+test('descriptions stored before the policy are normalized when rendered, without changing the stored value', function () {
+    $company = Company::create(['name' => 'Legacy Company']);
+    $raw = '<h2 style="font-size:48px">Over ons</h2><p style="font-family:Comic Sans">Tekst</p>';
+
+    // Bypass the model mutator to simulate content saved by the old editor.
+    DB::table('companies')->where('id', $company->id)->update(['description_nl' => $raw]);
+
+    expect($company->refresh()->localizedDescription('nl'))->toBe('<h3>Over ons</h3><p>Tekst</p>')
+        ->and(DB::table('companies')->where('id', $company->id)->value('description_nl'))->toBe($raw);
+});
+
+test('admin saves of company descriptions follow the same policy', function () {
+    $company = Company::create(['name' => 'Admin Company', 'description_nl' => '<p style="font-size:40px" onclick="x()">Hallo</p><script>x()</script>']);
+
+    expect($company->description_nl)->toBe('<p>Hallo</p>');
 });
 
 test('company description length is measured on visible text instead of html markup', function () {

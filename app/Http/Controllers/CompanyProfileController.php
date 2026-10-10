@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\CompanyProfileSubmission;
 use App\Models\Education;
 use App\Models\Sector;
+use App\Support\RichText;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -91,7 +92,7 @@ class CompanyProfileController extends Controller
             'proposed_name' => $validated['name'],
             'proposed_logo_path' => $logoPath,
             'proposed_website_url' => $validated['website_url'] ?? null,
-            'proposed_description' => $this->sanitizeSubmittedDescription($validated['description'] ?? ''),
+            'proposed_description' => RichText::sanitize($validated['description'] ?? null),
             'proposed_education_ids' => $validated['education_ids'] ?? [],
             'proposed_sector_ids' => $validated['sector_ids'] ?? [],
             'proposed_new_sector_names' => $this->normalizeNewSectorNames($validated['new_sector_names'] ?? []),
@@ -114,33 +115,6 @@ class CompanyProfileController extends Controller
         return $company;
     }
 
-    private function htmlDescription(mixed $value): ?string
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        if (is_string($value)) {
-            return trim($value) ?: null;
-        }
-
-        if (is_array($value)) {
-            $candidate = $value['html'] ?? $value['content'] ?? $value['value'] ?? null;
-
-            if (is_string($candidate)) {
-                return trim($candidate) ?: null;
-            }
-
-            $flat = collect($value)
-                ->filter(fn ($item) => is_string($item) && trim($item) !== '')
-                ->implode("\n\n");
-
-            return trim($flat) ?: null;
-        }
-
-        return null;
-    }
-
     private function visibleTextLength(mixed $html): int
     {
         if (! is_string($html)) {
@@ -150,55 +124,6 @@ class CompanyProfileController extends Controller
         $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
         return mb_strlen(trim($text));
-    }
-
-    private function sanitizeSubmittedDescription(?string $description): ?string
-    {
-        $description = trim((string) $description);
-
-        if ($description === '') {
-            return null;
-        }
-
-        $allowedTags = [
-            'a',
-            'b',
-            'blockquote',
-            'br',
-            'em',
-            'h2',
-            'h3',
-            'hr',
-            'i',
-            'li',
-            'ol',
-            'p',
-            's',
-            'strong',
-            'u',
-            'ul',
-        ];
-
-        $description = preg_replace('/<(script|style|iframe|object|embed)\b[^>]*>.*?<\/\1>/is', '', $description) ?? $description;
-        $description = strip_tags($description, '<'.implode('><', $allowedTags).'>');
-        $description = preg_replace('/\s+on[a-z]+\s*=\s*(["\']).*?\1/is', '', $description) ?? $description;
-        $description = preg_replace('/\s+(style|class|id)\s*=\s*(["\']).*?\2/is', '', $description) ?? $description;
-        $description = preg_replace_callback('/<a\b([^>]*)>/i', function (array $matches): string {
-            if (! preg_match('/\shref\s*=\s*(["\'])(.*?)\1/i', $matches[1], $hrefMatch)) {
-                return '<a>';
-            }
-
-            $href = trim(html_entity_decode($hrefMatch[2]));
-
-            if (! preg_match('/^(https?:\/\/|mailto:)/i', $href)) {
-                return '<a>';
-            }
-
-            return '<a href="'.e($href).'" target="_blank" rel="noopener noreferrer">';
-        }, $description) ?? $description;
-        $description = preg_replace('/\s+href\s*=\s*(["\'])\s*javascript:.*?\1/is', '', $description) ?? $description;
-
-        return trim($description) ?: null;
     }
 
     /**

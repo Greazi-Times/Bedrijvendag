@@ -115,7 +115,7 @@ const partnerDialogData = computed<CompanyDialogData | null>(() => {
     <SiteLayout>
         <PageIntro :eyebrow="props.event ? t('partners.edition', { name: eventTitle() ?? '' }) : 'ATIx Bedrijvendag'" :title="t('nav.partners')" :lead="t('partners.intro')">
             <template v-if="props.event" #aside>
-                <div class="rounded-[var(--radius-card)] bg-canvas p-6 shadow-raised ring-1 ring-hairline">
+                <div class="shadow-raised rounded-[var(--radius-card)] bg-canvas p-6 ring-1 ring-hairline">
                     <p class="text-sm text-ink-muted">{{ t('partners.currentEdition') }}</p>
                     <p class="mt-2 text-xl font-semibold tracking-[-0.02em] text-ink">{{ eventTitle() }}</p>
                     <p class="t-mono mt-1 text-sm text-brand-ink">{{ formatDate(props.event.date) }}</p>
@@ -126,7 +126,7 @@ const partnerDialogData = computed<CompanyDialogData | null>(() => {
         <div class="site-container pt-16 pb-24 md:pt-24 md:pb-32">
             <section v-for="section in sections" :key="section.key" class="mb-20 last:mb-0 md:mb-28" :aria-labelledby="`partners-${section.key}`">
                 <div v-reveal class="grid grid-cols-1 gap-4 border-b border-hairline pb-8 lg:grid-cols-12 lg:items-end">
-                    <h2 :id="`partners-${section.key}`" class="text-[clamp(2rem,1.4rem+2vw,3.25rem)] leading-[1.02] font-semibold tracking-[-0.045em] text-ink lg:col-span-8">
+                    <h2 :id="`partners-${section.key}`" class="t-h2 text-ink lg:col-span-8">
                         {{ section.title }}
                     </h2>
                     <p class="t-body lg:col-span-4 lg:col-start-9">{{ section.description }}</p>
@@ -137,7 +137,6 @@ const partnerDialogData = computed<CompanyDialogData | null>(() => {
                         v-for="(partner, index) in section.partners"
                         :key="`${section.key}-${partner.id}`"
                         v-reveal="(index % 3) * 60"
-                        v-spotlight
                         class="spot card-lift group relative flex flex-col p-2.5"
                     >
                         <div
@@ -153,7 +152,10 @@ const partnerDialogData = computed<CompanyDialogData | null>(() => {
                                 decoding="async"
                             />
                             <span v-else class="text-5xl font-semibold tracking-[-0.05em] text-[#6b7180]" aria-hidden="true">{{ partner.name.charAt(0) }}</span>
-                            <span v-if="partner.stand_number" class="t-mono absolute top-3 left-3 rounded-[var(--radius-chip)] bg-[#0b0f19] px-2.5 py-1 text-xs font-medium text-white">
+                            <span
+                                v-if="partner.stand_number"
+                                class="t-mono absolute top-3 left-3 rounded-[var(--radius-chip)] bg-[#0b0f19] px-2.5 py-1 text-xs font-medium text-white"
+                            >
                                 {{ t('common.stand') }} {{ partner.stand_number }}
                             </span>
                             <span

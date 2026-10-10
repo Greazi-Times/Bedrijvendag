@@ -4,7 +4,9 @@ namespace App\Models;
 
 use App\Jobs\TranslateCompanyDescription;
 use App\Services\DeepLTranslator;
+use App\Support\RichText;
 use App\Support\TranslationContent;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -54,7 +56,18 @@ class Company extends Model
         $primary = $locale === 'en' ? $this->description_en : $this->description_nl;
         $fallback = $locale === 'en' ? $this->description_nl : $this->description_en;
 
-        return filled($primary) ? $primary : (filled($fallback) ? $fallback : null);
+        // Sanitized on the way out too, so descriptions saved before this policy render the same way.
+        return RichText::sanitize(filled($primary) ? $primary : (filled($fallback) ? $fallback : null));
+    }
+
+    protected function descriptionNl(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => RichText::sanitize($value));
+    }
+
+    protected function descriptionEn(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => RichText::sanitize($value));
     }
 
     public function queueEnglishDescriptionTranslation(bool $overwrite = false): bool

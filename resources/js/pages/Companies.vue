@@ -194,13 +194,7 @@ const scrollToNewsletter = () => {
             </div>
 
             <ul v-if="filteredCompanies.length" class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <li
-                    v-for="(company, index) in filteredCompanies"
-                    :key="company.id"
-                    v-reveal="(index % 3) * 60"
-                    v-spotlight
-                    class="spot card-lift group relative flex flex-col p-2.5"
-                >
+                <li v-for="(company, index) in filteredCompanies" :key="company.id" v-reveal="(index % 3) * 60" class="spot card-lift group relative flex flex-col p-2.5">
                     <div class="relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-[var(--radius-input)] bg-canvas p-10 ring-1 ring-hairline">
                         <img
                             v-if="company.logo_url"

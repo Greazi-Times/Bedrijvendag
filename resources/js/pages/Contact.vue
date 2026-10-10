@@ -64,9 +64,9 @@ const fields = [
                     <li>
                         <a
                             href="mailto:bedrijvendag.atix@avans.nl"
-                            class="group flex items-center gap-4 rounded-[var(--radius-card)] bg-canvas p-4 shadow-raised ring-1 ring-hairline transition-colors hover:bg-surface"
+                            class="group shadow-raised flex items-center gap-4 rounded-[var(--radius-card)] bg-canvas p-4 ring-1 ring-hairline transition-colors hover:bg-surface"
                         >
-                            <span class="tile-sunset flex size-11 shrink-0 items-center justify-center rounded-xl"
+                            <span class="tile-sunset flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-input)]"
                                 ><PhEnvelopeSimple :size="20" weight="bold" aria-hidden="true"
                             /></span>
                             <span class="min-w-0 flex-1">
@@ -84,9 +84,11 @@ const fields = [
                     <li>
                         <a
                             href="tel:+31885258600"
-                            class="group flex items-center gap-4 rounded-[var(--radius-card)] bg-canvas p-4 shadow-raised ring-1 ring-hairline transition-colors hover:bg-surface"
+                            class="group shadow-raised flex items-center gap-4 rounded-[var(--radius-card)] bg-canvas p-4 ring-1 ring-hairline transition-colors hover:bg-surface"
                         >
-                            <span class="tile-electric flex size-11 shrink-0 items-center justify-center rounded-xl"><PhPhone :size="20" weight="bold" aria-hidden="true" /></span>
+                            <span class="tile-electric flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-input)]"
+                                ><PhPhone :size="20" weight="bold" aria-hidden="true"
+                            /></span>
                             <span class="min-w-0 flex-1">
                                 <span class="block text-sm text-ink-muted">{{ t('common.phone') }}</span>
                                 <span class="t-mono block font-medium text-ink">088-5258600</span>
@@ -99,8 +101,8 @@ const fields = [
                             />
                         </a>
                     </li>
-                    <li class="flex items-center gap-4 rounded-[var(--radius-card)] bg-canvas p-4 shadow-raised ring-1 ring-hairline">
-                        <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface text-ink"
+                    <li class="shadow-raised flex items-center gap-4 rounded-[var(--radius-card)] bg-canvas p-4 ring-1 ring-hairline">
+                        <span class="flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-input)] bg-surface text-ink"
                             ><PhMapPin :size="20" weight="bold" aria-hidden="true"
                         /></span>
                         <span class="min-w-0 flex-1">

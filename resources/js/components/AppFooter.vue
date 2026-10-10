@@ -88,19 +88,20 @@ async function submitNewsletter() {
 </script>
 
 <template>
-    <footer class="theme-dark relative isolate overflow-hidden">
-        <div class="grid-lines opacity-60" aria-hidden="true"></div>
-        <div class="pointer-events-none absolute -top-40 left-1/2 -z-10 h-80 w-[60rem] -translate-x-1/2 rounded-full bg-brand/20 blur-[120px]" aria-hidden="true"></div>
-
-        <div class="site-container relative pt-16 md:pt-24">
+    <footer class="border-t border-hairline bg-surface">
+        <div class="site-container pt-14 md:pt-20">
             <!-- Newsletter call-out -->
-            <div class="grid grid-cols-1 gap-10 border-b border-hairline pb-16 md:pb-20 lg:grid-cols-12 lg:items-end">
+            <div class="grid grid-cols-1 gap-8 border-b border-hairline pb-14 md:pb-16 lg:grid-cols-12 lg:items-end">
                 <div class="lg:col-span-7">
-                    <h2 class="t-h2 text-ink">{{ t('about.ctaTitle') }}</h2>
-                    <p class="t-lead mt-5 max-w-lg">{{ t('footer.newsletterDescription') }}</p>
+                    <h2 class="t-h3 text-ink">{{ t('about.ctaTitle') }}</h2>
+                    <p class="t-body mt-3 max-w-lg">{{ t('footer.newsletterDescription') }}</p>
                 </div>
                 <div class="lg:col-span-5">
-                    <form class="flex gap-2 rounded-[var(--radius-card)] bg-white/[0.06] p-1.5 ring-1 ring-white/10 focus-within:ring-brand/60" novalidate @submit.prevent="submitNewsletter">
+                    <form
+                        class="flex gap-2 rounded-[var(--radius-card)] bg-canvas p-1.5 ring-1 ring-hairline focus-within:ring-brand"
+                        novalidate
+                        @submit.prevent="submitNewsletter"
+                    >
                         <label for="newsletter-email" class="sr-only">{{ t('footer.emailPlaceholder') }}</label>
                         <input
                             id="newsletter-email"
@@ -110,7 +111,7 @@ async function submitNewsletter() {
                             autocomplete="email"
                             spellcheck="false"
                             :placeholder="t('footer.emailPlaceholder')"
-                            class="min-h-12 w-full min-w-0 bg-transparent px-5 text-base text-ink placeholder:text-ink-subtle focus:outline-none"
+                            class="min-h-11 w-full min-w-0 bg-transparent px-4 text-base text-ink placeholder:text-ink-subtle focus:outline-none"
                             :aria-invalid="newsletterFlash?.type === 'error' ? 'true' : undefined"
                             aria-describedby="newsletter-feedback"
                             required
@@ -149,7 +150,7 @@ async function submitNewsletter() {
                     <h2 class="text-sm font-semibold text-ink">{{ t('footer.pages') }}</h2>
                     <ul class="mt-4 space-y-3">
                         <li v-for="link in pageLinks" :key="link.href + link.label">
-                            <Link :href="link.href" class="text-sm text-ink-muted transition-colors hover:text-brand">{{ link.label }}</Link>
+                            <Link :href="link.href" class="text-sm text-ink-muted transition-colors hover:text-ink">{{ link.label }}</Link>
                         </li>
                     </ul>
                 </nav>
@@ -158,10 +159,10 @@ async function submitNewsletter() {
                     <h2 class="text-sm font-semibold text-ink">{{ t('footer.information') }}</h2>
                     <ul class="mt-4 space-y-3">
                         <li v-for="link in infoLinks" :key="link.href + link.label">
-                            <Link :href="link.href" class="text-sm text-ink-muted transition-colors hover:text-brand">{{ link.label }}</Link>
+                            <Link :href="link.href" class="text-sm text-ink-muted transition-colors hover:text-ink">{{ link.label }}</Link>
                         </li>
                         <li>
-                            <a href="/dashboard" class="text-sm text-ink-muted transition-colors hover:text-brand">Dashboard</a>
+                            <a href="/dashboard" class="text-sm text-ink-muted transition-colors hover:text-ink">Dashboard</a>
                         </li>
                     </ul>
                 </nav>
@@ -170,14 +171,14 @@ async function submitNewsletter() {
                     <h2 class="text-sm font-semibold text-ink">{{ t('footer.legal') }}</h2>
                     <ul class="mt-4 space-y-3">
                         <li v-for="link in legalLinks" :key="link.href">
-                            <Link :href="link.href" class="text-sm text-ink-muted transition-colors hover:text-brand">{{ link.label }}</Link>
+                            <Link :href="link.href" class="text-sm text-ink-muted transition-colors hover:text-ink">{{ link.label }}</Link>
                         </li>
                         <li>
                             <a
                                 href="https://github.com/Greazi-Times/Bedrijvendag"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="inline-flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-brand"
+                                class="inline-flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-ink"
                             >
                                 <PhGithubLogo :size="15" aria-hidden="true" />
                                 {{ t('nav.repository') }}
@@ -188,19 +189,11 @@ async function submitNewsletter() {
             </div>
         </div>
 
-        <!-- Oversized wordmark -->
-        <div class="relative overflow-hidden" aria-hidden="true">
-            <p
-                class="site-container t-mega bg-[linear-gradient(180deg,rgb(255_255_255/0.16)_0%,rgb(255_255_255/0.02)_85%)] bg-clip-text pb-[0.06em] text-center whitespace-nowrap text-transparent select-none"
-                style="font-size: clamp(3rem, 0.4rem + 13.2vw, 13.5rem); letter-spacing: -0.05em"
-            >
-                Bedrijvendag
-            </p>
-        </div>
-
-        <div class="site-container relative flex flex-col gap-3 border-t border-hairline py-6 text-[0.8125rem] text-ink-muted md:flex-row md:items-center md:justify-between">
-            <p>© {{ year }} ATIx Bedrijvendag. {{ t('footer.rights') }}</p>
-            <p v-if="page.props.deploymentVersion" class="t-mono text-xs text-ink-subtle">{{ page.props.deploymentVersion }}</p>
+        <div class="site-container">
+            <div class="flex flex-col gap-3 border-t border-hairline py-6 text-[0.8125rem] text-ink-muted md:flex-row md:items-center md:justify-between">
+                <p>© {{ year }} ATIx Bedrijvendag. {{ t('footer.rights') }}</p>
+                <p v-if="page.props.deploymentVersion" class="t-mono text-xs text-ink-subtle">{{ page.props.deploymentVersion }}</p>
+            </div>
         </div>
     </footer>
 </template>

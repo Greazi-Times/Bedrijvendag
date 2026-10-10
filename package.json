@@ -35,6 +35,9 @@
     "dependencies": {
         "@inertiajs/vue3": "^2.3.7",
         "@phosphor-icons/vue": "^2.2.1",
+        "@tiptap/pm": "^3.31.4",
+        "@tiptap/starter-kit": "^3.31.4",
+        "@tiptap/vue-3": "^3.31.4",
         "@vueuse/core": "^12.8.2",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",

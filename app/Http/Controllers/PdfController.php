@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Support\RichText;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class PdfController extends Controller
@@ -31,7 +32,7 @@ class PdfController extends Controller
             ->values()
             ->map(function ($stand) {
                 $displayName = $stand->company?->name ?? $stand->partner?->name;
-                $displayDescription = $stand->company?->localizedDescription() ?? $stand->partner?->translated('description');
+                $displayDescription = $stand->company?->localizedDescription() ?? RichText::sanitize($stand->partner?->translated('description'));
                 $displayWebsiteUrl = $stand->company?->website_url ?? $stand->partner?->website_url;
                 $displayEducations = $stand->company?->educations
                     ?? $stand->partner?->educations
