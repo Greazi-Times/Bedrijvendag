@@ -112,7 +112,7 @@ const internshipPhaseClasses: Record<InternshipPhase, string> = {
     education: 'bg-surface text-ink-muted ring-hairline',
     orientation: 'bg-brand-blue/12 text-brand-blue ring-brand-blue/30',
     internship: 'tile-sunset ring-transparent',
-    graduation: 'tile-electric ring-transparent',
+    graduation: 'bg-ink text-canvas ring-transparent',
 };
 
 const form = useForm({
@@ -163,9 +163,9 @@ const processSteps: Component[] = [PhPaperPlaneTilt, PhChatsCircle, PhFileText];
             </div>
 
             <template #aside>
-                <aside class="rounded-[var(--radius-card)] bg-canvas p-6 shadow-raised ring-1 ring-hairline" aria-labelledby="next-event-title">
+                <aside class="shadow-raised rounded-[var(--radius-card)] bg-canvas p-6 ring-1 ring-hairline" aria-labelledby="next-event-title">
                     <div class="flex items-start gap-4">
-                        <span class="tile-sunset flex size-11 shrink-0 items-center justify-center rounded-xl"
+                        <span class="tile-sunset flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-input)]"
                             ><PhCalendarBlank :size="20" weight="bold" aria-hidden="true"
                         /></span>
                         <div>
@@ -209,12 +209,11 @@ const processSteps: Component[] = [PhPaperPlaneTilt, PhChatsCircle, PhFileText];
                             v-for="(icon, index) in educationPoints"
                             :key="index"
                             v-reveal="(index % 2) * 80"
-                            class="card-lift flex flex-col rounded-[var(--radius-card)] p-7"
-                            :class="[index === 0 ? 'tile-sunset' : index === 3 ? 'tile-electric' : 'card-muted', index % 2 === 1 ? 'sm:translate-y-8' : '']"
+                            class="card-muted flex flex-col rounded-[var(--radius-card)] p-7"
                         >
-                            <component :is="icon" :size="30" weight="fill" :class="index === 0 || index === 3 ? '' : 'text-brand-ink'" aria-hidden="true" />
-                            <h3 class="t-h4 mt-auto pt-10" :class="index === 0 || index === 3 ? '' : 'text-ink'">{{ t(`companyInterest.educationPoint${index + 1}Title`) }}</h3>
-                            <p class="mt-2 text-[0.9375rem] leading-relaxed" :class="index === 0 ? 'text-[#0b0f19]/80' : index === 3 ? 'text-white/80' : 'text-ink-muted'">
+                            <component :is="icon" :size="28" class="text-brand-ink" aria-hidden="true" />
+                            <h3 class="t-h4 mt-8 text-ink">{{ t(`companyInterest.educationPoint${index + 1}Title`) }}</h3>
+                            <p class="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">
                                 {{ t(`companyInterest.educationPoint${index + 1}Text`) }}
                             </p>
                         </article>
@@ -227,8 +226,8 @@ const processSteps: Component[] = [PhPaperPlaneTilt, PhChatsCircle, PhFileText];
                         <h3 class="t-h3 mt-4 text-ink">{{ t('companyInterest.forEmployersTitle') }}</h3>
                     </div>
                     <ul class="grid gap-6 sm:grid-cols-3 lg:col-span-8">
-                        <li v-for="index in 3" :key="index" class="border-t border-[color-mix(in_srgb,var(--site-brand-blue)_25%,transparent)] pt-5 text-[0.9375rem] leading-relaxed text-ink-muted">
-                            <PhCheckCircle :size="22" weight="fill" class="mb-4 text-brand-blue" aria-hidden="true" />
+                        <li v-for="index in 3" :key="index" class="border-t border-hairline pt-5 text-[0.9375rem] leading-relaxed text-ink-muted">
+                            <PhCheckCircle :size="22" weight="fill" class="mb-4 text-brand-ink" aria-hidden="true" />
                             {{ t(`companyInterest.employerTip${index}`) }}
                         </li>
                     </ul>
@@ -294,7 +293,7 @@ const processSteps: Component[] = [PhPaperPlaneTilt, PhChatsCircle, PhFileText];
                                         <div
                                             v-for="(phase, index) in selectedProgram.phases"
                                             :key="index"
-                                            class="flex min-h-24 items-center justify-center rounded-xl px-1 text-center text-xs leading-tight font-semibold ring-1"
+                                            class="flex min-h-24 items-center justify-center rounded-[var(--radius-input)] px-1 text-center text-xs leading-tight font-semibold ring-1"
                                             :class="internshipPhaseClasses[phase]"
                                             :title="t(`companyInterest.phase.${phase}`)"
                                         >
@@ -309,7 +308,7 @@ const processSteps: Component[] = [PhPaperPlaneTilt, PhChatsCircle, PhFileText];
                                         <div
                                             v-for="halfYear in 2"
                                             :key="halfYear"
-                                            class="flex min-h-16 flex-col items-center justify-center rounded-xl px-2 text-center leading-tight ring-1"
+                                            class="flex min-h-16 flex-col items-center justify-center rounded-[var(--radius-input)] px-2 text-center leading-tight ring-1"
                                             :class="internshipPhaseClasses[internshipPhaseAt(year, halfYear)]"
                                         >
                                             <span class="text-[10px] font-medium opacity-75">{{ t(`companyInterest.halfYear${halfYear}`) }}</span>
@@ -363,17 +362,14 @@ const processSteps: Component[] = [PhPaperPlaneTilt, PhChatsCircle, PhFileText];
                 </div>
 
                 <ol class="mt-14 grid gap-3 md:grid-cols-3">
-                    <li v-for="(icon, index) in processSteps" :key="index" v-reveal="index * 80" v-spotlight class="spot card-lift relative bg-canvas p-7 md:p-8">
-                        <span
-                            class="pointer-events-none absolute -top-6 right-4 text-[5.5rem] leading-none font-semibold tracking-[-0.04em] text-ink/[0.06] select-none"
-                            aria-hidden="true"
-                        >
-                            {{ index + 1 }}
-                        </span>
-                        <span class="flex size-12 items-center justify-center rounded-[var(--radius-input)]" :class="index === 1 ? 'tile-electric' : 'tile-sunset'">
-                            <component :is="icon" :size="22" weight="bold" aria-hidden="true" />
-                        </span>
-                        <h3 class="t-h3 mt-10 text-ink">{{ t(`companyInterest.step${index + 1}Title`) }}</h3>
+                    <li v-for="(icon, index) in processSteps" :key="index" v-reveal="index * 80" class="spot relative bg-canvas p-7 md:p-8">
+                        <div class="flex items-center justify-between">
+                            <span class="tile-sunset flex size-11 items-center justify-center rounded-[var(--radius-input)]">
+                                <component :is="icon" :size="22" weight="bold" aria-hidden="true" />
+                            </span>
+                            <span class="t-mono text-sm text-ink-subtle" aria-hidden="true">0{{ index + 1 }}</span>
+                        </div>
+                        <h3 class="t-h3 mt-8 text-ink">{{ t(`companyInterest.step${index + 1}Title`) }}</h3>
                         <p class="t-body mt-2">{{ t(`companyInterest.step${index + 1}Text`) }}</p>
                     </li>
                 </ol>
@@ -385,7 +381,7 @@ const processSteps: Component[] = [PhPaperPlaneTilt, PhChatsCircle, PhFileText];
             <div class="site-container grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
                 <div class="lg:col-span-4">
                     <p v-reveal class="t-eyebrow">{{ t('companyInterest.formEyebrow') }}</p>
-                    <h2 v-reveal="40" class="mt-5 text-[clamp(2rem,1.4rem+2vw,3rem)] leading-[1.02] font-semibold tracking-[-0.045em] text-ink">
+                    <h2 v-reveal="40" class="t-h2 mt-4 text-ink">
                         {{ t('companyInterest.formTitle') }}
                     </h2>
                     <p v-reveal="80" class="t-lead mt-5">{{ t('companyInterest.formIntro') }}</p>

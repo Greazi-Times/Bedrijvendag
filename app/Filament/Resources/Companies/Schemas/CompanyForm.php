@@ -33,17 +33,14 @@ class CompanyForm
                     ->default(null),
                 RichEditor::make('description_nl')
                     ->label('Description')
+                    // Same policy as the company profile editor (App\Support\RichText), enforced on save.
                     ->toolbarButtons([
                         'bold',
                         'italic',
-                        'underline',
-                        'strike',
+                        'h3',
                         'bulletList',
                         'orderedList',
                         'link',
-                        'blockquote',
-                        'h2',
-                        'h3',
                     ])
                     ->required()
                     ->columnSpanFull(),

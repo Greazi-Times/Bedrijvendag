@@ -1,44 +1,17 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import {
-    CheckCircle2,
-    ExternalLink,
-    Link2,
-    List,
-    ListOrdered,
-    Pilcrow,
-    Plus,
-    Quote,
-    Redo2,
-    RemoveFormatting,
-    Search,
-    Send,
-    SeparatorHorizontal,
-    Type,
-    Underline,
-    Undo2,
-    Upload,
-    X,
-} from 'lucide-vue-next';
-import { computed, nextTick, onMounted, ref } from 'vue';
-import type { Component } from 'vue';
+import { PhArrowSquareOut, PhCheckCircle, PhMagnifyingGlass, PhPaperPlaneTilt, PhPlus, PhUploadSimple, PhX } from '@phosphor-icons/vue';
+import { computed, ref } from 'vue';
 
 import PageIntro from '@/components/site/PageIntro.vue';
+import RichTextEditor from '@/components/site/RichTextEditor.vue';
 import SiteLayout from '@/components/site/SiteLayout.vue';
 import { useTranslations } from '@/i18n';
+import { focusFirstError } from '@/lib/forms';
 
 type Option = {
     id: number;
     name: string;
-};
-
-type ToolbarItem = {
-    label: string;
-    command: string;
-    value?: string;
-    text?: string;
-    class?: string;
-    icon?: Component;
 };
 
 const props = defineProps<{
@@ -63,9 +36,7 @@ const { dateLocale, t } = useTranslations();
 
 const logoPreview = ref<string | null>(props.company.logo_url ?? null);
 const saved = ref(false);
-const editor = ref<HTMLElement | null>(null);
 const descriptionMaxLength = 5000;
-const allowedEditorTags = new Set(['A', 'B', 'BLOCKQUOTE', 'BR', 'EM', 'H2', 'H3', 'HR', 'I', 'LI', 'OL', 'P', 'S', 'STRONG', 'U', 'UL']);
 const sectorSearch = ref('');
 const newSectorName = ref('');
 
@@ -94,31 +65,6 @@ const submittedAt = computed(() => {
     });
 });
 
-const toolbarGroups = computed<ToolbarItem[][]>(() => [
-    [
-        { label: t('companyProfile.bold'), command: 'bold', text: 'B', class: 'font-bold' },
-        { label: t('companyProfile.italic'), command: 'italic', text: 'I', class: 'font-serif italic' },
-        { label: t('companyProfile.underline'), command: 'underline', icon: Underline },
-        { label: t('companyProfile.strike'), command: 'strikeThrough', text: 'S', class: 'line-through' },
-    ],
-    [
-        { label: t('companyProfile.heading'), command: 'formatBlock', value: 'h2', icon: Type },
-        { label: t('companyProfile.subheading'), command: 'formatBlock', value: 'h3', icon: Pilcrow },
-        { label: t('companyProfile.quote'), command: 'formatBlock', value: 'blockquote', icon: Quote },
-    ],
-    [
-        { label: t('companyProfile.bullets'), command: 'insertUnorderedList', icon: List },
-        { label: t('companyProfile.numbered'), command: 'insertOrderedList', icon: ListOrdered },
-        { label: t('companyProfile.line'), command: 'insertHorizontalRule', icon: SeparatorHorizontal },
-    ],
-    [
-        { label: t('companyProfile.insertLink'), command: 'createLink', icon: Link2 },
-        { label: t('companyProfile.clearFormatting'), command: 'removeFormat', icon: RemoveFormatting },
-        { label: t('companyProfile.undo'), command: 'undo', icon: Undo2 },
-        { label: t('companyProfile.redo'), command: 'redo', icon: Redo2 },
-    ],
-]);
-
 const filteredSectors = computed(() => {
     const query = sectorSearch.value.trim().toLowerCase();
 
@@ -139,20 +85,10 @@ const canAddNewSector = computed(() => {
     return !alreadyExists && !alreadyProposed && form.new_sector_names.length < 10;
 });
 
-const descriptionLength = computed(() => {
-    const text = form.description.replace(/<[^>]*>/g, '').replace(/&(#\d+|#x[\da-f]+|[a-z\d]+);/gi, ' ');
-
-    return [...text.trim()].length;
-});
+const descriptionLength = ref(0);
 
 const sectorError = computed(() => {
     return form.errors.sector_ids || form.errors.new_sector_names || Object.entries(form.errors).find(([key]) => key.startsWith('new_sector_names.'))?.[1];
-});
-
-onMounted(() => {
-    if (editor.value) {
-        editor.value.innerHTML = form.description;
-    }
 });
 
 function toggleValue(values: number[], id: number) {
@@ -179,89 +115,6 @@ function removeNewSector(name: string) {
     form.new_sector_names = form.new_sector_names.filter((sectorName) => sectorName !== name);
 }
 
-function syncDescription() {
-    form.description = editor.value?.innerHTML ?? '';
-}
-
-function focusEditor() {
-    editor.value?.focus();
-}
-
-function runEditorCommand(command: string, value?: string) {
-    focusEditor();
-
-    if (command === 'createLink') {
-        const url = window.prompt(t('companyProfile.linkPrompt'));
-        if (!url) return;
-
-        document.execCommand('createLink', false, url);
-    } else {
-        document.execCommand(command, false, value);
-    }
-
-    syncDescription();
-}
-
-function handleEditorInput() {
-    syncDescription();
-}
-
-function cleanPastedHtml(html: string) {
-    const source = new DOMParser().parseFromString(html, 'text/html');
-    const output = document.createElement('div');
-
-    const appendCleaned = (node: Node, parent: Node) => {
-        if (node.nodeType === Node.TEXT_NODE) {
-            parent.appendChild(document.createTextNode(node.textContent ?? ''));
-            return;
-        }
-
-        if (!(node instanceof Element) || ['SCRIPT', 'STYLE', 'META', 'LINK', 'TITLE'].includes(node.tagName)) return;
-
-        let target: Node = parent;
-
-        if (allowedEditorTags.has(node.tagName)) {
-            const element = document.createElement(node.tagName.toLowerCase());
-            const href = node.getAttribute('href');
-
-            if (node.tagName === 'A' && href && /^(https?:\/\/|mailto:)/i.test(href)) {
-                element.setAttribute('href', href);
-            }
-
-            parent.appendChild(element);
-            target = element;
-        } else if (['DIV', 'H1', 'H4', 'H5', 'H6'].includes(node.tagName)) {
-            const element = document.createElement('p');
-            parent.appendChild(element);
-            target = element;
-        }
-
-        node.childNodes.forEach((child) => appendCleaned(child, target));
-    };
-
-    source.body.childNodes.forEach((child) => appendCleaned(child, output));
-
-    return output.innerHTML;
-}
-
-function handleEditorPaste(event: ClipboardEvent) {
-    event.preventDefault();
-
-    const html = event.clipboardData?.getData('text/html');
-    const text = event.clipboardData?.getData('text/plain') ?? '';
-    const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-    const fallbackHtml = text
-        .split(/\n{2,}/)
-        .map((paragraph) => paragraph.trim())
-        .filter(Boolean)
-        .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br>')}</p>`)
-        .join('');
-
-    document.execCommand('insertHTML', false, html ? cleanPastedHtml(html) : fallbackHtml);
-
-    nextTick(syncDescription);
-}
-
 function handleLogoChange(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
@@ -277,11 +130,10 @@ function handleLogoChange(event: Event) {
 }
 
 function submit() {
-    syncDescription();
-
     form.post(props.submitUrl, {
         preserveScroll: true,
         forceFormData: true,
+        onError: focusFirstError,
         onSuccess: () => {
             saved.value = true;
             form.logo = null;
@@ -297,227 +149,241 @@ function submit() {
         <PageIntro :eyebrow="t('companyProfile.eyebrow')" :title="t('companyProfile.title')" :lead="t('companyProfile.intro')" />
 
         <section class="site-container pt-14 pb-24 md:pt-20 md:pb-32">
-            <div class="mx-auto max-w-4xl">
-                <div v-if="pendingSubmission || saved" class="alert alert-success mt-0 mb-8" role="status" aria-live="polite">
-                    <div class="flex items-start gap-3">
-                        <CheckCircle2 class="mt-0.5 h-5 w-5 shrink-0 text-success" />
-                        <p>
-                            {{ t('companyProfile.received', { date: submittedAt ? t('companyProfile.onDate', { date: submittedAt }) : '' }) }}
-                        </p>
-                    </div>
+            <div class="mx-auto max-w-3xl">
+                <div v-if="pendingSubmission || saved" class="alert alert-success mb-8" role="status" aria-live="polite">
+                    <PhCheckCircle :size="20" weight="fill" class="shrink-0 text-success" aria-hidden="true" />
+                    <p>{{ t('companyProfile.received', { date: submittedAt ? t('companyProfile.onDate', { date: submittedAt }) : '' }) }}</p>
                 </div>
 
-                <form class="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]" @submit.prevent="submit">
-                    <section class="card rounded-[var(--radius-card)] p-6 sm:p-8">
-                        <div class="grid gap-6 sm:grid-cols-2">
-                            <div>
-                                <label for="contact_name" class="field-label mb-2 block"
-                                    >{{ t('companyProfile.contactPerson') }} <span class="text-danger" aria-hidden="true">*</span></label
-                                >
-                                <input id="contact_name" v-model="form.contact_name" type="text" autocomplete="name" required class="input" />
-                                <p v-if="form.errors.contact_name" class="field-error mt-2">{{ form.errors.contact_name }}</p>
-                            </div>
+                <form class="card divide-y divide-hairline" novalidate @submit.prevent="submit">
+                    <!-- Contact -->
+                    <fieldset class="grid gap-5 p-6 sm:p-10">
+                        <legend class="contents">
+                            <span class="t-h4 block text-ink">{{ t('companyProfile.sectionContact') }}</span>
+                        </legend>
+                        <p class="t-small -mt-3">{{ t('companyProfile.sectionContactHelp') }}</p>
 
-                            <div>
-                                <label for="contact_email" class="field-label mb-2 block"
-                                    >{{ t('companyProfile.contactEmail') }} <span class="text-danger" aria-hidden="true">*</span></label
-                                >
-                                <input id="contact_email" v-model="form.contact_email" type="email" autocomplete="email" required class="input" />
-                                <p v-if="form.errors.contact_email" class="field-error mt-2">{{ form.errors.contact_email }}</p>
-                            </div>
+                        <div class="field">
+                            <label for="contact_name" class="field-label">{{ t('companyProfile.contactPerson') }} <span class="text-danger" aria-hidden="true">*</span></label>
+                            <input
+                                id="contact_name"
+                                v-model="form.contact_name"
+                                type="text"
+                                autocomplete="name"
+                                required
+                                class="input"
+                                :aria-invalid="form.errors.contact_name ? 'true' : undefined"
+                                :aria-describedby="form.errors.contact_name ? 'contact_name-error' : undefined"
+                            />
+                            <p v-if="form.errors.contact_name" id="contact_name-error" class="field-error">{{ form.errors.contact_name }}</p>
+                        </div>
 
-                            <div>
-                                <label for="name" class="field-label mb-2 block">{{ t('companyProfile.companyName') }} <span class="text-danger" aria-hidden="true">*</span></label>
-                                <input id="name" v-model="form.name" type="text" required class="input" />
-                                <p v-if="form.errors.name" class="field-error mt-2">{{ form.errors.name }}</p>
-                            </div>
+                        <div class="field">
+                            <label for="contact_email" class="field-label">{{ t('companyProfile.contactEmail') }} <span class="text-danger" aria-hidden="true">*</span></label>
+                            <input
+                                id="contact_email"
+                                v-model="form.contact_email"
+                                type="email"
+                                autocomplete="email"
+                                spellcheck="false"
+                                required
+                                class="input"
+                                :aria-invalid="form.errors.contact_email ? 'true' : undefined"
+                                :aria-describedby="form.errors.contact_email ? 'contact_email-error' : undefined"
+                            />
+                            <p v-if="form.errors.contact_email" id="contact_email-error" class="field-error">{{ form.errors.contact_email }}</p>
+                        </div>
+                    </fieldset>
 
-                            <div>
-                                <label for="website_url" class="field-label mb-2 block">{{ t('common.website') }}</label>
-                                <input id="website_url" v-model="form.website_url" type="url" placeholder="https://example.com" class="input" />
-                                <p v-if="form.errors.website_url" class="field-error mt-2">{{ form.errors.website_url }}</p>
-                            </div>
+                    <!-- Company -->
+                    <fieldset class="grid gap-5 p-6 sm:p-10">
+                        <legend class="contents">
+                            <span class="t-h4 block text-ink">{{ t('companyProfile.sectionCompany') }}</span>
+                        </legend>
 
-                            <div class="sm:col-span-2">
-                                <label for="description" class="field-label mb-2 block">{{ t('common.description') }}</label>
-                                <div class="overflow-hidden rounded-[var(--radius-input)] ring-1 ring-hairline focus-within:ring-2 focus-within:ring-ring/40">
-                                    <div class="flex flex-wrap gap-1 border-b border-hairline bg-canvas p-2">
-                                        <template v-for="(group, groupIndex) in toolbarGroups" :key="groupIndex">
-                                            <span v-if="groupIndex > 0" class="mx-1 h-8 w-px bg-border" aria-hidden="true"></span>
-                                            <button
-                                                v-for="item in group"
-                                                :key="item.label"
-                                                type="button"
-                                                :title="item.label"
-                                                class="inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm font-semibold text-ink transition hover:bg-secondary/15 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
-                                                @click="runEditorCommand(item.command, item.value)"
-                                            >
-                                                <component :is="item.icon" v-if="item.icon" class="h-4 w-4" />
-                                                <span v-else :class="item.class">{{ item.text }}</span>
-                                            </button>
-                                        </template>
-                                    </div>
+                        <div class="field">
+                            <label for="name" class="field-label">{{ t('companyProfile.companyName') }} <span class="text-danger" aria-hidden="true">*</span></label>
+                            <input
+                                id="name"
+                                v-model="form.name"
+                                type="text"
+                                autocomplete="organization"
+                                required
+                                class="input"
+                                :aria-invalid="form.errors.name ? 'true' : undefined"
+                                :aria-describedby="form.errors.name ? 'name-error' : undefined"
+                            />
+                            <p v-if="form.errors.name" id="name-error" class="field-error">{{ form.errors.name }}</p>
+                        </div>
 
-                                    <div
-                                        id="description"
-                                        ref="editor"
-                                        contenteditable="true"
-                                        class="rich-editor prose prose-sm min-h-56 max-w-none bg-canvas p-4 text-ink outline-none dark:prose-invert"
-                                        role="textbox"
-                                        aria-multiline="true"
-                                        :data-placeholder="t('companyProfile.descriptionPlaceholder')"
-                                        @input="handleEditorInput"
-                                        @paste="handleEditorPaste"
-                                        @blur="syncDescription"
-                                    ></div>
+                        <div class="field">
+                            <label for="website_url" class="field-label">{{ t('common.website') }}</label>
+                            <input
+                                id="website_url"
+                                v-model="form.website_url"
+                                type="url"
+                                inputmode="url"
+                                spellcheck="false"
+                                placeholder="https://example.com"
+                                class="input"
+                                :aria-invalid="form.errors.website_url ? 'true' : undefined"
+                                :aria-describedby="form.errors.website_url ? 'website_url-error' : undefined"
+                            />
+                            <p v-if="form.errors.website_url" id="website_url-error" class="field-error">{{ form.errors.website_url }}</p>
+                            <a
+                                v-if="company.website_url"
+                                :href="company.website_url"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="t-link inline-flex items-center gap-1.5 self-start text-sm"
+                            >
+                                {{ t('companyProfile.openWebsite') }}
+                                <PhArrowSquareOut :size="14" aria-hidden="true" />
+                            </a>
+                        </div>
+
+                        <div class="field">
+                            <span class="field-label">{{ t('companyProfile.logo') }}</span>
+                            <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                                <div class="flex h-24 w-40 shrink-0 items-center justify-center rounded-[var(--radius-input)] bg-white p-3 ring-1 ring-hairline">
+                                    <img v-if="logoPreview" :src="logoPreview" :alt="form.name" class="max-h-full max-w-full object-contain" />
+                                    <span v-else class="text-sm text-[#545a68]">{{ t('common.noLogo') }}</span>
                                 </div>
-                                <textarea v-model="form.description" name="description" class="sr-only" tabindex="-1" aria-hidden="true"></textarea>
-                                <div class="mt-2 flex items-start justify-between gap-4 text-xs text-ink-muted">
-                                    <p>{{ t('companyProfile.editorHelp') }}</p>
-                                    <p class="shrink-0 tabular-nums" :class="{ 'text-danger': descriptionLength > descriptionMaxLength }">
-                                        {{ descriptionLength }} / {{ descriptionMaxLength }}
-                                    </p>
+                                <div>
+                                    <label for="logo" class="btn btn-secondary cursor-pointer focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand">
+                                        <PhUploadSimple :size="16" aria-hidden="true" />
+                                        {{ t('companyProfile.uploadLogo') }}
+                                        <input id="logo" type="file" accept="image/*" class="sr-only" @change="handleLogoChange" />
+                                    </label>
+                                    <p v-if="form.errors.logo" class="field-error mt-2">{{ form.errors.logo }}</p>
                                 </div>
-                                <p v-if="form.errors.description" class="field-error mt-2">{{ form.errors.description }}</p>
-                            </div>
-
-                            <div class="sm:col-span-2">
-                                <p class="text-sm font-semibold text-ink">{{ t('common.sectors') }}</p>
-                                <div class="relative mt-4">
-                                    <Search class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-ink-muted" />
-                                    <input v-model="sectorSearch" type="search" :placeholder="t('companyProfile.searchSector')" class="input pl-11" />
-                                </div>
-
-                                <div class="mt-4 max-h-64 overflow-y-auto rounded-[var(--radius-input)] bg-surface p-3 ring-1 ring-hairline">
-                                    <div class="flex flex-wrap gap-3">
-                                        <label
-                                            v-for="sector in filteredSectors"
-                                            :key="sector.id"
-                                            class="inline-flex max-w-full items-center gap-3 rounded-lg bg-canvas px-3 py-2 text-sm whitespace-nowrap text-ink ring-1 ring-hairline"
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                class="h-4 w-4 shrink-0 rounded border-hairline text-brand-ink focus:ring-ring/40"
-                                                :checked="form.sector_ids.includes(sector.id)"
-                                                @change="toggleValue(form.sector_ids, sector.id)"
-                                            />
-                                            <span>{{ sector.name }}</span>
-                                        </label>
-                                    </div>
-
-                                    <p v-if="!filteredSectors.length" class="text-sm text-ink-muted">{{ t('companyProfile.noSector') }}</p>
-                                </div>
-
-                                <div class="mt-4 rounded-[var(--radius-input)] bg-surface p-4 ring-1 ring-hairline">
-                                    <label for="new_sector_name" class="text-sm font-semibold text-ink">{{ t('companyProfile.newSector') }}</label>
-                                    <div class="mt-3 flex flex-col gap-3 sm:flex-row">
-                                        <input
-                                            id="new_sector_name"
-                                            v-model="newSectorName"
-                                            type="text"
-                                            maxlength="80"
-                                            :placeholder="t('companyProfile.newSectorExample')"
-                                            class="input min-w-0 flex-1"
-                                            @keydown.enter.prevent="addNewSector"
-                                        />
-                                        <button type="button" :disabled="!canAddNewSector" class="btn btn-primary" @click="addNewSector">
-                                            <Plus class="h-4 w-4" />
-                                            {{ t('companyProfile.add') }}
-                                        </button>
-                                    </div>
-                                    <p class="mt-2 text-xs text-ink-muted">{{ t('companyProfile.newSectorHelp') }}</p>
-
-                                    <div v-if="form.new_sector_names.length" class="mt-4 flex flex-wrap gap-2">
-                                        <span
-                                            v-for="name in form.new_sector_names"
-                                            :key="name"
-                                            class="inline-flex max-w-full items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm font-semibold whitespace-nowrap text-brand-ink ring-1 ring-brand/25"
-                                        >
-                                            {{ name }}
-                                            <button
-                                                type="button"
-                                                :aria-label="t('companyProfile.remove', { name })"
-                                                class="rounded-md p-0.5 transition hover:bg-primary/10"
-                                                @click="removeNewSector(name)"
-                                            >
-                                                <X class="h-3.5 w-3.5" />
-                                            </button>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <p v-if="sectorError" class="field-error mt-2">{{ sectorError }}</p>
                             </div>
                         </div>
-                    </section>
+                    </fieldset>
 
-                    <aside class="space-y-8">
-                        <section class="card rounded-[var(--radius-card)] p-6">
-                            <p class="text-sm font-semibold text-ink">{{ t('companyProfile.logo') }}</p>
-                            <div class="mt-4 flex aspect-[4/3] items-center justify-center rounded-[var(--radius-input)] bg-canvas p-6 ring-1 ring-hairline">
-                                <img v-if="logoPreview" :src="logoPreview" :alt="form.name" class="max-h-full max-w-full object-contain" />
-                                <span v-else class="text-sm text-ink-muted">{{ t('common.noLogo') }}</span>
-                            </div>
+                    <!-- Description -->
+                    <div class="grid gap-3 p-6 sm:p-10">
+                        <h2 id="description-label" class="t-h4 text-ink">{{ t('common.description') }}</h2>
+                        <RichTextEditor
+                            id="description"
+                            v-model="form.description"
+                            :placeholder="t('companyProfile.descriptionPlaceholder')"
+                            labelled-by="description-label"
+                            described-by="description-help"
+                            :invalid="Boolean(form.errors.description)"
+                            @text-length="descriptionLength = $event"
+                        />
+                        <div id="description-help" class="flex items-start justify-between gap-4 text-xs text-ink-muted">
+                            <p>{{ t('companyProfile.editorHelp') }}</p>
+                            <p class="shrink-0 tabular-nums" :class="{ 'text-danger': descriptionLength > descriptionMaxLength }">
+                                {{ descriptionLength }} / {{ descriptionMaxLength }}
+                            </p>
+                        </div>
+                        <p v-if="form.errors.description" class="field-error">{{ form.errors.description }}</p>
+                    </div>
+
+                    <!-- Educations -->
+                    <fieldset class="grid gap-4 p-6 sm:p-10">
+                        <legend class="contents">
+                            <span class="t-h4 block text-ink">{{ t('common.educations') }}</span>
+                        </legend>
+                        <p class="t-small -mt-2">{{ t('companyProfile.sectionEducationsHelp') }}</p>
+                        <div class="grid gap-2 sm:grid-cols-2">
                             <label
-                                for="logo"
-                                class="mt-4 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-input)] bg-canvas px-4 py-3 text-sm font-semibold text-ink ring-1 ring-hairline transition hover:bg-surface"
+                                v-for="education in options.educations"
+                                :key="education.id"
+                                class="flex cursor-pointer items-start gap-3 rounded-[var(--radius-input)] px-3 py-2.5 text-sm text-ink ring-1 ring-hairline transition-colors hover:bg-surface has-[:checked]:bg-surface has-[:checked]:ring-brand/40"
                             >
-                                <Upload class="h-4 w-4" />
-                                {{ t('companyProfile.uploadLogo') }}
+                                <input
+                                    type="checkbox"
+                                    class="mt-0.5 size-4 shrink-0 accent-[var(--site-brand)]"
+                                    :checked="form.education_ids.includes(education.id)"
+                                    @change="toggleValue(form.education_ids, education.id)"
+                                />
+                                <span>{{ education.name }}</span>
                             </label>
-                            <input id="logo" type="file" accept="image/*" class="sr-only" @change="handleLogoChange" />
-                            <p v-if="form.errors.logo" class="field-error mt-2">{{ form.errors.logo }}</p>
-                        </section>
+                        </div>
+                        <p v-if="form.errors.education_ids" class="field-error">{{ form.errors.education_ids }}</p>
+                    </fieldset>
 
-                        <section class="card rounded-[var(--radius-card)] p-6">
-                            <p class="text-sm font-semibold text-ink">{{ t('common.educations') }}</p>
-                            <div class="mt-4 space-y-3">
-                                <label v-for="education in options.educations" :key="education.id" class="flex items-start gap-3 text-sm text-ink">
+                    <!-- Sectors -->
+                    <fieldset class="grid gap-4 p-6 sm:p-10">
+                        <legend class="contents">
+                            <span class="t-h4 block text-ink">{{ t('common.sectors') }}</span>
+                        </legend>
+                        <div class="relative">
+                            <PhMagnifyingGlass :size="16" class="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-ink-muted" aria-hidden="true" />
+                            <label for="sector_search" class="sr-only">{{ t('companyProfile.searchSector') }}</label>
+                            <input id="sector_search" v-model="sectorSearch" type="search" :placeholder="t('companyProfile.searchSector')" class="input pl-10" />
+                        </div>
+
+                        <div class="max-h-64 overflow-y-auto rounded-[var(--radius-input)] bg-surface p-3 ring-1 ring-hairline">
+                            <div class="flex flex-wrap gap-2">
+                                <label
+                                    v-for="sector in filteredSectors"
+                                    :key="sector.id"
+                                    class="inline-flex max-w-full cursor-pointer items-center gap-2.5 rounded-[var(--radius-input)] bg-canvas px-3 py-2 text-sm text-ink ring-1 ring-hairline has-[:checked]:ring-brand/40 dark:bg-surface-2"
+                                >
                                     <input
                                         type="checkbox"
-                                        class="mt-1 h-4 w-4 rounded border-hairline text-brand-ink focus:ring-ring/40"
-                                        :checked="form.education_ids.includes(education.id)"
-                                        @change="toggleValue(form.education_ids, education.id)"
+                                        class="size-4 shrink-0 accent-[var(--site-brand)]"
+                                        :checked="form.sector_ids.includes(sector.id)"
+                                        @change="toggleValue(form.sector_ids, sector.id)"
                                     />
-                                    <span>{{ education.name }}</span>
+                                    <span>{{ sector.name }}</span>
                                 </label>
                             </div>
-                            <p v-if="form.errors.education_ids" class="field-error mt-2">{{ form.errors.education_ids }}</p>
-                        </section>
-                    </aside>
+                            <p v-if="!filteredSectors.length" class="t-small">{{ t('companyProfile.noSector') }}</p>
+                        </div>
 
-                    <div class="card flex flex-col gap-4 rounded-[var(--radius-card)] p-6 sm:flex-row sm:items-center sm:justify-between lg:col-span-2">
-                        <p class="text-sm leading-relaxed text-ink-muted">{{ t('companyProfile.approval') }}</p>
-                        <button type="submit" :disabled="form.processing" class="btn btn-primary">
-                            <Send class="h-4 w-4" />
+                        <div class="field">
+                            <label for="new_sector_name" class="field-label">{{ t('companyProfile.newSector') }}</label>
+                            <div class="flex flex-col gap-3 sm:flex-row">
+                                <input
+                                    id="new_sector_name"
+                                    v-model="newSectorName"
+                                    type="text"
+                                    maxlength="80"
+                                    :placeholder="t('companyProfile.newSectorExample')"
+                                    class="input min-w-0 flex-1"
+                                    aria-describedby="new_sector_help"
+                                    @keydown.enter.prevent="addNewSector"
+                                />
+                                <button type="button" :disabled="!canAddNewSector" class="btn btn-secondary" @click="addNewSector">
+                                    <PhPlus :size="16" aria-hidden="true" />
+                                    {{ t('companyProfile.add') }}
+                                </button>
+                            </div>
+                            <p id="new_sector_help" class="field-help">{{ t('companyProfile.newSectorHelp') }}</p>
+
+                            <ul v-if="form.new_sector_names.length" class="mt-1 flex flex-wrap gap-2">
+                                <li v-for="name in form.new_sector_names" :key="name" class="chip chip-brand gap-1.5 pr-1">
+                                    {{ name }}
+                                    <button
+                                        type="button"
+                                        :aria-label="t('companyProfile.remove', { name })"
+                                        class="inline-flex size-5 items-center justify-center rounded-[var(--radius-chip)] hover:bg-brand/15"
+                                        @click="removeNewSector(name)"
+                                    >
+                                        <PhX :size="12" weight="bold" aria-hidden="true" />
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <p v-if="sectorError" class="field-error">{{ sectorError }}</p>
+                    </fieldset>
+
+                    <!-- Submit -->
+                    <div class="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-10">
+                        <p class="t-small max-w-md">{{ t('companyProfile.approval') }}</p>
+                        <button type="submit" :disabled="form.processing" class="btn btn-primary btn-lg shrink-0">
+                            <PhPaperPlaneTilt :size="18" aria-hidden="true" />
                             {{ form.processing ? t('common.submitting') : t('companyProfile.sendReview') }}
                         </button>
                     </div>
                 </form>
-
-                <a
-                    v-if="company.website_url"
-                    :href="company.website_url"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-brand-ink hover:text-brand-ink/80"
-                >
-                    {{ t('companyProfile.openWebsite') }}
-                    <ExternalLink class="h-4 w-4" />
-                </a>
             </div>
         </section>
     </SiteLayout>
 </template>
-
-<style scoped>
-.rich-editor:empty::before {
-    content: attr(data-placeholder);
-    color: var(--muted-foreground);
-}
-
-.rich-editor :deep(a) {
-    color: var(--primary);
-    text-decoration: underline;
-}
-</style>

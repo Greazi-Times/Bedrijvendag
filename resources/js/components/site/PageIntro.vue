@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * Opening band for inner pages: a soft brand glow over a faint grid, the
- * page headline and an optional aside (actions or facts).
+ * Opening band for inner pages: the page headline and an optional aside
+ * (actions or facts) on a quiet surface.
  */
 type Props = {
     title: string;
@@ -16,20 +16,17 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-    <section class="relative isolate overflow-hidden border-b border-hairline bg-surface">
-        <div class="aurora aurora-soft" aria-hidden="true"></div>
-        <div class="grid-lines grid-lines-ink" aria-hidden="true"></div>
-
-        <div class="site-container relative grid grid-cols-1 gap-10 pt-14 pb-14 md:pt-20 md:pb-16 lg:grid-cols-12 lg:items-end lg:gap-12">
+    <section class="bg-intro border-b border-hairline">
+        <div class="site-container grid grid-cols-1 gap-8 pt-12 pb-12 md:pt-16 md:pb-14 lg:grid-cols-12 lg:items-end lg:gap-12">
             <div :class="$slots.aside ? 'lg:col-span-8' : 'lg:col-span-10'">
-                <p v-if="eyebrow" class="enter chip chip-brand">{{ eyebrow }}</p>
-                <h1 class="enter t-h1 text-ink" :class="eyebrow ? 'mt-6' : ''" style="--enter-delay: 60ms">
+                <p v-if="eyebrow" class="enter t-eyebrow">{{ eyebrow }}</p>
+                <h1 class="enter t-h1 text-ink" :class="eyebrow ? 'mt-4' : ''" style="--enter-delay: 60ms">
                     <slot name="title">{{ title }}</slot>
                 </h1>
-                <p v-if="lead || $slots.lead" class="enter t-lead mt-6 max-w-2xl" style="--enter-delay: 120ms">
+                <p v-if="lead || $slots.lead" class="enter t-lead mt-5 max-w-2xl" style="--enter-delay: 120ms">
                     <slot name="lead">{{ lead }}</slot>
                 </p>
-                <div v-if="$slots.default" class="enter mt-9" style="--enter-delay: 180ms">
+                <div v-if="$slots.default" class="enter mt-8" style="--enter-delay: 180ms">
                     <slot />
                 </div>
             </div>

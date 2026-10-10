@@ -6,6 +6,7 @@ use App\Models\BorrelEnrollment;
 use App\Models\Event;
 use App\Models\Partner;
 use App\Support\PageMedia;
+use App\Support\RichText;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -121,7 +122,7 @@ class HomeController extends Controller
             'name' => $p->name,
             'url' => $p->url,
             'logo_url' => $p->logo ? Storage::url($p->logo) : null,
-            'description' => $p->translated('description'),
+            'description' => RichText::sanitize($p->translated('description')),
             'educations' => method_exists($p, 'educations') ? $p->educations->map(fn ($education) => ['id' => $education->id, 'name' => $education->translated('name')])->values() : [],
             'stand_number' => $standNumber,
         ];

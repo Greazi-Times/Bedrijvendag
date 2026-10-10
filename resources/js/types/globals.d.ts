@@ -1,5 +1,4 @@
 import type { reveal } from '../lib/reveal';
-import type { spotlight } from '../lib/spotlight';
 import type { AppPageProps } from './index';
 
 // Extend ImportMeta interface for Vite...
@@ -28,6 +27,5 @@ declare module 'vue' {
 
     interface GlobalDirectives {
         vReveal: typeof reveal;
-        vSpotlight: typeof spotlight;
     }
 }

@@ -5,7 +5,6 @@ import type { DefineComponent } from 'vue';
 import { createSSRApp, h } from 'vue';
 import { renderToString } from 'vue/server-renderer';
 import { reveal } from './lib/reveal';
-import { spotlight } from './lib/spotlight';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -19,8 +18,7 @@ createServer(
             setup: ({ App, props, plugin }) =>
                 createSSRApp({ render: () => h(App, props) })
                     .use(plugin)
-                    .directive('reveal', reveal)
-                    .directive('spotlight', spotlight),
+                    .directive('reveal', reveal),
         }),
     { cluster: true },
 );

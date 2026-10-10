@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { PhArrowLeft, PhFunnelSimple, PhMapPin, PhMapTrifold, PhX } from '@phosphor-icons/vue';
+import { PhArrowLeft, PhFunnelSimple, PhMapPin, PhMapTrifold } from '@phosphor-icons/vue';
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import ActiveFilterChips from '@/components/site/ActiveFilterChips.vue';
 import CompanyDialog from '@/components/site/CompanyDialog.vue';
@@ -299,21 +299,6 @@ onUnmounted(() => {
                                 <p class="t-small">{{ t('map.noMapConfigured') }}</p>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Selected stand -->
-                    <div v-if="selectedStand" class="card mt-3 flex items-center gap-3 p-3 pl-4" aria-live="polite">
-                        <span class="flex h-9 min-w-9 shrink-0 items-center justify-center rounded-full px-2 text-sm font-semibold" :class="standBadgeClass(selectedStand)">
-                            {{ standDisplayCode(selectedStand) }}
-                        </span>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-xs text-ink-muted">{{ selectedStand.stand_type === 'partner' ? t('map.partner') : t('common.stand') }}</p>
-                            <p class="truncate font-medium text-ink">{{ standDisplayName(selectedStand) }}</p>
-                        </div>
-                        <button type="button" class="btn btn-secondary btn-sm" @click="openCompany(selectedStand)">{{ t('map.readMore') }}</button>
-                        <button type="button" class="btn btn-ghost btn-icon size-9 min-h-9" :aria-label="t('common.close')" @click="clearSelection">
-                            <PhX :size="18" aria-hidden="true" />
-                        </button>
                     </div>
                 </div>
 
