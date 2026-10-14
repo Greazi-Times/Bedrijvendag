@@ -17,6 +17,7 @@ class ViewCompanyProfileSubmission extends ViewRecord
     {
         return [
             Action::make('approve')
+                ->authorize('review')
                 ->label('Approve changes')
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
@@ -39,6 +40,7 @@ class ViewCompanyProfileSubmission extends ViewRecord
                     ($emailSent ? $notification->success() : $notification->warning())->send();
                 }),
             Action::make('reject')
+                ->authorize('review')
                 ->label('Reject')
                 ->color('danger')
                 ->icon('heroicon-o-x-circle')

@@ -22,11 +22,6 @@ class EventMapPointResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function canViewAny(): bool
-    {
-        return true;
-    }
-
     public static function getPages(): array
     {
         return [

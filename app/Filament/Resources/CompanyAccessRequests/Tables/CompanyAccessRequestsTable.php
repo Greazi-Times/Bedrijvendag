@@ -62,6 +62,7 @@ class CompanyAccessRequestsTable
             ->recordActions([
                 ViewAction::make(),
                 Action::make('approve')
+                    ->authorize('review')
                     ->color('success')
                     ->icon('heroicon-o-check-circle')
                     ->visible(fn (CompanyAccessRequest $record): bool => $record->status === CompanyAccessRequest::STATUS_PENDING)
@@ -93,6 +94,7 @@ class CompanyAccessRequestsTable
                             ->send();
                     }),
                 Action::make('reject')
+                    ->authorize('review')
                     ->color('danger')
                     ->icon('heroicon-o-x-circle')
                     ->visible(fn (CompanyAccessRequest $record): bool => $record->status === CompanyAccessRequest::STATUS_PENDING)

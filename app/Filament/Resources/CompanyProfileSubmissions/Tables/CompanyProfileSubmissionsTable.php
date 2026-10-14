@@ -51,6 +51,7 @@ class CompanyProfileSubmissionsTable
             ->recordActions([
                 ViewAction::make(),
                 Action::make('approve')
+                    ->authorize('review')
                     ->color('success')
                     ->icon('heroicon-o-check-circle')
                     ->visible(fn (CompanyProfileSubmission $record): bool => $record->status === CompanyProfileSubmission::STATUS_PENDING)
@@ -74,6 +75,7 @@ class CompanyProfileSubmissionsTable
                         ($emailSent ? $notification->success() : $notification->warning())->send();
                     }),
                 Action::make('reject')
+                    ->authorize('review')
                     ->color('danger')
                     ->icon('heroicon-o-x-circle')
                     ->visible(fn (CompanyProfileSubmission $record): bool => $record->status === CompanyProfileSubmission::STATUS_PENDING)
