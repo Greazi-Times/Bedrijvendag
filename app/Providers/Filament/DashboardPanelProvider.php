@@ -47,6 +47,7 @@ class DashboardPanelProvider extends PanelProvider
                 fn (): string => view('filament.theme-cookie-sync')->render(),
             )
             ->login()
+            ->passwordReset()
             ->colors([
                 'primary' => '#ff6600',
                 'info' => '#3b82f6',
@@ -66,6 +67,7 @@ class DashboardPanelProvider extends PanelProvider
                 'Company',
                 'Catalog',
                 'Settings',
+                'Administration',
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([

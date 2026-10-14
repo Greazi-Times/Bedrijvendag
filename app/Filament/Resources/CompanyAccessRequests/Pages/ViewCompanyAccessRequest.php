@@ -17,6 +17,7 @@ class ViewCompanyAccessRequest extends ViewRecord
     {
         return [
             Action::make('approve')
+                ->authorize('review')
                 ->label('Approve')
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
@@ -47,6 +48,7 @@ class ViewCompanyAccessRequest extends ViewRecord
                         ->send();
                 }),
             Action::make('reject')
+                ->authorize('review')
                 ->label('Reject')
                 ->color('danger')
                 ->icon('heroicon-o-x-circle')

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Pages\Concerns\AuthorizesSettings;
 use App\Filament\Pages\Concerns\QueuesPolicyContentTranslation;
 use App\Settings\CookiePolicySettings;
 use Filafly\Icons\Phosphor\Enums\Phosphor;
@@ -11,7 +12,7 @@ use Filament\Schemas\Schema;
 
 class ManageCookiePolicy extends SettingsPage
 {
-    use QueuesPolicyContentTranslation;
+    use AuthorizesSettings, QueuesPolicyContentTranslation;
 
     protected static string|null|\UnitEnum $navigationGroup = 'Settings';
 

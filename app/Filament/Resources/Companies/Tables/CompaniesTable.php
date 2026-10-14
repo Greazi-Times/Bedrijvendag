@@ -51,12 +51,14 @@ class CompaniesTable
                 EditAction::make()
                     ->button(),
                 Action::make('verificationLink')
+                    ->authorize('update')
                     ->label('Verification link')
                     ->icon('heroicon-o-link')
                     ->button()
                     ->url(fn (Company $record): string => $record->profileVerificationUrl())
                     ->openUrlInNewTab(),
                 Action::make('regenerateProfileToken')
+                    ->authorize('update')
                     ->label('Regenerate link')
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')

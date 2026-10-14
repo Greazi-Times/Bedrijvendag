@@ -25,11 +25,6 @@ class EventStandResource extends Resource
         return true;
     }
 
-    public static function canViewAny(): bool
-    {
-        return true;
-    }
-
     public static function getPages(): array
     {
         return [

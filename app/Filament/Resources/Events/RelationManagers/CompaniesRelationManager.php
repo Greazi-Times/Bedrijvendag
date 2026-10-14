@@ -58,6 +58,7 @@ class CompaniesRelationManager extends RelationManager
             ])
             ->actions([
                 Action::make('assign')
+                    ->authorize(fn (): bool => auth()->user()->can('events.update'))
                     ->label('Assign / Change')
                     ->form(function ($record) {
                         $event = $this->getOwnerRecord();
@@ -98,6 +99,7 @@ class CompaniesRelationManager extends RelationManager
                     }),
 
                 Action::make('remove')
+                    ->authorize(fn (): bool => auth()->user()->can('events.update'))
                     ->label('Remove')
                     ->color('danger')
                     ->requiresConfirmation()

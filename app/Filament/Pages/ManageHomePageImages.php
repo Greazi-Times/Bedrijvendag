@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Pages\Concerns\AuthorizesSettings;
 use App\Settings\HomePageImageSettings;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 
 class ManageHomePageImages extends SettingsPage
 {
+    use AuthorizesSettings;
+
     protected static string|null|\UnitEnum $navigationGroup = 'Settings';
 
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::OutlinedPhoto;

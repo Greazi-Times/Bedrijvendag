@@ -27,7 +27,8 @@ test('review page shows changed and unchanged fields with their current and prop
         ->and($comparison['logo']['after'])->toBe('company-logos/original.png')
         ->and($comparison['name']['changed'])->toBeTrue();
 
-    $this->actingAs(\App\Models\User::factory()->create());
+    \Spatie\Permission\Models\Permission::findOrCreate('company-profile-submissions.view');
+    $this->actingAs(\App\Models\User::factory()->create()->givePermissionTo('company-profile-submissions.view'));
     \Livewire\Livewire::test(\App\Filament\Resources\CompanyProfileSubmissions\Pages\ViewCompanyProfileSubmission::class, [
         'record' => $submission->id,
     ])->assertSuccessful()

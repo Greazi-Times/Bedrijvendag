@@ -18,6 +18,7 @@ class ListCompanies extends ListRecords
     {
         return [
             ExportAction::make('verificationLinks')
+                ->authorize('update')
                 ->color('gray')
                 ->label('Download verification links')
                 ->exports([
