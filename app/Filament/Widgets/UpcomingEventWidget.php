@@ -8,6 +8,11 @@ use Illuminate\Support\Carbon;
 
 class UpcomingEventWidget extends Widget
 {
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('events.view') ?? false;
+    }
+
     protected static ?int $sort = 2;
 
     protected string $view = 'filament.widgets.upcoming-event-widget';

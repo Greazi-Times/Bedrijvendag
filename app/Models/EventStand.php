@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Audited;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EventStand extends Model
 {
+    use Audited;
+
     protected $table = 'event_stands';
 
     protected $fillable = [

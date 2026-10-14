@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Audited;
 use Illuminate\Database\Eloquent\Model;
 
 class EventMapPoint extends Model
 {
+    use Audited;
+
+    protected string $auditCategory = 'event-stands';
+
     protected $fillable = [
         'event_id',
         'label',

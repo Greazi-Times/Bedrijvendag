@@ -4,5 +4,5 @@ namespace App\Policies;
 
 class EventMapPointPolicy extends ModelPolicy
 {
-    protected string $module = 'event-map-points';
+    protected string $module = 'event-stands';
 }

@@ -6,10 +6,8 @@ use App\Models\User;
 use App\Support\Access;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rules\Password;
 
@@ -59,36 +57,12 @@ class UserForm
                     ]),
 
                 Section::make('Effective permissions')
-                    ->description('Read-only. Change access by assigning roles, or by editing a role under Roles.')
+                    ->description('Read-only. Hover a check to see which role grants it. Change access through roles.')
                     ->visibleOn('edit')
                     ->collapsible()
-                    ->schema(fn (?User $record): array => $record ? [
-                        Grid::make(['md' => 2, 'xl' => 3])->schema(self::effectivePermissions($record)),
-                    ] : []),
+                    ->schema([
+                        View::make('filament.users.effective-permissions'),
+                    ]),
             ]);
-    }
-
-    /** @return list<Fieldset> */
-    private static function effectivePermissions(User $user): array
-    {
-        $fieldsets = [];
-
-        foreach (Access::effectivePermissions($user) as $module => $permissions) {
-            $entries = [];
-
-            foreach ($permissions as $index => $permission) {
-                $entries[] = TextEntry::make('effective_'.md5($module).'_'.$index)
-                    ->label($permission['label'])
-                    ->inlineLabel()
-                    ->state($permission['allowed'] ? 'Allowed' : 'Denied')
-                    ->badge()
-                    ->color($permission['allowed'] ? 'success' : 'gray')
-                    ->helperText($permission['allowed'] ? 'via '.implode(', ', $permission['via']) : null);
-            }
-
-            $fieldsets[] = Fieldset::make($module)->columns(1)->schema($entries);
-        }
-
-        return $fieldsets;
     }
 }

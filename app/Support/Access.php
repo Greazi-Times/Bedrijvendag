@@ -2,9 +2,8 @@
 
 namespace App\Support;
 
-use App\Models\AuditLog;
+use App\Exceptions\PrivilegeDenied;
 use App\Models\User;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
@@ -15,9 +14,14 @@ use Spatie\Permission\Models\Role;
  * user do X"; these rules also hold for Super Admins, who pass every policy
  * through Gate::before: nobody can change their own roles, lock out the last
  * Super Admin, touch the protected roles, or hand out more than they hold.
+ * Every change is audited here, and every refusal is logged as
+ * security.privilege.denied (see PrivilegeDenied).
  */
 final class Access
 {
+    /** Removing permissions of these modules from a role is logged as high severity. */
+    private const ADMIN_MODULES = ['users', 'roles', 'permissions', 'audit', 'security'];
+
     /** @return Collection<int, string> */
     public static function permissionsOf(User $user): Collection
     {
@@ -94,15 +98,27 @@ final class Access
             self::ensureAnotherSuperAdmin($target);
         }
 
-        $before = $target->getRoleNames()->values()->all();
+        $before = $target->getRoleNames()->sort()->values();
+        $after = $roles->pluck('name')->sort()->values();
 
-        DB::transaction(function () use ($target, $roles, $before): void {
+        DB::transaction(function () use ($target, $roles, $before, $after): void {
             $target->syncRoles($roles);
 
-            AuditLog::record('user.roles_updated', $target, [
-                'old' => $before,
-                'new' => $roles->pluck('name')->sort()->values()->all(),
-            ]);
+            foreach (['roles.assigned' => $after->diff($before), 'roles.revoked' => $before->diff($after)] as $event => $names) {
+                if ($names->isEmpty()) {
+                    continue;
+                }
+
+                $verb = $event === 'roles.assigned' ? 'assigned to' : 'revoked from';
+
+                Audit::log(
+                    $event,
+                    'Role '.$names->join(', ')." {$verb} {$target->name}",
+                    $target,
+                    ['roles' => $names->values()->all(), 'old' => $before->all(), 'new' => $after->all()],
+                    severity: $names->contains(Permissions::SUPER_ADMIN) ? 'high' : null,
+                );
+            }
         });
     }
 
@@ -116,8 +132,8 @@ final class Access
         }
 
         DB::transaction(function () use ($target): void {
-            AuditLog::record('user.deleted', $target, [
-                'email' => $target->email,
+            Audit::log('users.deleted', "User {$target->name} deleted", $target, [
+                'old' => ['name' => $target->name, 'email' => $target->email],
                 'roles' => $target->getRoleNames()->values()->all(),
             ]);
 
@@ -142,7 +158,7 @@ final class Access
         $wanted = $wanted->merge($current->reject(fn (string $permission): bool => Permissions::defined($permission)))->values();
 
         if ($role) {
-            self::deny(! self::canManageRole($actor, $role), 'You are not allowed to change this role.');
+            self::deny(! self::canManageRole($actor, $role), 'You are not allowed to change this role.', self::severityFor($role));
             self::deny(in_array($role->name, Permissions::SYSTEM_ROLES, true) && $name !== $role->name, 'System roles cannot be renamed.');
         }
 
@@ -153,7 +169,7 @@ final class Access
 
         self::deny(! self::covers($actor, $added->merge($removed)), 'You can only grant or remove permissions you hold yourself.');
 
-        return DB::transaction(function () use ($role, $name, $wanted, $added, $removed): Role {
+        return DB::transaction(function () use ($role, $name, $current, $wanted, $added, $removed): Role {
             $isNew = ! $role;
             $oldName = $role?->name;
 
@@ -162,14 +178,19 @@ final class Access
             $role->save();
             $role->syncPermissions($wanted->all());
 
-            $changes = array_filter([
-                'name' => $isNew || $oldName === $name ? null : ['old' => $oldName, 'new' => $name],
-                'permissions_added' => $added->all() ?: null,
-                'permissions_removed' => $removed->all() ?: null,
-            ]);
+            if ($isNew) {
+                Audit::log('roles.created', "Role {$name} created", $role, ['permissions' => $wanted->sort()->values()->all()]);
+            } elseif ($oldName !== $name) {
+                Audit::log('roles.updated', "Role {$oldName} renamed to {$name}", $role, ['old' => ['name' => $oldName], 'attributes' => ['name' => $name]]);
+            }
 
-            if ($isNew || $changes) {
-                AuditLog::record($isNew ? 'role.created' : 'role.updated', $role, $changes);
+            if (! $isNew && ($added->isNotEmpty() || $removed->isNotEmpty())) {
+                Audit::log('permissions.updated', "Permissions of role {$name} changed", $role, [
+                    'added' => $added->all(),
+                    'removed' => $removed->all(),
+                    'old' => $current->sort()->values()->all(),
+                    'new' => $wanted->sort()->values()->all(),
+                ], severity: $removed->contains(fn (string $permission): bool => in_array(Permissions::module($permission), self::ADMIN_MODULES, true)) ? 'high' : null);
             }
 
             return $role;
@@ -178,12 +199,12 @@ final class Access
 
     public static function deleteRole(User $actor, Role $role): void
     {
-        self::deny(in_array($role->name, Permissions::SYSTEM_ROLES, true), 'System roles cannot be deleted.');
-        self::deny(! self::canManageRole($actor, $role), 'You are not allowed to delete this role.');
+        self::deny(in_array($role->name, Permissions::SYSTEM_ROLES, true), 'System roles cannot be deleted.', self::severityFor($role));
+        self::deny(! self::canManageRole($actor, $role), 'You are not allowed to delete this role.', self::severityFor($role));
 
         DB::transaction(function () use ($role): void {
-            AuditLog::record('role.deleted', $role, [
-                'permissions' => $role->permissions->pluck('name')->all(),
+            Audit::log('roles.deleted', "Role {$role->name} deleted", $role, [
+                'permissions' => $role->permissions->pluck('name')->sort()->values()->all(),
                 'users' => $role->users()->count(),
             ]);
 
@@ -192,17 +213,17 @@ final class Access
     }
 
     /**
-     * Every registered permission for the user, grouped by module, with the
-     * roles (or a direct grant) that give it.
+     * The registered permissions the user holds, each with the roles (or a
+     * direct grant) that give it. Permissions not listed are denied.
      *
-     * @return array<string, list<array{label: string, allowed: bool, via: list<string>}>>
+     * @return array<string, list<string>>
      */
     public static function effectivePermissions(User $user): array
     {
         $user->loadMissing(['roles.permissions', 'permissions']);
         $superAdmin = $user->isSuperAdmin();
         $direct = $user->permissions->pluck('name');
-        $groups = [];
+        $granted = [];
 
         foreach (Permissions::all() as $name) {
             $via = $superAdmin ? [Permissions::SUPER_ADMIN] : $user->roles
@@ -212,27 +233,31 @@ final class Access
                 ->values()
                 ->all();
 
-            $groups[Permissions::moduleLabel(Permissions::module($name))][] = [
-                'label' => Permissions::label($name),
-                'allowed' => $via !== [],
-                'via' => $via,
-            ];
+            if ($via !== []) {
+                $granted[$name] = $via;
+            }
         }
 
-        return $groups;
+        return $granted;
     }
 
     private static function ensureAnotherSuperAdmin(User $target): void
     {
         $others = User::role(Permissions::SUPER_ADMIN)->whereKeyNot($target->getKey())->count();
 
-        self::deny($others === 0, 'The last Super Admin cannot be removed.');
+        self::deny($others === 0, 'The last Super Admin cannot be removed.', 'critical');
     }
 
-    private static function deny(bool $condition, string $message): void
+    /** Attempts on the Super Admin role target the highest access there is. */
+    private static function severityFor(Role $role): string
+    {
+        return $role->name === Permissions::SUPER_ADMIN ? 'critical' : 'high';
+    }
+
+    private static function deny(bool $condition, string $message, string $severity = 'high'): void
     {
         if ($condition) {
-            throw new AuthorizationException($message);
+            throw new PrivilegeDenied($message, $severity);
         }
     }
 }

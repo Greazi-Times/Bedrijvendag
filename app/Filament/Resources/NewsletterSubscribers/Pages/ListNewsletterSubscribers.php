@@ -17,6 +17,7 @@ class ListNewsletterSubscribers extends ListRecords
     {
         return [
             ExportAction::make()
+                ->authorize('export')
                 ->color('gray')
                 ->label('Download Excel')
                 ->exports([

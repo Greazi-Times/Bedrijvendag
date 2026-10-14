@@ -16,6 +16,8 @@ class ManageHomePageImages extends SettingsPage
 {
     use AuthorizesSettings;
 
+    protected static string $permission = 'settings.media';
+
     protected static string|null|\UnitEnum $navigationGroup = 'Settings';
 
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::OutlinedPhoto;

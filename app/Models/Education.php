@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Audited;
 use App\Models\Concerns\HasAutomaticTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Education extends Model
 {
-    use HasAutomaticTranslations;
+    use Audited, HasAutomaticTranslations;
+
+    protected string $auditCategory = 'education';
 
     protected $fillable = [
         'name',

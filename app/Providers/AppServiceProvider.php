@@ -3,17 +3,18 @@
 namespace App\Providers;
 
 use App\Contracts\TranslatesText;
+use App\Listeners\AuditAuthenticationEvents;
 use App\Models\User;
-use App\Policies\PermissionPolicy;
 use App\Policies\RolePolicy;
 use App\Services\DeepLTranslator;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,6 +34,16 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureAuthorization();
+        $this->configureAuditing();
+    }
+
+    protected function configureAuditing(): void
+    {
+        Event::subscribe(AuditAuthenticationEvents::class);
+
+        if ($proxies = config('app.trusted_proxies')) {
+            TrustProxies::at($proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
     }
 
     protected function configureAuthorization(): void
@@ -42,7 +53,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(fn (User $user): ?bool => $user->isSuperAdmin() ? true : null);
 
         Gate::policy(Role::class, RolePolicy::class);
-        Gate::policy(Permission::class, PermissionPolicy::class);
     }
 
     /**

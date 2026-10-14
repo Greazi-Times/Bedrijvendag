@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\SecurityOverview;
 use App\Filament\Widgets\BorrelEnrollmentsPerEventChart;
 use App\Filament\Widgets\CompaniesPerEventChart;
 use App\Filament\Widgets\DashboardStatsOverview;
@@ -46,7 +48,7 @@ class DashboardPanelProvider extends PanelProvider
                 PanelsRenderHook::HEAD_START,
                 fn (): string => view('filament.theme-cookie-sync')->render(),
             )
-            ->login()
+            ->login(Login::class)
             ->passwordReset()
             ->colors([
                 'primary' => '#ff6600',
@@ -70,6 +72,7 @@ class DashboardPanelProvider extends PanelProvider
                 'Administration',
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+            ->livewireComponents(SecurityOverview::widgetComponents())
             ->widgets([
                 AccountWidget::class,
                 UpcomingEventWidget::class,

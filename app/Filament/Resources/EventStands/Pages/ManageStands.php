@@ -46,6 +46,7 @@ class ManageStands extends Page implements HasForms, HasTable
                 ->openUrlInNewTab(),
 
             Action::make('create_map_location')
+                ->authorize('update')
                 ->label('Add map location')
                 ->icon('heroicon-o-plus')
                 ->visible(fn (): bool => filled($this->selectedEventId))
@@ -120,6 +121,8 @@ class ManageStands extends Page implements HasForms, HasTable
 
     public function openMarkerEditorForStand(int $eventStandId): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId) {
             return;
         }
@@ -218,6 +221,8 @@ class ManageStands extends Page implements HasForms, HasTable
 
     public function setMarkerForStand(int $eventStandId, float $xPercent, float $yPercent): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId) {
             return;
         }
@@ -246,6 +251,8 @@ class ManageStands extends Page implements HasForms, HasTable
 
     public function setMarkerForPoint(int $mapPointId, float $xPercent, float $yPercent): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId) {
             return;
         }
@@ -269,6 +276,8 @@ class ManageStands extends Page implements HasForms, HasTable
 
     public function openCreatePointEditor(): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId) {
             return;
         }
@@ -282,6 +291,8 @@ class ManageStands extends Page implements HasForms, HasTable
 
     public function openEditPointEditor(int $mapPointId): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId) {
             return;
         }
@@ -304,6 +315,8 @@ class ManageStands extends Page implements HasForms, HasTable
 
     public function savePointEditor(): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId || ! $this->pointEditorMode) {
             return;
         }
@@ -343,6 +356,8 @@ class ManageStands extends Page implements HasForms, HasTable
 
     public function openMarkerEditorForPoint(int $mapPointId): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId) {
             return;
         }
@@ -373,6 +388,8 @@ class ManageStands extends Page implements HasForms, HasTable
 
     public function deletePoint(int $mapPointId): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId) {
             return;
         }
@@ -458,6 +475,7 @@ class ManageStands extends Page implements HasForms, HasTable
             ])
             ->actions([
                 Action::make('set_marker')
+                    ->authorize('update')
                     ->label(fn (EventStand $record): string => is_numeric($record->x_percent) && is_numeric($record->y_percent)
                         ? 'Change marker'
                         : 'Set marker')
@@ -470,6 +488,7 @@ class ManageStands extends Page implements HasForms, HasTable
                     }),
 
                 Action::make('assign')
+                    ->authorize('update')
                     ->label(fn (EventStand $record): string => $this->standHasAssignment($record) ? 'Reassign' : 'Assign')
                     ->button()
                     ->size(Size::Small)
@@ -562,6 +581,7 @@ class ManageStands extends Page implements HasForms, HasTable
                     }),
 
                 Action::make('remove')
+                    ->authorize('update')
                     ->label('Remove assignment')
                     ->icon('heroicon-o-trash')
                     ->button()
@@ -711,5 +731,11 @@ class ManageStands extends Page implements HasForms, HasTable
             'entrance' => 'E',
             default => strtoupper(substr($point->label, 0, 1)),
         };
+    }
+
+    /** Viewing the page needs event-stands.view; every change needs event-stands.update. */
+    private function authorizeUpdate(): void
+    {
+        abort_unless(auth()->user()?->can('event-stands.update'), 403);
     }
 }

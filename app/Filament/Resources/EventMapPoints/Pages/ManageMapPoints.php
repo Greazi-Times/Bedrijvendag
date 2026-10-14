@@ -57,6 +57,7 @@ class ManageMapPoints extends Page implements HasForms, HasTable
     {
         return [
             Action::make('create')
+                ->authorize('update')
                 ->label('Add point')
                 ->icon('heroicon-o-plus')
                 ->visible(fn (): bool => filled($this->selectedEventId))
@@ -85,6 +86,7 @@ class ManageMapPoints extends Page implements HasForms, HasTable
             ])
             ->actions([
                 Action::make('set_marker')
+                    ->authorize('update')
                     ->label('Set marker')
                     ->icon('heroicon-o-map-pin')
                     ->action(function (EventMapPoint $record): void {
@@ -92,6 +94,7 @@ class ManageMapPoints extends Page implements HasForms, HasTable
                     }),
 
                 Action::make('edit')
+                    ->authorize('update')
                     ->label('Edit')
                     ->icon('heroicon-o-pencil-square')
                     ->action(function (EventMapPoint $record): void {
@@ -99,6 +102,7 @@ class ManageMapPoints extends Page implements HasForms, HasTable
                     }),
 
                 Action::make('clear_marker')
+                    ->authorize('update')
                     ->label('Clear marker')
                     ->color('danger')
                     ->requiresConfirmation()
@@ -118,6 +122,7 @@ class ManageMapPoints extends Page implements HasForms, HasTable
                     }),
 
                 Action::make('delete')
+                    ->authorize('update')
                     ->label('Delete')
                     ->color('danger')
                     ->requiresConfirmation()
@@ -140,6 +145,8 @@ class ManageMapPoints extends Page implements HasForms, HasTable
 
     public function setMarkerForPoint(int $mapPointId, float $xPercent, float $yPercent): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId) {
             return;
         }
@@ -165,6 +172,8 @@ class ManageMapPoints extends Page implements HasForms, HasTable
 
     public function openCreatePointEditor(): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId) {
             return;
         }
@@ -178,6 +187,8 @@ class ManageMapPoints extends Page implements HasForms, HasTable
 
     public function openEditPointEditor(int $mapPointId): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId) {
             return;
         }
@@ -200,6 +211,8 @@ class ManageMapPoints extends Page implements HasForms, HasTable
 
     public function savePointEditor(): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId || ! $this->pointEditorMode) {
             return;
         }
@@ -240,6 +253,8 @@ class ManageMapPoints extends Page implements HasForms, HasTable
 
     public function openMarkerEditorForPoint(int $mapPointId): void
     {
+        $this->authorizeUpdate();
+
         if (! $this->selectedEventId) {
             return;
         }
@@ -351,5 +366,11 @@ class ManageMapPoints extends Page implements HasForms, HasTable
             'entrance' => 'E',
             default => strtoupper(substr($point->label, 0, 1)),
         };
+    }
+
+    /** Viewing the page needs event-stands.view; every change needs event-stands.update. */
+    private function authorizeUpdate(): void
+    {
+        abort_unless(auth()->user()?->can('event-stands.update'), 403);
     }
 }

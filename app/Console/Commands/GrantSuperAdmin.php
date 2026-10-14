@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\AuditLog;
 use App\Models\User;
+use App\Support\Audit;
 use App\Support\Permissions;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -39,7 +39,10 @@ class GrantSuperAdmin extends Command
         DB::transaction(function () use ($user): void {
             $user->assignRole(Permissions::SUPER_ADMIN);
 
-            AuditLog::record('user.super_admin_granted', $user, ['via' => 'console']);
+            Audit::log('roles.assigned', "Role Super Admin assigned to {$user->name} from the console", $user, [
+                'roles' => [Permissions::SUPER_ADMIN],
+                'via' => 'console',
+            ], severity: 'high');
         });
 
         $this->info("{$user->name} is now a Super Admin.");
