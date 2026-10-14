@@ -14,6 +14,8 @@ class ManageCookiePolicy extends SettingsPage
 {
     use AuthorizesSettings, QueuesPolicyContentTranslation;
 
+    protected static string $permission = 'settings.legal';
+
     protected static string|null|\UnitEnum $navigationGroup = 'Settings';
 
     protected static string|null|\BackedEnum $navigationIcon = Phosphor::Cookie;

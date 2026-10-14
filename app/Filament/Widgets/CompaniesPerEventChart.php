@@ -7,6 +7,11 @@ use Filament\Widgets\ChartWidget;
 
 class CompaniesPerEventChart extends ChartWidget
 {
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('companies.view') ?? false;
+    }
+
     protected static ?int $sort = 5;
 
     protected int|string|array $columnSpan = 1;

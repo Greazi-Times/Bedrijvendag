@@ -13,6 +13,6 @@ class CreateRole extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        return Access::saveRole(auth()->user(), null, $data['name'], collect($data['permissions'] ?? [])->flatten()->all());
+        return Access::saveRole(auth()->user(), null, $data['name'], $data['permissions'] ?? []);
     }
 }

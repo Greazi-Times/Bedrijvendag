@@ -1,13 +1,20 @@
 <?php
 
 use App\Filament\Pages\ManagePrivacyPolicy;
+use App\Filament\Resources\EventStands\Pages\ManageStands;
 use App\Filament\Resources\Roles\Pages\CreateRole;
 use App\Filament\Resources\Roles\Pages\EditRole;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
+use App\Filament\Widgets\BorrelEnrollmentsPerEventChart;
+use App\Filament\Widgets\CompaniesPerEventChart;
+use App\Filament\Widgets\DashboardStatsOverview;
+use App\Filament\Widgets\UpcomingEventWidget;
 use App\Models\AuditLog;
+use App\Models\Company;
 use App\Models\CompanyAccessRequest;
 use App\Models\Event;
+use App\Models\NewsletterSubscriber;
 use App\Models\User;
 use App\Support\Access;
 use App\Support\Permissions;
@@ -64,13 +71,14 @@ test('administration pages require their permission', function (string $url, str
     ['/dashboard/users', 'users.view'],
     ['/dashboard/roles', 'roles.view'],
     ['/dashboard/permissions', 'permissions.view'],
-    ['/dashboard/audit-logs', 'audit-logs.view'],
+    ['/dashboard/audit-logs', 'audit.view'],
+    ['/dashboard/security', 'security.view'],
 ]);
 
 test('super admins can open every administration page', function () {
     $this->actingAs(superAdmin());
 
-    foreach (['/dashboard', '/dashboard/users', '/dashboard/roles', '/dashboard/permissions', '/dashboard/audit-logs', '/dashboard/events'] as $url) {
+    foreach (['/dashboard', '/dashboard/users', '/dashboard/roles', '/dashboard/permissions', '/dashboard/audit-logs', '/dashboard/security', '/dashboard/events'] as $url) {
         $this->get($url)->assertOk();
     }
 });
@@ -93,7 +101,7 @@ test('approving requests and editing settings need their own permission', functi
         ->and($viewer->can('review', CompanyAccessRequest::class))->toBeFalse()
         ->and(ManagePrivacyPolicy::canAccess())->toBeFalse();
 
-    $this->actingAs(userWith(['dashboard.view', 'settings.manage'], 'Settings'));
+    $this->actingAs(userWith(['dashboard.view', 'settings.legal'], 'Settings'));
 
     expect(ManagePrivacyPolicy::canAccess())->toBeTrue();
 });
@@ -222,7 +230,7 @@ test('deleting a user is logged with a readable label', function () {
     Access::deleteUser($admin, $target);
 
     expect(User::query()->whereKey($target->id)->exists())->toBeFalse()
-        ->and(AuditLog::query()->where('action', 'user.deleted')->value('subject_label'))->toBe($target->name);
+        ->and(AuditLog::query()->where('event', 'users.deleted')->value('subject_label'))->toBe($target->name);
 });
 
 test('unauthorized requests do not change data', function () {
@@ -233,8 +241,10 @@ test('unauthorized requests do not change data', function () {
     Livewire::test(EditUser::class, ['record' => $target->getRouteKey()])->assertForbidden();
     Livewire::test(CreateUser::class)->assertForbidden();
 
+    // Only the refused requests are logged, no changes.
     expect($target->fresh()->name)->toBe('Unchanged')
-        ->and(AuditLog::query()->count())->toBe(0);
+        ->and(AuditLog::query()->whereNotIn('event', ['users.created', 'security.access.denied'])->count())->toBe(0)
+        ->and(AuditLog::query()->where('event', 'security.access.denied')->count())->toBe(2);
 });
 
 // Role management
@@ -243,14 +253,14 @@ test('roles can be created with permissions', function () {
     $this->actingAs(superAdmin());
 
     Livewire::test(CreateRole::class)
-        ->fillForm(['name' => 'Event Manager', 'permissions' => ['events' => ['events.view', 'events.update']]])
+        ->fillForm(['name' => 'Event Manager', 'permissions' => ['events.view', 'events.update']])
         ->call('create')
         ->assertHasNoFormErrors();
 
     $role = Role::findByName('Event Manager');
 
     expect($role->permissions->pluck('name')->sort()->values()->all())->toBe(['events.update', 'events.view'])
-        ->and(AuditLog::query()->where('action', 'role.created')->exists())->toBeTrue();
+        ->and(AuditLog::query()->where('event', 'roles.created')->exists())->toBeTrue();
 });
 
 test('roles can be renamed and permissions added and removed', function () {
@@ -258,7 +268,7 @@ test('roles can be renamed and permissions added and removed', function () {
     $role = Role::create(['name' => 'Editor'])->givePermissionTo(['events.view', 'sectors.view']);
 
     Livewire::test(EditRole::class, ['record' => $role->getRouteKey()])
-        ->fillForm(['name' => 'Content Editor', 'permissions' => ['events' => ['events.view', 'events.create'], 'sectors' => []]])
+        ->fillForm(['name' => 'Content Editor', 'permissions' => ['events.view', 'events.create']])
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -266,9 +276,10 @@ test('roles can be renamed and permissions added and removed', function () {
 
     expect($role->name)->toBe('Content Editor')
         ->and($role->permissions->pluck('name')->sort()->values()->all())->toBe(['events.create', 'events.view'])
-        ->and(AuditLog::query()->where('action', 'role.updated')->first()->changes)->toMatchArray([
-            'permissions_added' => ['events.create'],
-            'permissions_removed' => ['sectors.view'],
+        ->and(AuditLog::query()->where('event', 'roles.updated')->exists())->toBeTrue()
+        ->and(AuditLog::query()->where('event', 'permissions.updated')->first()->properties->only(['added', 'removed'])->all())->toBe([
+            'added' => ['events.create'],
+            'removed' => ['sectors.view'],
         ]);
 });
 
@@ -302,7 +313,7 @@ test('administrators cannot grant permissions they do not hold', function () {
     $this->actingAs($actor);
 
     Livewire::test(CreateRole::class)
-        ->fillForm(['name' => 'Sneaky', 'permissions' => ['users' => ['users.delete']]])
+        ->fillForm(['name' => 'Sneaky', 'permissions' => ['users.delete']])
         ->call('create');
 
     expect(Role::query()->where('name', 'Sneaky')->exists())->toBeFalse();
@@ -324,12 +335,55 @@ test('effective permissions show which role grants each permission', function ()
     $user->assignRole(Role::create(['name' => 'Event Manager'])->givePermissionTo('events.view'));
     $user->givePermissionTo('sectors.view');
 
-    $events = collect(Access::effectivePermissions($user)['Events'])->keyBy('label');
-    $sectors = collect(Access::effectivePermissions($user)['Sectors'])->keyBy('label');
+    $granted = Access::effectivePermissions($user);
 
-    expect($events['View'])->toMatchArray(['allowed' => true, 'via' => ['Event Manager']])
-        ->and($events['Delete'])->toMatchArray(['allowed' => false, 'via' => []])
-        ->and($sectors['View'])->toMatchArray(['allowed' => true, 'via' => ['Direct']]);
+    expect($granted)->toBe(['events.view' => ['Event Manager'], 'sectors.view' => ['Direct']]);
+});
+
+// Finer-grained permissions
+
+test('sync carries retired permissions over to the ones that replace them', function () {
+    // Roles set up before the split held the broad permissions.
+    $legacy = Role::create(['name' => 'Legacy']);
+    foreach (['event-stands.manage', 'settings.manage', 'companies.update', 'newsletter-subscribers.view'] as $old) {
+        $legacy->givePermissionTo(Permission::findOrCreate($old));
+    }
+    Permission::query()->whereIn('name', ['event-stands.view', 'event-stands.update', 'settings.media', 'settings.legal', 'companies.links', 'newsletter-subscribers.export'])->delete();
+
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    expect($legacy->fresh()->permissions->pluck('name')->sort()->values()->all())->toBe([
+        'companies.links', 'companies.update', 'event-stands.update', 'event-stands.view',
+        'newsletter-subscribers.export', 'newsletter-subscribers.view', 'settings.legal', 'settings.media',
+    ])->and(Permission::query()->whereIn('name', ['event-stands.manage', 'settings.manage'])->exists())->toBeFalse();
+});
+
+test('exports, verification links and stand changes need their own permission', function () {
+    $viewer = userWith(['dashboard.view', 'newsletter-subscribers.view', 'companies.view', 'event-stands.view']);
+    $this->actingAs($viewer);
+
+    expect($viewer->can('export', NewsletterSubscriber::class))->toBeFalse()
+        ->and($viewer->can('links', Company::class))->toBeFalse();
+
+    Livewire::test(ManageStands::class)->call('deletePoint', 1)->assertForbidden();
+
+    $this->actingAs(userWith(['dashboard.view', 'newsletter-subscribers.export', 'companies.links'], 'Allowed'));
+
+    expect(auth()->user()->can('export', NewsletterSubscriber::class))->toBeTrue()
+        ->and(auth()->user()->can('links', Company::class))->toBeTrue();
+});
+
+test('dashboard widgets only show modules the user may view', function () {
+    $this->actingAs(userWith(['dashboard.view', 'events.view']));
+
+    expect(UpcomingEventWidget::canView())->toBeTrue()
+        ->and(DashboardStatsOverview::canView())->toBeTrue()
+        ->and(CompaniesPerEventChart::canView())->toBeFalse()
+        ->and(BorrelEnrollmentsPerEventChart::canView())->toBeFalse();
+
+    $this->actingAs(userWith(['dashboard.view'], 'Bare'));
+
+    expect(DashboardStatsOverview::canView())->toBeFalse();
 });
 
 // Database and seeding
@@ -387,7 +441,7 @@ test('audit entries never contain passwords or hashes', function () {
     $hash = User::query()->where('email', 'logged@example.com')->value('password');
     $logged = AuditLog::query()->get()->toJson();
 
-    expect(AuditLog::query()->where('action', 'user.created')->exists())->toBeTrue()
+    expect(AuditLog::query()->where('event', 'users.created')->where('subject_label', 'Logged Person')->exists())->toBeTrue()
         ->and($logged)->not->toContain('a-Secret-value-9')
         ->and($logged)->not->toContain($hash)
         ->and($logged)->not->toContain('password');

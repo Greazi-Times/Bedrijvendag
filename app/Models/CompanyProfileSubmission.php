@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Mail\CompanyProfileApprovedMail;
 use App\Mail\CompanyProfileRejectedMail;
+use App\Models\Concerns\Audited;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Mail\Mailable;
@@ -15,6 +16,11 @@ use Throwable;
 
 class CompanyProfileSubmission extends Model
 {
+    use Audited;
+
+    /** Contact details stay in the submission itself; the log tracks the review. */
+    protected array $auditAttributes = ['status', 'company_id', 'reviewed_by', 'review_note'];
+
     public const STATUS_PENDING = 'pending';
 
     public const STATUS_APPROVED = 'approved';

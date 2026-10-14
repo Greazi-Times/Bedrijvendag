@@ -23,6 +23,7 @@ class CompanyInfolist
                     ->label('Profile contact email')
                     ->placeholder('No profile contact email has been provided'),
                 TextEntry::make('profileVerificationUrl')
+                    ->visible(fn (): bool => auth()->user()->can('companies.links'))
                     ->label('Verification link')
                     ->getStateUsing(fn ($record): string => $record->profileVerificationUrl())
                     ->copyable()

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Roles\Pages;
 
 use App\Filament\Resources\Roles\RoleResource;
-use App\Filament\Resources\Roles\Schemas\RoleForm;
 use App\Support\Access;
 use App\Support\Permissions;
 use Filament\Actions\DeleteAction;
@@ -31,11 +30,7 @@ class EditRole extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $data['permissions'] = $this->getRecord()->permissions
-            ->pluck('name')
-            ->groupBy(fn (string $name): string => RoleForm::stateKey(Permissions::module($name)))
-            ->map->values()
-            ->all();
+        $data['permissions'] = $this->getRecord()->permissions->pluck('name')->all();
 
         return $data;
     }
@@ -47,7 +42,7 @@ class EditRole extends EditRecord
             auth()->user(),
             $record,
             $data['name'] ?? $record->name,
-            collect($data['permissions'] ?? [])->flatten()->all(),
+            $data['permissions'] ?? [],
         );
     }
 }

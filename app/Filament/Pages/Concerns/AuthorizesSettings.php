@@ -2,13 +2,14 @@
 
 namespace App\Filament\Pages\Concerns;
 
-use App\Models\AuditLog;
+use App\Support\Audit;
 
+/** Pages using this declare `protected static string $permission`. */
 trait AuthorizesSettings
 {
     public static function canAccess(): bool
     {
-        return auth()->user()?->can('settings.manage') ?? false;
+        return auth()->user()?->can(static::$permission) ?? false;
     }
 
     public function canEdit(): bool
@@ -19,6 +20,6 @@ trait AuthorizesSettings
     // Runs inside the save transaction, so a failed save leaves no entry.
     protected function beforeSave(): void
     {
-        AuditLog::record('settings.updated', label: static::getNavigationLabel());
+        Audit::log('settings.updated', static::getNavigationLabel().' updated', label: static::getNavigationLabel());
     }
 }

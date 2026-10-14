@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Users;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\RelationManagers\AccountHistoryRelationManager;
+use App\Filament\Resources\Users\RelationManagers\ActivityRelationManager;
 use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
@@ -41,6 +43,14 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return UsersTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            ActivityRelationManager::class,
+            AccountHistoryRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

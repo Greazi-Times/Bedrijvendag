@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Jobs\TranslateCompanyDescription;
+use App\Models\Concerns\Audited;
 use App\Services\DeepLTranslator;
 use App\Support\RichText;
 use App\Support\TranslationContent;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 
 class Company extends Model
 {
+    use Audited;
+
     protected $fillable = [
         'name',
         'logo_path',

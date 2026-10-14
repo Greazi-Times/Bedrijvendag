@@ -55,6 +55,13 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
 
     /*
+    | Proxies whose X-Forwarded-* headers are trusted, comma separated (or "*"
+    | when the app is only reachable through the proxy). Empty means none, so
+    | the connecting address is used as the client IP and cannot be spoofed.
+    */
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
-use App\Models\AuditLog;
 use App\Models\User;
 use App\Support\Access;
 use Filament\Actions\Action;
@@ -54,17 +53,8 @@ class EditUser extends EditRecord
     {
         /** @var User $record */
         return DB::transaction(function () use ($record, $data): User {
-            $record->fill(Arr::only($data, ['name', 'email']));
-
-            $changes = collect($record->getDirty())
-                ->map(fn ($new, string $key): array => ['old' => $record->getOriginal($key), 'new' => $new])
-                ->all();
-
-            $record->save();
-
-            if ($changes) {
-                AuditLog::record('user.updated', $record, $changes);
-            }
+            // Logged as users.updated by the model (App\Models\Concerns\Audited).
+            $record->update(Arr::only($data, ['name', 'email']));
 
             // The roles field is disabled (so not submitted) when editing yourself.
             if (array_key_exists('roles', $data)) {
@@ -92,8 +82,6 @@ class EditUser extends EditRecord
 
             return;
         }
-
-        AuditLog::record('user.password_reset_sent', $user);
 
         Notification::make()->title('Password reset link sent')->success()->send();
     }

@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Support\Permissions;
 
 /**
  * Maps Filament's abilities onto "module.action" permissions. Every ability
@@ -37,6 +36,11 @@ abstract class ModelPolicy
     public function review(User $user): bool
     {
         return $this->allows($user, 'review');
+    }
+
+    public function export(User $user): bool
+    {
+        return $this->allows($user, 'export');
     }
 
     public function delete(User $user): bool
@@ -81,11 +85,6 @@ abstract class ModelPolicy
 
     protected function allows(User $user, string $action): bool
     {
-        // Pages that only offer one combined screen use a single "manage" permission.
-        if (Permissions::MODULES[$this->module]['actions'] === ['manage']) {
-            $action = 'manage';
-        }
-
         return $user->can("{$this->module}.{$action}");
     }
 }

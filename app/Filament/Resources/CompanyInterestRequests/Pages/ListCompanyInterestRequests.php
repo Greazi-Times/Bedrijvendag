@@ -18,6 +18,7 @@ class ListCompanyInterestRequests extends ListRecords
     {
         return [
             ExportAction::make('companyInterestRequests')
+                ->authorize('export')
                 ->color('gray')
                 ->label('Download CSV')
                 ->exports([

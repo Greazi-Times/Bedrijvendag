@@ -2,49 +2,28 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Facades\Auth;
+use App\Support\Audit;
+use App\Support\SecurityAlerts;
+use LogicException;
+use Spatie\Activitylog\Models\Activity;
 
-class AuditLog extends Model
+/**
+ * One audit entry. Written through spatie/laravel-activitylog (model events
+ * and App\Support\Audit), enriched with request metadata when it is created.
+ * Entries are append-only in the application: they cannot be updated, and
+ * are only removed by the retention command (audit:prune).
+ */
+class AuditLog extends Activity
 {
-    public const UPDATED_AT = null;
+    /** Nothing is mass assignable; the logger sets attributes one by one. */
+    public $guarded = ['*'];
 
-    protected $guarded = [];
-
-    protected function casts(): array
+    protected static function booted(): void
     {
-        return [
-            'changes' => 'array',
-        ];
-    }
+        static::creating(fn (AuditLog $log) => Audit::enrich($log));
+        static::created(fn (AuditLog $log) => SecurityAlerts::evaluate($log));
 
-    /**
-     * Record an administrative change made by the signed-in user. Callers pass
-     * only the fields they mean to log; never pass passwords, hashes or tokens.
-     *
-     * @param  array<string, mixed>  $changes
-     */
-    public static function record(string $action, ?Model $subject = null, array $changes = [], ?string $label = null): self
-    {
-        return self::query()->create([
-            'user_id' => Auth::id(),
-            'action' => $action,
-            'subject_type' => $subject?->getMorphClass(),
-            'subject_id' => $subject?->getKey(),
-            'subject_label' => $label ?? $subject?->getAttribute('name'),
-            'changes' => $changes ?: null,
-        ]);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function subject(): MorphTo
-    {
-        return $this->morphTo();
+        static::updating(fn () => throw new LogicException('Audit entries cannot be changed.'));
+        static::deleting(fn () => throw new LogicException('Audit entries are only removed by audit:prune.'));
     }
 }

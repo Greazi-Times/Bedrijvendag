@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Mail\CompanyAccessApprovedMail;
+use App\Models\Concerns\Audited;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,11 @@ use Throwable;
 
 class CompanyAccessRequest extends Model
 {
+    use Audited;
+
+    /** Contact details stay in the request itself; the log tracks the review. */
+    protected array $auditAttributes = ['status', 'company_id', 'reviewed_by', 'review_note'];
+
     public const TYPE_EXISTING = 'existing';
 
     public const TYPE_NEW = 'new';

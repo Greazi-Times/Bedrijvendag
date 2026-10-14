@@ -7,6 +7,11 @@ use Filament\Widgets\ChartWidget;
 
 class BorrelEnrollmentsPerEventChart extends ChartWidget
 {
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('borrel-enrollments.view') ?? false;
+    }
+
     protected static ?int $sort = 4;
 
     protected int|string|array $columnSpan = 1;

@@ -375,6 +375,7 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
+                                    @can('event-stands.update')
                                     <div class="flex flex-wrap justify-end gap-2">
                                         <x-filament::button size="sm" color="gray" icon="heroicon-o-map-pin" wire:click="openMarkerEditorForPoint({{ $point->id }})">
                                             {{ is_numeric($point->x_percent) && is_numeric($point->y_percent) ? 'Change marker' : 'Set marker' }}
@@ -386,6 +387,7 @@
                                             Delete
                                         </x-filament::button>
                                     </div>
+                                    @endcan
                                 </td>
                             </tr>
                         @empty
