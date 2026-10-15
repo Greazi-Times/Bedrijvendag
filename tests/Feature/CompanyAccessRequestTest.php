@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
-test('company access page lists companies without exposing verification links', function () {
+test('company access page lists companies without exposing edit links', function () {
     $company = Company::create([
         'name' => 'Acme',
         'website_url' => 'https://acme.example',

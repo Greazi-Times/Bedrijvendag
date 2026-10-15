@@ -20,9 +20,9 @@ class ListCompanies extends ListRecords
             ExportAction::make('verificationLinks')
                 ->authorize('links')
                 ->color('gray')
-                ->label('Download verification links')
+                ->label('Download edit links')
                 ->exports([
-                    ExcelExport::make('company-verification-links')
+                    ExcelExport::make('company-edit-links')
                         ->fromTable()
                         ->withColumns([
                             Column::make('name')
@@ -32,7 +32,7 @@ class ListCompanies extends ListRecords
                             Column::make('profile_contact_email')
                                 ->heading('Profile contact email'),
                             Column::make('profile_verification_url')
-                                ->heading('Verification link'),
+                                ->heading('Company edit link'),
                         ])
                         ->only([
                             'name',
@@ -41,7 +41,7 @@ class ListCompanies extends ListRecords
                             'profile_verification_url',
                         ])
                         ->withWriterType(Excel::XLSX)
-                        ->withFilename('company-verification-links-'.now()->format('Y-m-d')),
+                        ->withFilename('company-edit-links-'.now()->format('Y-m-d')),
                 ]),
             CreateAction::make(),
         ];

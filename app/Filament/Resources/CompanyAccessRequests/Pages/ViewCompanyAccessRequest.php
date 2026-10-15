@@ -34,7 +34,7 @@ class ViewCompanyAccessRequest extends ViewRecord
                     if ($emailSent) {
                         Notification::make()
                             ->title('Access request approved')
-                            ->body('The requester has been emailed the private verification link.')
+                            ->body('The requester has been emailed the company edit link.')
                             ->success()
                             ->send();
 

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Company extends Model
@@ -145,6 +146,12 @@ class Company extends Model
     public function profileSubmissions(): HasMany
     {
         return $this->hasMany(CompanyProfileSubmission::class);
+    }
+
+    /** The submission waiting for review; the database allows at most one per company. */
+    public function pendingProfileSubmission(): HasOne
+    {
+        return $this->hasOne(CompanyProfileSubmission::class)->where('status', CompanyProfileSubmission::STATUS_PENDING);
     }
 
     public function accessRequests(): HasMany

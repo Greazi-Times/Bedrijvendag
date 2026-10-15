@@ -50,7 +50,7 @@ test('older reviewed submissions do not pretend the current profile is the origi
     expect($submission->profileComparison())->toBe([]);
 });
 
-test('company can open its verification form with a token', function () {
+test('company can open its edit form with a token', function () {
     $education = Education::create(['name' => 'Informatica']);
     $sector = Sector::create(['name' => 'Software']);
 
@@ -387,4 +387,215 @@ test('profile submission stays pending and does not update the company when the 
         ->and($company->refresh()->name)->toBe('Before')
         ->and($company->website_url)->toBe('https://before.example')
         ->and($company->description_nl)->toBe('<p>Before description</p>');
+});
+
+/**
+ * @return array<string, mixed>
+ */
+function profilePayload(Company $company, array $overrides = []): array
+{
+    return [
+        'contact_name' => 'Jane Doe',
+        'contact_email' => 'jane@example.com',
+        'name' => $company->name,
+        'website_url' => $company->website_url,
+        'description' => $company->description_nl,
+        'education_ids' => $company->educations()->pluck('education.id')->all(),
+        'sector_ids' => $company->sectors()->pluck('sectors.id')->all(),
+        ...$overrides,
+    ];
+}
+
+test('a submission without changes is refused and stores nothing', function () {
+    Mail::fake();
+
+    $education = Education::create(['name' => 'Informatica']);
+    $sector = Sector::create(['name' => 'Software']);
+    $company = Company::create(['name' => 'Same Co', 'website_url' => 'https://same.example', 'description_nl' => '<p>Same</p>']);
+    $company->educations()->attach($education);
+    $company->sectors()->attach($sector);
+
+    // Surrounding whitespace is not a change either.
+    $this->from(route('company-profile.edit', $company->profile_token))
+        ->post(route('company-profile.update', $company->profile_token), profilePayload($company, ['name' => '  Same Co ']))
+        ->assertRedirect(route('company-profile.edit', $company->profile_token))
+        ->assertSessionHasErrors('form');
+
+    expect(CompanyProfileSubmission::query()->count())->toBe(0);
+    Mail::assertNothingSent();
+});
+
+test('a changed field is stored once and an identical resend is recognised as already received', function () {
+    Mail::fake();
+
+    $company = Company::create(['name' => 'Repeat Co']);
+    $payload = profilePayload($company, ['name' => 'Repeat Company']);
+
+    $this->post(route('company-profile.update', $company->profile_token), $payload)
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('company_profile_result', 'created');
+
+    // Double click, network retry or a second tab: same data again.
+    $this->post(route('company-profile.update', $company->profile_token), $payload)
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('company_profile_result', 'duplicate');
+
+    expect(CompanyProfileSubmission::query()->count())->toBe(1);
+    Mail::assertNothingSent();
+});
+
+test('a pending submission is compared on content, not on ordering of choices', function () {
+    $first = Sector::create(['name' => 'Energy']);
+    $second = Sector::create(['name' => 'Water']);
+    $company = Company::create(['name' => 'Order Co']);
+
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company, [
+        'sector_ids' => [$first->id, $second->id],
+        'new_sector_names' => ['Biotech'],
+    ]))->assertSessionHas('company_profile_result', 'created');
+
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company, [
+        'sector_ids' => [$second->id, $first->id],
+        'new_sector_names' => ['biotech '],
+    ]))->assertSessionHas('company_profile_result', 'duplicate');
+
+    expect(CompanyProfileSubmission::query()->count())->toBe(1);
+});
+
+test('a new change while a submission is pending supersedes it within the same review', function () {
+    $company = Company::create(['name' => 'Pending Co', 'website_url' => 'https://old.example']);
+
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company, ['name' => 'Pending Company']))
+        ->assertSessionHas('company_profile_result', 'created');
+
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company, [
+        'name' => 'Pending Company',
+        'website_url' => 'https://new.example',
+    ]))->assertSessionHas('company_profile_result', 'updated');
+
+    // Going back to the published values is also a real change compared to what is pending.
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company))
+        ->assertSessionHas('company_profile_result', 'updated');
+
+    $submissions = CompanyProfileSubmission::query()->orderBy('id')->get();
+
+    expect($submissions->pluck('proposed_website_url')->all())->toBe(['https://old.example', 'https://new.example', 'https://old.example'])
+        ->and($submissions->pluck('status')->all())->toBe([
+            CompanyProfileSubmission::STATUS_SUPERSEDED,
+            CompanyProfileSubmission::STATUS_SUPERSEDED,
+            CompanyProfileSubmission::STATUS_PENDING,
+        ])
+        ->and($submissions->pluck('revision')->all())->toBe([1, 2, 3])
+        ->and($company->refresh()->website_url)->toBe('https://old.example');
+});
+
+test('uploading the logo that is already proposed is not a change, a different logo is', function () {
+    Storage::fake('public');
+
+    $company = Company::create(['name' => 'Logo Co']);
+    $logo = UploadedFile::fake()->image('logo.png', 40, 40);
+    $contents = file_get_contents($logo->getRealPath());
+
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company, ['logo' => $logo]))
+        ->assertSessionHas('company_profile_result', 'created');
+
+    $same = UploadedFile::fake()->createWithContent('logo-again.png', $contents);
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company, ['logo' => $same]))
+        ->assertSessionHas('company_profile_result', 'duplicate');
+
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company, ['logo' => UploadedFile::fake()->image('other.png', 80, 80)]))
+        ->assertSessionHas('company_profile_result', 'updated');
+
+    expect(CompanyProfileSubmission::query()->count())->toBe(2)
+        ->and(Storage::disk('public')->allFiles('company-logos'))->toHaveCount(2);
+});
+
+test('a submission without a new logo keeps the logo of the pending proposal', function () {
+    Storage::fake('public');
+
+    $company = Company::create(['name' => 'Keep Logo Co', 'logo_path' => 'company-logos/published.png']);
+
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company, ['logo' => UploadedFile::fake()->image('new.png')]));
+    $proposedLogo = CompanyProfileSubmission::query()->value('proposed_logo_path');
+
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company, ['name' => 'Keep Logo Company']))
+        ->assertSessionHas('company_profile_result', 'updated');
+
+    expect(CompanyProfileSubmission::query()->latest('id')->value('proposed_logo_path'))->toBe($proposedLogo)
+        ->and($proposedLogo)->not->toBe('company-logos/published.png');
+});
+
+test('the edit page shows the pending proposal and when it was submitted', function () {
+    $this->travelTo(now()->setDate(2026, 10, 15)->setTime(13, 8));
+
+    $education = Education::create(['name' => 'Werktuigbouwkunde']);
+    $company = Company::create(['name' => 'Shown Co', 'description_nl' => '<p>Published</p>']);
+
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company, [
+        'name' => 'Shown Company',
+        'description' => '<p>Proposed</p>',
+        'education_ids' => [$education->id],
+        'new_sector_names' => ['Robotica'],
+    ]));
+
+    $this->get(route('company-profile.edit', $company->profile_token))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('company.name', 'Shown Company')
+            ->where('company.description', '<p>Proposed</p>')
+            ->where('company.education_ids', [$education->id])
+            ->where('company.new_sector_names', ['Robotica'])
+            ->where('latestSubmission.status', CompanyProfileSubmission::STATUS_PENDING)
+            ->where('latestSubmission.submitted_at', now()->toIso8601String())
+        );
+
+    expect($company->refresh()->name)->toBe('Shown Co');
+});
+
+test('the edit page reports the outcome of the submission that was just received', function () {
+    $company = Company::create(['name' => 'Flash Co']);
+
+    $this->followingRedirects()
+        ->from(route('company-profile.edit', $company->profile_token))
+        ->post(route('company-profile.update', $company->profile_token), profilePayload($company, ['name' => 'Flash Company']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('CompanyProfile/Edit')
+            ->where('submissionResult', 'created')
+            ->where('latestSubmission.status', CompanyProfileSubmission::STATUS_PENDING)
+        );
+});
+
+test('without a pending submission the form is measured against the published profile again', function () {
+    Mail::fake();
+
+    $company = Company::create(['name' => 'Reviewed Co', 'profile_contact_email' => 'contact@example.com']);
+
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company, ['name' => 'Reviewed Company']));
+    CompanyProfileSubmission::query()->firstOrFail()->reject('No');
+
+    // The rejected proposal is no longer what we compare against; the published name is.
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company->refresh()))
+        ->assertSessionHasErrors('form');
+
+    $this->post(route('company-profile.update', $company->profile_token), profilePayload($company, ['name' => 'Reviewed Company']))
+        ->assertSessionHas('company_profile_result', 'created');
+
+    $this->get(route('company-profile.edit', $company->profile_token))
+        ->assertInertia(fn (Assert $page) => $page->where('latestSubmission.status', CompanyProfileSubmission::STATUS_PENDING));
+
+    Mail::assertSentCount(1);
+});
+
+test('failed validation stores nothing and keeps the input for the form', function () {
+    $company = Company::create(['name' => 'Invalid Co']);
+
+    $this->from(route('company-profile.edit', $company->profile_token))
+        ->post(route('company-profile.update', $company->profile_token), profilePayload($company, [
+            'name' => 'Invalid Company',
+            'website_url' => 'not a url',
+        ]))
+        ->assertRedirect(route('company-profile.edit', $company->profile_token))
+        ->assertSessionHasErrors('website_url')
+        ->assertSessionMissing('company_profile_result');
+
+    expect(CompanyProfileSubmission::query()->count())->toBe(0);
 });

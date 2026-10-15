@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Exceptions\OutdatedSubmission;
 use App\Mail\CompanyProfileApprovedMail;
 use App\Mail\CompanyProfileRejectedMail;
 use App\Models\Concerns\Audited;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Mail\Mailable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -27,9 +29,38 @@ class CompanyProfileSubmission extends Model
 
     public const STATUS_REJECTED = 'rejected';
 
+    /** Replaced by a newer update from the company before it was reviewed. Kept as history, never reviewable. */
+    public const STATUS_SUPERSEDED = 'superseded';
+
+    public const STATUS_LABELS = [
+        self::STATUS_PENDING => 'Pending review',
+        self::STATUS_APPROVED => 'Approved',
+        self::STATUS_REJECTED => 'Rejected',
+        self::STATUS_SUPERSEDED => 'Superseded',
+    ];
+
+    public const STATUS_COLORS = [
+        self::STATUS_PENDING => 'warning',
+        self::STATUS_APPROVED => 'success',
+        self::STATUS_REJECTED => 'danger',
+        self::STATUS_SUPERSEDED => 'gray',
+    ];
+
+    /** Proposed fields in the order and with the names reviewers see. */
+    public const PROPOSED_FIELDS = [
+        'proposed_name' => 'Company name',
+        'proposed_website_url' => 'Website',
+        'proposed_logo_path' => 'Logo',
+        'proposed_description' => 'Description',
+        'proposed_education_ids' => 'Study programmes',
+        'proposed_sector_ids' => 'Sectors',
+        'proposed_new_sector_names' => 'New sectors',
+    ];
+
     protected $fillable = [
         'company_id',
         'status',
+        'revision',
         'contact_name',
         'contact_email',
         'proposed_name',
@@ -43,6 +74,7 @@ class CompanyProfileSubmission extends Model
         'reviewed_at',
         'reviewed_by',
         'review_note',
+        'attention_note',
     ];
 
     protected $casts = [
@@ -104,11 +136,57 @@ class CompanyProfileSubmission extends Model
         return $sectorNames;
     }
 
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    /**
+     * Every submission of this company, newest first: the review history.
+     *
+     * @return Collection<int, self>
+     */
+    public function history(): Collection
+    {
+        return self::query()
+            ->with('reviewer:id,name')
+            ->where('company_id', $this->company_id)
+            ->orderByDesc('submitted_at')
+            ->orderByDesc('id')
+            ->get();
+    }
+
+    /**
+     * Names of the proposed fields that differ from another stored submission.
+     *
+     * @return array<int, string>
+     */
+    public function changedFieldsComparedTo(self $other): array
+    {
+        $normalize = function (string $field, mixed $value): mixed {
+            if (is_array($value)) {
+                $value = array_map(fn ($item) => is_string($item) ? mb_strtolower(trim($item)) : (int) $item, $value);
+                sort($value);
+
+                return $value;
+            }
+
+            return blank($value) ? null : trim((string) $value);
+        };
+
+        return collect(self::PROPOSED_FIELDS)
+            ->filter(fn (string $label, string $field): bool => $normalize($field, $this->{$field}) !== $normalize($field, $other->{$field}))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @throws OutdatedSubmission when this is no longer the pending version
+     */
     public function approve(?string $note = null): bool
     {
-        if ($this->status !== self::STATUS_PENDING) {
-            return false;
-        }
+        // Checked against the database, not this possibly stale instance, and again under a lock when the review is saved.
+        $this->lockAsPendingVersion();
 
         $email = $this->notificationEmail();
 
@@ -123,11 +201,13 @@ class CompanyProfileSubmission extends Model
         return $this->approveWithNotification($email, $note);
     }
 
+    /**
+     * @throws OutdatedSubmission when this is no longer the pending version
+     */
     public function reject(?string $note = null): bool
     {
-        if ($this->status !== self::STATUS_PENDING) {
-            return false;
-        }
+        // Checked against the database, not this possibly stale instance, and again under a lock when the review is saved.
+        $this->lockAsPendingVersion();
 
         $email = $this->notificationEmail();
 
@@ -213,6 +293,7 @@ class CompanyProfileSubmission extends Model
     {
         try {
             DB::transaction(function () use ($email, $note): void {
+                $this->lockAsPendingVersion();
                 $this->comparison_snapshot = $this->profileComparison();
                 $this->company->update([
                     'name' => $this->proposed_name,
@@ -235,6 +316,8 @@ class CompanyProfileSubmission extends Model
             });
 
             return true;
+        } catch (OutdatedSubmission $exception) {
+            throw $exception;
         } catch (Throwable $exception) {
             Log::error('Failed to approve company profile submission after email failure.', [
                 'company_profile_submission_id' => $this->id,
@@ -250,6 +333,7 @@ class CompanyProfileSubmission extends Model
     {
         try {
             DB::transaction(function () use ($email, $note): void {
+                $this->lockAsPendingVersion();
                 $this->comparison_snapshot = $this->profileComparison();
                 $this->forceFill([
                     'review_note' => $note,
@@ -266,6 +350,8 @@ class CompanyProfileSubmission extends Model
             });
 
             return true;
+        } catch (OutdatedSubmission $exception) {
+            throw $exception;
         } catch (Throwable $exception) {
             Log::error('Failed to reject company profile submission after email failure.', [
                 'company_profile_submission_id' => $this->id,
@@ -274,6 +360,21 @@ class CompanyProfileSubmission extends Model
             ]);
 
             return false;
+        }
+    }
+
+    /**
+     * Optimistic check at the moment of review: the row is locked and must still
+     * be pending. A company update supersedes this row under the same lock, so
+     * an administrator can never approve or reject a version that was replaced
+     * after the page was opened.
+     */
+    private function lockAsPendingVersion(): void
+    {
+        $status = self::query()->whereKey($this->getKey())->lockForUpdate()->value('status');
+
+        if ($status !== self::STATUS_PENDING) {
+            throw new OutdatedSubmission($this, $status);
         }
     }
 

@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\CompanyProfileSubmissions\Schemas;
 
+use App\Filament\Resources\CompanyProfileSubmissions\CompanyProfileSubmissionResource;
 use App\Models\CompanyProfileSubmission;
 use App\Support\ProfileDiff;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -15,6 +17,27 @@ class CompanyProfileSubmissionInfolist
     {
         return $schema
             ->components([
+                Section::make('Earlier version')
+                    ->description('The company sent a newer update after this one. This version is kept as history and cannot be approved or rejected.')
+                    ->icon('heroicon-o-clock')
+                    ->iconColor('gray')
+                    ->visible(fn (CompanyProfileSubmission $record): bool => $record->status === CompanyProfileSubmission::STATUS_SUPERSEDED)
+                    ->schema([
+                        TextEntry::make('latest_version')
+                            ->hiddenLabel()
+                            ->getStateUsing(fn (CompanyProfileSubmission $record): string => $record->company?->pendingProfileSubmission()->exists()
+                                ? 'Review the latest version'
+                                : 'A later version has already been reviewed. See the history below.')
+                            ->url(fn (CompanyProfileSubmission $record): ?string => ($latest = $record->company?->pendingProfileSubmission()->first())
+                                ? CompanyProfileSubmissionResource::getUrl('view', ['record' => $latest])
+                                : null)
+                            ->color(fn (CompanyProfileSubmission $record): string => $record->company?->pendingProfileSubmission()->exists() ? 'primary' : 'gray'),
+                    ]),
+                Section::make('Check the history before approving')
+                    ->description(fn (CompanyProfileSubmission $record): ?string => $record->attention_note)
+                    ->icon('heroicon-o-exclamation-triangle')
+                    ->iconColor('warning')
+                    ->visible(fn (CompanyProfileSubmission $record): bool => $record->isPending() && filled($record->attention_note)),
                 Section::make('Submission')
                     ->columns(2)
                     ->schema([
@@ -22,24 +45,27 @@ class CompanyProfileSubmissionInfolist
                             ->label('Current company'),
                         TextEntry::make('status')
                             ->badge()
-                            ->color(fn (string $state): string => match ($state) {
-                                CompanyProfileSubmission::STATUS_APPROVED => 'success',
-                                CompanyProfileSubmission::STATUS_REJECTED => 'danger',
-                                default => 'warning',
-                            }),
+                            ->formatStateUsing(fn (string $state): string => CompanyProfileSubmission::STATUS_LABELS[$state] ?? ucfirst($state))
+                            ->color(fn (string $state): string => CompanyProfileSubmission::STATUS_COLORS[$state] ?? 'gray'),
                         TextEntry::make('contact_name')
                             ->placeholder('No contact name'),
                         TextEntry::make('contact_email')
                             ->placeholder('No contact email'),
                         TextEntry::make('submitted_at')
+                            ->label('Last updated')
                             ->dateTime(),
+                        TextEntry::make('revision')
+                            ->label('Updates in this review')
+                            ->helperText('How many times the company sent changes before this was reviewed.'),
                         TextEntry::make('reviewed_at')
                             ->dateTime()
                             ->placeholder('Not reviewed yet'),
                     ]),
                 Section::make('Proposed public profile')
                     ->visible(fn (CompanyProfileSubmission $record): bool => $record->status !== CompanyProfileSubmission::STATUS_PENDING && $record->comparison_snapshot === null)
-                    ->description('This older submission has no saved original values. Only the submitted profile is available.')
+                    ->description(fn (CompanyProfileSubmission $record): string => $record->status === CompanyProfileSubmission::STATUS_SUPERSEDED
+                        ? 'The values the company sent in this earlier version. Compare the latest version to see what will change.'
+                        : 'This older submission has no saved original values. Only the submitted profile is available.')
                     ->columns(2)
                     ->schema([
                         TextEntry::make('proposed_name')
@@ -56,6 +82,7 @@ class CompanyProfileSubmissionInfolist
                             ->placeholder('No logo'),
                         TextEntry::make('proposed_description')
                             ->label('Description')
+                            ->html()
                             ->columnSpanFull()
                             ->placeholder('No description'),
                         TextEntry::make('proposedEducationNames')
@@ -131,6 +158,15 @@ class CompanyProfileSubmissionInfolist
                         TextEntry::make('review_note')
                             ->placeholder('No note')
                             ->columnSpanFull(),
+                    ]),
+                Section::make('Submission history')
+                    ->description('Every version this company sent, newest first. Earlier versions are read-only.')
+                    ->columnSpanFull()
+                    ->collapsible()
+                    ->schema([
+                        ViewEntry::make('history')
+                            ->hiddenLabel()
+                            ->view('filament.resources.company-profile-submissions.history-entry'),
                     ]),
             ]);
     }

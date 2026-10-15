@@ -1,6 +1,8 @@
 <?php
 
 use App\Filament\Pages\ManagePrivacyPolicy;
+use App\Filament\Resources\Companies\Pages\ListCompanies;
+use App\Filament\Resources\Companies\Pages\ViewCompany;
 use App\Filament\Resources\EventStands\Pages\ManageStands;
 use App\Filament\Resources\Roles\Pages\CreateRole;
 use App\Filament\Resources\Roles\Pages\EditRole;
@@ -358,7 +360,7 @@ test('sync carries retired permissions over to the ones that replace them', func
     ])->and(Permission::query()->whereIn('name', ['event-stands.manage', 'settings.manage'])->exists())->toBeFalse();
 });
 
-test('exports, verification links and stand changes need their own permission', function () {
+test('exports, edit links and stand changes need their own permission', function () {
     $viewer = userWith(['dashboard.view', 'newsletter-subscribers.view', 'companies.view', 'event-stands.view']);
     $this->actingAs($viewer);
 
@@ -371,6 +373,30 @@ test('exports, verification links and stand changes need their own permission', 
 
     expect(auth()->user()->can('export', NewsletterSubscriber::class))->toBeTrue()
         ->and(auth()->user()->can('links', Company::class))->toBeTrue();
+});
+
+test('company edit links are labelled as edit links and can still be opened and regenerated', function () {
+    $company = Company::create(['name' => 'Link Company']);
+    $oldUrl = $company->profileVerificationUrl();
+    $this->actingAs(userWith(['dashboard.view', 'companies.view', 'companies.links']));
+
+    Livewire::test(ListCompanies::class)
+        ->assertSee('Open edit link')
+        ->assertSee('Regenerate edit link')
+        ->assertSee('Download edit links')
+        ->assertDontSee('Verification link')
+        ->callTableAction('regenerateProfileToken', $company)
+        ->assertNotified('Edit link regenerated');
+
+    $company->refresh();
+    expect($company->profileVerificationUrl())->not->toBe($oldUrl);
+    $this->get($company->profileVerificationUrl())->assertOk();
+    $this->get($oldUrl)->assertNotFound();
+
+    Livewire::test(ViewCompany::class, ['record' => $company->id])
+        ->assertSee('Company edit link')
+        ->assertSee('Share this link with the company so they can view and update their company profile.')
+        ->assertSee($company->profileVerificationUrl());
 });
 
 test('dashboard widgets only show modules the user may view', function () {

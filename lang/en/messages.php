@@ -6,7 +6,8 @@ return [
     'borrel_success' => 'You are registered. See you at the networking drinks!',
     'company_access_success' => 'Your request has been received. The organisers will review it before granting access.',
     'company_interest_success' => 'Thank you, we received your message about the upcoming edition. The organisers will contact you.',
-    'company_profile_success' => 'Your company information has been submitted. We will review the changes before publishing them on the website.',
+    'company_profile_unchanged' => 'There are no changes to submit. The information matches the current company profile.',
+    'company_profile_busy' => 'Your changes are already being processed. Please wait a moment and try again.',
     'map_points' => [
         'bar' => 'Bar',
         'info' => 'Information',
