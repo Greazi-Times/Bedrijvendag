@@ -37,9 +37,9 @@ class CompaniesTable
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('profile_verification_url')
-                    ->label('Verification link')
+                    ->label('Edit link')
                     ->copyable()
-                    ->copyMessage('Verification link copied')
+                    ->copyMessage('Edit link copied')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
@@ -52,23 +52,24 @@ class CompaniesTable
                     ->button(),
                 Action::make('verificationLink')
                     ->authorize('links')
-                    ->label('Verification link')
+                    ->label('Open edit link')
                     ->icon('heroicon-o-link')
                     ->button()
                     ->url(fn (Company $record): string => $record->profileVerificationUrl())
                     ->openUrlInNewTab(),
                 Action::make('regenerateProfileToken')
                     ->authorize('links')
-                    ->label('Regenerate link')
+                    ->label('Regenerate edit link')
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
                     ->button()
                     ->requiresConfirmation()
+                    ->modalDescription('The current edit link will stop working. Share the new link with the company so they can keep updating their profile.')
                     ->action(function (Company $record): void {
                         $record->regenerateProfileToken();
 
                         Notification::make()
-                            ->title('Verification link regenerated')
+                            ->title('Edit link regenerated')
                             ->success()
                             ->send();
                     }),

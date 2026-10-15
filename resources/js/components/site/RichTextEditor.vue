@@ -33,7 +33,8 @@ const props = defineProps<{
 }>();
 
 const model = defineModel<string>({ default: '' });
-const emit = defineEmits<{ textLength: [length: number] }>();
+// `ready` reports the initial content as the editor writes it, so a form can use that as its unchanged value.
+const emit = defineEmits<{ textLength: [length: number]; ready: [html: string] }>();
 const { t } = useTranslations();
 
 const safeUrl = (url: string) => /^(https?:\/\/|mailto:)/i.test(url.trim());
@@ -86,7 +87,10 @@ const editor = useEditor({
         model.value = editor.isEmpty ? '' : editor.getHTML();
         emit('textLength', editor.getText().trim().length);
     },
-    onCreate: ({ editor }) => emit('textLength', editor.getText().trim().length),
+    onCreate: ({ editor }) => {
+        emit('textLength', editor.getText().trim().length);
+        emit('ready', editor.isEmpty ? '' : editor.getHTML());
+    },
 });
 
 // Keep the editor in sync when the form resets the value from outside.

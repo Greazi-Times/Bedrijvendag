@@ -24,10 +24,11 @@ class CompanyInfolist
                     ->placeholder('No profile contact email has been provided'),
                 TextEntry::make('profileVerificationUrl')
                     ->visible(fn (): bool => auth()->user()->can('companies.links'))
-                    ->label('Verification link')
+                    ->label('Company edit link')
+                    ->helperText('Share this link with the company so they can view and update their company profile.')
                     ->getStateUsing(fn ($record): string => $record->profileVerificationUrl())
                     ->copyable()
-                    ->copyMessage('Verification link copied')
+                    ->copyMessage('Edit link copied')
                     ->columnSpanFull(),
                 TextEntry::make('description_nl')
                     ->label('Description')

@@ -74,13 +74,14 @@ class CompanyAccessRequestInfolist
                             ->getStateUsing(fn (CompanyAccessRequest $record): string => $record->proposedSectorNames())
                             ->columnSpanFull(),
                     ]),
-                Section::make('Private verification link')
+                Section::make('Company edit link')
+                    ->description('Share this link with the company so they can view and update their company profile.')
                     ->schema([
                         TextEntry::make('verificationUrl')
-                            ->label('Verification link')
+                            ->label('Edit link')
                             ->getStateUsing(fn (CompanyAccessRequest $record): ?string => $record->verificationUrl())
                             ->copyable()
-                            ->copyMessage('Verification link copied')
+                            ->copyMessage('Edit link copied')
                             ->placeholder('Approve the request first to create or link the company.'),
                     ]),
                 Section::make('Review')
