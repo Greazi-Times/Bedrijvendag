@@ -272,7 +272,7 @@ test('reviewing needs the review permission and viewing needs the view permissio
         ->assertActionHidden('reject');
 
     $this->actingAs(User::factory()->create());
-    $this->get(CompanyProfileSubmissionResource::getUrl('view', ['record' => $pending]))->assertForbidden();
+    $this->get(CompanyProfileSubmissionResource::getUrl('view', ['record' => $pending]))->assertNotFound();
 
     expect($pending->fresh()->status)->toBe(CompanyProfileSubmission::STATUS_PENDING);
 });

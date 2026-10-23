@@ -56,18 +56,18 @@ function administrator(): User
 
 // Authentication and page access
 
-test('guests are redirected to the login page', function () {
-    $this->get('/dashboard/users')->assertRedirect('/dashboard/login');
+test('guests get a 404 instead of a login redirect', function () {
+    $this->get('/dashboard/users')->assertNotFound();
 });
 
-test('users without dashboard access get a 403', function () {
+test('users without dashboard access get a 404', function () {
     $this->actingAs(User::factory()->create())
         ->get('/dashboard')
-        ->assertForbidden();
+        ->assertNotFound();
 });
 
 test('administration pages require their permission', function (string $url, string $permission) {
-    $this->actingAs(userWith(['dashboard.view']))->get($url)->assertForbidden();
+    $this->actingAs(userWith(['dashboard.view']))->get($url)->assertNotFound();
     $this->actingAs(userWith(['dashboard.view', $permission], 'Allowed'))->get($url)->assertOk();
 })->with([
     ['/dashboard/users', 'users.view'],
@@ -92,7 +92,7 @@ test('existing modules are checked per action', function () {
         ->and($user->can('create', Event::class))->toBeFalse()
         ->and($user->can('delete', Event::class))->toBeFalse();
 
-    $this->actingAs($user)->get('/dashboard/events/create')->assertForbidden();
+    $this->actingAs($user)->get('/dashboard/events/create')->assertNotFound();
 });
 
 test('approving requests and editing settings need their own permission', function () {

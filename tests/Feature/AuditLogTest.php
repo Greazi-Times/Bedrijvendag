@@ -266,7 +266,7 @@ test('permission changes record what was added and removed', function () {
 test('forbidden requests are logged as denied access', function () {
     $user = auditor(['dashboard.view'], 'Plain');
 
-    $this->actingAs($user)->get('/dashboard/audit-logs')->assertForbidden();
+    $this->actingAs($user)->get('/dashboard/audit-logs')->assertNotFound();
 
     $log = AuditLog::query()->where('event', 'security.access.denied')->sole();
 
@@ -349,7 +349,7 @@ test('audit entries are read-only', function () {
 test('users without audit.view cannot open entries', function () {
     $log = Audit::log('settings.updated', 'Settings updated');
 
-    $this->actingAs(auditor(['dashboard.view'], 'Plain'))->get("/dashboard/audit-logs/{$log->id}")->assertForbidden();
+    $this->actingAs(auditor(['dashboard.view'], 'Plain'))->get("/dashboard/audit-logs/{$log->id}")->assertNotFound();
     $this->actingAs(auditor())->get("/dashboard/audit-logs/{$log->id}")->assertOk();
 });
 

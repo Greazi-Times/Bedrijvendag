@@ -46,6 +46,7 @@ class HandleInertiaRequests extends Middleware
             'supportedLocales' => ['nl', 'en'],
             'auth' => [
                 'user' => $request->user(),
+                'canAccessDashboard' => (bool) $request->user()?->can('dashboard.view'),
             ],
             'media' => [
                 'siteLogo' => PageMedia::siteLogo(),

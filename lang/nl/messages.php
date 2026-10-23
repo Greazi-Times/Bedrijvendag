@@ -15,4 +15,10 @@ return [
         'entrance' => 'Ingang',
         'other' => 'Overig',
     ],
+    'errors' => [
+        'eyebrow' => 'Fout :code',
+        'home' => 'Terug naar de homepage',
+        'retry' => 'Opnieuw proberen',
+        '500' => ['title' => 'Er ging iets mis', 'message' => 'Er is aan onze kant een onverwachte fout opgetreden. Probeer het over een moment opnieuw.'],
+    ],
 ];

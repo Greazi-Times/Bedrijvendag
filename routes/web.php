@@ -119,3 +119,7 @@ Route::post('/borrel-signup', function (Request $request) {
 
     return redirect()->back()->with('success', __('messages.borrel_success'));
 });
+
+// Unknown URLs still get the web middleware (session, locale) so the 404 page speaks the
+// visitor's language. The dashboard is left to its own catch-all in DashboardPanelProvider.
+Route::fallback(fn () => abort(404))->where('fallbackPlaceholder', '(?!dashboard(?:/|$)).*');

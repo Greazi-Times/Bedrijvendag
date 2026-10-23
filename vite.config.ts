@@ -9,6 +9,7 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/js/app.ts',
+                'resources/css/app.css',
                 'resources/css/filament/dashboard/theme.css'
             ],
             ssr: 'resources/js/ssr.ts',

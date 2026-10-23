@@ -16,13 +16,19 @@ class HandleAppearance
      */
     public function handle(Request $request, Closure $next): Response
     {
+        self::share($request);
+
+        return $next($request);
+    }
+
+    /** Also called for error pages, which can render without this middleware. */
+    public static function share(Request $request): void
+    {
         $appearance = $request->cookie('appearance');
 
         View::share(
             'appearance',
             in_array($appearance, ['light', 'dark', 'system'], true) ? $appearance : 'light',
         );
-
-        return $next($request);
     }
 }

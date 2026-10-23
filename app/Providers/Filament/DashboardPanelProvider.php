@@ -25,6 +25,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 
@@ -94,6 +95,12 @@ class DashboardPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            // Unknown dashboard URLs and methods pass the same auth middleware as real pages,
+            // so a 404 here is indistinguishable from a page the visitor may not open.
+            ->authenticatedRoutes(fn () => Route::any('{path?}', fn () => abort(404))
+                ->where('path', '.*')
+                ->name('missing')
+                ->fallback())
             // ->authGuard('customers')
             ->plugins([
                 PhosphorIcons::make(),
