@@ -161,7 +161,7 @@ async function submitNewsletter() {
                         <li v-for="link in infoLinks" :key="link.href + link.label">
                             <Link :href="link.href" class="text-sm text-ink-muted transition-colors hover:text-ink">{{ link.label }}</Link>
                         </li>
-                        <li v-if="page.props.auth.canAccessDashboard">
+                        <li>
                             <a href="/dashboard/login" class="text-sm text-ink-muted transition-colors hover:text-ink">Dashboard</a>
                         </li>
                     </ul>
