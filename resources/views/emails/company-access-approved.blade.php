@@ -11,6 +11,10 @@
 
     <p>Je aanvraag voor toegang tot het Bedrijvendag bedrijfsprofiel van <strong>{{ $accessRequest->company?->name ?? $accessRequest->company_name }}</strong> is goedgekeurd.</p>
 
+    @if (filled($customMessage))
+        <p>{!! nl2br(e($customMessage)) !!}</p>
+    @endif
+
     <p>Via de onderstaande persoonlijke link kunnen jullie de bedrijfsinformatie controleren en wijzigingen insturen:</p>
 
     <p>

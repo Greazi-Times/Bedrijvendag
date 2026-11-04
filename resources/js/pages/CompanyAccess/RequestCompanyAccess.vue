@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
 import { PhBuildings, PhCheckCircle, PhMagnifyingGlass, PhPaperPlaneTilt, PhPlus, PhPlusCircle, PhUploadSimple, PhX } from '@phosphor-icons/vue';
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 
 import PageIntro from '@/components/site/PageIntro.vue';
 import SiteLayout from '@/components/site/SiteLayout.vue';
@@ -25,6 +25,7 @@ const props = defineProps<{
         sectors: Option[];
     };
     submitUrl: string;
+    matchUrl: string;
 }>();
 const { t } = useTranslations();
 
@@ -81,6 +82,58 @@ const canAddNewSector = computed(() => {
 const sectorError = computed(() => {
     return form.errors.sector_ids || form.errors.new_sector_names || Object.entries(form.errors).find(([key]) => key.startsWith('new_sector_names.'))?.[1];
 });
+
+// Debounced lookup of existing companies while a new company name is typed.
+const matches = ref<{ exact: CompanyOption[]; similar: CompanyOption[] }>({ exact: [], similar: [] });
+const dismissedFor = ref('');
+let timer: ReturnType<typeof setTimeout> | undefined;
+let controller: AbortController | undefined;
+let lastLookup = '';
+
+const visibleMatches = computed(() => (dismissedFor.value === form.company_name.trim() ? { exact: [], similar: [] } : matches.value));
+
+watch(
+    () => form.company_name,
+    (value) => {
+        clearTimeout(timer);
+        controller?.abort();
+        const name = value.trim();
+
+        if (name.length < 3) {
+            matches.value = { exact: [], similar: [] };
+            lastLookup = '';
+            return;
+        }
+
+        if (name === lastLookup) return;
+
+        timer = setTimeout(async () => {
+            controller = new AbortController();
+            try {
+                const response = await fetch(`${props.matchUrl}?name=${encodeURIComponent(name)}`, {
+                    headers: { Accept: 'application/json' },
+                    signal: controller.signal,
+                });
+                if (!response.ok) return;
+                matches.value = await response.json();
+                lastLookup = name;
+            } catch {
+                // Aborted or offline: suggestions are optional, the server re-checks on submit.
+            }
+        }, 400);
+    },
+);
+
+onBeforeUnmount(() => {
+    clearTimeout(timer);
+    controller?.abort();
+});
+
+function chooseExistingCompany(company: CompanyOption) {
+    mode.value = 'existing';
+    // The mode watcher clears the selection, so select after it has run.
+    nextTick(() => selectCompany(company));
+}
 
 watch(mode, (value) => {
     form.type = value;
@@ -244,6 +297,38 @@ function submit() {
                                 >
                                 <input id="company_name" v-model="form.company_name" type="text" required class="input" />
                                 <p v-if="form.errors.company_name" class="field-error mt-2">{{ form.errors.company_name }}</p>
+
+                                <div
+                                    v-if="visibleMatches.exact.length || visibleMatches.similar.length"
+                                    class="alert mt-3"
+                                    role="status"
+                                    aria-live="polite"
+                                >
+                                    <p class="text-sm font-semibold">
+                                        {{ visibleMatches.exact.length ? t('companyAccess.alreadyRegistered') : t('companyAccess.didYouMean') }}
+                                    </p>
+                                    <ul class="mt-3 grid gap-2">
+                                        <li v-for="company in [...visibleMatches.exact, ...visibleMatches.similar]" :key="company.id">
+                                            <button
+                                                type="button"
+                                                class="block w-full rounded-[var(--radius-input)] bg-canvas px-4 py-3 text-left text-sm ring-1 ring-hairline transition hover:bg-surface"
+                                                @click="chooseExistingCompany(company)"
+                                            >
+                                                <span class="font-semibold">{{ company.name }}</span>
+                                                <span v-if="company.website_url" class="mt-1 block text-xs text-ink-muted">{{ company.website_url }}</span>
+                                                <span class="mt-1 block text-xs font-semibold text-brand-ink">{{ t('companyAccess.selectThisCompany') }}</span>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                    <button
+                                        v-if="!visibleMatches.exact.length"
+                                        type="button"
+                                        class="mt-3 text-xs font-semibold underline"
+                                        @click="dismissedFor = form.company_name.trim()"
+                                    >
+                                        {{ t('companyAccess.noneOfThese') }}
+                                    </button>
+                                </div>
                             </div>
 
                             <div>

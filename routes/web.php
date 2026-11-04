@@ -48,6 +48,10 @@ Route::post('/voor-bedrijven', [CompanyInterestController::class, 'store'])
 Route::get('/bedrijf-toegang', [CompanyAccessController::class, 'create'])
     ->name('company-access.create');
 
+Route::get('/bedrijf-toegang/zoek', [CompanyAccessController::class, 'match'])
+    ->middleware('throttle:60,1')
+    ->name('company-access.match');
+
 Route::post('/bedrijf-toegang', [CompanyAccessController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('company-access.store');

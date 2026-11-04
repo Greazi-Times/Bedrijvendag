@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CompanyAccessRequests\Tables;
 
+use App\Filament\Resources\CompanyAccessRequests\ReviewActions;
 use App\Models\CompanyAccessRequest;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
@@ -10,6 +11,7 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Validation\ValidationException;
 
 class CompanyAccessRequestsTable
 {
@@ -75,45 +77,19 @@ class CompanyAccessRequestsTable
                     ])
                     ->requiresConfirmation()
                     ->action(function (CompanyAccessRequest $record, array $data): void {
-                        $emailSent = $record->approve($data['review_note'] ?? null);
-
-                        if ($emailSent) {
-                            Notification::make()
-                                ->title('Access request approved')
-                                ->body('The requester has been emailed the company edit link.')
-                                ->success()
-                                ->send();
+                        try {
+                            $approved = $record->approve($data['review_note'] ?? null);
+                        } catch (ValidationException $exception) {
+                            Notification::make()->title('Approval blocked')->body(collect($exception->errors())->flatten()->implode(' '))->danger()->send();
 
                             return;
                         }
 
-                        Notification::make()
-                            ->title('Access request approved')
-                            ->body('The email could not be sent. Check the mail settings before approving more requests.')
-                            ->warning()
-                            ->send();
+                        ReviewActions::feedback($record, $approved, 'approved');
                     }),
-                Action::make('reject')
-                    ->authorize('review')
-                    ->color('danger')
-                    ->icon('heroicon-o-x-circle')
+                ReviewActions::configureReject(Action::make('reject'))
                     ->visible(fn (CompanyAccessRequest $record): bool => $record->status === CompanyAccessRequest::STATUS_PENDING)
-                    ->modalHeading('Reject access request')
-                    ->modalSubmitActionLabel('Reject')
-                    ->form([
-                        Textarea::make('review_note')
-                            ->label('Reason or internal note')
-                            ->rows(3),
-                    ])
-                    ->requiresConfirmation()
-                    ->action(function (CompanyAccessRequest $record, array $data): void {
-                        $record->reject($data['review_note'] ?? null);
-
-                        Notification::make()
-                            ->title('Access request rejected')
-                            ->success()
-                            ->send();
-                    }),
+                    ->action(fn (CompanyAccessRequest $record, array $data) => ReviewActions::reject($record, $data)),
             ]);
     }
 }

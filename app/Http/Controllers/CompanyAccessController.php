@@ -6,9 +6,12 @@ use App\Models\Company;
 use App\Models\CompanyAccessRequest;
 use App\Models\Education;
 use App\Models\Sector;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,7 +33,20 @@ class CompanyAccessController extends Controller
                 'sectors' => Sector::query()->orderBy('name')->get(['id', 'name']),
             ],
             'submitUrl' => route('company-access.store'),
+            'matchUrl' => route('company-access.match'),
         ]);
+    }
+
+    public function match(Request $request): JsonResponse
+    {
+        $matches = Company::matchesForName((string) $request->query('name', ''));
+        $format = fn (Collection $companies): array => $companies->take(5)->map(fn (Company $company): array => [
+            'id' => $company->id,
+            'name' => $company->name,
+            'website_url' => $company->website_url,
+        ])->all();
+
+        return response()->json(['exact' => $format($matches['exact']), 'similar' => $format($matches['similar'])]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -76,6 +92,11 @@ class CompanyAccessController extends Controller
             'contact_email' => ['required', 'email', 'max:255'],
             'message' => ['nullable', 'string', 'max:2000'],
         ]);
+
+        if ($validated['type'] === CompanyAccessRequest::TYPE_NEW
+            && Company::matchesForName($validated['company_name'])['exact']->isNotEmpty()) {
+            throw ValidationException::withMessages(['company_name' => __('messages.company_already_exists')]);
+        }
 
         $company = null;
 

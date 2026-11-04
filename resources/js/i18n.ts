@@ -437,6 +437,10 @@ const messages = {
             new: 'Mijn bedrijf staat er nog niet bij',
             selectedCompany: 'Geselecteerd: :name',
             sendRequest: 'Aanvraag versturen',
+            alreadyRegistered: 'Dit bedrijf is al geregistreerd. Selecteer het bedrijf in de lijst om toegang aan te vragen.',
+            didYouMean: 'Bedoelde je een van deze bedrijven?',
+            selectThisCompany: 'Dit bedrijf selecteren',
+            noneOfThese: 'Geen van deze, ik vraag een nieuw bedrijf aan',
         },
         companyProfile: {
             head: 'Bedrijfsinformatie controleren',
@@ -937,6 +941,10 @@ const messages = {
             new: 'My company is not listed yet',
             selectedCompany: 'Selected: :name',
             sendRequest: 'Send request',
+            alreadyRegistered: 'This company is already registered. Please select it from the list to request access.',
+            didYouMean: 'Did you mean one of these companies?',
+            selectThisCompany: 'Select this company',
+            noneOfThese: 'None of these, I am requesting a new company',
         },
         companyProfile: {
             head: 'Review company information',

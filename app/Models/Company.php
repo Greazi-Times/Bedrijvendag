@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class Company extends Model
@@ -104,6 +105,37 @@ class Company extends Model
         ])->save();
 
         return $this->profile_token;
+    }
+
+    /** Lowercase, accent- and punctuation-free key: "BOM Engineering B.V." == "bom engineering bv". */
+    public static function nameKey(string $name): string
+    {
+        return preg_replace('/[^a-z0-9]+/', '', Str::lower(Str::ascii($name))) ?? '';
+    }
+
+    /**
+     * @return array{exact: Collection<int, Company>, similar: Collection<int, Company>}
+     */
+    public static function matchesForName(string $name): array
+    {
+        $key = static::nameKey($name);
+        $none = ['exact' => collect(), 'similar' => collect()];
+
+        if (strlen($key) < 3) {
+            return $none;
+        }
+
+        $companies = static::query()->orderBy('name')->get(['id', 'name', 'website_url']);
+        $exact = $companies->filter(fn (Company $c): bool => static::nameKey($c->name) === $key);
+        $similar = $companies->diff($exact)->filter(function (Company $c) use ($key): bool {
+            $other = static::nameKey($c->name);
+
+            return strlen($other) >= 3
+                && (levenshtein($key, $other) <= max(1, intdiv(min(strlen($key), strlen($other)), 5))
+                    || (min(strlen($key), strlen($other)) >= 4 && (str_contains($other, $key) || str_contains($key, $other))));
+        });
+
+        return ['exact' => $exact->values(), 'similar' => $similar->values()];
     }
 
     public function profileVerificationUrl(): string
