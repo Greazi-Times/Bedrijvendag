@@ -153,11 +153,6 @@ const mapPointsWithCoords = computed(() => {
     return (props.mapPoints ?? []).filter((point) => typeof point.x_percent === 'number' && typeof point.y_percent === 'number');
 });
 
-const selectedStand = computed(() => {
-    if (selectedStandId.value == null) return null;
-    return props.stands.find((s) => s.id === selectedStandId.value) ?? null;
-});
-
 // The stand list matches the map height only when they sit side by side.
 const isDesktop = ref(false);
 
@@ -184,10 +179,6 @@ function selectStand(id: Stand['id'], reveal = false) {
     if (reveal && window.matchMedia('(max-width: 1023px)').matches) {
         mapPanelRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-}
-
-function clearSelection() {
-    selectedStandId.value = null;
 }
 
 const openCompany = (stand: Stand) => {
