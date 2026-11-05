@@ -7,6 +7,7 @@ use App\Support\Access;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rules\Password;
@@ -30,19 +31,23 @@ class UserForm
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
                         TextInput::make('password')
+                            ->label(fn (string $operation): string => $operation === 'create' ? 'Password' : 'New password')
                             ->password()
                             ->revealable()
-                            ->required()
+                            ->required(fn (string $operation): bool => $operation === 'create')
                             ->rule(Password::default())
                             ->confirmed()
-                            ->visibleOn('create'),
+                            ->autocomplete('new-password')
+                            // Left empty on edit means unchanged. The User model hashes it (hashed cast).
+                            ->dehydrated(fn (?string $state): bool => filled($state))
+                            ->helperText(fn (string $operation): ?string => $operation === 'edit' ? 'Leave empty to keep the current password. The user does not need to know the old one.' : null),
                         TextInput::make('password_confirmation')
-                            ->label('Confirm password')
+                            ->label(fn (string $operation): string => $operation === 'create' ? 'Confirm password' : 'Confirm new password')
                             ->password()
                             ->revealable()
-                            ->required()
-                            ->dehydrated(false)
-                            ->visibleOn('create'),
+                            ->required(fn (Get $get): bool => filled($get('password')))
+                            ->autocomplete('new-password')
+                            ->dehydrated(false),
                     ]),
 
                 Section::make('Roles')

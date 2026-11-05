@@ -23,6 +23,7 @@ use App\Support\Permissions;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Hash;
 use Jeffgreco13\FilamentBreezy\Middleware\MustTwoFactor;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -155,6 +156,51 @@ test('authorized users can edit a user and change roles', function () {
     expect($target->fresh()->name)->toBe('New Name')
         ->and($target->fresh()->hasRole('Editor'))->toBeTrue();
 });
+
+test('editing a user without a password keeps the current password', function () {
+    $this->actingAs(administrator());
+    $target = User::factory()->create();
+    $hash = $target->password;
+
+    Livewire::test(EditUser::class, ['record' => $target->getRouteKey()])
+        ->assertFormSet(['password' => null])
+        ->fillForm(['name' => 'Renamed'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($target->fresh()->password)->toBe($hash)->and($target->fresh()->name)->toBe('Renamed');
+});
+
+test('administrators can set a new password for a user', function () {
+    $this->actingAs(administrator());
+    $target = User::factory()->create(['name' => 'Same', 'email' => 'same@example.com']);
+
+    Livewire::test(EditUser::class, ['record' => $target->getRouteKey()])
+        ->fillForm(['password' => 'a-Strong-password-1', 'password_confirmation' => 'a-Strong-password-1'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $target->refresh();
+    expect(Hash::check('a-Strong-password-1', $target->password))->toBeTrue()
+        ->and($target->name)->toBe('Same')->and($target->email)->toBe('same@example.com');
+});
+
+test('password changes on the edit page are validated', function (array $data, array $errors) {
+    $this->actingAs(administrator());
+    $target = User::factory()->create();
+    $hash = $target->password;
+
+    Livewire::test(EditUser::class, ['record' => $target->getRouteKey()])
+        ->fillForm($data)
+        ->call('save')
+        ->assertHasFormErrors($errors);
+
+    expect($target->fresh()->password)->toBe($hash);
+})->with([
+    'mismatch' => [['password' => 'a-Strong-password-1', 'password_confirmation' => 'other'], ['password']],
+    'too weak' => [['password' => 'x', 'password_confirmation' => 'x'], ['password']],
+    'no confirmation' => [['password' => 'a-Strong-password-1', 'password_confirmation' => ''], ['password_confirmation']],
+]);
 
 test('administrators cannot assign the super admin role', function () {
     $admin = administrator();
