@@ -50,7 +50,6 @@ class CompanyProfileSubmissionsTable
                     ->alignCenter()
                     ->sortable(),
                 TextColumn::make('contact_email')
-                    ->searchable()
                     ->toggleable(),
             ])
             ->filters([

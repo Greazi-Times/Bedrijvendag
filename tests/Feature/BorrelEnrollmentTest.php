@@ -93,13 +93,11 @@ test('borrel signup only accepts future events', function () {
 
     $this->post('/borrel-signup', [
         'event_id' => $futureEvent->id,
-        'name' => 'Future Student',
         'email' => 'future@example.com',
     ])->assertRedirect();
 
-    $this->assertDatabaseHas('borrel_enrollments', [
-        'event_id' => $futureEvent->id,
-        'name' => 'Future Student',
-        'email' => 'future@example.com',
-    ]);
+    // The address is stored encrypted and found through its keyed lookup hash.
+    $guest = BorrelEnrollment::query()->where('event_id', $futureEvent->id)->whereEmail('email', ' FUTURE@example.com')->first();
+    expect($guest)->not->toBeNull()->and($guest->name)->toBeNull(); // no name is collected
+    expect(Illuminate\Support\Facades\DB::table('borrel_enrollments')->where('event_id', $futureEvent->id)->value('email'))->not->toContain('future@example.com');
 });

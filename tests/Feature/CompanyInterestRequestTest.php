@@ -57,7 +57,8 @@ test('company interest form validates required contact details', function () {
     Mail::fake();
 
     $this->post(route('company-interest.store'))
-        ->assertSessionHasErrors(['company_name', 'contact_name', 'contact_email']);
+        ->assertSessionHasErrors(['company_name', 'contact_email'])
+        ->assertSessionDoesntHaveErrors(['contact_name']);
 
     Mail::assertNothingSent();
 });

@@ -88,7 +88,7 @@ class CompanyAccessController extends Controller
             'sector_ids.*' => ['integer', Rule::exists('sectors', 'id')],
             'new_sector_names' => ['array', 'max:10'],
             'new_sector_names.*' => ['string', 'max:80'],
-            'contact_name' => ['required', 'string', 'max:255'],
+            'contact_name' => ['nullable', 'string', 'max:255'], // no longer asked on the form; kept for compatibility
             'contact_email' => ['required', 'email', 'max:255'],
             'message' => ['nullable', 'string', 'max:2000'],
         ]);
@@ -125,7 +125,7 @@ class CompanyAccessController extends Controller
             'new_sector_names' => $validated['type'] === CompanyAccessRequest::TYPE_NEW
                 ? $this->normalizeNewSectorNames($validated['new_sector_names'] ?? [])
                 : [],
-            'contact_name' => $validated['contact_name'],
+            'contact_name' => $validated['contact_name'] ?? null,
             'contact_email' => $validated['contact_email'],
             'message' => strip_tags($validated['message'] ?? ''),
             'submitted_at' => now(),

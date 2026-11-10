@@ -118,7 +118,6 @@ const internshipPhaseClasses: Record<InternshipPhase, string> = {
 const form = useForm({
     company_name: '',
     website_url: '',
-    contact_name: '',
     contact_email: '',
     message: '',
 });
@@ -423,20 +422,6 @@ const processSteps: Component[] = [PhPaperPlaneTilt, PhChatsCircle, PhFileText];
                                 :aria-describedby="form.errors.website_url ? 'website_url-error' : undefined"
                             />
                             <p v-if="form.errors.website_url" id="website_url-error" class="field-error">{{ form.errors.website_url }}</p>
-                        </div>
-
-                        <div class="field">
-                            <label for="contact_name" class="field-label">{{ t('companyInterest.contactPerson') }}<span class="text-danger" aria-hidden="true"> *</span></label>
-                            <input
-                                id="contact_name"
-                                v-model="form.contact_name"
-                                type="text"
-                                autocomplete="name"
-                                class="input"
-                                :aria-invalid="form.errors.contact_name ? 'true' : undefined"
-                                :aria-describedby="form.errors.contact_name ? 'contact_name-error' : undefined"
-                            />
-                            <p v-if="form.errors.contact_name" id="contact_name-error" class="field-error">{{ form.errors.contact_name }}</p>
                         </div>
 
                         <div class="field">

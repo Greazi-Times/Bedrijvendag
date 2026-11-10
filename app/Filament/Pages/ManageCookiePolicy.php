@@ -3,8 +3,10 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Pages\Concerns\AuthorizesSettings;
+use App\Filament\Pages\Concerns\OffersPolicyDraft;
 use App\Filament\Pages\Concerns\QueuesPolicyContentTranslation;
 use App\Settings\CookiePolicySettings;
+use App\Support\PolicyDraft;
 use Filafly\Icons\Phosphor\Enums\Phosphor;
 use Filament\Forms\Components\RichEditor;
 use Filament\Pages\SettingsPage;
@@ -12,7 +14,12 @@ use Filament\Schemas\Schema;
 
 class ManageCookiePolicy extends SettingsPage
 {
-    use AuthorizesSettings, QueuesPolicyContentTranslation;
+    use AuthorizesSettings, OffersPolicyDraft, QueuesPolicyContentTranslation;
+
+    protected static function draftFile(): string
+    {
+        return 'cookie-policy';
+    }
 
     protected static string $permission = 'settings.legal';
 
@@ -53,7 +60,8 @@ class ManageCookiePolicy extends SettingsPage
                     // Bigger editor, but still fits on most screens.
                     'style' => 'min-height: 40vh; max-height: 50vh; overflow-y: auto;',
                 ])
-                ->required(),
+                ->required()
+                ->rules([fn () => PolicyDraft::rule()]),
         ]);
     }
 }

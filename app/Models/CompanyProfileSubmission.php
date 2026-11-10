@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedEmail;
 use App\Exceptions\OutdatedSubmission;
 use App\Mail\CompanyProfileApprovedMail;
 use App\Mail\CompanyProfileRejectedMail;
@@ -78,6 +79,8 @@ class CompanyProfileSubmission extends Model
     ];
 
     protected $casts = [
+        'contact_email' => EncryptedEmail::class,
+        'contact_name' => \App\Casts\EncryptedText::class,
         'comparison_snapshot' => 'array',
         'proposed_education_ids' => 'array',
         'proposed_sector_ids' => 'array',

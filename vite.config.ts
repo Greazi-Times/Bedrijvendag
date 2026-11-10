@@ -16,8 +16,10 @@ export default defineConfig({
             refresh: true
         }),
         tailwindcss(),
+        // Generation goes through a lock shared with `npm run types`, so nothing reads the generated files while they are rewritten.
         wayfinder({
-            formVariants: true
+            formVariants: true,
+            command: 'node scripts/wayfinder-generate.mjs'
         }),
         vue({
             template: {

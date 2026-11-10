@@ -54,7 +54,7 @@ class EditUser extends EditRecord
         /** @var User $record */
         return DB::transaction(function () use ($record, $data): User {
             // Logged as users.updated by the model (App\Models\Concerns\Audited).
-            $record->update(Arr::only($data, ['name', 'email']));
+            $record->update(Arr::only($data, ['name', 'email', 'password']));
 
             // The roles field is disabled (so not submitted) when editing yourself.
             if (array_key_exists('roles', $data)) {

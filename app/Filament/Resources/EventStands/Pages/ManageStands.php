@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\EventStands\Pages;
 
+use App\Filament\Resources\Enrollments\EnrollmentResource;
 use App\Filament\Resources\EventStands\EventStandResource;
 use App\Models\Company;
 use App\Models\Event;
 use App\Models\EventMapPoint;
 use App\Models\EventStand;
 use App\Models\Partner;
+use App\Services\StandEligibility;
 use App\Support\PageMedia;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -22,6 +24,7 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class ManageStands extends Page implements HasForms, HasTable
 {
@@ -472,6 +475,15 @@ class ManageStands extends Page implements HasForms, HasTable
                 TextColumn::make('assigned_name')
                     ->label('Assigned to')
                     ->getStateUsing(fn (EventStand $record): string => $record->company?->name ?? $record->partner?->name ?? '—'),
+
+                TextColumn::make('eligibility')
+                    ->label('Enrollment')
+                    ->badge()
+                    ->color('warning')
+                    ->icon('heroicon-o-exclamation-triangle')
+                    ->getStateUsing(fn (EventStand $record): ?string => $this->standWarning($record)['short'] ?? null)
+                    ->url(fn (EventStand $record): ?string => ($e = $this->standWarning($record)['enrollment'] ?? null) ? EnrollmentResource::getUrl('view', ['record' => $e]) : null)
+                    ->tooltip(fn (EventStand $record): ?string => ($w = $this->standWarning($record)) ? $w['label'].'. The stand and its position are kept; approve the enrollment, or remove or reassign the stand.' : null),
             ])
             ->actions([
                 Action::make('set_marker')
@@ -518,64 +530,82 @@ class ManageStands extends Page implements HasForms, HasTable
                             ];
                         }
 
+                        $event = Event::query()->findOrFail($record->event_id); // the stand's own edition, never the page property
+                        $eligibility = app(StandEligibility::class);
+                        $current = $record->company_id;
+                        // Grouped so a search term can never widen the list: (eligible OR current company) AND name LIKE ...
+                        $scope = fn () => Company::query()->where(fn ($w) => $w
+                            ->whereIn('companies.id', $eligibility->assignableCompanies($event)->select('companies.id'))
+                            ->when($current, fn ($w) => $w->orWhere('companies.id', $current)));
+
                         return [
                             Select::make('company_id')
                                 ->label('Company')
-                                ->options(fn (): array => Company::query()
-                                    ->orderBy('name')
-                                    ->pluck('name', 'id')
-                                    ->all()
-                                )
+                                ->helperText($eligibility->isHistorical($event) ? 'This edition is in the past, so any company can be selected.' : 'Only companies with an approved enrollment for this edition can be given a stand.')
+                                ->options(fn (): array => $scope()->orderBy('name')->pluck('name', 'id')->all())
                                 ->searchable()
                                 ->preload()
                                 ->default(fn (EventStand $record): ?int => $record->company_id)
-                                ->getSearchResultsUsing(fn (string $search): array => Company::query()
-                                    ->where('name', 'like', "%{$search}%")
+                                ->getSearchResultsUsing(fn (string $search): array => $scope()
+                                    ->where('companies.name', 'like', '%'.addcslashes($search, '%_\\').'%')
                                     ->orderBy('name')
                                     ->limit(50)
                                     ->pluck('name', 'id')
                                     ->all()
                                 )
                                 ->getOptionLabelUsing(fn ($value): ?string => $value ? Company::query()->whereKey($value)->value('name') : null)
+                                // The dropdown is not trusted: a hand-crafted request is checked again on the server.
+                                ->rule(fn (): \Closure => function (string $attribute, $value, \Closure $fail) use ($eligibility, $event, $current): void {
+                                    if ((int) $value !== (int) $current && ! $eligibility->isEligible($event, (int) $value) && ! $eligibility->isHistorical($event)) {
+                                        $fail('This company has no approved enrollment for this edition.');
+                                    }
+                                })
                                 ->required(),
                         ];
                     })
                     ->action(function (array $data, EventStand $record) {
-                        DB::transaction(function () use ($data, $record): void {
-                            if ($record->type === 'partner') {
-                                $partnerId = (int) $data['partner_id'];
+                        try {
+                            DB::transaction(function () use ($data, $record): void {
+                                if ($record->type === 'partner') {
+                                    $partnerId = (int) $data['partner_id'];
+
+                                    EventStand::query()
+                                        ->where('event_id', $record->event_id)
+                                        ->where('type', 'partner')
+                                        ->where('partner_id', $partnerId)
+                                        ->where('id', '!=', $record->id)
+                                        ->update(['partner_id' => null]);
+
+                                    $record->update([
+                                        'company_id' => null,
+                                        'partner_id' => $partnerId,
+                                        'type' => 'partner',
+                                    ]);
+
+                                    return;
+                                }
+
+                                $companyId = (int) $data['company_id'];
 
                                 EventStand::query()
-                                    ->where('event_id', $this->selectedEventId)
-                                    ->where('type', 'partner')
-                                    ->where('partner_id', $partnerId)
+                                    ->where('event_id', $record->event_id)
+                                    ->where('type', 'company')
+                                    ->where('company_id', $companyId)
                                     ->where('id', '!=', $record->id)
-                                    ->update(['partner_id' => null]);
+                                    ->update(['company_id' => null]);
 
                                 $record->update([
-                                    'company_id' => null,
-                                    'partner_id' => $partnerId,
-                                    'type' => 'partner',
+                                    'company_id' => $companyId,
+                                    'partner_id' => null,
+                                    'type' => 'company',
                                 ]);
+                            });
+                        } catch (ValidationException $e) {
+                            // Rolled back as a whole, including the removal from the previous stand.
+                            Notification::make()->danger()->title('Stand not assigned')->body(collect($e->errors())->flatten()->implode("\n"))->persistent()->send();
 
-                                return;
-                            }
-
-                            $companyId = (int) $data['company_id'];
-
-                            EventStand::query()
-                                ->where('event_id', $this->selectedEventId)
-                                ->where('type', 'company')
-                                ->where('company_id', $companyId)
-                                ->where('id', '!=', $record->id)
-                                ->update(['company_id' => null]);
-
-                            $record->update([
-                                'company_id' => $companyId,
-                                'partner_id' => null,
-                                'type' => 'company',
-                            ]);
-                        });
+                            return;
+                        }
 
                         $this->resetTable();
                     }),
@@ -600,6 +630,38 @@ class ManageStands extends Page implements HasForms, HasTable
                         $this->resetTable();
                     }),
             ]);
+    }
+
+    /** @var \Illuminate\Support\Collection<int, EventStand>|null computed once per request, not once per table row */
+    private ?\Illuminate\Support\Collection $flaggedStands = null;
+
+    /** @var array<int, array{label: string, short: string, enrollment: ?\App\Models\Enrollment}> */
+    private array $standWarnings = [];
+
+    /** @return \Illuminate\Support\Collection<int, EventStand> company stands of an active or future edition without an approved enrollment */
+    public function getFlaggedStands(): \Illuminate\Support\Collection
+    {
+        if ($this->flaggedStands === null) {
+            $eligibility = app(StandEligibility::class);
+            $event = $this->getSelectedEvent();
+            $this->flaggedStands = $event ? $eligibility->flaggedStands($event) : collect();
+            $this->standWarnings = $this->flaggedStands->mapWithKeys(fn (EventStand $s): array => [$s->id => $eligibility->explain($s)])->all();
+        }
+
+        return $this->flaggedStands;
+    }
+
+    public function getStandExplanation(EventStand $stand): string
+    {
+        return $this->standWarning($stand)['label'] ?? '';
+    }
+
+    /** Non-blocking: set for flagged stands only. */
+    protected function standWarning(EventStand $stand): ?array
+    {
+        $this->getFlaggedStands();
+
+        return $this->standWarnings[$stand->id] ?? null;
     }
 
     protected function getStandQuery(): Builder
@@ -650,13 +712,17 @@ class ManageStands extends Page implements HasForms, HasTable
             ->where('event_id', $this->selectedEventId)
             ->where('type', $type);
 
+        // Only EMPTY stands above the maximum are removed; an occupied stand is never deleted here.
+        // (Event::updating already refuses to lower the count past an occupied stand; this covers bulk changes.)
+        $empty = fn ($q) => $q->whereNull('company_id')->whereNull('partner_id');
+
         if ($max === 0) {
-            $query->delete();
+            $empty($query)->delete();
 
             return;
         }
 
-        $query
+        $empty($query)
             ->whereRaw('CAST(stand_number AS UNSIGNED) > ?', [$max])
             ->delete();
 

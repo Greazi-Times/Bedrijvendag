@@ -21,11 +21,9 @@ class CompanyInterestRequestsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('contact_name')
-                    ->label('Contact')
-                    ->searchable(),
+                    ->label('Contact'),
                 TextColumn::make('contact_email')
                     ->label('Email')
-                    ->searchable()
                     ->copyable(),
                 TextColumn::make('event.name')
                     ->label('Edition')

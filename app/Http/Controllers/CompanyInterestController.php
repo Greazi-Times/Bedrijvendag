@@ -35,7 +35,7 @@ class CompanyInterestController extends Controller
         $validated = $request->validate([
             'company_name' => ['required', 'string', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:255'],
-            'contact_name' => ['required', 'string', 'max:255'],
+            'contact_name' => ['nullable', 'string', 'max:255'], // no longer asked on the form; kept for compatibility
             'contact_email' => ['required', 'email', 'max:255'],
             'message' => ['nullable', 'string', 'max:2000'],
         ]);

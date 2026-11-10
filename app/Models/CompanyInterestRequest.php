@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedEmail;
 use App\Models\Concerns\Audited;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,8 @@ class CompanyInterestRequest extends Model
     protected static $recordEvents = ['deleted'];
 
     protected array $auditAttributes = ['event_id', 'company_name'];
+
+    protected $casts = ['contact_email' => EncryptedEmail::class, 'contact_name' => \App\Casts\EncryptedText::class];
 
     protected $fillable = [
         'event_id',

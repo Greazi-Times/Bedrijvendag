@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedEmail;
 use App\Exceptions\AlreadyReviewedException;
 use App\Mail\CompanyAccessApprovedMail;
 use App\Mail\CompanyAccessRejectedMail;
@@ -58,6 +59,8 @@ class CompanyAccessRequest extends Model
     ];
 
     protected $casts = [
+        'contact_email' => EncryptedEmail::class,
+        'contact_name' => \App\Casts\EncryptedText::class,
         'submitted_at' => 'datetime',
         'reviewed_at' => 'datetime',
         'education_ids' => 'array',

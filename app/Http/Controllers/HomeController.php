@@ -92,6 +92,7 @@ class HomeController extends Controller
             'highlightEvent' => $highlightEventPayload,
             'borrelEvent' => $borrelEventPayload,
             'borrelStatus' => $borrelStatus,
+            'marketingConsentText' => __('messages.marketing_consent_text'),
             'closingBorrelCount' => $closingBorrelCount,
             'partners' => $partners,
             'homeImages' => PageMedia::homeImages(),

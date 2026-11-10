@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BorrelEnrollments\Tables;
 
+use App\Support\Privacy\EmailSearch;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -20,12 +21,10 @@ class BorrelEnrollmentsTable
                     ->label('Event')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('name')
-                    ->searchable()
-                    ->sortable(),
+                TextColumn::make('name')->placeholder('Not asked')->toggleable(isToggledHiddenByDefault: true), // legacy only; encrypted at rest
                 TextColumn::make('email')
                     ->label('Email address')
-                    ->searchable(),
+                    ->searchable(query: EmailSearch::exact('email')),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

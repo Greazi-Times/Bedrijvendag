@@ -3,12 +3,15 @@
 namespace App\Filament\Resources\Events\RelationManagers;
 
 use App\Models\Company;
+use App\Services\StandEligibility;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class CompaniesRelationManager extends RelationManager
 {
@@ -75,8 +78,10 @@ class CompaniesRelationManager extends RelationManager
                             Select::make('company_id')
                                 ->label('Company')
                                 ->options(
-                                    Company::query()
-                                        ->whereNotIn('id', $assignedCompanyIds)
+                                    // Same rule as the Event Map: only companies with an approved enrollment for this edition.
+                                    app(StandEligibility::class)->assignableCompanies($event)
+                                        ->whereNotIn('companies.id', $assignedCompanyIds)
+                                        ->orderBy('name')
                                         ->pluck('name', 'id')
                                 )
                                 ->searchable()
@@ -85,6 +90,15 @@ class CompaniesRelationManager extends RelationManager
                     })
                     ->action(function ($record, array $data) {
                         $event = $this->getOwnerRecord();
+
+                        // attach() writes the pivot directly and skips model events, so the rule is enforced here.
+                        try {
+                            app(StandEligibility::class)->assertCompanyEligible($event, (int) $data['company_id']);
+                        } catch (ValidationException $e) {
+                            Notification::make()->danger()->title('Stand not assigned')->body(collect($e->errors())->flatten()->implode("\n"))->persistent()->send();
+
+                            return;
+                        }
 
                         // If a company is already assigned to this stand, detach it first
                         if ($record->company_id) {

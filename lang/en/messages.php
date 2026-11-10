@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'marketing_consent_text' => 'I would also like to receive emails about future editions and other news from ATIx Bedrijvendag. This is separate from the drinks and you can unsubscribe at any time.',
+    'newsletter_consent_text' => 'I subscribe to the newsletter with updates about future editions of ATIx Bedrijvendag.',
+    'unsubscribe_title' => 'Unsubscribe from the newsletter',
+    'unsubscribe_question' => 'Do you no longer want emails about future editions and news from ATIx Bedrijvendag? You will still receive messages about any registration or application you made.',
+    'unsubscribe_button' => 'Unsubscribe',
+    'unsubscribe_done' => 'You have been unsubscribed. You will not receive promotional emails anymore.',
+    'unsubscribe_home' => 'Back to the website',
     'borrel_unavailable' => 'Registration for the networking drinks is currently unavailable.',
     'borrel_duplicate' => 'This email address is already registered for the networking drinks.',
     'borrel_success' => 'You are registered. See you at the networking drinks!',

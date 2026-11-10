@@ -33,8 +33,7 @@ class CompanyAccessRequestsTable
                     ->label('Matched company')
                     ->searchable()
                     ->toggleable(),
-                TextColumn::make('contact_email')
-                    ->searchable(),
+                TextColumn::make('contact_email'),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {

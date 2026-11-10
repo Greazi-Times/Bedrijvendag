@@ -46,7 +46,6 @@ const form = useForm({
     education_ids: [] as number[],
     sector_ids: [] as number[],
     new_sector_names: [] as string[],
-    contact_name: '',
     contact_email: '',
     message: '',
 });
@@ -453,14 +452,6 @@ function submit() {
                                 <p v-if="sectorError" class="field-error mt-2">{{ sectorError }}</p>
                             </div>
                         </template>
-
-                        <div>
-                            <label for="contact_name" class="field-label mb-2 block"
-                                >{{ t('companyAccess.contactPerson') }} <span class="text-danger" aria-hidden="true">*</span></label
-                            >
-                            <input id="contact_name" v-model="form.contact_name" type="text" autocomplete="name" class="input" />
-                            <p v-if="form.errors.contact_name" class="field-error mt-2">{{ form.errors.contact_name }}</p>
-                        </div>
 
                         <div>
                             <label for="contact_email" class="field-label mb-2 block"

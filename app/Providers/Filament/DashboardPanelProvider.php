@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Auth\RequestPasswordReset;
 use App\Filament\Pages\SecurityOverview;
 use App\Filament\Widgets\BorrelEnrollmentsPerEventChart;
 use App\Filament\Widgets\CompaniesPerEventChart;
@@ -50,7 +51,7 @@ class DashboardPanelProvider extends PanelProvider
                 fn (): string => view('filament.theme-cookie-sync')->render(),
             )
             ->login(Login::class)
-            ->passwordReset()
+            ->passwordReset(RequestPasswordReset::class)
             ->colors([
                 'primary' => '#ff6600',
                 'info' => '#3b82f6',

@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedEmail;
 use App\Jobs\TranslateCompanyDescription;
 use App\Models\Concerns\Audited;
+use App\Services\CompanyMatcher;
 use App\Services\DeepLTranslator;
 use App\Support\RichText;
 use App\Support\TranslationContent;
@@ -31,6 +33,7 @@ class Company extends Model
     ];
 
     protected $casts = [
+        'profile_contact_email' => EncryptedEmail::class,
         'profile_token_expires_at' => 'datetime',
     ];
 
@@ -110,7 +113,7 @@ class Company extends Model
     /** Lowercase, accent- and punctuation-free key: "BOM Engineering B.V." == "bom engineering bv". */
     public static function nameKey(string $name): string
     {
-        return preg_replace('/[^a-z0-9]+/', '', Str::lower(Str::ascii($name))) ?? '';
+        return app(CompanyMatcher::class)->normalize($name);
     }
 
     /**
@@ -118,24 +121,7 @@ class Company extends Model
      */
     public static function matchesForName(string $name): array
     {
-        $key = static::nameKey($name);
-        $none = ['exact' => collect(), 'similar' => collect()];
-
-        if (strlen($key) < 3) {
-            return $none;
-        }
-
-        $companies = static::query()->orderBy('name')->get(['id', 'name', 'website_url']);
-        $exact = $companies->filter(fn (Company $c): bool => static::nameKey($c->name) === $key);
-        $similar = $companies->diff($exact)->filter(function (Company $c) use ($key): bool {
-            $other = static::nameKey($c->name);
-
-            return strlen($other) >= 3
-                && (levenshtein($key, $other) <= max(1, intdiv(min(strlen($key), strlen($other)), 5))
-                    || (min(strlen($key), strlen($other)) >= 4 && (str_contains($other, $key) || str_contains($key, $other))));
-        });
-
-        return ['exact' => $exact->values(), 'similar' => $similar->values()];
+        return app(CompanyMatcher::class)->matches($name);
     }
 
     public function profileVerificationUrl(): string
@@ -184,6 +170,11 @@ class Company extends Model
     public function pendingProfileSubmission(): HasOne
     {
         return $this->hasOne(CompanyProfileSubmission::class)->where('status', CompanyProfileSubmission::STATUS_PENDING);
+    }
+
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class);
     }
 
     public function accessRequests(): HasMany

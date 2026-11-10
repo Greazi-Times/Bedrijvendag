@@ -13,7 +13,7 @@ class BorrelEnrollmentInfolist
             ->components([
                 TextEntry::make('event.name')
                     ->label('Event'),
-                TextEntry::make('name'),
+                TextEntry::make('name')->placeholder('Not asked')->visible(fn ($record): bool => filled($record?->name)),
                 TextEntry::make('email')
                     ->label('Email address'),
                 TextEntry::make('created_at')

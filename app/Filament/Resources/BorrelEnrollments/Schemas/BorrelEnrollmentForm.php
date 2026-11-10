@@ -15,8 +15,6 @@ class BorrelEnrollmentForm
                 Select::make('event_id')
                     ->relationship('event', 'name')
                     ->required(),
-                TextInput::make('name')
-                    ->required(),
                 TextInput::make('email')
                     ->label('Email address')
                     ->email()

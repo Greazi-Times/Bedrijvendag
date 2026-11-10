@@ -350,6 +350,21 @@
         @endif
 
         <x-filament::section heading="Stands">
+            @php
+                $flagged = $this->getFlaggedStands();
+            @endphp
+            @if ($flagged->isNotEmpty())
+                <div class="mb-4 rounded-lg border border-warning-300 bg-warning-50 p-4 text-sm text-warning-800 dark:border-warning-700 dark:bg-warning-950 dark:text-warning-200" role="status">
+                    <p class="font-semibold">{{ $flagged->count() }} {{ \Illuminate\Support\Str::plural('stand', $flagged->count()) }} without an approved enrollment</p>
+                    <p class="mt-1">These companies keep their stand and position, but they would not be allowed on a stand today. Nothing was changed automatically. To resolve: approve their enrollment, or remove or reassign the stand (its marker is kept).</p>
+                    <ul class="mt-2 list-disc pl-5">
+                        @foreach ($flagged as $stand)
+                            <li>Stand {{ $stand->stand_number }}: {{ $stand->company?->name }} — {{ $this->getStandExplanation($stand) }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             {{ $this->table }}
         </x-filament::section>
 

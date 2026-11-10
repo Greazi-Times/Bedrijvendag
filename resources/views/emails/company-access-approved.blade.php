@@ -7,7 +7,7 @@
 <body style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
     @php($verificationUrl = $accessRequest->verificationUrl())
 
-    <p>Beste {{ $accessRequest->contact_name }},</p>
+    <p>Beste {{ $accessRequest->contact_name ?: 'relatie' }},</p>
 
     <p>Je aanvraag voor toegang tot het Bedrijvendag bedrijfsprofiel van <strong>{{ $accessRequest->company?->name ?? $accessRequest->company_name }}</strong> is goedgekeurd.</p>
 

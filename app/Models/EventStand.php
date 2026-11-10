@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Builders\EventStandBuilder;
 use App\Models\Concerns\Audited;
+use App\Services\StandEligibility;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -43,7 +45,23 @@ class EventStand extends Model
                 $eventStand->partner_id = null;
                 $eventStand->type = 'company';
             }
+
+            // Only a change of company or edition is checked, so layout edits on grandfathered stands are never blocked.
+            app(StandEligibility::class)->assertCanAssign($eventStand);
         });
+    }
+
+    /** Marks the model's own UPDATE ... WHERE id query so the bulk guard does not re-route it through the model again. */
+    protected function setKeysForSaveQuery($query)
+    {
+        $query = parent::setKeysForSaveQuery($query);
+
+        return $query instanceof EventStandBuilder ? $query->forModelSave() : $query;
+    }
+
+    public function newEloquentBuilder($query): EventStandBuilder
+    {
+        return new EventStandBuilder($query);
     }
 
     public function event(): BelongsTo

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\NewsletterSubscribers\Tables;
 
+use App\Support\Privacy\EmailSearch;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -13,7 +14,7 @@ class NewsletterSubscribersTable
             ->columns([
                 TextColumn::make('email')
                     ->label('Email address')
-                    ->searchable(),
+                    ->searchable(query: EmailSearch::exact('email')),
                 TextColumn::make('subscribed_at')
                     ->dateTime()
                     ->sortable(),

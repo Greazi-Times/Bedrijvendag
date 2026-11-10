@@ -34,7 +34,6 @@ class CompaniesTable
                     ->searchable(),
                 TextColumn::make('profile_contact_email')
                     ->label('Profile contact')
-                    ->searchable()
                     ->toggleable(),
                 TextColumn::make('profile_verification_url')
                     ->label('Edit link')

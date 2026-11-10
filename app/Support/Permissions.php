@@ -32,6 +32,8 @@ final class Permissions
         'dashboard' => ['label' => 'Dashboard', 'section' => 'General', 'description' => 'Sign in to the dashboard. Each widget also needs the view permission of its module.', 'actions' => ['view']],
         'events' => ['label' => 'Events', 'section' => 'Edition', 'description' => 'Editions with their dates, programme and partners.', 'actions' => ['view', 'create', 'update', 'delete']],
         'event-stands' => ['label' => 'Stands & map', 'section' => 'Edition', 'description' => 'Stand assignment, map markers and map points per edition.', 'actions' => ['view', 'update']],
+        'enrollments' => ['label' => 'Enrollments', 'section' => 'Company', 'description' => 'Company enrollments per edition, including contact and invoice details. Approve and reject lives under review.', 'actions' => ['view', 'review', 'delete']],
+        'forms' => ['label' => 'Forms', 'section' => 'Edition', 'description' => 'Enrollment and information form builder, per edition. Updating also publishes and duplicates.', 'actions' => ['view', 'create', 'update', 'delete']],
         'borrel-enrollments' => ['label' => 'Borrel enrollments', 'section' => 'Edition', 'description' => 'Names and email addresses of borrel guests.', 'actions' => ['view', 'create', 'update', 'delete']],
         'companies' => ['label' => 'Companies', 'section' => 'Company', 'description' => 'Company profiles. Edit links let anyone holding them edit a company profile.', 'actions' => ['view', 'create', 'update', 'delete', 'links']],
         'company-access-requests' => ['label' => 'Access requests', 'section' => 'Company', 'description' => 'Requests from companies for a profile link.', 'actions' => ['view', 'review']],

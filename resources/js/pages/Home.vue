@@ -58,6 +58,7 @@ const props = defineProps<{
     highlightEvent: EventCard | null;
     borrelEvent: EventCard | null;
     borrelStatus: BorrelStatus;
+    marketingConsentText: string;
     closingBorrelCount: number;
     partners: PartnerCard[];
     homeImages: HomeImages;
@@ -182,8 +183,8 @@ const editionMonth = (value: string | null) => formatDate(value, dateLocale.valu
 // Borrel form logic
 
 const borrelForm = useForm({
-    name: '',
     email: '',
+    marketing_consent: false, // optional and never pre-checked
     event_id: props.borrelEvent?.id ?? null,
 });
 
@@ -206,7 +207,7 @@ const submitBorrel = () => {
         onError: focusFirstError,
         onSuccess: () => {
             triggerBorrelSuccess();
-            borrelForm.reset('name', 'email');
+            borrelForm.reset('email', 'marketing_consent');
         },
     });
 };
@@ -385,22 +386,6 @@ onBeforeUnmount(() => {
 
                         <form class="mt-7 grid gap-5" novalidate @submit.prevent="submitBorrel">
                             <div class="field">
-                                <label for="borrel-name" class="field-label">{{ t('common.name') }}</label>
-                                <input
-                                    id="borrel-name"
-                                    v-model="borrelForm.name"
-                                    type="text"
-                                    name="name"
-                                    autocomplete="name"
-                                    class="input"
-                                    :placeholder="t('home.fullName')"
-                                    :aria-invalid="borrelForm.errors.name ? 'true' : undefined"
-                                    :aria-describedby="borrelForm.errors.name ? 'borrel-name-error' : undefined"
-                                />
-                                <p v-if="borrelForm.errors.name" id="borrel-name-error" class="field-error">{{ borrelForm.errors.name }}</p>
-                            </div>
-
-                            <div class="field">
                                 <label for="borrel-email" class="field-label">{{ t('common.email') }}</label>
                                 <input
                                     id="borrel-email"
@@ -415,6 +400,13 @@ onBeforeUnmount(() => {
                                     :aria-describedby="borrelForm.errors.email ? 'borrel-email-error' : undefined"
                                 />
                                 <p v-if="borrelForm.errors.email" id="borrel-email-error" class="field-error">{{ borrelForm.errors.email }}</p>
+                            </div>
+
+                            <div class="field">
+                                <label for="borrel-marketing" class="flex items-start gap-3 text-sm">
+                                    <input id="borrel-marketing" v-model="borrelForm.marketing_consent" type="checkbox" name="marketing_consent" class="mt-1 h-4 w-4" />
+                                    <span>{{ marketingConsentText }}</span>
+                                </label>
                             </div>
 
                             <div class="mt-1 grid gap-3">

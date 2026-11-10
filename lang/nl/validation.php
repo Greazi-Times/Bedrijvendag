@@ -2,6 +2,19 @@
 
 return [
     'required' => 'Het veld :attribute is verplicht.',
+    'accepted' => 'Je moet :attribute accepteren.',
+    'boolean' => 'Het veld :attribute moet ja of nee zijn.',
+    'numeric' => 'Het veld :attribute moet een getal zijn.',
+    'date' => 'Het veld :attribute moet een geldige datum zijn.',
+    'uuid' => 'Het veld :attribute is ongeldig.',
+    'regex' => 'Het veld :attribute heeft een ongeldig formaat.',
+    'mimes' => 'Het veld :attribute moet een bestand zijn van het type: :values.',
+    'min' => [
+        'numeric' => 'Het veld :attribute moet minimaal :min zijn.',
+        'file' => 'Het bestand :attribute moet minimaal :min kilobytes zijn.',
+        'string' => 'Het veld :attribute moet minimaal :min tekens bevatten.',
+        'array' => 'Het veld :attribute moet minimaal :min items bevatten.',
+    ],
     'email' => 'Het veld :attribute moet een geldig e-mailadres zijn.',
     'url' => 'Het veld :attribute moet een geldige URL zijn.',
     'string' => 'Het veld :attribute moet tekst bevatten.',

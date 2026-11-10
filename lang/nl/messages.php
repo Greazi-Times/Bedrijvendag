@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'marketing_consent_text' => 'Ik wil ook graag e-mails ontvangen over toekomstige edities en andere nieuwtjes van ATIx Bedrijvendag. Dit is los van de borrel en altijd weer af te melden.',
+    'newsletter_consent_text' => 'Ik meld me aan voor de nieuwsbrief met updates over toekomstige edities van ATIx Bedrijvendag.',
+    'unsubscribe_title' => 'Afmelden voor de nieuwsbrief',
+    'unsubscribe_question' => 'Wil je geen e-mails meer ontvangen over toekomstige edities en nieuws van ATIx Bedrijvendag? Berichten over een inschrijving of aanmelding die je hebt gedaan blijf je gewoon krijgen.',
+    'unsubscribe_button' => 'Afmelden',
+    'unsubscribe_done' => 'Je bent afgemeld. Je ontvangt geen promotionele e-mails meer.',
+    'unsubscribe_home' => 'Terug naar de website',
     'borrel_unavailable' => 'Aanmelden voor de borrel is op dit moment niet mogelijk.',
     'borrel_duplicate' => 'Dit e-mailadres is al aangemeld voor deze borrel.',
     'borrel_success' => 'Je bent aangemeld. Tot bij de borrel.',

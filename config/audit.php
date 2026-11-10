@@ -43,6 +43,8 @@ return [
         'remember_token', 'two_factor_secret', 'two_factor_recovery_codes',
         'token', 'profile_token', 'api_token', 'access_token', 'refresh_token',
         'secret', 'private_key', 'session', 'session_id', '_token',
+        // Personal email addresses (and their lookup hashes) never enter the audit trail.
+        'contact_name', 'contact_email', 'profile_contact_email', 'contact_email_hash', 'email_hash', 'answers',
     ],
 
     /*
@@ -59,7 +61,7 @@ return [
     | not legal requirements.
     */
     'retention' => [
-        'scheduled' => env('AUDIT_RETENTION_SCHEDULED', false),
+        'scheduled' => env('AUDIT_RETENTION_SCHEDULED', true),
         'default' => (int) env('AUDIT_RETENTION_GENERAL_DAYS', 180),
         'categories' => [
             'auth' => (int) env('AUDIT_RETENTION_SECURITY_DAYS', 90),
