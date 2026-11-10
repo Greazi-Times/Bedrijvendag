@@ -30,3 +30,4 @@ yarn-error.log
 /graphify-out
 /AGENTS.md
 /CLAUDE.md
+/.playwright-cli/
