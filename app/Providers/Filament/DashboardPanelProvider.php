@@ -3,8 +3,6 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
-use App\Filament\Pages\Auth\RequestPasswordReset;
-use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\SecurityOverview;
 use App\Filament\Widgets\BorrelEnrollmentsPerEventChart;
 use App\Filament\Widgets\CompaniesPerEventChart;
@@ -16,6 +14,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -51,7 +50,7 @@ class DashboardPanelProvider extends PanelProvider
                 fn (): string => view('filament.theme-cookie-sync')->render(),
             )
             ->login(Login::class)
-            ->passwordReset(RequestPasswordReset::class)
+            ->passwordReset()
             ->colors([
                 'primary' => '#ff6600',
                 'info' => '#3b82f6',
