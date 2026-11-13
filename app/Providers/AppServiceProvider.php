@@ -28,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(TranslatesText::class, DeepLTranslator::class);
+        $this->app->singleton(\App\Services\Analytics\Analytics::class);
     }
 
     /**

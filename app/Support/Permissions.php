@@ -30,6 +30,7 @@ final class Permissions
      */
     public const MODULES = [
         'dashboard' => ['label' => 'Dashboard', 'section' => 'General', 'description' => 'Sign in to the dashboard. Each widget also needs the view permission of its module.', 'actions' => ['view']],
+        'statistics' => ['label' => 'Statistics', 'section' => 'General', 'description' => 'Financial figures (accepted participation fees) on the dashboard. Other statistics follow the view permission of their module.', 'actions' => ['financial']],
         'events' => ['label' => 'Events', 'section' => 'Edition', 'description' => 'Editions with their dates, programme and partners.', 'actions' => ['view', 'create', 'update', 'delete']],
         'event-stands' => ['label' => 'Stands & map', 'section' => 'Edition', 'description' => 'Stand assignment, map markers and map points per edition.', 'actions' => ['view', 'update']],
         'enrollments' => ['label' => 'Enrollments', 'section' => 'Company', 'description' => 'Company enrollments per edition, including contact and invoice details. Approve and reject lives under review.', 'actions' => ['view', 'review', 'delete']],
@@ -69,6 +70,7 @@ final class Permissions
         'settings.media' => ['settings.manage'],
         'settings.legal' => ['settings.manage'],
         'audit.view' => ['audit-logs.view'],
+        'statistics.financial' => ['enrollments.review'],
     ];
 
     /** Replaced by the permissions above; removed by sync once their roles are carried over. */
@@ -86,6 +88,7 @@ final class Permissions
         'legal' => 'Legal pages',
         'manage-retention' => 'Retention cleanup',
         'manage-alerts' => 'Acknowledge alerts',
+        'financial' => 'Financial figures',
     ];
 
     /**
