@@ -17,6 +17,9 @@ export type Field = {
     max_setting?: string | null;
     count_from?: string | null;
     maps_to?: string | null;
+    allow_na?: boolean;
+    label_low?: string;
+    label_high?: string;
     children?: Field[];
     visible_if?: { field: string; operator: string; value?: string | string[] | null } | null;
 };

@@ -44,9 +44,15 @@ class Analytics
         ])->values()->toJson());
     }
 
-    /** The edition shown by default: the next upcoming one, else the most recent. */
+    /**
+     * The edition shown by default, by event date: the one taking place today or else the next upcoming one, else the most
+     * recent past one. "Today" is the day in the privacy timezone, because editions are dates, not moments.
+     */
     public function defaultEvent(): ?Event
     {
-        return Event::query()->nextOrLatest()->first();
+        $today = now(config('privacy.timezone'))->toDateString();
+
+        return Event::query()->whereDate('date', '>=', $today)->orderBy('date')->orderBy('id')->first()
+            ?? Event::query()->orderByDesc('date')->orderByDesc('id')->first();
     }
 }

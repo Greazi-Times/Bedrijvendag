@@ -72,7 +72,7 @@ function publishNewGlobalVersion(string $kind, string $label = 'Company name (v2
 /* ------------------------------------------------------------ the two global forms exist */
 
 test('both global forms are created automatically with a published first version', function () {
-    $forms = Form::whereNotNull('system_key')->get()->keyBy('system_key');
+    $forms = Form::whereNotNull('system_key')->whereNotIn('kind', Form::FEEDBACK_KINDS)->get()->keyBy('system_key');
 
     expect($forms->keys()->sort()->values()->all())->toBe(['default_enrollment', 'default_info']);
 
@@ -130,7 +130,7 @@ test('initialising again never duplicates a global form or resets an administrat
     $this->artisan('forms:initialize')->assertSuccessful();
 
     expect($first['created'])->toBe([])->and($second['created'])->toBe([]);
-    expect(Form::whereNotNull('system_key')->count())->toBe(2);
+    expect(Form::whereNotNull('system_key')->count())->toBe(4);
     $again = globalForm('enrollment');
     expect($again->versions()->count())->toBe(2)->and($again->latestVersion->schema['sections'][0]['fields'][1]['label'])->toBe('Changed by an admin')
         ->and($again->draft_schema['sections'][0]['fields'][1]['label'])->toBe('Unpublished draft change');
@@ -143,7 +143,7 @@ test('a missing global form is recreated lazily and creation is idempotent under
     $form = app(GlobalForms::class)->get('info');
 
     expect($form->system_key)->toBe('default_info')->and($form->latestVersion->version)->toBe(1);
-    expect(app(GlobalForms::class)->ensure())->toBe([])->and(Form::whereNotNull('system_key')->count())->toBe(2);
+    expect(app(GlobalForms::class)->ensure())->toBe([])->and(Form::whereNotNull('system_key')->count())->toBe(4);
 });
 
 /* ------------------------------------------------------------ inheritance */
@@ -153,7 +153,7 @@ test('a new edition inherits both global forms automatically and its link works 
 
     expect($event->enrollmentForm->id)->toBe(globalForm('enrollment')->id)->and($event->infoForm->id)->toBe(globalForm('info')->id)
         ->and($event->enrollment_form_id)->toBeNull()->and($event->info_form_id)->toBeNull()
-        ->and(Form::whereNotNull('event_id')->count())->toBe(0);
+        ->and(Form::whereNotNull('event_id')->whereNotIn('kind', Form::FEEDBACK_KINDS)->count())->toBe(0);
 
     $this->get(route('enrollment.show', $event->enrollment_token))->assertInertia(fn (Assert $p) => $p
         ->where('state', 'open')->where('form.version_id', globalForm('enrollment')->latestVersion->id));
@@ -168,7 +168,7 @@ test('creating an edition in the admin needs no form setup', function () {
 
     $event = Event::where('name', 'Bedrijvendag 2029')->firstOrFail();
     expect($event->enrollment_token)->toHaveLength(40)->and($event->enrollmentForm->isGlobal())->toBeTrue()->and($event->infoForm->isGlobal())->toBeTrue()
-        ->and(Form::whereNotNull('event_id')->count())->toBe(0);
+        ->and(Form::whereNotNull('event_id')->whereNotIn('kind', Form::FEEDBACK_KINDS)->count())->toBe(0);
 });
 
 test('existing editions holding an untouched generated copy move onto the global forms', function () {
@@ -403,7 +403,7 @@ test('the global forms cannot be deleted, re-homed or turned into something else
     // an ordinary form cannot be turned into a global one, and the database itself allows each key only once
     expect(fn () => Form::create(['name' => 'x', 'kind' => 'info', 'draft_schema' => DefaultForms::info()])->forceFill(['system_key' => 'default_info'])->save())->toThrow(LogicException::class);
     expect(fn () => DB::table('forms')->insert(['name' => 'dup', 'kind' => 'info', 'system_key' => 'default_info', 'is_template' => false, 'draft_schema' => '{}', 'created_at' => now(), 'updated_at' => now()]))->toThrow(Illuminate\Database\UniqueConstraintViolationException::class);
-    expect(Form::whereNotNull('system_key')->count())->toBe(2);
+    expect(Form::whereNotNull('system_key')->count())->toBe(4);
 
     // an ordinary form can never become global through mass assignment
     $plain = Form::create(['name' => 'Plain', 'kind' => 'info', 'draft_schema' => DefaultForms::info(), 'system_key' => 'default_info']);
@@ -417,8 +417,8 @@ test('the global forms are listed first, editable but not deletable in the admin
     $this->actingAs(reviewerWithout(['forms.view', 'forms.create', 'forms.update', 'forms.delete']));
 
     Livewire::test(ListForms::class)->assertSuccessful()
-        ->assertCanSeeTableRecords(Form::whereNotNull('system_key')->get())->assertCanNotSeeTableRecords(collect([$custom]))
-        ->set('activeTab', 'custom')->assertCanSeeTableRecords(collect([$custom]))->assertCanNotSeeTableRecords(Form::whereNotNull('system_key')->get());
+        ->assertCanSeeTableRecords(Form::whereNotNull('system_key')->whereNotIn('kind', Form::FEEDBACK_KINDS)->get())->assertCanNotSeeTableRecords(collect([$custom]))
+        ->set('activeTab', 'custom')->assertCanSeeTableRecords(collect([$custom]))->assertCanNotSeeTableRecords(Form::whereNotNull('system_key')->whereNotIn('kind', Form::FEEDBACK_KINDS)->get());
 
     Livewire::test(EditForm::class, ['record' => globalForm('enrollment')->getKey()])->assertSuccessful()->assertSee('Global default form')
         ->assertActionHidden('delete')->assertActionVisible('publish')->assertActionVisible('versionHistory')->assertActionVisible('publishedVersion')->assertActionVisible('preview');

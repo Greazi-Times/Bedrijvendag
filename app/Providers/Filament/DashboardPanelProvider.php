@@ -3,18 +3,17 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\SecurityOverview;
 use App\Filament\Widgets\BorrelEnrollmentsPerEventChart;
 use App\Filament\Widgets\CompaniesPerEventChart;
 use App\Filament\Widgets\DashboardStatsOverview;
-use App\Filament\Widgets\UpcomingEventWidget;
 use Filafly\Icons\Phosphor\PhosphorIcons;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -76,7 +75,6 @@ class DashboardPanelProvider extends PanelProvider
             ->livewireComponents(SecurityOverview::widgetComponents())
             ->widgets([
                 AccountWidget::class,
-                UpcomingEventWidget::class,
                 DashboardStatsOverview::class,
                 BorrelEnrollmentsPerEventChart::class,
                 CompaniesPerEventChart::class,

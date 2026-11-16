@@ -478,7 +478,7 @@ test('the dashboard renders for an administrator with filters applied', function
 
     Livewire::test(Dashboard::class)
         ->assertOk()
-        ->assertSee('Overzicht')->assertSee('Bedrijven en retentie')->assertSee('Historische vergelijking')->assertSee('Administratie')
+        ->assertSee('Overzicht')->assertSee('Aanmeldingen')->assertSee('Bedrijven')->assertSee('Evenement')->assertSee('Historie')
         ->set('filters.edition', (string) $e[3]->id)
         ->assertSet('filters.edition', (string) $e[3]->id)
         ->set('filters.edition', 'all')
@@ -493,10 +493,10 @@ test('the dashboard page opens for a user with only the dashboard permission', f
 
 test('the financial tab is hidden without the financial permission', function () {
     $this->actingAs(analyticsUser(['dashboard.view', 'enrollments.view']));
-    $this->get('/dashboard')->assertOk()->assertDontSee('Financieel');
+    Livewire::test(Dashboard::class)->assertOk()->assertDontSee('dashboard-tab-financien', false);
 
     $this->actingAs(analyticsUser(['dashboard.view', 'statistics.financial']));
-    $this->get('/dashboard')->assertOk()->assertSee('Financieel');
+    Livewire::test(Dashboard::class)->assertOk()->assertSee('dashboard-tab-financien', false);
 });
 
 // Performance
@@ -568,14 +568,16 @@ test('no dashboard tab needs more widgets than Livewire allows in one request', 
     $page = Livewire::test(Dashboard::class)->instance();
     $tabs = (new ReflectionMethod($page, 'tabs'))->invoke($page);
 
-    expect($limit)->toBeLessThanOrEqual(20)->and($tabs)->toHaveCount(9);
+    expect($limit)->toBeLessThanOrEqual(20)->and($tabs)->toHaveCount(6);
 
     foreach ($tabs as $label => $tab) {
-        expect(count($tab['widgets']) + 1)->toBeLessThanOrEqual($limit, "{$label} mounts too many widgets");
+        foreach ($tab['sections'] as $section => $widgets) {
+            expect(count($widgets) + 1)->toBeLessThanOrEqual($limit, "{$label} / {$section} mounts too many widgets");
+        }
     }
 });
 
-test('only the widgets of the active tab are mounted and switching tabs swaps them', function () {
+test('only the widgets of the active section are mounted and switching tabs swaps them', function () {
     $this->actingAs(analyticsAdmin());
     $widgets = fn (string $html): int => substr_count($html, 'wire:name="App\Filament\Widgets');
 
@@ -583,7 +585,7 @@ test('only the widgets of the active tab are mounted and switching tabs swaps th
     $overview = $widgets($page->html());
     expect($overview)->toBeGreaterThan(0)->toBeLessThan(10)->and($page->html())->not->toContain('Retentiecohorten');
 
-    $page->set('activeTab', 'bedrijven-en-retentie')->assertSet('activeTab', 'bedrijven-en-retentie');
+    $page->set('activeTab', 'bedrijven')->assertSet('activeTab', 'bedrijven');
     expect($widgets($page->html()))->toBeGreaterThan($overview)->toBeLessThan(20);
 
     // An unknown tab falls back to the first one instead of mounting nothing or everything.
@@ -595,8 +597,8 @@ test('changing a global filter keeps the active tab and stays within the compone
     ['e' => $e] = $this->world;
     $this->actingAs(analyticsAdmin());
 
-    $page = Livewire::test(Dashboard::class)->set('activeTab', 'bedrijven-en-retentie')
+    $page = Livewire::test(Dashboard::class)->set('activeTab', 'bedrijven')
         ->set('filters.edition', (string) $e[3]->id)->set('filters.status', 'approved')->assertOk();
 
-    expect($page->get('activeTab'))->toBe('bedrijven-en-retentie')->and(substr_count($page->html(), 'wire:name="App\Filament\Widgets'))->toBeLessThan(20);
+    expect($page->get('activeTab'))->toBe('bedrijven')->and(substr_count($page->html(), 'wire:name="App\Filament\Widgets'))->toBeLessThan(20);
 });

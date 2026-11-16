@@ -11,7 +11,6 @@ use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Widgets\BorrelEnrollmentsPerEventChart;
 use App\Filament\Widgets\CompaniesPerEventChart;
 use App\Filament\Widgets\DashboardStatsOverview;
-use App\Filament\Widgets\UpcomingEventWidget;
 use App\Models\AuditLog;
 use App\Models\Company;
 use App\Models\CompanyAccessRequest;
@@ -448,8 +447,7 @@ test('company edit links are labelled as edit links and can still be opened and 
 test('dashboard widgets only show modules the user may view', function () {
     $this->actingAs(userWith(['dashboard.view', 'events.view']));
 
-    expect(UpcomingEventWidget::canView())->toBeTrue()
-        ->and(DashboardStatsOverview::canView())->toBeTrue()
+    expect(DashboardStatsOverview::canView())->toBeTrue()
         ->and(CompaniesPerEventChart::canView())->toBeFalse()
         ->and(BorrelEnrollmentsPerEventChart::canView())->toBeFalse();
 

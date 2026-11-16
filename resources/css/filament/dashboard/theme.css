@@ -4,6 +4,7 @@
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
+@source '../../../../resources/views/components/dashboard/**/*';
 
 /*
  * ATIx admin theme: a calm, Linear-style work surface in the public site's
@@ -397,3 +398,50 @@
     min-width: 0;
     min-height: 0;
 }
+
+/* Statistics dashboard: one calm card language (Apple Health/Stocks inspired). Colour only marks status. */
+.dash-stack { display: grid; gap: 1.25rem; }
+.dash-grid { display: grid; gap: 0.75rem; grid-template-columns: repeat(1, minmax(0, 1fr)); }
+@media (min-width: 640px) { .dash-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .dash-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { .dash-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.dash-card {
+    display: flex; flex-direction: column; gap: 0.25rem; min-height: 6.5rem; padding: 1rem 1.125rem;
+    background: var(--admin-card); border: 1px solid var(--admin-line); border-radius: var(--admin-radius-lg);
+    box-shadow: var(--admin-shadow); color: var(--admin-ink); text-decoration: none;
+}
+a.dash-card { transition: border-color 120ms ease; }
+a.dash-card:hover { border-color: color-mix(in srgb, var(--admin-accent) 45%, transparent); }
+a.dash-card:focus-visible, .dash-row:focus-visible { outline: 2px solid var(--admin-accent); outline-offset: 2px; }
+.dash-label { font-size: 0.8125rem; font-weight: 500; color: var(--admin-muted); display: flex; align-items: center; gap: 0.4rem; }
+.dash-dot { width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: var(--admin-line); flex: none; }
+.dash-dot[data-tone='success'] { background: var(--color-success-500); }
+.dash-dot[data-tone='warning'] { background: var(--color-warning-500); }
+.dash-dot[data-tone='danger'] { background: var(--color-danger-500); }
+.dash-dot[data-tone='info'], .dash-dot[data-tone='primary'] { background: var(--color-info-500, #3b82f6); }
+.dash-value { font-size: 2rem; line-height: 1.15; font-weight: 600; letter-spacing: -0.025em; font-variant-numeric: tabular-nums; }
+.dash-value-sm { font-size: 1.375rem; }
+.dash-sub { font-size: 0.8125rem; color: var(--admin-muted); }
+.dash-sub[data-tone='success'] { color: var(--color-success-600); }
+.dash-sub[data-tone='danger'] { color: var(--color-danger-600); }
+.dark .dash-sub[data-tone='success'] { color: var(--color-success-400); }
+.dark .dash-sub[data-tone='danger'] { color: var(--color-danger-400); }
+
+.dash-panel { background: var(--admin-card); border: 1px solid var(--admin-line); border-radius: var(--admin-radius-lg); box-shadow: var(--admin-shadow); }
+.dash-panel > header { padding: 0.875rem 1.125rem 0; }
+.dash-panel > header h3, .dash-heading { font-size: 0.9375rem; font-weight: 600; color: var(--admin-ink); }
+.dash-panel > header p, .dash-desc { font-size: 0.8125rem; color: var(--admin-muted); margin-top: 0.125rem; }
+.dash-panel > div { padding: 0.5rem 1.125rem 1rem; }
+.dash-list { list-style: none; margin: 0; padding: 0; }
+.dash-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 0; border-top: 1px solid var(--admin-line); font-size: 0.875rem; color: var(--admin-ink); text-decoration: none; border-radius: 4px; }
+.dash-list > li:first-child .dash-row { border-top: 0; }
+a.dash-row:hover .dash-row-label { text-decoration: underline; }
+.dash-row-label { flex: 1; min-width: 0; }
+.dash-row-count { font-variant-numeric: tabular-nums; font-weight: 600; }
+.dash-chip { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.15rem 0.6rem; border: 1px solid var(--admin-line); border-radius: 9999px; font-size: 0.75rem; color: var(--admin-muted); }
+.dash-bar { height: 0.5rem; border-radius: 9999px; background: var(--admin-hover); overflow: hidden; }
+.dash-bar > span { display: block; height: 100%; background: var(--admin-accent); border-radius: inherit; }
+.dash-two { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1024px) { .dash-two { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { a.dash-card { transition: none; } }

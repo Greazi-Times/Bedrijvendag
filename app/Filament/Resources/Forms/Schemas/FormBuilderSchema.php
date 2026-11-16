@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Forms\Schemas;
 
 use App\Models\Event;
 use App\Models\Form;
+use App\Support\Forms\DefaultFeedbackForms;
 use App\Support\Forms\DefaultForms;
 use App\Support\Forms\FieldType;
 use App\Support\Forms\FormSchema;
@@ -23,12 +24,12 @@ class FormBuilderSchema
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make(fn (?Form $record): string => $record?->isGlobal() ? 'Global default form' : 'Form')
-                ->description(fn (?Form $record): ?string => $record?->isGlobal() ? 'Applies to every edition that has not been given its own form. Publishing creates a new version that future submissions use; earlier submissions keep the version they were answered against.' : null)
+            Section::make(fn (?Form $record): string => $record?->isGlobal() ? ($record->isFeedback() ? 'Default feedback template' : 'Global default form') : 'Form')
+                ->description(fn (?Form $record): ?string => $record?->isFeedback() && $record->isGlobal() ? 'The starting point of the feedback form of every new edition. Existing editions keep their own copy and are never changed by this template; publishing creates a new template version that future editions use.' : ($record?->isGlobal() ? 'Applies to every edition that has not been given its own form. Publishing creates a new version that future submissions use; earlier submissions keep the version they were answered against.' : null))
                 ->schema([
                     TextInput::make('name')->required()->maxLength(255),
                     Select::make('kind')
-                        ->options(['enrollment' => 'Initial enrollment', 'info' => 'Information after approval'])
+                        ->options(fn (?Form $record): array => ['enrollment' => 'Initial enrollment', 'info' => 'Information after approval'] + ($record?->isFeedback() ? ['feedback_student' => 'Student feedback', 'feedback_company' => 'Company feedback'] : []))
                         ->required()
                         ->disabled(fn (?object $record): bool => $record !== null)
                         ->dehydrated(),
@@ -37,8 +38,8 @@ class FormBuilderSchema
                         ->placeholder('None (reusable template)')
                         ->options(fn (): array => Event::query()->orderByDesc('date')->pluck('name', 'id')->all())
                         ->searchable()
-                        ->hidden(fn (?Form $record): bool => (bool) $record?->isGlobal()),
-                    Toggle::make('is_template')->label('Offer as template')->hidden(fn (?Form $record): bool => (bool) $record?->isGlobal()),
+                        ->hidden(fn (?Form $record): bool => (bool) $record?->isGlobal() || (bool) $record?->isFeedback()),
+                    Toggle::make('is_template')->label('Offer as template')->hidden(fn (?Form $record): bool => (bool) $record?->isGlobal() || (bool) $record?->isFeedback()),
                 ])->columns(2),
 
             Repeater::make('draft_schema.sections')
@@ -74,7 +75,9 @@ class FormBuilderSchema
             ->itemLabel(fn (array $state): ?string => (filled($state['maps_to'] ?? null) ? '🔒 ' : '').(($state['label'] ?? null) ?: 'New question'))
             ->schema([
                 Hidden::make('key')->default(fn (): string => FormSchema::newKey())->dehydrated(),
-                Select::make('type')->options(FieldType::labels())->required()->live()
+                Select::make('type')
+                    ->options(fn ($livewire): array => in_array($livewire->getRecord()?->kind, Form::FEEDBACK_KINDS, true) ? FieldType::labels(FieldType::FEEDBACK) : array_diff_key(FieldType::labels(), ['rating' => true]))
+                    ->required()->live()
                     ->afterStateUpdated(fn ($state, $set) => $state === 'profile_verification' ? $set('maps_to', 'company.verification') : null)
                     ->disabled(fn ($get): bool => filled($get('maps_to')))->dehydrated(),
                 TextInput::make('label')->required(fn ($get): bool => $get('type') !== 'terms'),
@@ -85,11 +88,16 @@ class FormBuilderSchema
                 TextInput::make('placeholder'),
                 Toggle::make('required'),
                 TextInput::make('default')->label('Default value'),
-                TextInput::make('min')->numeric()->label('Min (length or value)'),
-                TextInput::make('max')->numeric()->label('Max (length, value or KB)'),
+                TextInput::make('min')->numeric()->label('Min (length or value)')->hidden(fn ($get): bool => $get('type') === 'rating'),
+                TextInput::make('max')->numeric()
+                    ->label(fn ($get): string => $get('type') === 'rating' ? 'Rating scale: 1 to …' : 'Max (length, value or KB)')
+                    ->helperText(fn ($get): ?string => $get('type') === 'rating' ? 'Between 2 and 10. Results of different scales are never merged.' : null),
+                Toggle::make('allow_na')->label('Offer "not applicable"')->visible(fn ($get): bool => $get('type') === 'rating'),
+                TextInput::make('label_low')->label('Label for 1')->visible(fn ($get): bool => $get('type') === 'rating'),
+                TextInput::make('label_high')->label('Label for the highest rating')->visible(fn ($get): bool => $get('type') === 'rating'),
                 Select::make('options_source')->label('Options from')->placeholder('Custom list')
                     ->options(['educations' => 'Educations', 'sectors' => 'Sectors'])
-                    ->visible(fn ($get): bool => in_array($get('type'), ['select', 'multiselect', 'radio'], true)),
+                    ->visible(fn ($get, $livewire): bool => in_array($get('type'), ['select', 'multiselect', 'radio'], true) && ! in_array($livewire->getRecord()?->kind, Form::FEEDBACK_KINDS, true)),
                 Repeater::make('options')->label('Options')->addActionLabel('Add option')->reorderableWithDragAndDrop()
                     ->visible(fn ($get): bool => in_array($get('type'), ['select', 'multiselect', 'radio'], true) && blank($get('options_source')))
                     ->schema([
@@ -212,6 +220,10 @@ class FormBuilderSchema
 
     public static function defaultFor(string $kind): array
     {
-        return $kind === 'info' ? DefaultForms::info() : DefaultForms::enrollment();
+        return match ($kind) {
+            'info' => DefaultForms::info(),
+            'feedback_student', 'feedback_company' => DefaultFeedbackForms::for($kind),
+            default => DefaultForms::enrollment(),
+        };
     }
 }

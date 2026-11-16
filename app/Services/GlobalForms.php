@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\Form;
+use App\Support\Forms\DefaultFeedbackForms;
 use App\Support\Forms\DefaultForms;
 use App\Support\Forms\LegacyDefaultForms;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -15,7 +16,10 @@ use Illuminate\Support\Facades\DB;
  */
 class GlobalForms
 {
-    private const NAMES = ['enrollment' => 'Default company enrollment form', 'info' => 'Default additional company information form'];
+    private const NAMES = [
+        'enrollment' => 'Default company enrollment form', 'info' => 'Default additional company information form',
+        'feedback_student' => 'Default Student Feedback', 'feedback_company' => 'Default Company Feedback',
+    ];
 
     public function get(string $kind): Form
     {
@@ -100,7 +104,11 @@ class GlobalForms
             return false;
         }
 
-        $schema = json_encode($kind === 'enrollment' ? DefaultForms::enrollment() : DefaultForms::info());
+        $schema = json_encode(match ($kind) {
+            'enrollment' => DefaultForms::enrollment(),
+            'info' => DefaultForms::info(),
+            default => DefaultFeedbackForms::for($kind),
+        });
         $now = now();
 
         try {

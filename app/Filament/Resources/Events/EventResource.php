@@ -8,6 +8,7 @@ use App\Filament\Resources\Events\Pages\ListEvents;
 use App\Filament\Resources\Events\Pages\ViewEvent;
 use App\Filament\Resources\Events\RelationManagers\BorrelEnrollmentsRelationManager;
 use App\Filament\Resources\Events\RelationManagers\CompaniesRelationManager;
+use App\Filament\Resources\Events\RelationManagers\FeedbackSurveysRelationManager;
 use App\Filament\Resources\Events\Schemas\EventForm;
 use App\Filament\Resources\Events\Schemas\EventInfolist;
 use App\Filament\Resources\Events\Tables\EventsTable;
@@ -50,6 +51,7 @@ class EventResource extends Resource
         return [
             CompaniesRelationManager::class,
             BorrelEnrollmentsRelationManager::class,
+            FeedbackSurveysRelationManager::class,
         ];
     }
 

@@ -26,13 +26,24 @@ class Form extends Model
 
     public const KEY_INFO = 'default_info';
 
-    public const GLOBAL_KEYS = ['enrollment' => self::KEY_ENROLLMENT, 'info' => self::KEY_INFO];
+    public const KEY_STUDENT_FEEDBACK = 'default_student_feedback';
+
+    public const KEY_COMPANY_FEEDBACK = 'default_company_feedback';
+
+    public const GLOBAL_KEYS = [
+        'enrollment' => self::KEY_ENROLLMENT, 'info' => self::KEY_INFO,
+        'feedback_student' => self::KEY_STUDENT_FEEDBACK, 'feedback_company' => self::KEY_COMPANY_FEEDBACK,
+    ];
+
+    /** Anonymous feedback questionnaires; they are never answered by a company enrollment. */
+    public const FEEDBACK_KINDS = ['feedback_student', 'feedback_company'];
 
     protected static function booted(): void
     {
         static::deleting(function (self $form): void {
             throw_if($form->isGlobal(), \LogicException::class, 'The global default forms cannot be deleted.');
             throw_if($form->isInUse(), \LogicException::class, 'A form that companies have answered cannot be deleted; their answers would become unreadable.');
+            throw_if($form->isFeedback() && FeedbackSurvey::query()->where('form_id', $form->id)->exists(), \LogicException::class, 'The questions of a feedback survey cannot be deleted; reset the survey to its template instead.');
         });
 
         // Global and edition-specific are different things and never turn into one another.
@@ -48,6 +59,11 @@ class Form extends Model
                 throw new \LogicException('A form cannot become, or stop being, a global default.');
             }
         });
+    }
+
+    public function isFeedback(): bool
+    {
+        return in_array($this->kind, self::FEEDBACK_KINDS, true);
     }
 
     public function isGlobal(): bool
@@ -127,7 +143,7 @@ class Form extends Model
         $versions = $this->versions()->pluck('id');
 
         return $versions->isNotEmpty()
-            && (Enrollment::query()->whereIn('form_version_id', $versions)->exists() || EnrollmentInfoSubmission::query()->whereIn('form_version_id', $versions)->exists());
+            && (FeedbackResponse::query()->whereIn('form_version_id', $versions)->exists() || Enrollment::query()->whereIn('form_version_id', $versions)->exists() || EnrollmentInfoSubmission::query()->whereIn('form_version_id', $versions)->exists());
     }
 
     /** Independent copy (own draft, no version history) for another edition or as a template. */

@@ -26,6 +26,11 @@ return [
         // Guests of the networking drinks: name and email are removed this many days after the event ended.
         'borrel_days_after_event' => (int) env('PRIVACY_BORREL_DAYS', 0),
 
+        // Anonymous feedback responses (no personal data by design, but free text may contain some by accident) are
+        // deleted this many days after the event ended. Empty: kept until an administrator removes them.
+        // CONFIRM with the data controller before setting; no period has been decided yet.
+        'feedback_days_after_event' => env('PRIVACY_FEEDBACK_DAYS') === null || env('PRIVACY_FEEDBACK_DAYS') === '' ? null : (int) env('PRIVACY_FEEDBACK_DAYS'),
+
         // Documented here so the policy text and the infrastructure checklist read one value. The security and audit
         // categories are enforced by config/audit.php (AUDIT_RETENTION_SECURITY_DAYS), the application log file by
         // config/logging.php (LOG_DAILY_DAYS), failed queue jobs by the scheduler.

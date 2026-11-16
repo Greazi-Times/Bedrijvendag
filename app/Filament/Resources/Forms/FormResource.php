@@ -37,9 +37,9 @@ class FormResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('kind')->badge()->formatStateUsing(fn (string $state): string => $state === 'enrollment' ? 'Enrollment' : 'Information'),
+                TextColumn::make('kind')->badge()->formatStateUsing(fn (string $state): string => ['enrollment' => 'Enrollment', 'info' => 'Information', 'feedback_student' => 'Student feedback', 'feedback_company' => 'Company feedback'][$state] ?? $state),
                 TextColumn::make('scope')->label('Used by')->badge()
-                    ->state(fn (Form $record): string => $record->isGlobal() ? 'Every edition without its own form' : ($record->event_id ? 'Edition: '.$record->event?->name : 'Reusable template'))
+                    ->state(fn (Form $record): string => $record->isGlobal() ? ($record->isFeedback() ? 'Template for new editions' : 'Every edition without its own form') : ($record->event_id ? 'Edition: '.$record->event?->name : 'Reusable template'))
                     ->color(fn (Form $record): string => $record->isGlobal() ? 'success' : ($record->event_id ? 'info' : 'gray')),
                 TextColumn::make('latestVersion.version')->label('Published')->prefix('v')->placeholder('Never'),
                 IconColumn::make('is_template')->label('Template')->boolean(),

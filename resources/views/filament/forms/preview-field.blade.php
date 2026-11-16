@@ -10,6 +10,7 @@
     @endif
     @if (! empty($field['description']))<div class="text-gray-500">{{ $field['description'] }}</div>@endif
     @if (! empty($field['options']))<div class="text-gray-500">Options: {{ collect($field['options'])->pluck('label')->implode(', ') }}</div>@endif
+    @if (($field['type'] ?? '') === 'rating')<div class="text-gray-500">Rating 1–{{ $field['max'] ?? 5 }}@if (! empty($field['label_low'])) (1 = {{ $field['label_low'] }}@if (! empty($field['label_high'])), {{ $field['max'] ?? 5 }} = {{ $field['label_high'] }}@endif)@endif @if (! empty($field['allow_na']))· “not applicable” offered @endif</div>@endif
     @if (! empty($field['options_source']))<div class="text-gray-500">Options from: {{ $field['options_source'] }}</div>@endif
     @if (! empty($field['visible_if']))<div class="text-xs text-gray-500">Shown when “{{ $labels[$field['visible_if']['field']] ?? 'another question' }}” {{ $field['visible_if']['operator'] }} {{ is_array($field['visible_if']['value'] ?? null) ? implode(',', $field['visible_if']['value']) : ($field['visible_if']['value'] ?? '') }}</div>@endif
     @if (! empty($field['children']))

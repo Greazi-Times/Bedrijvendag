@@ -13,7 +13,8 @@ class ListCatalog
 {
     /** key => [permission, heading] */
     public const LISTS = [
-        'participation' => ['companies.view', 'Deelname per bedrijf'],
+        'participation' => ['companies.view', 'Bedrijfsgeschiedenis'],
+        'matrix' => ['companies.view', 'Deelnamematrix'],
         'approved_no_stand' => ['event-stands.view', 'Goedgekeurde bedrijven zonder stand'],
         'flagged_stands' => ['event-stands.view', 'Stands met een waarschuwing'],
         'free_partner_stands' => ['event-stands.view', 'Vrije partnerstands'],
@@ -47,6 +48,7 @@ class ListCatalog
 
         return match ($key) {
             'participation' => $this->participationRows($event),
+            'matrix' => $this->matrixRows($event),
             'approved_no_stand' => $this->companies($this->planning->stands($event->id)['approved_without_stand'] ?? []),
             'grandfathered' => $this->companies($this->planning->stands($event->id)['grandfathered']),
             'multi_stand' => $this->multiStand($event),
@@ -67,6 +69,31 @@ class ListCatalog
             $detail = implode("\n", array_map(fn (bool $in, string $name): string => "{$name}: ".($in ? 'ja' : 'nee'), $row['timeline'], array_slice($editions, 0, count($row['timeline']))));
 
             return [...$row, 'company_id' => $row['id'], 'symbols' => $symbols, 'detail' => $detail, 'previous_text' => $row['previous'] ? 'Ja' : 'Nee', 'selected_text' => $row['selected'] ? 'Ja' : 'Nee'];
+        }, $this->participation->companyRows($event->id));
+    }
+
+    /** One row per company with a cell per edition (`e{id}`), plus the pattern of participation. @return list<array<string, mixed>> */
+    private function matrixRows(Event $event): array
+    {
+        $editions = array_slice($this->participation->editions(), 0, count($this->participation->companyRows($event->id)[0]['timeline'] ?? []));
+
+        return array_map(function (array $row) use ($editions): array {
+            $positions = array_keys(array_filter($row['timeline']));
+            $span = end($positions) - $positions[0] + 1;
+            $pattern = match (true) {
+                $row['selected'] && $row['total'] === 1 => 'Eerste deelname',
+                $row['selected'] && $row['total'] === count($row['timeline']) => 'Elke editie',
+                ! $row['selected'] => 'Gestopt',
+                $row['total'] < $span => 'Onderbroken',
+                default => 'Doorlopend',
+            };
+            $cells = [];
+
+            foreach ($editions as $i => $edition) {
+                $cells['e'.$edition['id']] = $row['timeline'][$i] ?? false;
+            }
+
+            return ['id' => $row['id'], 'company_id' => $row['id'], 'name' => $row['name'], 'total' => $row['total'], 'pattern' => $pattern, ...$cells];
         }, $this->participation->companyRows($event->id));
     }
 

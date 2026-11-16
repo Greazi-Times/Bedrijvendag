@@ -10,6 +10,7 @@ use App\Filament\Widgets\Analytics\NotesWidget;
 use App\Services\Analytics\ChartCatalog;
 use App\Services\Analytics\Kpis;
 use App\Services\Analytics\ListCatalog;
+use App\Services\Analytics\Participation;
 use App\Services\Analytics\Scope;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
@@ -135,4 +136,76 @@ test('chart data carries the retention and cohort series', function () {
 
     $revenue = $charts->make('revenue_per_edition', $scope, $admin);
     expect($revenue['datasets'][0]['data'])->toBe([null, null, 500.0, 500.0, 1200.0]);
+});
+
+// Redesigned dashboard: overview, insights, participation matrix, filters
+
+test('the overview collects the key figures, attention items and insights in one structure', function () {
+    ['e' => $e] = $this->world;
+    $admin = analyticsAdmin();
+    $data = app(\App\Services\Analytics\OverviewData::class)->build(new Scope($e[5], $e[4]), $admin);
+
+    expect(array_column($data['primary'], 'label'))->toContain('Goedgekeurde bedrijven', 'Nieuwe bedrijven', 'Terugkerende bedrijven', 'Standbezetting', 'Tweede formulier ingevuld')
+        ->and(array_column($data['secondary'], 'label'))->toContain('In behandeling', 'Afgewezen', 'Goedgekeurd zonder stand', 'Lunchdeelnemers', 'Borrelgasten')
+        ->and(array_column($data['attention'], 'key'))->toContain('pending')->not->toContain('failed_jobs')
+        ->and(array_column($data['insights'], 'text'))->toContain(count(app(Participation::class)->classify($e[5]->id)['returning']).' bedrijven hebben eerder deelgenomen.');
+});
+
+test('the overview never carries financial or restricted figures for a limited user', function () {
+    ['e' => $e] = $this->world;
+    $data = app(\App\Services\Analytics\OverviewData::class)->build(new Scope($e[5], $e[4]), analyticsUser(['dashboard.view']));
+
+    expect($data['primary'])->toBe([])->and($data['secondary'])->toBe([])->and($data['attention'])->toBe([])->and($data['insights'])->toBe([]);
+
+    $withFinance = app(\App\Services\Analytics\OverviewData::class)->build(new Scope($e[5], $e[4]), analyticsUser(['dashboard.view', 'statistics.financial']));
+    expect(array_column($withFinance['primary'], 'label'))->toBe(['Verwachte opbrengst']);
+
+    $this->actingAs(analyticsUser(['dashboard.view', 'enrollments.view']));
+    Livewire::test(\App\Filament\Widgets\Analytics\OverviewWidget::class, ['pageFilters' => ['edition' => (string) $e[5]->id]])->assertDontSee('Verwachte opbrengst');
+});
+
+test('the participation matrix has a column per edition and classifies the participation pattern', function () {
+    ['e' => $e, 'c' => $c] = $this->world;
+    $this->actingAs(analyticsAdmin());
+    $rows = collect(app(ListCatalog::class)->rows('matrix', new Scope($e[5], $e[4]), auth()->user()))->keyBy('company_id');
+
+    expect($rows[$c['A']->id]['pattern'])->toBe('Elke editie')
+        ->and($rows[$c['C']->id]['pattern'])->toBe('Onderbroken')
+        ->and($rows[$c['D']->id]['pattern'])->toBe('Eerste deelname')
+        ->and($rows[$c['B']->id]['pattern'])->toBe('Gestopt')
+        ->and($rows[$c['C']->id]['e'.$e[2]->id])->toBeFalse()
+        ->and($rows[$c['C']->id]['e'.$e[1]->id])->toBeTrue();
+
+    Livewire::test(ListWidget::class, ['list' => 'matrix', 'pageFilters' => ['edition' => (string) $e[5]->id]])
+        ->assertSee('Bedrijf A')->assertSee('Editie 2023')
+        ->filterTable('pattern', 'Onderbroken')->assertSee('Bedrijf C')->assertDontSee('Bedrijf A');
+});
+
+test('the matrix is empty for a user without company access', function () {
+    ['e' => $e] = $this->world;
+
+    expect(app(ListCatalog::class)->rows('matrix', new Scope($e[5], $e[4]), analyticsUser(['dashboard.view'])))->toBe([]);
+});
+
+test('resetting the dashboard filters restores the defaults and the applied filters are shown as chips', function () {
+    ['e' => $e] = $this->world;
+    $this->actingAs(analyticsAdmin());
+
+    $page = \Livewire\Livewire::test(\App\Filament\Pages\Dashboard::class)
+        ->set('filters.edition', 'all')->set('filters.status', 'approved')
+        ->assertSee('Alle edities')->assertSee('Status: Goedgekeurd')
+        ->call('resetFilters')->assertDontSee('Status: Goedgekeurd');
+
+    expect($page->get('filters.status'))->toBeNull()->and($page->get('filters.edition'))->not->toBe('all');
+});
+
+test('each new dashboard sub-section mounts its own few widgets', function () {
+    $this->actingAs(analyticsAdmin());
+    $page = \Livewire\Livewire::test(\App\Filament\Pages\Dashboard::class)->set('activeTab', 'bedrijven')->set('activeSection', 'deelnamegeschiedenis');
+
+    expect(substr_count($page->html(), 'wire:name="App\Filament\Widgets'))->toBe(2)->and(substr_count($page->html(), 'Widgets\Analytics\ListWidget'))->toBe(2);
+    $page->set('activeSection', 'cohortanalyse');
+    expect($page->html())->toContain('Analytics\CohortWidget');
+    $page->set('activeTab', 'overzicht');
+    expect($page->get('activeSection'))->toBeNull()->and($page->html())->toContain('Analytics\OverviewWidget');
 });

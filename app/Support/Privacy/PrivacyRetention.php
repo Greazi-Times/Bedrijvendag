@@ -7,6 +7,7 @@ use App\Models\CompanyAccessRequest;
 use App\Models\CompanyProfileSubmission;
 use App\Models\Enrollment;
 use App\Models\EnrollmentInfoSubmission;
+use App\Models\FeedbackResponse;
 use App\Services\EnrollmentWorkflow;
 use App\Support\Audit;
 use Carbon\CarbonInterface;
@@ -39,6 +40,7 @@ class PrivacyRetention
             $this->enrollments($now, $dryRun),
             $this->borrel($now, $dryRun),
             $this->accessRequests($now, $dryRun),
+            $this->feedback($now, $dryRun),
         );
 
         $dryRun || ErasureLedger::prune();
@@ -55,6 +57,22 @@ class PrivacyRetention
     public static function eventCutoff(int $days, ?CarbonInterface $now = null): string
     {
         return ($now ?? now())->copy()->timezone(config('privacy.timezone'))->subDays($days + 1)->toDateString();
+    }
+
+    /** Feedback of editions that ended more than the configured number of days ago; does nothing while no period is configured. @return array<string, int> */
+    private function feedback(CarbonInterface $now, bool $dryRun): array
+    {
+        $days = config('privacy.retention.feedback_days_after_event');
+
+        if ($days === null) {
+            return ['feedback_responses_deleted' => 0];
+        }
+
+        $query = FeedbackResponse::query()->whereHas('survey.event', fn (Builder $q) => $q->whereDate('date', '<=', self::eventCutoff((int) $days, $now)));
+        $count = (clone $query)->count();
+        $dryRun || $query->delete(); // answers go with their response (foreign key)
+
+        return ['feedback_responses_deleted' => $count];
     }
 
     /** @return array<string, int> */

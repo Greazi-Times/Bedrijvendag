@@ -5,8 +5,10 @@ use App\Models\Company;
 use App\Models\Enrollment;
 use App\Models\Event;
 use App\Models\EventStand;
+use App\Models\FeedbackSurvey;
 use App\Models\User;
 use App\Services\EnrollmentWorkflow;
+use App\Services\FeedbackSurveys;
 use App\Services\InformationWorkflow;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Filament\Facades\Filament;
@@ -60,6 +62,23 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+function survey(Event $event, string $audience = 'students'): FeedbackSurvey
+{
+    return $event->feedbackSurveys()->where('audience', $audience)->firstOrFail();
+}
+
+function openSurvey(Event $event, string $audience = 'students'): FeedbackSurvey
+{
+    app(FeedbackSurveys::class)->publish($survey = survey($event, $audience));
+
+    return $survey->fresh();
+}
+
+function feedbackUrl(FeedbackSurvey $survey): string
+{
+    return "/feedback/{$survey->event_id}/{$survey->audience}";
 }
 
 function enrollmentAnswers(array $over = []): array

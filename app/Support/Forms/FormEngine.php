@@ -84,6 +84,7 @@ class FormEngine
 
         $out[$key] = match (true) {
             $type === FieldType::Checkbox, $type === FieldType::Terms => (bool) $value,
+            $type === FieldType::Rating && is_numeric($value) => (int) $value,
             $type === FieldType::Number && $value !== null && $value !== '' => $value + 0,
             $value === '' => null,
             default => $value,
@@ -152,6 +153,8 @@ class FormEngine
             FieldType::Url => ['url:http,https', 'max:255'],
             FieldType::Number => $extra('numeric'),
             FieldType::Date => ['date'],
+            // "na" is only accepted when the question explicitly allows "not applicable".
+            FieldType::Rating => [Rule::in([...range(1, (int) ($field['max'] ?? 5)), ...(! empty($field['allow_na']) ? ['na'] : [])])],
             FieldType::Checkbox => ['boolean'],
             FieldType::Terms => ['accepted'],
             FieldType::Radio, FieldType::Select => ['string', Rule::in($this->allowedValues($field))],

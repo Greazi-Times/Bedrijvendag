@@ -77,6 +77,9 @@ function onFile(event: Event) {
     data.value[props.field.key] = (event.target as HTMLInputElement).files?.[0] ?? null;
 }
 
+// A rating runs from 1 to `max` (default 5); "na" is only offered when the question allows it.
+const scale = computed(() => Array.from({ length: Math.min(Math.max(Number(props.field.max ?? 5), 2), 10) }, (_, i) => i + 1));
+
 const inputType = computed(() => ({ email: 'email', phone: 'tel', url: 'url', number: 'number', date: 'date' })[props.field.type] ?? 'text');
 </script>
 
@@ -124,19 +127,38 @@ const inputType = computed(() => ({ email: 'email', phone: 'tel', url: 'url', nu
             <p v-if="error" :id="`${id}-err`" class="field-error mt-2" role="alert">{{ error }}</p>
         </div>
 
+        <fieldset v-else-if="field.type === 'rating'">
+            <legend class="field-label mb-2">{{ field.label }} <span v-if="field.required" class="text-danger" aria-hidden="true">*</span></legend>
+            <p v-if="field.description" :id="`${id}-help`" class="mb-2 text-xs text-ink-muted">{{ field.description }}</p>
+            <div class="flex flex-wrap gap-2">
+                <label v-for="n in scale" :key="n" class="cursor-pointer">
+                    <input v-model="data[field.key]" type="radio" :name="id" :value="n" class="peer sr-only" :aria-describedby="describedBy" />
+                    <span
+                        class="flex h-11 min-w-11 items-center justify-center rounded-[var(--radius-input)] bg-canvas px-3 text-sm font-medium text-ink ring-1 ring-hairline peer-checked:bg-ink peer-checked:text-canvas peer-focus-visible:ring-2 peer-focus-visible:ring-brand-blue"
+                        >{{ n }}</span
+                    >
+                </label>
+                <label v-if="field.allow_na" class="cursor-pointer">
+                    <input v-model="data[field.key]" type="radio" :name="id" value="na" class="peer sr-only" :aria-describedby="describedBy" />
+                    <span
+                        class="flex h-11 items-center justify-center rounded-[var(--radius-input)] bg-canvas px-3 text-sm text-ink-muted ring-1 ring-hairline peer-checked:bg-ink peer-checked:text-canvas peer-focus-visible:ring-2 peer-focus-visible:ring-brand-blue"
+                        >{{ ui.na }}</span
+                    >
+                </label>
+            </div>
+            <div v-if="field.label_low || field.label_high" class="mt-2 flex max-w-md justify-between gap-4 text-xs text-ink-muted">
+                <span>1 = {{ field.label_low }}</span>
+                <span>{{ scale.length }} = {{ field.label_high }}</span>
+            </div>
+            <p v-if="error" :id="`${id}-err`" class="field-error mt-2" role="alert">{{ error }}</p>
+        </fieldset>
+
         <fieldset v-else-if="field.type === 'radio' || field.type === 'multiselect'">
             <legend class="field-label mb-2">{{ field.label }} <span v-if="field.required" class="text-danger" aria-hidden="true">*</span></legend>
             <p v-if="field.description" :id="`${id}-help`" class="mb-2 text-xs text-ink-muted">{{ field.description }}</p>
             <div class="grid gap-2 sm:grid-cols-2">
                 <label v-for="o in choices" :key="o.value" class="flex items-center gap-3 rounded-[var(--radius-input)] bg-canvas px-4 py-3 text-sm ring-1 ring-hairline">
-                    <input
-                        v-if="field.type === 'radio'"
-                        v-model="data[field.key]"
-                        type="radio"
-                        :name="id"
-                        :value="o.value"
-                        class="h-4 w-4"
-                    />
+                    <input v-if="field.type === 'radio'" v-model="data[field.key]" type="radio" :name="id" :value="o.value" class="h-4 w-4" />
                     <input v-else type="checkbox" class="h-4 w-4" :checked="(data[field.key] ?? []).includes(o.value)" @change="toggle(o.value)" />
                     {{ o.label }}
                 </label>
@@ -155,12 +177,30 @@ const inputType = computed(() => ({ email: 'email', phone: 'tel', url: 'url', nu
         <div v-else>
             <label :for="id" class="field-label mb-2 block">{{ field.label }} <span v-if="field.required" class="text-danger" aria-hidden="true">*</span></label>
             <p v-if="field.description" :id="`${id}-help`" class="mb-2 text-xs text-ink-muted">{{ field.description }}</p>
-            <textarea v-if="field.type === 'textarea'" :id="id" v-model="data[field.key]" rows="5" :placeholder="field.placeholder" class="input" :aria-invalid="!!error" :aria-describedby="describedBy"></textarea>
+            <textarea
+                v-if="field.type === 'textarea'"
+                :id="id"
+                v-model="data[field.key]"
+                rows="5"
+                :placeholder="field.placeholder"
+                class="input"
+                :aria-invalid="!!error"
+                :aria-describedby="describedBy"
+            ></textarea>
             <select v-else-if="field.type === 'select'" :id="id" v-model="data[field.key]" class="input" :aria-invalid="!!error" :aria-describedby="describedBy">
                 <option value="">{{ ui.choose }}</option>
                 <option v-for="o in choices" :key="o.value" :value="o.value">{{ o.label }}</option>
             </select>
-            <input v-else-if="field.type === 'file'" :id="id" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" class="input" :aria-invalid="!!error" :aria-describedby="describedBy" @change="onFile" />
+            <input
+                v-else-if="field.type === 'file'"
+                :id="id"
+                type="file"
+                accept=".jpg,.jpeg,.png,.webp,.pdf"
+                class="input"
+                :aria-invalid="!!error"
+                :aria-describedby="describedBy"
+                @change="onFile"
+            />
             <input
                 v-else
                 :id="id"

@@ -19,6 +19,7 @@ enum FieldType: string
     case Repeater = 'repeater';
     case Info = 'info';
     case Heading = 'heading';
+    case Rating = 'rating';
     case Terms = 'terms';
     case ProfileVerification = 'profile_verification';
 
@@ -33,16 +34,22 @@ enum FieldType: string
         return in_array($this, [self::Info, self::Heading, self::ProfileVerification], true);
     }
 
+    /** Types suitable for anonymous feedback: nothing that collects personal data or files. */
+    public const FEEDBACK = ['text', 'textarea', 'radio', 'select', 'multiselect', 'rating', 'info', 'heading'];
+
     /** @return array<string, string> */
-    public static function labels(): array
+    public static function labels(?array $only = null): array
     {
-        return [
+        $all = [
             'text' => 'Short text', 'textarea' => 'Long text', 'email' => 'Email', 'phone' => 'Phone number',
             'url' => 'URL', 'number' => 'Number', 'date' => 'Date', 'checkbox' => 'Checkbox',
             'radio' => 'Radio group', 'select' => 'Single select', 'multiselect' => 'Multi-select',
             'file' => 'File / image upload', 'repeater' => 'Repeater (multiple entries)',
             'info' => 'Informational text', 'heading' => 'Heading', 'terms' => 'Terms and conditions acceptance',
+            'rating' => 'Rating scale',
             'profile_verification' => 'Company profile verification (system component)',
         ];
+
+        return $only === null ? $all : array_intersect_key($all, array_flip($only));
     }
 }

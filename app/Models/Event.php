@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\Audited;
 use App\Models\Concerns\HasAutomaticTranslations;
+use App\Services\FeedbackSurveys;
 use App\Services\FormResolver;
 use App\Services\StandCapacity;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -92,6 +93,17 @@ class Event extends Model
             $this->enrollment_closes_at?->isPast() => 'closed',
             default => 'open',
         };
+    }
+
+    public function feedbackSurveys(): HasMany
+    {
+        return $this->hasMany(FeedbackSurvey::class);
+    }
+
+    /** A new edition is saved together with its two feedback surveys or not at all. */
+    public function save(array $options = []): bool
+    {
+        return $this->exists ? parent::save($options) : DB::transaction(fn (): bool => parent::save($options));
     }
 
     public function enrollments(): HasMany
@@ -235,7 +247,12 @@ class Event extends Model
         // Explicit and ordered: enrollments (and their private files) must go before the forms whose versions they reference.
         static::deleting(function (self $event): void {
             $event->enrollments()->each(fn (Enrollment $enrollment) => $enrollment->delete());
+            // Feedback follows the edition it was given for; its responses go with it.
+            $event->feedbackSurveys()->delete();
         });
+
+        // Inside the insert transaction (see save()): a failure rolls the edition back.
+        static::created(fn (self $event) => app(FeedbackSurveys::class)->provision($event));
 
         static::creating(function (self $event): void {
             $event->enrollment_token ??= self::newEnrollmentToken();

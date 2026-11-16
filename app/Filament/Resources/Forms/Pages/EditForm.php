@@ -23,7 +23,7 @@ class EditForm extends EditRecord
     {
         $form = $this->getRecord();
         $version = $form->latestVersion?->version;
-        $prefix = $form->isGlobal() ? 'Global default form. ' : '';
+        $prefix = $form->isGlobal() ? ($form->isFeedback() ? 'Default feedback template. ' : 'Global default form. ') : ($form->isFeedback() ? 'Edition feedback form. ' : '');
 
         return $prefix.($version ? "Published version {$version}. Saving only changes the draft." : 'Not published yet.');
     }
@@ -79,6 +79,7 @@ class EditForm extends EditRecord
                 ->icon('heroicon-o-document-duplicate')
                 ->color('gray')
                 ->authorize('create')
+                ->visible(fn (Form $record): bool => ! $record->isFeedback())
                 ->form([
                     TextInput::make('name')->required()->default(fn (): string => $this->getRecord()->name.' (copy)'),
                     Select::make('event_id')->label('Edition')->placeholder('None (reusable template)')
@@ -110,7 +111,7 @@ class EditForm extends EditRecord
                 ->modalHeading('Version history')
                 ->modalContent(fn (Form $record): \Illuminate\Contracts\View\View => view('filament.forms.versions', ['form' => $record->load('versions')])),
             DeleteAction::make()
-                ->visible(fn (Form $record): bool => ! $record->isGlobal() && ! $record->isInUse() && ($record->event_id === null || ! in_array($record->id, [$record->event?->enrollment_form_id, $record->event?->info_form_id], true)))
+                ->visible(fn (Form $record): bool => ! $record->isGlobal() && ! $record->isFeedback() && ! $record->isInUse() && ($record->event_id === null || ! in_array($record->id, [$record->event?->enrollment_form_id, $record->event?->info_form_id], true)))
                 ->modalDescription('Forms that companies have already answered cannot be deleted, so their answers stay readable.'),
         ];
     }

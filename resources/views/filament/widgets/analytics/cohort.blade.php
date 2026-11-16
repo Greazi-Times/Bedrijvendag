@@ -5,19 +5,20 @@
         @else
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[32rem] border-separate border-spacing-1 text-sm">
+                    <caption class="sr-only">Retentiecohorten: aantal en percentage bedrijven per eerste editie dat later opnieuw deelnam</caption>
                     <thead>
                         <tr class="text-left text-xs text-gray-500 dark:text-gray-400">
-                            <th class="px-2 py-1 font-medium">Eerste editie</th>
-                            <th class="px-2 py-1 text-right font-medium">Start</th>
+                            <th scope="col" class="px-2 py-1 font-medium">Eerste editie</th>
+                            <th scope="col" class="px-2 py-1 text-right font-medium">Start</th>
                             @for ($d = 1; $d < $width; $d++)
-                                <th class="px-2 py-1 text-center font-medium">{{ $d === 1 ? 'Volgende editie' : $d.' edities later' }}</th>
+                                <th scope="col" class="px-2 py-1 text-center font-medium">{{ $d === 1 ? 'Volgende editie' : $d.' edities later' }}</th>
                             @endfor
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($cohorts as $cohort)
                             <tr>
-                                <td class="whitespace-nowrap px-2 py-1 font-medium">{{ $cohort['name'] }}</td>
+                                <th scope="row" class="whitespace-nowrap px-2 py-1 text-left font-medium">{{ $cohort['name'] }}</th>
                                 <td class="px-2 py-1 text-right tabular-nums">{{ $cohort['size'] }}</td>
                                 @for ($d = 1; $d < $width; $d++)
                                     @php

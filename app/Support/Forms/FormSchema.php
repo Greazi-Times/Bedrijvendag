@@ -2,6 +2,7 @@
 
 namespace App\Support\Forms;
 
+use App\Models\Form;
 use Illuminate\Support\Str;
 
 /** Structural validation of a form schema before it is published. */
@@ -38,6 +39,10 @@ class FormSchema
             }
         }
 
+        if (in_array($kind, Form::FEEDBACK_KINDS, true)) {
+            array_push($errors, ...self::feedbackProblems($sections));
+        }
+
         foreach (SystemFields::REQUIRED[$kind] ?? [] as $required) {
             if (! isset($maps[$required])) {
                 $errors[] = "The system field \"{$required}\" cannot be removed.";
@@ -67,6 +72,44 @@ class FormSchema
         }
 
         return $errors;
+    }
+
+    /** Anonymous feedback may only ask what cannot identify anyone, and needs at least one real question. @return list<string> */
+    private static function feedbackProblems(array $sections): array
+    {
+        $errors = [];
+        $answerable = 0;
+
+        foreach ($sections as $section) {
+            foreach ($section['fields'] ?? [] as $field) {
+                $type = (string) ($field['type'] ?? '');
+                $label = (string) ($field['label'] ?? $field['key'] ?? '?');
+
+                if (! in_array($type, FieldType::FEEDBACK, true)) {
+                    $errors[] = "Question \"{$label}\" has a type that is not allowed in anonymous feedback.";
+                }
+
+                if (! empty($field['options_source'])) {
+                    $errors[] = "Question \"{$label}\" must use its own answer options.";
+                }
+
+                if (! empty($field['maps_to'])) {
+                    $errors[] = "Question \"{$label}\" cannot be linked to a system property.";
+                }
+
+                if ($type === 'rating') {
+                    $max = $field['max'] ?? 5;
+
+                    if (! is_numeric($max) || (int) $max < 2 || (int) $max > 10) {
+                        $errors[] = "The rating scale of \"{$label}\" must run from 1 to a number between 2 and 10.";
+                    }
+                }
+
+                $answerable += in_array($type, ['info', 'heading'], true) ? 0 : 1;
+            }
+        }
+
+        return $answerable === 0 ? ['The survey needs at least one question.'] : $errors;
     }
 
     /**
