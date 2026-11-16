@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { createSlideSync, nextIndex, preload } from '@/lib/slideSync';
 
 const fallbackImages = [
     '/images/slides/Bedrijvendag-maart-26-2026-3.png',
@@ -11,28 +12,37 @@ const fallbackImages = [
 
 const props = defineProps<{
     slideImages: string[];
+    slideVersion: string;
 }>();
 
-const images = computed(() => (props.slideImages.length > 0 ? props.slideImages : fallbackImages));
+const images = ref(props.slideImages.length > 0 ? props.slideImages : fallbackImages);
 const currentIndex = ref(0);
 let intervalId: ReturnType<typeof setInterval> | null = null;
 
-function preloadImages() {
-    images.value.forEach((src) => {
-        const img = new Image();
-        img.src = src;
-    });
-}
+// Swap the list in place: the rotation timer is untouched, so the current slide keeps its remaining time.
+const sync = createSlideSync({
+    version: props.slideVersion,
+    async onUpdate(data) {
+        await preload(data.images);
+        const current = images.value[currentIndex.value];
+        currentIndex.value = nextIndex(current, currentIndex.value, data.images);
+        images.value = data.images;
+    },
+});
 
 onMounted(() => {
-    preloadImages();
+    preload(images.value);
 
     intervalId = setInterval(() => {
         currentIndex.value = (currentIndex.value + 1) % images.value.length;
     }, 8000);
+
+    sync.start();
 });
 
 onBeforeUnmount(() => {
+    sync.stop();
+
     if (intervalId) {
         clearInterval(intervalId);
     }

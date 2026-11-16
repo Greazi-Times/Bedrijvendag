@@ -109,8 +109,28 @@ Route::get('/partners', [HomeController::class, 'partners'])->name('partners');
 Route::get('/slides', function () {
     return Inertia::render('Slides', [
         'slideImages' => PageMedia::slideImages(),
+        'slideVersion' => PageMedia::slideVersion(),
     ]);
 })->name('slides');
+
+// Polled by the kiosk every minute: stateless JSON, so no session row is written per request.
+Route::withoutMiddleware([
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+    \App\Http\Middleware\HandleAppearance::class,
+    \App\Http\Middleware\SetLocale::class,
+    \App\Http\Middleware\HandleInertiaRequests::class,
+])->prefix('slides')->group(function () {
+    Route::get('/version', fn () => response()->json(['version' => PageMedia::slideVersion()])
+        ->header('Cache-Control', 'no-cache, must-revalidate'))->name('slides.version');
+
+    Route::get('/data', fn () => response()->json([
+        'version' => PageMedia::slideVersion(),
+        'images' => PageMedia::slideImages(),
+    ])->header('Cache-Control', 'no-cache, must-revalidate'))->name('slides.data');
+});
 
 Route::get('/edities', [EventController::class, 'index'])->name('events');
 

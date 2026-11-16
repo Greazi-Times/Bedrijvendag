@@ -3,6 +3,8 @@
 namespace App\Support;
 
 use App\Settings\HomePageImageSettings;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelSettings\Exceptions\MissingSettings;
 
@@ -100,6 +102,30 @@ class PageMedia
         } catch (MissingSettings) {
             return $fallbacks;
         }
+    }
+
+    /**
+     * Revision of the slideshow: a hash of the single stored payload row (no model hydration). Derived from the
+     * database, so a lost or expired cache entry yields the same value; the TTL only bounds staleness if a row is
+     * edited without going through the settings class.
+     */
+    public static function slideVersion(): string
+    {
+        return Cache::remember('slides.version', 300, function () {
+            $payload = DB::connection(config('settings.repositories.database.connection'))
+                ->table(config('settings.repositories.database.table') ?? 'settings')
+                ->where('group', HomePageImageSettings::group())
+                ->where('name', 'slide_image_paths')
+                ->value('payload');
+
+            return md5((string) $payload);
+        });
+    }
+
+    /** Forget only once the surrounding transaction has committed, so a rollback never publishes a revision. */
+    public static function forgetSlideVersion(): void
+    {
+        DB::afterCommit(fn () => Cache::forget('slides.version'));
     }
 
     public static function homeYoutubeUrl(): string

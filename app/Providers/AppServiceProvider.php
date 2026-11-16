@@ -7,6 +7,8 @@ use App\Listeners\AuditAuthenticationEvents;
 use App\Models\User;
 use App\Policies\RolePolicy;
 use App\Services\DeepLTranslator;
+use App\Settings\HomePageImageSettings;
+use App\Support\PageMedia;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Vite;
 use Illuminate\Http\Middleware\TrustProxies;
@@ -18,6 +20,7 @@ use Illuminate\Support\Facades\View as ViewFacade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
+use Spatie\LaravelSettings\Events\SettingsSaved;
 use Spatie\Permission\Models\Role;
 
 class AppServiceProvider extends ServiceProvider
@@ -40,6 +43,12 @@ class AppServiceProvider extends ServiceProvider
         $this->configureAuthorization();
         $this->configureAuditing();
         $this->configureErrorPages();
+
+        Event::listen(SettingsSaved::class, function (SettingsSaved $event) {
+            if ($event->settings instanceof HomePageImageSettings) {
+                PageMedia::forgetSlideVersion();
+            }
+        });
     }
 
     /**
