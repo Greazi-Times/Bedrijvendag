@@ -82,7 +82,7 @@ onBeforeUnmount(() => {
 /* Crossfade: the new slide fades in on top while the old one stays fully opaque underneath until removed. */
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.5s ease;
+    transition: opacity 1.5s ease-in-out;
 }
 
 .fade-enter-active {
