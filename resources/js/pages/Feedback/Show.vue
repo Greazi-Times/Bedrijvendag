@@ -76,10 +76,12 @@ function submit() {
                         <p class="text-sm font-semibold">{{ ui.form_error }}</p>
                     </div>
 
-                    <div class="grid gap-10">
-                        <fieldset v-for="section in sections" :key="section.key" class="grid gap-7">
-                            <legend v-if="sections.length > 1" class="mb-1 text-xl font-semibold text-ink">{{ section.title }}</legend>
-                            <p v-if="section.description" class="-mt-4 text-sm text-ink-muted">{{ section.description }}</p>
+                    <div class="divide-y divide-hairline">
+                        <section v-for="section in sections" :key="section.key" :aria-labelledby="`section-${section.key}`" class="grid gap-7 py-10 first:pt-0 last:pb-0">
+                            <header v-if="(sections.length > 1 && section.title) || section.description" class="grid gap-2">
+                                <h2 v-if="sections.length > 1 && section.title" :id="`section-${section.key}`" class="text-xl font-semibold text-ink">{{ section.title }}</h2>
+                                <p v-if="section.description" class="max-w-prose text-sm leading-relaxed text-ink-muted">{{ section.description }}</p>
+                            </header>
                             <FormField
                                 v-for="field in section.fields"
                                 :key="field.key"
@@ -94,7 +96,7 @@ function submit() {
                                 terms-html=""
                                 :ui="ui"
                             />
-                        </fieldset>
+                        </section>
                     </div>
 
                     <div aria-hidden="true" style="position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden">

@@ -130,25 +130,28 @@ const inputType = computed(() => ({ email: 'email', phone: 'tel', url: 'url', nu
         <fieldset v-else-if="field.type === 'rating'">
             <legend class="field-label mb-2">{{ field.label }} <span v-if="field.required" class="text-danger" aria-hidden="true">*</span></legend>
             <p v-if="field.description" :id="`${id}-help`" class="mb-2 text-xs text-ink-muted">{{ field.description }}</p>
-            <div class="flex flex-wrap gap-2">
-                <label v-for="n in scale" :key="n" class="cursor-pointer">
-                    <input v-model="data[field.key]" type="radio" :name="id" :value="n" class="peer sr-only" :aria-describedby="describedBy" />
-                    <span
-                        class="flex h-11 min-w-11 items-center justify-center rounded-[var(--radius-input)] bg-canvas px-3 text-sm font-medium text-ink ring-1 ring-hairline peer-checked:bg-ink peer-checked:text-canvas peer-focus-visible:ring-2 peer-focus-visible:ring-brand-blue"
-                        >{{ n }}</span
-                    >
-                </label>
-                <label v-if="field.allow_na" class="cursor-pointer">
+            <div class="max-w-md">
+                <div class="flex gap-2">
+                    <label v-for="n in scale" :key="n" class="min-w-0 flex-1 cursor-pointer">
+                        <input v-model="data[field.key]" type="radio" :name="id" :value="n" class="peer sr-only" :aria-describedby="describedBy" />
+                        <span
+                            class="flex h-11 items-center justify-center rounded-[var(--radius-input)] bg-canvas text-sm font-medium text-ink ring-1 ring-hairline peer-checked:bg-ink peer-checked:text-canvas peer-focus-visible:ring-2 peer-focus-visible:ring-brand-blue"
+                            >{{ n }}</span
+                        >
+                    </label>
+                </div>
+                <!-- Same width as the buttons, so each end of the scale sits under its own end. -->
+                <div v-if="field.label_low || field.label_high" class="mt-2 flex justify-between gap-6 text-xs leading-snug text-ink-muted">
+                    <span>{{ field.label_low }}</span>
+                    <span class="text-right">{{ field.label_high }}</span>
+                </div>
+                <label v-if="field.allow_na" class="mt-3 inline-block cursor-pointer">
                     <input v-model="data[field.key]" type="radio" :name="id" value="na" class="peer sr-only" :aria-describedby="describedBy" />
                     <span
-                        class="flex h-11 items-center justify-center rounded-[var(--radius-input)] bg-canvas px-3 text-sm text-ink-muted ring-1 ring-hairline peer-checked:bg-ink peer-checked:text-canvas peer-focus-visible:ring-2 peer-focus-visible:ring-brand-blue"
+                        class="flex h-10 items-center justify-center rounded-[var(--radius-input)] bg-canvas px-4 text-sm text-ink-muted ring-1 ring-hairline peer-checked:bg-ink peer-checked:text-canvas peer-focus-visible:ring-2 peer-focus-visible:ring-brand-blue"
                         >{{ ui.na }}</span
                     >
                 </label>
-            </div>
-            <div v-if="field.label_low || field.label_high" class="mt-2 flex max-w-md justify-between gap-4 text-xs text-ink-muted">
-                <span>1 = {{ field.label_low }}</span>
-                <span>{{ scale.length }} = {{ field.label_high }}</span>
             </div>
             <p v-if="error" :id="`${id}-err`" class="field-error mt-2" role="alert">{{ error }}</p>
         </fieldset>
