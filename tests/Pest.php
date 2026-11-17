@@ -71,7 +71,7 @@ function survey(Event $event, string $audience = 'students'): FeedbackSurvey
 
 function openSurvey(Event $event, string $audience = 'students'): FeedbackSurvey
 {
-    app(FeedbackSurveys::class)->publish($survey = survey($event, $audience));
+    app(FeedbackSurveys::class)->setEnabled($survey = survey($event, $audience), true);
 
     return $survey->fresh();
 }
@@ -79,6 +79,16 @@ function openSurvey(Event $event, string $audience = 'students'): FeedbackSurvey
 function feedbackUrl(FeedbackSurvey $survey): string
 {
     return "/feedback/{$survey->event_id}/{$survey->audience}";
+}
+
+function studentAnswers(array $over = []): array
+{
+    return ['answers' => $over + ['overall_rating' => 4, 'company_variety' => 5, 'conversation_usefulness' => 'na', 'most_valuable' => ['networking', 'internships'], 'liked_most' => 'The atmosphere', 'recommend' => 'yes']];
+}
+
+function feedbackAdmin(array $permissions = ['events.view', 'events.update', 'events.create', 'forms.view', 'forms.update', 'feedback.view', 'feedback.update', 'feedback.delete'])
+{
+    return test()->actingAs(reviewerWithout($permissions));
 }
 
 function enrollmentAnswers(array $over = []): array

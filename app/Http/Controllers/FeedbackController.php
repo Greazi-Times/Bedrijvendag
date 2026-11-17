@@ -22,7 +22,7 @@ class FeedbackController extends Controller
 
     public function show(Request $request, Event $event, string $audience): Response
     {
-        $survey = $this->survey($event, $audience);
+        $survey = $this->survey($event, $audience, hideDisabled: true);
         $state = $survey->state();
         $base = ['state' => $state, 'ui' => __('feedback.ui'), 'event' => ['name' => $event->name], 'audience' => ['key' => $audience, 'label' => __("feedback.audience.{$audience}")]];
 
@@ -46,6 +46,7 @@ class FeedbackController extends Controller
     {
         abort_if((int) $request->header('Content-Length', 0) > self::MAX_BYTES, 413);
 
+        // A disabled survey answers a visitor who had it open with a message, not a 404; nothing is stored either way.
         $survey = $this->survey($event, $audience);
         $done = redirect()->route('feedback.show', ['event' => $event->id, 'audience' => $audience])->with('feedback_submitted', true);
 
@@ -68,13 +69,13 @@ class FeedbackController extends Controller
         return $done;
     }
 
-    /** A draft survey does not exist as far as the public is concerned. */
-    private function survey(Event $event, string $audience): FeedbackSurvey
+    /** A disabled survey does not exist as far as the public page is concerned. */
+    private function survey(Event $event, string $audience, bool $hideDisabled = false): FeedbackSurvey
     {
         abort_unless(isset(FeedbackSurvey::KINDS[$audience]), 404);
 
         $survey = FeedbackSurvey::query()->with('form.latestVersion')->where('event_id', $event->id)->where('audience', $audience)->firstOrFail();
-        abort_if($survey->state() === 'draft', 404);
+        abort_if($hideDisabled && $survey->state() === 'disabled', 404);
 
         return $survey;
     }

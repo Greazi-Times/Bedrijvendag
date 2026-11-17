@@ -12,11 +12,6 @@ use App\Models\Form;
 use App\Services\FeedbackSurveys;
 use Livewire\Livewire;
 
-function feedbackAdmin(array $permissions = ['events.view', 'events.update', 'events.create', 'forms.view', 'forms.update', 'feedback.view', 'feedback.update', 'feedback.delete'])
-{
-    return test()->actingAs(reviewerWithout($permissions));
-}
-
 function managerFor(Event $event)
 {
     return Livewire::test(FeedbackSurveysRelationManager::class, ['ownerRecord' => $event, 'pageClass' => EditEvent::class]);
@@ -30,23 +25,28 @@ test('creating an edition in the admin panel creates both surveys', function () 
         ->call('create')->assertHasNoFormErrors();
 
     $event = Event::query()->where('name', 'Bedrijvendag 2031')->firstOrFail();
-    expect($event->feedbackSurveys()->count())->toBe(2)->and($event->feedbackSurveys()->pluck('status')->unique()->all())->toBe(['draft']);
+    expect($event->feedbackSurveys()->count())->toBe(2)->and($event->feedbackSurveys()->pluck('enabled')->unique()->map(fn ($v) => (bool) $v)->all())->toBe([false]);
 });
 
-test('the edition shows both surveys and an administrator can publish, schedule, close and reset them', function () {
+test('the edition shows both surveys and an administrator can switch, schedule, rename and reset them', function () {
     $event = openEvent();
     feedbackAdmin();
     $survey = $event->feedbackSurveys()->where('audience', 'students')->first();
+    $versions = $survey->form->versions()->count();
 
     managerFor($event)->assertCanSeeTableRecords($event->feedbackSurveys)
-        ->assertTableActionVisible('publish', $survey)->assertTableActionHidden('unpublish', $survey)
-        ->callTableAction('publish', $survey)
-        ->assertTableActionVisible('unpublish', $survey)
-        ->callTableAction('schedule', $survey, ['opens_at' => now()->addDay(), 'closes_at' => now()->addDays(3)])
-        ->callTableAction('close', $survey)
-        ->callTableAction('qr', $survey);
+        ->assertTableActionVisible('activate', $survey)->assertTableActionHidden('deactivate', $survey)
+        ->callTableAction('activate', $survey)
+        ->assertTableActionVisible('deactivate', $survey)
+        ->callTableAction('settings', $survey, ['name' => 'Student Feedback 2027 (final)', 'enabled' => true, 'opens_at' => now()->addDay(), 'closes_at' => now()->addDays(3)])
+        ->callTableAction('qr', $survey)
+        ->callTableAction('preview', $survey);
 
-    expect($survey->fresh()->status)->toBe('closed')->and($survey->fresh()->opens_at)->not->toBeNull();
+    expect($survey->fresh()->enabled)->toBeTrue()->and($survey->fresh()->state())->toBe('not_open_yet')->and($survey->form->fresh()->name)->toBe('Student Feedback 2027 (final)');
+    expect($survey->form->versions()->count())->toBe($versions); // switching and scheduling never create a questionnaire version
+
+    managerFor($event)->callTableAction('deactivate', $survey);
+    expect($survey->fresh()->enabled)->toBeFalse()->and($survey->fresh()->opens_at)->not->toBeNull(); // dates are kept
 
     $schema = $survey->form->draft_schema;
     $schema['sections'][0]['fields'][0]['label'] = 'Edited';
@@ -57,15 +57,14 @@ test('the edition shows both surveys and an administrator can publish, schedule,
     expect($survey->form->fresh()->latestVersion->schema['sections'][0]['fields'][0]['label'])->toBe('How would you rate the ATIx Bedrijvendag overall?');
 });
 
-test('a survey that cannot be published is reported instead of opened', function () {
+test('settings with a closing date before the opening date are refused', function () {
     $event = openEvent();
     feedbackAdmin();
     $survey = $event->feedbackSurveys()->first();
-    $survey->form->forceFill(['draft_schema' => ['sections' => [['key' => 'aa', 'title' => 'T', 'fields' => [['key' => 'mail', 'type' => 'email', 'label' => 'Email']]]]]])->save();
 
-    managerFor($event)->callTableAction('publish', $survey)->assertNotified('Not possible');
+    managerFor($event)->callTableAction('settings', $survey, ['name' => 'X', 'enabled' => true, 'opens_at' => now()->addDays(3), 'closes_at' => now()->addDay()])->assertHasTableActionErrors(['closes_at']);
 
-    expect($survey->fresh()->status)->toBe('draft');
+    expect($survey->fresh()->opens_at)->toBeNull();
 });
 
 test('without the feedback permission nobody can change or even see a survey', function () {
@@ -73,7 +72,7 @@ test('without the feedback permission nobody can change or even see a survey', f
     $survey = $event->feedbackSurveys()->first();
     feedbackAdmin(['events.view', 'feedback.view']);
 
-    managerFor($event)->assertTableActionHidden('publish', $survey)->assertTableActionHidden('reset', $survey);
+    managerFor($event)->assertTableActionHidden('activate', $survey)->assertTableActionHidden('settings', $survey)->assertTableActionHidden('reset', $survey);
     Livewire::test(FeedbackResults::class)->assertOk();
 
     test()->actingAs(reviewerWithout(['events.view', 'forms.view']));

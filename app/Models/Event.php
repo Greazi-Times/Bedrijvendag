@@ -7,6 +7,7 @@ use App\Models\Concerns\HasAutomaticTranslations;
 use App\Services\FeedbackSurveys;
 use App\Services\FormResolver;
 use App\Services\StandCapacity;
+use App\Support\Availability;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -87,12 +88,7 @@ class Event extends Model
     /** 'open' | 'disabled' | 'not_open_yet' | 'closed' */
     public function enrollmentState(): string
     {
-        return match (true) {
-            ! $this->enrollment_enabled => 'disabled',
-            $this->enrollment_opens_at?->isFuture() => 'not_open_yet',
-            $this->enrollment_closes_at?->isPast() => 'closed',
-            default => 'open',
-        };
+        return Availability::state((bool) $this->enrollment_enabled, $this->enrollment_opens_at, $this->enrollment_closes_at);
     }
 
     public function feedbackSurveys(): HasMany

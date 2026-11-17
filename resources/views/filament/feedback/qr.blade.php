@@ -8,6 +8,6 @@
         @endif
     </div>
     @if ($survey->state() !== 'open')
-        <p class="text-warning-600">This survey is not open yet, so the code leads to an unavailable page until it is published.</p>
+        <p class="text-warning-600">This form is currently not open. The code stays valid: it works again as soon as the form is open.</p>
     @endif
 </div>

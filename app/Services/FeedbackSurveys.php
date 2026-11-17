@@ -19,7 +19,7 @@ class FeedbackSurveys
 
     /**
      * Gives the edition the surveys it is missing, each with an independent, published copy of the current global
-     * template and in draft status. Joins the caller's transaction, so a failure never leaves a half-made edition.
+     * template and switched off. Joins the caller's transaction, so a failure never leaves a half-made edition.
      */
     public function provision(Event $event): void
     {
@@ -38,7 +38,7 @@ class FeedbackSurveys
                     ]);
                     $form->publish();
 
-                    (new FeedbackSurvey)->forceFill(['event_id' => $event->id, 'audience' => $audience, 'form_id' => $form->id, 'status' => 'draft'])->save();
+                    (new FeedbackSurvey)->forceFill(['event_id' => $event->id, 'audience' => $audience, 'form_id' => $form->id])->save();
                 });
             } catch (UniqueConstraintViolationException) {
                 // A concurrent run created it first; its form is the one in use.
@@ -73,22 +73,9 @@ class FeedbackSurveys
         });
     }
 
-    /** Publishes the current questions as a new version (when changed) and opens the survey for its schedule. */
-    public function publish(FeedbackSurvey $survey, ?User $by = null): void
+    /** Switches the survey on or off. Only the flag changes: no questionnaire version is created and the dates are kept. */
+    public function setEnabled(FeedbackSurvey $survey, bool $enabled): void
     {
-        DB::transaction(function () use ($survey, $by): void {
-            $survey->form->publish($by);
-            $survey->forceFill(['status' => 'published'])->save();
-        });
-    }
-
-    public function unpublish(FeedbackSurvey $survey): void
-    {
-        $survey->forceFill(['status' => 'draft'])->save();
-    }
-
-    public function close(FeedbackSurvey $survey): void
-    {
-        $survey->forceFill(['status' => 'closed'])->save();
+        $survey->forceFill(['enabled' => $enabled])->save();
     }
 }

@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Models\Concerns\Audited;
+use App\Support\Availability;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\ValidationException;
 
 /** One anonymous questionnaire of an edition: exactly one per audience. Its questions live in a (versioned) Form. */
 class FeedbackSurvey extends Model
@@ -22,11 +24,11 @@ class FeedbackSurvey extends Model
     public const LABELS = [self::STUDENTS => 'Student Feedback', self::COMPANIES => 'Company Feedback'];
 
     // The relations (event, form, audience) are set by the provisioning service only.
-    protected $fillable = ['status', 'opens_at', 'closes_at'];
+    protected $fillable = ['enabled', 'opens_at', 'closes_at'];
 
-    protected $casts = ['opens_at' => 'datetime', 'closes_at' => 'datetime'];
+    protected $casts = ['enabled' => 'boolean', 'opens_at' => 'datetime', 'closes_at' => 'datetime'];
 
-    protected array $auditAttributes = ['status', 'opens_at', 'closes_at'];
+    protected array $auditAttributes = ['enabled', 'opens_at', 'closes_at'];
 
     public function event(): BelongsTo
     {
@@ -48,15 +50,20 @@ class FeedbackSurvey extends Model
         return self::LABELS[$this->audience];
     }
 
-    /** 'draft' | 'not_open_yet' | 'closed' | 'open': the only place that decides whether answers are accepted. */
+    protected static function booted(): void
+    {
+        // Same rule as the form fields, enforced for every code path.
+        static::saving(function (self $survey): void {
+            if ($survey->opens_at && $survey->closes_at && $survey->closes_at->lte($survey->opens_at)) {
+                throw ValidationException::withMessages(['closes_at' => 'The closing date must be after the opening date.']);
+            }
+        });
+    }
+
+    /** 'disabled' | 'not_open_yet' | 'closed' | 'open': the only place that decides whether answers are accepted. */
     public function state(): string
     {
-        return match (true) {
-            $this->status === 'draft' => 'draft',
-            $this->status === 'closed' || $this->closes_at?->isPast() => 'closed',
-            $this->opens_at?->isFuture() => 'not_open_yet',
-            default => 'open',
-        };
+        return Availability::state($this->enabled, $this->opens_at, $this->closes_at);
     }
 
     public function isOpen(): bool

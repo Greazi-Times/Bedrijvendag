@@ -15,11 +15,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Testing\AssertableInertia as Assert;
 
-function studentAnswers(array $over = []): array
-{
-    return ['answers' => $over + ['overall_rating' => 4, 'company_variety' => 5, 'conversation_usefulness' => 'na', 'most_valuable' => ['networking', 'internships'], 'liked_most' => 'The atmosphere', 'recommend' => 'yes']];
-}
-
 // ---------------------------------------------------------------- provisioning
 
 test('a new edition automatically gets exactly one student and one company survey, as drafts with a published form', function () {
@@ -29,7 +24,7 @@ test('a new edition automatically gets exactly one student and one company surve
     expect($event->feedbackSurveys->pluck('audience')->sort()->values()->all())->toBe(['companies', 'students']);
 
     foreach ($event->feedbackSurveys as $survey) {
-        expect($survey->status)->toBe('draft')
+        expect($survey->enabled)->toBeFalse()
             ->and($survey->form->kind)->toBe(FeedbackSurvey::KINDS[$survey->audience])
             ->and($survey->form->event_id)->toBe($event->id)
             ->and($survey->form->latestVersion)->not->toBeNull();
@@ -57,7 +52,7 @@ test('the database refuses a second survey of the same audience in one edition',
     $event = openEvent();
     $other = Form::create(['name' => 'x', 'kind' => 'feedback_student', 'event_id' => $event->id, 'draft_schema' => DefaultFeedbackForms::student()]);
 
-    expect(fn () => (new FeedbackSurvey)->forceFill(['event_id' => $event->id, 'audience' => 'students', 'form_id' => $other->id, 'status' => 'draft'])->save())
+    expect(fn () => (new FeedbackSurvey)->forceFill(['event_id' => $event->id, 'audience' => 'students', 'form_id' => $other->id])->save())
         ->toThrow(UniqueConstraintViolationException::class);
 });
 
@@ -205,11 +200,11 @@ test('a rejected submission never flashes the typed answers back into the sessio
     expect(session()->getOldInput())->toBe([]);
 });
 
-test('drafts are invisible, scheduled and closed surveys refuse answers', function () {
+test('disabled surveys are invisible, scheduled and closed surveys refuse answers', function () {
     $event = openEvent();
-    $draft = survey($event);
-    $this->get(feedbackUrl($draft))->assertNotFound();
-    $this->post(feedbackUrl($draft), studentAnswers())->assertNotFound();
+    $disabled = survey($event);
+    $this->get(feedbackUrl($disabled))->assertNotFound();
+    $this->post(feedbackUrl($disabled), studentAnswers())->assertSessionHasErrors('form');
 
     $open = openSurvey($event);
     $open->forceFill(['opens_at' => now()->addDay()])->save();
@@ -221,10 +216,7 @@ test('drafts are invisible, scheduled and closed surveys refuse answers', functi
     $this->post(feedbackUrl($open), studentAnswers())->assertSessionHasErrors('form');
 
     $open->forceFill(['closes_at' => null])->save();
-    app(FeedbackSurveys::class)->close($open);
-    $this->post(feedbackUrl($open), studentAnswers())->assertSessionHasErrors('form');
-
-    app(FeedbackSurveys::class)->unpublish($open);
+    app(FeedbackSurveys::class)->setEnabled($open, false);
     $this->get(feedbackUrl($open))->assertNotFound();
     expect(FeedbackResponse::count())->toBe(0);
 });

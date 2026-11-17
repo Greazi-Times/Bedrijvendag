@@ -9,15 +9,37 @@ copies of the two global templates.
 | Concern | Where |
 | --- | --- |
 | Questions, versions, validation | the existing form builder: `Form` / `FormVersion` / `FormEngine` (kinds `feedback_student`, `feedback_company`, new field type `rating`) |
-| Survey (status, schedule, public link) | `FeedbackSurvey`, unique per `(event_id, audience)` |
+| Survey (on/off switch, schedule, public link) | `FeedbackSurvey`, unique per `(event_id, audience)`; status from `App\Support\Availability`, which enrollment uses too |
 | Answers | `FeedbackResponse` (survey, form version, **day**) and `FeedbackAnswer` (one row per answered question) |
-| Provisioning, reset, publish | `App\Services\FeedbackSurveys` (idempotent); `php artisan feedback:provision` backfills |
+| Provisioning, reset, switching on/off | `App\Services\FeedbackSurveys` (idempotent); `php artisan feedback:provision` backfills |
 | Submission | `App\Services\FeedbackSubmissions` |
 | Statistics | `App\Services\Analytics\FeedbackStats` (SQL aggregation) |
 | Admin | Edition → **Feedback** tab; Forms → **Feedback templates**; Edition → **Feedback results** |
 | Public | `GET/POST /feedback/{edition id}/students` and `/companies` |
 
 Global templates are the two `Form` rows with `system_key` `default_student_feedback` / `default_company_feedback`.
+## Switching on and off
+
+Like enrollment, each survey has a manual **switch** (`enabled`, off for new surveys) and optional **opens at / closes at**
+moments, edited under Edition → Feedback → *Settings* (shown and entered in Europe/Amsterdam, stored in UTC). The
+effective status is calculated in one place, `Availability::state()`:
+
+1. switched off → **Disabled** (always wins over the dates; the public link is a 404 and submissions are rejected);
+2. opening moment in the future → **Scheduled**;
+3. closing moment passed → **Closed**;
+4. otherwise **Open**.
+
+A closing moment must be after the opening moment. Switching or scheduling never creates a questionnaire version;
+versions only come from publishing questions in the form editor.
+
+## QR codes
+
+`App\Support\Feedback\QrCode` draws the code from the real QR matrix (error correction H) in ATIx orange with rounded
+modules, softly rounded finder patterns and the gear of `public/favicon.svg` in the centre (about 5% of the area; the
+modules under it are left out). SVG is the print format; PNG needs the `imagick` extension. The code only depends on the
+public link, so it is the same whether the form is on, off or closed. Finder rounding is deliberately mild: strongly
+rounded finders stopped an OpenCV decoder from locking on.
+
 Publishing a template only affects editions created afterwards. "Reset to default template" on an edition survey
 publishes the current template as a **new version** of that survey's form; older versions and responses stay.
 
