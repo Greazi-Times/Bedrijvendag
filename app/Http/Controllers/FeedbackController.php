@@ -27,7 +27,7 @@ class FeedbackController extends Controller
         $base = ['state' => $state, 'ui' => __('feedback.ui'), 'event' => ['name' => $event->name], 'audience' => ['key' => $audience, 'label' => __("feedback.audience.{$audience}")]];
 
         if ($state !== 'open' || ! ($version = $survey->form->latestVersion)) {
-            return Inertia::render('Feedback/Show', $base + ['state' => $state === 'open' ? 'closed' : $state, 'stateMessage' => __('feedback.states.'.($state === 'open' ? 'closed' : $state))]);
+            return Inertia::render('Feedback/Show', array_merge($base, ['state' => $state === 'open' ? 'closed' : $state, 'stateMessage' => __('feedback.states.'.($state === 'open' ? 'closed' : $state))]));
         }
 
         $questions = collect($version->schema['sections'] ?? [])->flatMap(fn (array $s) => $s['fields'] ?? [])
