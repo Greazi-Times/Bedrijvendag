@@ -119,7 +119,7 @@ class FeedbackSurveysRelationManager extends RelationManager
                     Action::make('qr')->label('QR code')->icon('heroicon-o-qr-code')->authorize('view')
                         ->modalSubmitAction(false)->modalCancelActionLabel('Close')->modalWidth('md')
                         ->modalHeading(fn (FeedbackSurvey $record): string => 'QR code: '.$record->form->name)
-                        ->modalContent(fn (FeedbackSurvey $record): View => view('filament.feedback.qr', ['survey' => $record, 'svg' => QrCode::svg($record->url()), 'png' => extension_loaded('imagick')])),
+                        ->modalContent(fn (FeedbackSurvey $record): View => view('filament.feedback.qr', ['survey' => $record, 'svg' => QrCode::svg($record->url())])),
                     Action::make('reset')->label('Reset to default template')->icon('heroicon-o-arrow-uturn-left')->color('danger')->authorize('update')
                         ->requiresConfirmation()->modalHeading('Reset the questions to the default template?')
                         ->modalDescription('Replaces the questions with the current published default template as a new version. Earlier versions and every response stay and remain readable.')
