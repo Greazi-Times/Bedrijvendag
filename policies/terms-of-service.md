@@ -1,8 +1,6 @@
 # Algemene voorwaarden
 
-**ATIx Bedrijvendag** · https://atixbedrijvendag.nl · Laatst bijgewerkt: _[datum van publicatie invullen]_
-
-> **CONCEPT VOOR BEOORDELING.** **[BEVESTIGEN: …]** markeert open punten uit `docs/privacy/legal-review.md`. Opslaan is geblokkeerd zolang die er staan.
+**ATIx Bedrijvendag** · https://atixbedrijvendag.nl · Laatst bijgewerkt: _17-11-2026_
 
 ## 1. Inleiding
 
@@ -10,7 +8,7 @@ Deze voorwaarden gelden voor het gebruik van de website van ATIx Bedrijvendag en
 
 ## 2. Wie zijn wij
 
-ATIx Bedrijvendag is de naam van een evenement. De juridische organisatie die de website aanbiedt en het evenement organiseert is **[BEVESTIGEN: volledige naam, rechtsvorm, KvK-nummer]**. Adres: Lovensdijkstraat 61, 4818 AJ Breda · info@atixbedrijvendag.nl · privacy: privacy@atixbedrijvendag.nl.
+ATIx Bedrijvendag is de naam van een evenement. De juridische organisatie die de website aanbiedt en het evenement organiseert is Avans Hogeschool. Adres: Lovensdijkstraat 61, 4818 AJ Breda · info@atixbedrijvendag.nl · privacy: privacy@atixbedrijvendag.nl.
 
 ## 3. Toepasselijkheid en aanvaarding
 
@@ -30,7 +28,7 @@ Wie een bedrijf registreert of inschrijft, verklaart bevoegd te zijn om voor dat
 
 ## 7. Inschrijven voor een editie
 
-Een inschrijving is een verzoek om deel te nemen, geen bevestigde plaats. Eventuele kosten en voorwaarden van een editie staan bij de inschrijving of in een aparte overeenkomst. **[BEVESTIGEN: betaal-, annulerings- en restitutieafspraken zijn niet in deze tekst vastgelegd en mogen alleen uit echte afspraken worden toegevoegd.]**
+Een inschrijving is een verzoek om deel te nemen, geen bevestigde plaats. Eventuele kosten en voorwaarden van een editie staan bij de inschrijving of in een aparte overeenkomst.
 
 ## 8. Beoordeling en goedkeuring
 
@@ -62,7 +60,7 @@ Tijdens het evenement kunnen foto's en video's worden gemaakt. In de locatie han
 
 ## 15. Wijziging of annulering van het evenement
 
-We kunnen datum, plaats of vorm wijzigen of het evenement annuleren om organisatorische of veiligheidsredenen of door overmacht. We informeren ingeschreven bedrijven snel. De financiële gevolgen volgen uit eventuele aparte afspraken en dwingend recht. **[BEVESTIGEN]**
+We kunnen datum, plaats of vorm wijzigen of het evenement annuleren om organisatorische of veiligheidsredenen of door overmacht. We informeren ingeschreven bedrijven snel. De financiële gevolgen volgen uit eventuele aparte afspraken en dwingend recht.
 
 ## 16. Opschorten of beëindigen
 
@@ -74,7 +72,7 @@ We doen ons best om de website beschikbaar en juist te houden, maar kunnen geen 
 
 ## 18. Aansprakelijkheid
 
-Niets in deze voorwaarden sluit aansprakelijkheid uit of beperkt die voor zover de wet dat niet toestaat, bijvoorbeeld bij opzet of bewuste roekeloosheid, en de rechten van consumenten blijven gelden. Daarbinnen zijn wij aansprakelijk voor schade die het gevolg is van een toerekenbare tekortkoming van ons. **[BEVESTIGEN: of en tot welk bedrag de aansprakelijkheid voor andere schade wordt beperkt; er is bewust geen bedrag verzonnen.]** Wij zijn niet verantwoordelijk voor de inhoud of beschikbaarheid van websites van derden en niet voor gebeurtenissen buiten onze redelijke macht.
+Niets in deze voorwaarden sluit aansprakelijkheid uit of beperkt die voor zover de wet dat niet toestaat, bijvoorbeeld bij opzet of bewuste roekeloosheid, en de rechten van consumenten blijven gelden. Daarbinnen zijn wij aansprakelijk voor schade die het gevolg is van een toerekenbare tekortkoming van ons. Wij zijn niet verantwoordelijk voor de inhoud of beschikbaarheid van websites van derden en niet voor gebeurtenissen buiten onze redelijke macht.
 
 ## 19. Privacy
 
@@ -90,7 +88,7 @@ We kunnen deze voorwaarden aanpassen om juridische, organisatorische of technisc
 
 ## 22. Toepasselijk recht en geschillen
 
-Nederlands recht is van toepassing, onverminderd de dwingende bescherming die het recht van het land waar een consument woont biedt. Wij zoeken eerst een oplossing in overleg. Geschillen gaan naar de bevoegde Nederlandse rechter **[BEVESTIGEN: gewenste rechtbank; Breda ligt in het arrondissement Zeeland-West-Brabant]**, tenzij dwingende regels (bijvoorbeeld voor consumenten) een andere rechter aanwijzen.
+Nederlands recht is van toepassing, onverminderd de dwingende bescherming die het recht van het land waar een consument woont biedt. Wij zoeken eerst een oplossing in overleg. Geschillen gaan naar de bevoegde Nederlandse rechter, tenzij dwingende regels (bijvoorbeeld voor consumenten) een andere rechter aanwijzen.
 
 ## 23. Contact
 

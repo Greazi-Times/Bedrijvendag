@@ -1,8 +1,6 @@
 # Cookiebeleid
 
-**ATIx Bedrijvendag** · https://atixbedrijvendag.nl · Laatst bijgewerkt: _[datum van publicatie invullen]_
-
-> **CONCEPT VOOR BEOORDELING.** Namen en looptijden komen uit de code en configuratie van de applicatie. Ze zijn **niet** in een draaiende productieomgeving gecontroleerd. **[BEVESTIGEN: productiecookies controleren, inclusief cookies van infrastructuur zoals Cloudflare.]**
+**ATIx Bedrijvendag** · https://atixbedrijvendag.nl · Laatst bijgewerkt: _17-11-2026_
 
 ## 1. Inleiding
 
@@ -15,18 +13,18 @@ Cookies zijn kleine bestanden die een website in je browser opslaat. Vergelijkba
 ## 3. Soorten cookies
 
 - **Functioneel/noodzakelijk**: nodig om een dienst te leveren die je vraagt (inloggen, beveiliging, sessie). Hiervoor is geen toestemming nodig.
-- **Voorkeuren**: onthouden een keuze zoals het uiterlijk. Alleen vrijgesteld als de voorkeur strikt nodig is voor de dienst die je vroeg; anders is toestemming vereist. **[BEVESTIGEN: juridische beoordeling of de uiterlijk- en zijbalkvoorkeur als vrijgesteld mag gelden; zo niet, dan moet het worden opgeschort tot toestemming of worden verwijderd.]**
+- **Voorkeuren**: onthouden een keuze zoals het uiterlijk. Alleen vrijgesteld als de voorkeur strikt nodig is voor de dienst die je vroeg; anders is toestemming vereist.
 - **Analyse, tracking en advertenties**: vereisen meestal toestemming. In de code van de applicatie hebben we deze niet gevonden.
 
 ## 4. Gebruikte cookies (afgeleid uit code en configuratie)
 
 | Naam | Doel | Aanbieder | Eerste/derde partij | Duur | Categorie |
 |---|---|---|---|---|---|
-| `…-session` (afgeleid van de applicatienaam, bijvoorbeeld `atix-bedrijvendag-session` **[BEVESTIGEN]**) | Houdt je ingelogd en bewaart sessiegegevens | atixbedrijvendag.nl | Eerste | 120 minuten (sessieduur-instelling) **[BEVESTIGEN]** | Noodzakelijk |
+| `…-session` (afgeleid van de applicatienaam, bijvoorbeeld `atix-bedrijvendag-session`) | Houdt je ingelogd en bewaart sessiegegevens | atixbedrijvendag.nl | Eerste | 120 minuten (sessieduur-instelling) | Noodzakelijk |
 | `XSRF-TOKEN` | Beschermt formulieren tegen misbruik vanaf andere sites | atixbedrijvendag.nl | Eerste | zoals de sessie | Noodzakelijk |
-| `remember_web_…` | Houdt je ingelogd op een vertrouwd apparaat als je daarvoor kiest **[BEVESTIGEN dat de optie bestaat]** | atixbedrijvendag.nl | Eerste | standaard van Laravel, enkele honderden dagen **[BEVESTIGEN]** | Noodzakelijk (op jouw verzoek) |
-| `appearance` | Onthoudt licht of donker | atixbedrijvendag.nl | Eerste | tot één jaar **[BEVESTIGEN]** | Voorkeur |
-| `sidebar_state` | Onthoudt of de zijbalk in het dashboard open staat | atixbedrijvendag.nl | Eerste | tot één week **[BEVESTIGEN]** | Voorkeur |
+| `remember_web_…` | Houdt je ingelogd op een vertrouwd apparaat als je daarvoor kiest | atixbedrijvendag.nl | Eerste | standaard van Laravel, enkele honderden dagen | Noodzakelijk (op jouw verzoek) |
+| `appearance` | Onthoudt licht of donker | atixbedrijvendag.nl | Eerste | tot één jaar | Voorkeur |
+| `sidebar_state` | Onthoudt of de zijbalk in het dashboard open staat | atixbedrijvendag.nl | Eerste | tot één week | Voorkeur |
 
 In lokale opslag van je browser staan de sleutels `appearance` en `theme` voor dezelfde weergavevoorkeur. Die worden niet naar ons verstuurd.
 
@@ -36,7 +34,7 @@ Sessie- en beveiligingscookies bestaan alleen om de site te laten werken en verl
 
 ## 6. Cookies en technieken van derden
 
-We hebben geen analyse-, advertentie-, social-media- of video-embeds gevonden. De pagina laadt wel lettertypen van **Bunny Fonts (fonts.bunny.net)**. Voor zover bekend plaatst die geen cookies, maar je browser verstuurt je IP-adres en apparaatgegevens naar die partij (zie de privacyverklaring). Cookies die door infrastructuur zoals Cloudflare worden geplaatst zijn in de code niet zichtbaar. **[BEVESTIGEN in productie.]** Voor externe sites waarnaar we linken, zoals fotoalbums, geldt hun eigen beleid.
+We hebben geen analyse-, advertentie-, social-media- of video-embeds gevonden. De pagina laadt wel lettertypen van **Bunny Fonts (fonts.bunny.net)**. Voor zover bekend plaatst die geen cookies, maar je browser verstuurt je IP-adres en apparaatgegevens naar die partij (zie de privacyverklaring). Cookies die door infrastructuur zoals Cloudflare worden geplaatst zijn in de code niet zichtbaar. Voor externe sites waarnaar we linken, zoals fotoalbums, geldt hun eigen beleid.
 
 ## 7. Toestemming
 

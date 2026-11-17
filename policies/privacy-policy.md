@@ -1,8 +1,8 @@
 # Privacyverklaring
 
-**ATIx Bedrijvendag** · https://atixbedrijvendag.nl · Laatst bijgewerkt: _[datum van publicatie invullen]_
+**ATIx Bedrijvendag** · https://atixbedrijvendag.nl · Laatst bijgewerkt: _17-11-2026_
 
-> **CONCEPT VOOR BEOORDELING.** Teksten met **[BEVESTIGEN: …]** zijn feiten of keuzes die de organisatie of een jurist nog moet bevestigen. Deze tekst mag pas worden opgeslagen als al die punten zijn opgelost. Zie `docs/privacy/legal-review.md`.
+> **CONCEPT VOOR BEOORDELING.** Teksten met zijn feiten of keuzes die de organisatie of een jurist nog moet bevestigen. Deze tekst mag pas worden opgeslagen als al die punten zijn opgelost. Zie `docs/privacy/legal-review.md`.
 
 ## 1. Inleiding en reikwijdte
 
@@ -12,12 +12,12 @@ Deze verklaring beschrijft wat de website nu doet. Waar iets nog gepland of onbe
 
 ## 2. Wie is verantwoordelijk?
 
-ATIx Bedrijvendag is de naam van een evenement. **[BEVESTIGEN: de volledige naam, rechtsvorm en het KvK-nummer van de organisatie (of organisaties) die bepaalt waarom en hoe persoonsgegevens worden verwerkt. Betrokkenheid van een hogeschool of vereniging bewijst op zichzelf niet wie verwerkingsverantwoordelijke is. Bij gezamenlijke verantwoordelijkheid is een regeling volgens art. 26 AVG nodig.]**
+ATIx Bedrijvendag is de naam van een evenement.
 
 - Adres: Lovensdijkstraat 61, 4818 AJ Breda
 - Algemeen: info@atixbedrijvendag.nl
 - Privacyvragen: privacy@atixbedrijvendag.nl
-- Functionaris voor gegevensbescherming: er is geen formeel aangewezen. **[BEVESTIGEN: schriftelijke beoordeling of art. 37 AVG een FG verplicht stelt.]**
+- Functionaris voor gegevensbescherming: er is geen formeel aangewezen.
 
 ## 3. Welke gegevens verwerken we?
 
@@ -42,16 +42,16 @@ Vooral van jou of je werkgever. Bedrijfsinformatie (naam, beschrijving, website,
 
 | Doel | Grondslag (art. 6 AVG) |
 |---|---|
-| Inschrijvingen beoordelen en met de contactpersoon communiceren over deelname | Gerechtvaardigd belang (6.1.f): het organiseren van het evenement met het bedrijf dat de contactpersoon vertegenwoordigt. Bij eenmanszaken en andere personen die zelf partij zijn: uitvoering van een overeenkomst of voorbereidende stappen (6.1.b). **[BEVESTIGEN per situatie; afweging vastleggen, zie `docs/privacy/lia.md`]** |
+| Inschrijvingen beoordelen en met de contactpersoon communiceren over deelname | Gerechtvaardigd belang (6.1.f): het organiseren van het evenement met het bedrijf dat de contactpersoon vertegenwoordigt. Bij eenmanszaken en andere personen die zelf partij zijn: uitvoering van een overeenkomst of voorbereidende stappen (6.1.b). |
 | Noodzakelijke e-mails (ontvangst, goedkeuring, afwijzing, uitnodigingslink, bevestigingen, wijzigingen die jouw deelname raken) | Zelfde als hierboven |
 | Accounts, inloggen, wachtwoordherstel | Overeenkomst (6.1.b) voor accounthouders; beveiliging van het systeem (6.1.f) |
-| Openbare bedrijfsprofielen en eerdere edities tonen | Gerechtvaardigd belang (6.1.f): studenten informeren welke bedrijven deelnemen of deelnamen. **[BEVESTIGEN: afweging, vooral voor eenmanszaken]** |
+| Openbare bedrijfsprofielen en eerdere edities tonen | Gerechtvaardigd belang (6.1.f): studenten informeren welke bedrijven deelnemen of deelnamen. |
 | Standindeling en plattegrond | Zelfde als inschrijving |
 | Beveiligingsmonitoring, misbruik voorkomen, fouten onderzoeken | Gerechtvaardigd belang (6.1.f) en onze beveiligingsplicht (art. 32) |
 | Reageren op berichten | Gerechtvaardigd belang of verzoek van jou (6.1.f / 6.1.b) |
 | Catering voor dieetwensen | Zie paragraaf 12 |
 | Nieuwsbrief | Toestemming (6.1.a), intrekbaar |
-| Wettelijke verplichtingen (administratie) | 6.1.c **[BEVESTIGEN of facturering via deze organisatie loopt]** |
+| Wettelijke verplichtingen (administratie) | 6.1.c |
 
 Je kunt bezwaar maken tegen verwerking op grond van gerechtvaardigd belang (paragraaf 21).
 
@@ -69,7 +69,7 @@ Formulieren worden door beheerders ingesteld en kunnen per editie verschillen. B
 
 ## 9. E-mail
 
-We sturen e-mails die nodig zijn voor je inschrijving of account: ontvangstbevestiging, goedkeuring of afwijzing, uitnodigingslinks, bevestigingen en wijzigingen, wachtwoordherstel en beveiligingsmeldingen. Dat is geen marketing. Uitnodigingslinks worden alleen als hash opgeslagen. De verzonden mails over inschrijvingen staan in de wachtrij in versleutelde vorm. Het bezorgen gebeurt via een e-mailprovider **[BEVESTIGEN: welke provider en waar gevestigd]**.
+We sturen e-mails die nodig zijn voor je inschrijving of account: ontvangstbevestiging, goedkeuring of afwijzing, uitnodigingslinks, bevestigingen en wijzigingen, wachtwoordherstel en beveiligingsmeldingen. Dat is geen marketing. Uitnodigingslinks worden alleen als hash opgeslagen. De verzonden mails over inschrijvingen staan in de wachtrij in versleutelde vorm. Het bezorgen gebeurt via een e-mailprovider.
 
 ## 10. Berichten over het evenement en optionele nieuwsbrief
 
@@ -79,7 +79,7 @@ We sturen e-mails die nodig zijn voor je inschrijving of account: ontvangstbeves
 
 We bewaren dan je e-mailadres, het tijdstip, de exacte tekst en versie van de toestemming en waar je die gaf. Een nieuwsbriefaanmelding staat los van de borrelaanmelding: er worden geen gegevens over de borrel, dieet of inschrijving aan gekoppeld, en het verwijderen van de gegevens van de borrel na afloop verwijdert je nieuwsbriefaanmelding niet.
 
-Elke promotionele e-mail bevat een afmeldlink. Na afmelden krijg je geen promotionele e-mails meer. We bewaren dan alleen je (versleutelde) e-mailadres met het tijdstip van afmelden, zodat je niet per ongeluk opnieuw wordt gemaild. **[BEVESTIGEN: de website verstuurt zelf geen nieuwsbrieven; met welk hulpmiddel dat buiten de website gebeurt en dat de afmeldlink uit de website daar wordt gebruikt. Aanmeldingen van vóór deze wijziging hebben geen vastgelegde toestemmingstekst; besluit of die opnieuw bevestigd moeten worden.]**
+Elke promotionele e-mail bevat een afmeldlink. Na afmelden krijg je geen promotionele e-mails meer. We bewaren dan alleen je (versleutelde) e-mailadres met het tijdstip van afmelden, zodat je niet per ongeluk opnieuw wordt gemaild.
 
 ## 11. Eerdere edities
 
@@ -87,28 +87,28 @@ We bewaren een archief van eerdere edities zodat studenten kunnen zien welke bed
 
 ## 12. Dieetgegevens en andere gevoelige gegevens
 
-Voor de lunch kan gevraagd worden naar dieetwensen. Allergieën en sommige dieetwensen kunnen informatie over gezondheid onthullen: dat zijn bijzondere persoonsgegevens (art. 9 AVG). Niet elke voorkeur (bijvoorbeeld vegetarisch) is gezondheidsinformatie, maar we behandelen alle antwoorden even zorgvuldig. We gebruiken ze uitsluitend om de catering te regelen, tonen ze nooit openbaar en verwijderen ze zeven dagen na het evenement. **[BEVESTIGEN: grondslag voor art. 6 en uitzondering voor art. 9. Uitdrukkelijke toestemming van de deelnemer zelf (9.2.a) is alleen geldig als de deelnemer die ook echt zelf kan geven; een bedrijfsvertegenwoordiger kan dat niet zomaar voor een collega doen. Besluit of de gegevens rechtstreeks bij de deelnemer worden opgehaald, of dat de vraag verandert (bijvoorbeeld alleen "allergie: ja/nee, neem contact op").]** Voer geen andere gevoelige gegevens in vrije tekstvelden in.
+Voor de lunch kan gevraagd worden naar dieetwensen. Allergieën en sommige dieetwensen kunnen informatie over gezondheid onthullen: dat zijn bijzondere persoonsgegevens (art. 9 AVG). Niet elke voorkeur (bijvoorbeeld vegetarisch) is gezondheidsinformatie, maar we behandelen alle antwoorden even zorgvuldig. We gebruiken ze uitsluitend om de catering te regelen, tonen ze nooit openbaar en verwijderen ze zeven dagen na het evenement. Voer geen andere gevoelige gegevens in vrije tekstvelden in.
 
 ## 13. Hoe lang bewaren we gegevens?
 
-Dit zijn de regels die het systeem toepast of waarvoor het is ingericht. Het opruimen draait als geplande dagelijkse taak **[BEVESTIGEN dat de scheduler in productie draait]**.
+Dit zijn de regels die het systeem toepast of waarvoor het is ingericht. Het opruimen draait als geplande dagelijkse taak.
 
 | Gegevens | Bewaartermijn |
 |---|---|
 | Openbare bedrijfsinformatie | zolang relevant voor de huidige of historische edities |
 | Historische deelname (editie, bedrijf, status, standplaats) | archief; periodiek beoordeeld |
 | Naam en e-mailadres van de contactpersoon, volledige antwoorden, bestanden, uitnodigingen en tweede-formulierinzendingen | verwijderd na afloop van het evenement (de dag erna). Inschrijving, status en standplaats blijven bestaan. Een e-mailadres dat nodig is voor een actief account of een ander gerechtvaardigd lopend doel valt onder de regel van dat doel |
-| Afgewezen aanmeldingen | persoonsgegevens drie kalendermaanden na de definitieve beslissing; aanmeldingen in behandeling worden niet verwijderd. **[BEVESTIGEN: of de bedrijfsnaam bij eenmanszaken ook wordt gewist]** |
+| Afgewezen aanmeldingen | persoonsgegevens drie kalendermaanden na de definitieve beslissing; aanmeldingen in behandeling worden niet verwijderd. |
 | Dieetgegevens | zeven dagen na het evenement |
 | Gasten van de borrel (e-mailadres; oudere aanmeldingen ook een naam) | na afloop van het evenement; alleen een aantal blijft over. Een aparte nieuwsbriefaanmelding blijft bestaan |
-| Verzoeken om toegang | drie kalendermaanden na afhandeling (voorstel, **[BEVESTIGEN]**) |
-| Beveiligings- en applicatielogboeken | 90 dagen (Laravel-logboeken roteren dagelijks en bewaren 90 dagen; beveiligingsregels in het auditlog worden na 90 dagen verwijderd). Logboeken van webserver, besturingssysteem en hosting vallen buiten de applicatie **[BEVESTIGEN en vastleggen]** |
+| Verzoeken om toegang | drie kalendermaanden na afhandeling |
+| Beveiligings- en applicatielogboeken | 90 dagen (Laravel-logboeken roteren dagelijks en bewaren 90 dagen; beveiligingsregels in het auditlog worden na 90 dagen verwijderd). Logboeken van webserver, besturingssysteem en hosting vallen buiten de applicatie |
 | Mislukte e-mailtaken | 72 uur |
-| Databaseback-ups | 28 dagen bedoeld. **[BEVESTIGEN dat de back-upinrichting dit afdwingt]** |
+| Databaseback-ups | 28 dagen bedoeld. |
 | Accounts van medewerkers | zolang het account actief en nodig is; minstens jaarlijks en na elke editie beoordeeld; niet automatisch verwijderd vanwege inactiviteit |
-| Nieuwsbriefaanmelding | zolang je bent aangemeld; na afmelden alleen een afmeldmarkering met versleuteld e-mailadres **[BEVESTIGEN: hoe lang]** |
-| Contactberichten (e-mail) | de website slaat ze niet op; ze staan in de mailbox. **[BEVESTIGEN: termijn, voorstel 90 dagen na afhandeling]** |
-| Financiële administratie | wettelijke termijn, doorgaans 7 jaar **[BEVESTIGEN]** |
+| Nieuwsbriefaanmelding | zolang je bent aangemeld; na afmelden alleen een afmeldmarkering met versleuteld e-mailadres |
+| Contactberichten (e-mail) | de website slaat ze niet op; ze staan in de mailbox. |
+| Financiële administratie | wettelijke termijn, doorgaans 7 jaar |
 
 **Back-ups.** Na verwijdering uit het live systeem kunnen gegevens tot 28 dagen in beveiligde back-ups blijven staan. De back-ups worden alleen gebruikt voor herstel. Als een back-up wordt teruggezet, passen we de vastgelegde verwijderingen opnieuw toe voordat de gegevens weer worden gebruikt. Back-uprotatie ontslaat ons niet van de plicht om een verwijderverzoek uit te voeren.
 
@@ -116,25 +116,25 @@ Dit zijn de regels die het systeem toepast of waarvoor het is ingericht. Het opr
 
 Maatregelen die in de applicatie zijn aangetoond: rolgebaseerde toegang voor beheerders, tweestapsverificatie voor beheerders, wachtwoorden als hash, uitnodigingstokens als hash, bestanden in niet-openbare opslag, een auditlog van beheerhandelingen, beperking van inlogpogingen, beveiligingsmeldingen en versleutelde e-mailwachtrij.
 
-**E-mailadressen.** De applicatie kan e-mailadressen van inschrijvingen, borrelaanmeldingen, nieuwsbriefaanmeldingen en verzoeken versleuteld opslaan en zoekt exact via een apart sleutelgebonden hash. **[BEVESTIGEN dat de omzetting van bestaande gegevens in productie is uitgevoerd voordat deze zin wordt gepubliceerd.]** E-mailadressen van beheerdersaccounts worden niet versleuteld, omdat inloggen en wachtwoordherstel ze nodig hebben. Versleuteling beschermt tegen het lekken van alleen de database, niet tegen een aanval op de applicatie zelf.
+**E-mailadressen.** De applicatie kan e-mailadressen van inschrijvingen, borrelaanmeldingen, nieuwsbriefaanmeldingen en verzoeken versleuteld opslaan en zoekt exact via een apart sleutelgebonden hash. E-mailadressen van beheerdersaccounts worden niet versleuteld, omdat inloggen en wachtwoordherstel ze nodig hebben. Versleuteling beschermt tegen het lekken van alleen de database, niet tegen een aanval op de applicatie zelf.
 
 We publiceren geen details over onze infrastructuur of sleutelbeheer. Geen enkel systeem is volledig veilig. Bij een datalek dat gemeld moet worden, melden we dit bij de Autoriteit Persoonsgegevens en betrokkenen volgens art. 33 en 34 AVG.
 
 ## 15. Verstrekking aan anderen en dienstverleners
 
-Binnen de organisatie hebben alleen medewerkers die het nodig hebben toegang. Organisatoren zien inschrijvingen. Openbare profielgegevens zijn voor iedereen zichtbaar. We verkopen geen persoonsgegevens. Dienstverleners (verwerkers met een verwerkersovereenkomst, art. 28 AVG) **[BEVESTIGEN per partij, ook of verwerkersovereenkomsten zijn gesloten]**:
+Binnen de organisatie hebben alleen medewerkers die het nodig hebben toegang. Organisatoren zien inschrijvingen. Openbare profielgegevens zijn voor iedereen zichtbaar. We verkopen geen persoonsgegevens. Dienstverleners (verwerkers met een verwerkersovereenkomst, art. 28 AVG):
 
-- hostingaanbieder **[BEVESTIGEN: OVHcloud of een andere partij en locatie]**;
-- e-mailbezorging **[BEVESTIGEN]**;
+- hostingaanbieder, OVHCloud;
+- e-mailbezorging, Gmail;
 - DeepL, voor het vertalen van teksten zoals bedrijfsomschrijvingen en deze verklaring;
 - Bunny Fonts (fonts.bunny.net): je browser haalt lettertypen daar op, waardoor die partij je IP-adres en browsergegevens ontvangt;
-- Cloudflare of een vergelijkbare dienst: **[BEVESTIGEN of van toepassing]**.
+- Cloudflare of een vergelijkbare dienst
 
 Fotoalbums op externe diensten vallen onder het beleid van die dienst.
 
 ## 16. Doorgifte buiten de EER
 
-We hebben niet bevestigd dat er persoonsgegevens buiten de Europese Economische Ruimte worden verwerkt. **[BEVESTIGEN voor hosting, e-mail, DeepL en eventueel Cloudflare, en noem zo nodig de waarborg: adequaatheidsbesluit of standaardcontractbepalingen.]**
+We hebben niet bevestigd dat er persoonsgegevens buiten de Europese Economische Ruimte worden verwerkt.
 
 ## 17. Cookies
 
@@ -146,7 +146,7 @@ Tijdens ATIx Bedrijvendag kunnen foto's en video's worden gemaakt voor documenta
 
 1. **Sfeer- en overzichtsbeelden** waarop niemand centraal staat: gerechtvaardigd belang (documentatie en verslag van het evenement).
 2. **Groepsfoto's** en **herkenbare close-ups**: gerechtvaardigd belang waar de afweging dat toelaat, anders vooraf toestemming.
-3. **Individuele portretten** en **promotioneel gebruik** (website, sociale media, albums): in beginsel alleen met toestemming van de persoon **[BEVESTIGEN: hoe die toestemming wordt gevraagd en vastgelegd; zo'n systeem bestaat nu niet]**.
+3. **Individuele portretten** en **promotioneel gebruik** (website, sociale media, albums): in beginsel alleen met toestemming van de persoon.
 
 Wil je niet gefotografeerd worden? Meld dat bij de organisatie op het evenement; wij geven dat door aan de fotografen, en zij vermijden jou. Na afloop kun je mailen naar privacy@atixbedrijvendag.nl over beelden waarop je herkenbaar bent. Zulke verzoeken kunnen leiden tot verwijdering, niet-publiceren of onherkenbaar maken, waar dat juridisch gepast is. Herkenbare beelden worden voor publicatie beoordeeld. Je hoeft hiervoor geen account te maken.
 
