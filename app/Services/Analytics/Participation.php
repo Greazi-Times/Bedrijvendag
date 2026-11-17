@@ -45,6 +45,12 @@ class Participation
         return $this->data()['grandfathered'];
     }
 
+    /** @return array<int, list<int>> event id => company ids on a Super Admin override stand without an approved enrollment (not registrations) */
+    public function overridden(): array
+    {
+        return $this->data()['overridden'];
+    }
+
     public function index(int $eventId): ?int
     {
         foreach ($this->editions() as $i => $edition) {
@@ -187,7 +193,7 @@ class Participation
         });
     }
 
-    /** @return array{editions: list<array<string, mixed>>, sets: array<int, list<int>>, grandfathered: array<int, list<int>>} */
+    /** @return array{editions: list<array<string, mixed>>, sets: array<int, list<int>>, grandfathered: array<int, list<int>>, overridden: array<int, list<int>>} */
     private function data(): array
     {
         return $this->analytics->remember('participation', function (): array {
@@ -206,18 +212,20 @@ class Participation
             $editions = [];
             $sets = [];
             $grandfathered = [];
+            $overridden = [];
 
             foreach ($events as $event) {
                 $enrollmentEra = $eraStart !== null && $event->date->gte($eraStart);
                 $fromApproved = array_values(array_unique(array_merge($approved[$event->id] ?? [], $confirmed[$event->id] ?? [])));
                 $fromStands = $stands[$event->id] ?? [];
 
+                $overridden[$event->id] = array_values(array_diff($confirmed[$event->id] ?? [], $approved[$event->id] ?? []));
                 $sets[$event->id] = $enrollmentEra ? $fromApproved : $fromStands;
                 $grandfathered[$event->id] = $enrollmentEra ? array_values(array_diff($fromStands, $fromApproved)) : [];
                 $editions[] = ['id' => $event->id, 'name' => $event->name, 'date' => $event->date->toDateString(), 'provisional' => $event->date->gte(today()), 'enrollments' => $enrollmentEra];
             }
 
-            return compact('editions', 'sets', 'grandfathered');
+            return compact('editions', 'sets', 'grandfathered', 'overridden');
         });
     }
 

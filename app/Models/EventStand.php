@@ -31,8 +31,8 @@ class EventStand extends Model
         'participation_confirmed_at' => 'datetime',
     ];
 
-    /** One-shot carrier of a Super Admin historical override; only assignWithHistoricalOverride() sets it. */
-    public ?string $historicalOverrideReason = null;
+    /** One-shot carrier of a Super Admin enrollment override; only assignWithEnrollmentOverride() sets it. */
+    public ?string $enrollmentOverrideReason = null;
 
     public bool $overrideUsed = false;
 
@@ -40,17 +40,17 @@ class EventStand extends Model
      * Places a company on this stand, bypassing the enrollment requirement. Allowed only for a Super Admin on a
      * historical edition (checked again in StandEligibility); the override lives for this one save and is logged.
      */
-    public function assignWithHistoricalOverride(int $companyId, string $reason, ?string $previousStandNumber = null): void
+    public function assignWithEnrollmentOverride(int $companyId, string $reason, ?string $previousStandNumber = null): void
     {
         DB::transaction(function () use ($companyId, $reason, $previousStandNumber): void {
             $previousCompany = $this->company_id;
-            $this->historicalOverrideReason = $reason;
+            $this->enrollmentOverrideReason = $reason;
             $this->overrideUsed = false;
 
             try {
                 $this->fill(['company_id' => $companyId, 'partner_id' => null, 'type' => 'company'])->save();
             } finally {
-                $this->historicalOverrideReason = null;
+                $this->enrollmentOverrideReason = null;
             }
 
             if (! $this->overrideUsed) {
@@ -69,7 +69,7 @@ class EventStand extends Model
                     'new_stand' => $this->stand_number,
                     'reason' => $reason,
                 ])
-                ->log('Historical stand assignment: enrollment requirement overridden');
+                ->log('Stand assignment: enrollment requirement overridden');
         });
     }
 

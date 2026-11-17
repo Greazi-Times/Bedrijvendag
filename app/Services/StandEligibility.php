@@ -19,8 +19,7 @@ use Illuminate\Validation\ValidationException;
  *   dietary answers, contacts or the state of the invitation never change eligibility, so a company can be given a stand
  *   the moment it is approved and keeps it whatever happens to the second form.
  * - Partners are a separate model with their own stands and are never checked here.
- * - Historical editions (strictly before today, Europe/Amsterdam) follow the same rule. Only a Super Admin can place a
- *   non-approved company there, through EventStand::assignWithHistoricalOverride() with a reason; it is logged.
+ * - Only a Super Admin can place a non-approved company on a stand of any edition, through EventStand::assignWithEnrollmentOverride() with a reason; it is logged.
  * - Grandfathering needs no flag: a check only runs when a write changes WHO is on a stand or WHICH edition it is in.
  *   An existing assignment keeps working (layout, markers), but re-placing it, moving it to another stand or edition,
  *   or re-adding it after removal is a new assignment and must pass.
@@ -33,10 +32,10 @@ class StandEligibility
         return $event->date !== null && $event->date->toDateString() < now('Europe/Amsterdam')->toDateString();
     }
 
-    /** The only authorization for the override: a real Super Admin acting on a historical edition. */
-    public function canOverride(Event $event, ?User $user): bool
+    /** The only authorization for the override: a real Super Admin, for any edition. */
+    public function canOverride(?User $user): bool
     {
-        return $user !== null && $user->isSuperAdmin() && $this->isHistorical($event);
+        return $user !== null && $user->isSuperAdmin();
     }
 
     public function isEligible(Event $event, Company|int $company): bool
@@ -53,7 +52,7 @@ class StandEligibility
     /** What the stand dropdowns may offer: approved companies, or every company when the user may and does override. */
     public function assignableCompanies(Event $event, bool $override = false): Builder
     {
-        return $override && $this->canOverride($event, auth()->user()) ? Company::query() : $this->eligibleCompanies($event);
+        return $override && $this->canOverride(auth()->user()) ? Company::query() : $this->eligibleCompanies($event);
     }
 
     /** Does this pending write place a company on a stand in a way that must be checked? */
@@ -80,9 +79,9 @@ class StandEligibility
             return;
         }
 
-        $reason = trim((string) $stand->historicalOverrideReason);
+        $reason = trim((string) $stand->enrollmentOverrideReason);
 
-        if ($reason !== '' && $this->canOverride($event, auth()->user())) {
+        if ($reason !== '' && $this->canOverride(auth()->user())) {
             $stand->forceFill(['participation_confirmed_at' => now()]);
             $stand->overrideUsed = true;
 
@@ -111,7 +110,7 @@ class StandEligibility
     public function flaggedStands(Event $event): Collection
     {
         if ($this->isHistorical($event)) {
-            return collect(); // history is not "flagged": it is corrected through the override
+            return collect(); // history is not "flagged"
         }
 
         return EventStand::query()
@@ -119,6 +118,7 @@ class StandEligibility
             ->where('event_id', $event->id)
             ->where('type', 'company')
             ->whereNotNull('company_id')
+            ->whereNull('participation_confirmed_at') // explicitly overridden by a Super Admin: not a grandfathered leftover
             ->whereNotIn('company_id', $event->approvedCompanies()->select('companies.id'))
             ->orderByRaw('CAST(stand_number AS UNSIGNED)')
             ->get();
