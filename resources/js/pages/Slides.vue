@@ -33,8 +33,11 @@ const sync = createSlideSync({
 onMounted(() => {
     preload(images.value);
 
-    intervalId = setInterval(() => {
-        currentIndex.value = (currentIndex.value + 1) % images.value.length;
+    intervalId = setInterval(async () => {
+        // Only swap once the next image is loaded; until then the current slide stays visible.
+        const next = (currentIndex.value + 1) % images.value.length;
+        await preload([images.value[next]], 3000);
+        currentIndex.value = next % images.value.length;
     }, 8000);
 
     sync.start();
@@ -51,7 +54,7 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="slideshow">
-        <Transition name="fade" mode="out-in">
+        <Transition name="fade">
             <img :key="images[currentIndex]" :src="images[currentIndex]" alt="" class="slide-image" />
         </Transition>
     </div>
@@ -68,25 +71,30 @@ onBeforeUnmount(() => {
 }
 
 .slide-image {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
 }
 
-/* Fade animation */
+/* Crossfade: the new slide fades in on top while the old one stays fully opaque underneath until removed. */
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.5s ease;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.fade-enter-active {
+    z-index: 1;
+}
+
+.fade-enter-from {
     opacity: 0;
 }
 
-.fade-enter-to,
-.fade-leave-from {
+.fade-leave-from,
+.fade-leave-to {
     opacity: 1;
 }
 </style>
