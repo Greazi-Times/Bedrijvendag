@@ -2,15 +2,8 @@
 
 use App\Http\Controllers\FeedbackController;
 use App\Http\Middleware\PrivatePage;
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
-
-// Generous on purpose: a whole lecture hall scanning one QR code often shares one IP address. The counter lives only
-// in the cache for a minute and is never stored with a response.
-RateLimiter::for('feedback', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
 
 Route::prefix('feedback/{event}/{audience}')->whereNumber('event')->whereIn('audience', ['students', 'companies'])
     ->middleware(['web', PrivatePage::class])->group(function () {

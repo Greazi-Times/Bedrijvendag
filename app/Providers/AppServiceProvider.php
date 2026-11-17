@@ -10,12 +10,15 @@ use App\Services\DeepLTranslator;
 use App\Settings\HomePageImageSettings;
 use App\Support\PageMedia;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Vite;
 use Illuminate\Http\Middleware\TrustProxies;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View as ViewFacade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -43,12 +46,26 @@ class AppServiceProvider extends ServiceProvider
         $this->configureAuthorization();
         $this->configureAuditing();
         $this->configureErrorPages();
+        $this->configureRateLimiting();
 
         Event::listen(SettingsSaved::class, function (SettingsSaved $event) {
             if ($event->settings instanceof HomePageImageSettings) {
                 PageMedia::forgetSlideVersion();
             }
         });
+    }
+
+    /**
+     * Named limiters live here, not in a route file: with `route:cache` (production) the route files, and the `then`
+     * callback that loads them, are skipped, so a limiter registered there would not exist and `throttle:name` would
+     * throw MissingRateLimiterException.
+     *
+     * Feedback is public and anonymous. Generous on purpose: a whole lecture hall scanning one QR code often shares one
+     * IP address. The counter lives only in the cache for a minute and is never stored with a response.
+     */
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('feedback', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
     }
 
     /**
