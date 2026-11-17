@@ -12,11 +12,16 @@ use App\Models\Partner;
 use App\Services\StandEligibility;
 use App\Support\PageMedia;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Enums\Size;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -77,9 +82,8 @@ class ManageStands extends Page implements HasForms, HasTable
 
     public function mount(): void
     {
-        $this->selectedEventId = Event::query()
-            ->orderByDesc('date')
-            ->value('id');
+        // Same default as the dashboard: today or the next upcoming edition, else the latest past one.
+        $this->selectedEventId = app(\App\Services\Analytics\Analytics::class)->defaultEvent()?->id;
 
         if ($this->selectedEventId) {
             $this->syncStandRowsForSelectedEvent();
@@ -532,21 +536,31 @@ class ManageStands extends Page implements HasForms, HasTable
 
                         $event = Event::query()->findOrFail($record->event_id); // the stand's own edition, never the page property
                         $eligibility = app(StandEligibility::class);
+                        $canOverride = $eligibility->canOverride($event, auth()->user());
                         $current = $record->company_id;
                         // Grouped so a search term can never widen the list: (eligible OR current company) AND name LIKE ...
-                        $scope = fn () => Company::query()->where(fn ($w) => $w
-                            ->whereIn('companies.id', $eligibility->assignableCompanies($event)->select('companies.id'))
+                        $scope = fn (bool $override) => Company::query()->where(fn ($w) => $w
+                            ->whereIn('companies.id', $eligibility->assignableCompanies($event, $override)->select('companies.id'))
                             ->when($current, fn ($w) => $w->orWhere('companies.id', $current)));
 
                         return [
+                            Placeholder::make('override_info')
+                                ->hiddenLabel()
+                                ->visible($canOverride)
+                                ->content('Historische editie: inschrijvingscontrole overschrijven. Hiermee kan een bedrijf zonder goedgekeurde inschrijving op een stand worden gezet. Er wordt geen inschrijving aangemaakt of gewijzigd; de actie wordt vastgelegd in het logboek.'),
+                            Toggle::make('historical_override')
+                                ->label('Historische editie: inschrijvingscontrole overschrijven')
+                                ->visible($canOverride)
+                                ->live()
+                                ->default(false),
                             Select::make('company_id')
                                 ->label('Company')
-                                ->helperText($eligibility->isHistorical($event) ? 'This edition is in the past, so any company can be selected.' : 'Only companies with an approved enrollment for this edition can be given a stand.')
-                                ->options(fn (): array => $scope()->orderBy('name')->pluck('name', 'id')->all())
+                                ->helperText(fn (Get $get): string => $canOverride && $get('historical_override') ? 'Override active: every company can be selected.' : 'Only companies with an approved enrollment for this edition can be given a stand.')
+                                ->options(fn (Get $get): array => $scope($canOverride && (bool) $get('historical_override'))->orderBy('name')->pluck('name', 'id')->all())
                                 ->searchable()
                                 ->preload()
                                 ->default(fn (EventStand $record): ?int => $record->company_id)
-                                ->getSearchResultsUsing(fn (string $search): array => $scope()
+                                ->getSearchResultsUsing(fn (string $search, Get $get): array => $scope($canOverride && (bool) $get('historical_override'))
                                     ->where('companies.name', 'like', '%'.addcslashes($search, '%_\\').'%')
                                     ->orderBy('name')
                                     ->limit(50)
@@ -555,12 +569,23 @@ class ManageStands extends Page implements HasForms, HasTable
                                 )
                                 ->getOptionLabelUsing(fn ($value): ?string => $value ? Company::query()->whereKey($value)->value('name') : null)
                                 // The dropdown is not trusted: a hand-crafted request is checked again on the server.
-                                ->rule(fn (): \Closure => function (string $attribute, $value, \Closure $fail) use ($eligibility, $event, $current): void {
-                                    if ((int) $value !== (int) $current && ! $eligibility->isEligible($event, (int) $value) && ! $eligibility->isHistorical($event)) {
+                                ->rule(fn (Get $get): \Closure => function (string $attribute, $value, \Closure $fail) use ($eligibility, $event, $current, $canOverride, $get): void {
+                                    $overriding = $canOverride && $get('historical_override') && $get('override_confirm') && filled($get('override_reason'));
+
+                                    if ((int) $value !== (int) $current && ! $eligibility->isEligible($event, (int) $value) && ! $overriding) {
                                         $fail('This company has no approved enrollment for this edition.');
                                     }
                                 })
                                 ->required(),
+                            Textarea::make('override_reason')
+                                ->label('Reden voor overschrijven')
+                                ->maxLength(500)
+                                ->visible(fn (Get $get): bool => $canOverride && (bool) $get('historical_override'))
+                                ->required(fn (Get $get): bool => $canOverride && (bool) $get('historical_override')),
+                            Checkbox::make('override_confirm')
+                                ->label('Ik begrijp dat dit de inschrijvingseis voor deze historische editie omzeilt')
+                                ->visible(fn (Get $get): bool => $canOverride && (bool) $get('historical_override'))
+                                ->accepted(fn (Get $get): bool => $canOverride && (bool) $get('historical_override')),
                         ];
                     })
                     ->action(function (array $data, EventStand $record) {
@@ -586,6 +611,10 @@ class ManageStands extends Page implements HasForms, HasTable
                                 }
 
                                 $companyId = (int) $data['company_id'];
+                                $previousStand = EventStand::query()
+                                    ->where('event_id', $record->event_id)->where('type', 'company')
+                                    ->where('company_id', $companyId)->where('id', '!=', $record->id)
+                                    ->value('stand_number');
 
                                 EventStand::query()
                                     ->where('event_id', $record->event_id)
@@ -593,6 +622,13 @@ class ManageStands extends Page implements HasForms, HasTable
                                     ->where('company_id', $companyId)
                                     ->where('id', '!=', $record->id)
                                     ->update(['company_id' => null]);
+
+                                // The override is requested explicitly; the server re-checks Super Admin + historical + reason.
+                                if (! empty($data['historical_override']) && ! empty($data['override_confirm'])) {
+                                    $record->assignWithHistoricalOverride($companyId, (string) ($data['override_reason'] ?? ''), $previousStand);
+
+                                    return;
+                                }
 
                                 $record->update([
                                     'company_id' => $companyId,
@@ -649,6 +685,14 @@ class ManageStands extends Page implements HasForms, HasTable
         }
 
         return $this->flaggedStands;
+    }
+
+    /** Super Admin looking at a past edition: the override is available. */
+    public function historicalOverrideAvailable(): bool
+    {
+        $event = $this->getSelectedEvent();
+
+        return $event !== null && app(StandEligibility::class)->canOverride($event, auth()->user());
     }
 
     public function getStandExplanation(EventStand $stand): string

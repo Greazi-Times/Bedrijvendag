@@ -4,6 +4,13 @@
             {{ $this->form }}
         </x-filament::section>
 
+        @if ($this->historicalOverrideAvailable())
+            <x-filament::section icon="heroicon-o-exclamation-triangle" icon-color="warning">
+                <x-slot name="heading">Historische editie: inschrijvingscontrole overschrijven</x-slot>
+                Deze editie is voorbij. Als Super Admin kun je bedrijven zonder goedgekeurde inschrijving op een stand zetten via "Assign". Elke overschrijving vereist een bevestiging en een reden en wordt gelogd; er worden geen inschrijvingen aangemaakt of gewijzigd.
+        </x-filament::section>
+        @endif
+
         @if ($this->pointEditorMode)
             <div class="fixed inset-0 z-[999] flex items-center justify-center p-4">
                 <button

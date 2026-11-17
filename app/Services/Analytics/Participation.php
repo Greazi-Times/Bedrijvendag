@@ -12,7 +12,8 @@ use App\Models\EventStand;
  * streaks, cohorts). Companies are identified by company id only, never by name.
  *
  * Source of participation per edition (one rule, in `data()`):
- *  - from the first edition that has any enrollment record onwards: approved enrollments (the stand is irrelevant;
+ *  - from the first edition that has any enrollment record onwards: approved enrollments plus stands a Super Admin confirmed
+ *    through the historical override (otherwise the stand is irrelevant;
  *    a stand without an approved enrollment is a grandfathered assignment and does NOT count as participation);
  *  - before that: company stands (the only evidence the old site recorded).
  * Both sources are reduced to distinct company ids per edition, so nobody is counted twice. Approval confirms
@@ -199,6 +200,8 @@ class Participation
 
             $approved = $companiesPerEvent(Enrollment::query()->where('status', Enrollment::STATUS_APPROVED)->whereNotNull('company_id'));
             $stands = $companiesPerEvent(EventStand::query()->where('type', 'company')->whereNotNull('company_id'));
+            // Stands a Super Admin confirmed as participation without an enrollment; distinct from approved registrations.
+            $confirmed = $companiesPerEvent(EventStand::query()->where('type', 'company')->whereNotNull('company_id')->whereNotNull('participation_confirmed_at'));
 
             $editions = [];
             $sets = [];
@@ -206,7 +209,7 @@ class Participation
 
             foreach ($events as $event) {
                 $enrollmentEra = $eraStart !== null && $event->date->gte($eraStart);
-                $fromApproved = $approved[$event->id] ?? [];
+                $fromApproved = array_values(array_unique(array_merge($approved[$event->id] ?? [], $confirmed[$event->id] ?? [])));
                 $fromStands = $stands[$event->id] ?? [];
 
                 $sets[$event->id] = $enrollmentEra ? $fromApproved : $fromStands;

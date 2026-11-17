@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\Enrollment;
 use App\Models\Event;
 use App\Models\EventStand;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
@@ -18,16 +19,24 @@ use Illuminate\Validation\ValidationException;
  *   dietary answers, contacts or the state of the invitation never change eligibility, so a company can be given a stand
  *   the moment it is approved and keeps it whatever happens to the second form.
  * - Partners are a separate model with their own stands and are never checked here.
- * - Historical editions (date before today) are not restricted, so past data can still be corrected.
+ * - Historical editions (strictly before today, Europe/Amsterdam) follow the same rule. Only a Super Admin can place a
+ *   non-approved company there, through EventStand::assignWithHistoricalOverride() with a reason; it is logged.
  * - Grandfathering needs no flag: a check only runs when a write changes WHO is on a stand or WHICH edition it is in.
  *   An existing assignment keeps working (layout, markers), but re-placing it, moving it to another stand or edition,
  *   or re-adding it after removal is a new assignment and must pass.
  */
 class StandEligibility
 {
+    /** Strictly before today in Amsterdam; the date is a plain calendar date, so compare dates, not instants. */
     public function isHistorical(Event $event): bool
     {
-        return $event->date !== null && $event->date->lt(today());
+        return $event->date !== null && $event->date->toDateString() < now('Europe/Amsterdam')->toDateString();
+    }
+
+    /** The only authorization for the override: a real Super Admin acting on a historical edition. */
+    public function canOverride(Event $event, ?User $user): bool
+    {
+        return $user !== null && $user->isSuperAdmin() && $this->isHistorical($event);
     }
 
     public function isEligible(Event $event, Company|int $company): bool
@@ -41,10 +50,10 @@ class StandEligibility
         return Company::query()->whereIn('companies.id', $event->approvedCompanies()->select('companies.id'));
     }
 
-    /** What the stand dropdowns may offer: approved companies, or every company for a historical edition (unrestricted). */
-    public function assignableCompanies(Event $event): Builder
+    /** What the stand dropdowns may offer: approved companies, or every company when the user may and does override. */
+    public function assignableCompanies(Event $event, bool $override = false): Builder
     {
-        return $this->isHistorical($event) ? Company::query() : $this->eligibleCompanies($event);
+        return $override && $this->canOverride($event, auth()->user()) ? Company::query() : $this->eligibleCompanies($event);
     }
 
     /** Does this pending write place a company on a stand in a way that must be checked? */
@@ -67,7 +76,16 @@ class StandEligibility
         // Always the edition stored on the stand itself, never a value from the request.
         $event = Event::query()->find($stand->event_id);
 
-        if (! $event || $this->isHistorical($event) || $this->isEligible($event, (int) $stand->company_id)) {
+        if (! $event || $this->isEligible($event, (int) $stand->company_id)) {
+            return;
+        }
+
+        $reason = trim((string) $stand->historicalOverrideReason);
+
+        if ($reason !== '' && $this->canOverride($event, auth()->user())) {
+            $stand->forceFill(['participation_confirmed_at' => now()]);
+            $stand->overrideUsed = true;
+
             return;
         }
 
@@ -77,7 +95,7 @@ class StandEligibility
     /** @throws ValidationException */
     public function assertCompanyEligible(Event $event, int $companyId): void
     {
-        if ($this->isHistorical($event) || $this->isEligible($event, $companyId)) {
+        if ($this->isEligible($event, $companyId)) {
             return;
         }
 
@@ -93,7 +111,7 @@ class StandEligibility
     public function flaggedStands(Event $event): Collection
     {
         if ($this->isHistorical($event)) {
-            return collect();
+            return collect(); // history is not "flagged": it is corrected through the override
         }
 
         return EventStand::query()

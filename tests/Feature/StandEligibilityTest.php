@@ -136,7 +136,7 @@ test('moving a stand to another edition checks the destination edition', functio
     expect(fn () => $legacy->update(['event_id' => $to->id]))->toThrow(ValidationException::class);
 });
 
-test('the dropdown for a historical edition offers every company', function () {
+test('the dropdown for a historical edition offers only approved companies to non-super-admins', function () {
     $past = historicalEvent();
     $stand = emptyStand($past);
     Company::create(['name' => 'Old BV']);
@@ -144,16 +144,14 @@ test('the dropdown for a historical edition offers every company', function () {
 
     $select = companySelect(Livewire::test(ManageStands::class)->set('selectedEventId', $past->id)->mountTableAction('assign', $stand));
 
-    expect(array_values($select->getOptions()))->toBe(['Old BV']);
+    expect($select->getOptions())->toBe([]);
 });
 
-test('historical editions are not restricted', function () {
+test('historical editions are restricted without the Super Admin override', function () {
     $past = historicalEvent();
     $stand = emptyStand($past);
 
-    $stand->update(['company_id' => Company::create(['name' => 'Old BV'])->id]);
-
-    expect($stand->fresh()->company_id)->not->toBeNull();
+    expect(assignFails($stand, Company::create(['name' => 'Old BV'])))->toBeTrue();
 });
 
 test('bulk writes cannot bypass the eligibility check', function () {

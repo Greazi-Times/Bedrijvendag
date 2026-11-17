@@ -230,12 +230,12 @@ test('serves the stored English company description on a previous edition', func
         'description_en' => '<p>We build machines.</p>',
     ]);
 
-    EventStand::query()->create([
+    EventStand::withoutEvents(fn () => EventStand::query()->create([
         'event_id' => $event->id,
         'company_id' => $company->id,
         'type' => 'company',
         'stand_number' => '1',
-    ]);
+    ]));
 
     $this->withSession(['locale' => 'en'])
         ->get(route('edition.show', $event))

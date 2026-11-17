@@ -111,10 +111,10 @@ test('changing an edition date moves it in or out of the eligibility rules witho
 
     $event->update(['date' => '2020-01-01']);
     expect($eligibility->flaggedStands($event->fresh())->count())->toBe(0);
-    emptyStand($event, 2)->update(['company_id' => Company::create(['name' => 'Anyone'])->id]); // historical: unrestricted
+    expect(assignFails(emptyStand($event, 2), Company::create(['name' => 'Anyone'])))->toBeTrue(); // historical: needs the override
 
     $event->update(['date' => '2030-01-01']);
-    expect($eligibility->flaggedStands($event->fresh())->count())->toBe(2)->and($stand->fresh()->company_id)->not->toBeNull();
+    expect($eligibility->flaggedStands($event->fresh())->count())->toBe(1)->and($stand->fresh()->company_id)->not->toBeNull();
 });
 
 /* ---------------------------------------------------------------- form builder protections */
