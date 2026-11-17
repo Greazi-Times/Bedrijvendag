@@ -33,6 +33,7 @@ final class Permissions
         'statistics' => ['label' => 'Statistics', 'section' => 'General', 'description' => 'Financial figures (accepted participation fees) on the dashboard. Other statistics follow the view permission of their module.', 'actions' => ['financial']],
         'events' => ['label' => 'Events', 'section' => 'Edition', 'description' => 'Editions with their dates, programme and partners.', 'actions' => ['view', 'create', 'update', 'delete']],
         'event-stands' => ['label' => 'Stands & map', 'section' => 'Edition', 'description' => 'Stand assignment, map markers and map points per edition.', 'actions' => ['view', 'update']],
+        'attendance' => ['label' => 'Attendance', 'section' => 'Edition', 'description' => 'Check companies in on the day. Dietary wishes of the lunch participants are sensitive and need the separate dietary permission.', 'actions' => ['view', 'update', 'dietary']],
         'enrollments' => ['label' => 'Enrollments', 'section' => 'Company', 'description' => 'Company enrollments per edition, including contact and invoice details. Approve and reject lives under review.', 'actions' => ['view', 'review', 'delete']],
         'forms' => ['label' => 'Forms', 'section' => 'Edition', 'description' => 'Enrollment and information form builder, per edition. Updating also publishes and duplicates.', 'actions' => ['view', 'create', 'update', 'delete']],
         'feedback' => ['label' => 'Feedback', 'section' => 'Edition', 'description' => 'Anonymous student and company feedback per edition: publishing, results, and removing written answers that contain personal data. Editing the questions needs the forms permission.', 'actions' => ['view', 'update', 'delete']],
@@ -65,6 +66,9 @@ final class Permissions
     private const ORIGINS = [
         'event-stands.view' => ['event-stands.manage', 'event-map-points.manage'],
         'event-stands.update' => ['event-stands.manage', 'event-map-points.manage'],
+        'attendance.view' => ['event-stands.view'],
+        'attendance.update' => ['event-stands.update'],
+        'attendance.dietary' => ['enrollments.view'],
         'companies.links' => ['companies.update'],
         'company-interest-requests.export' => ['company-interest-requests.view'],
         'newsletter-subscribers.export' => ['newsletter-subscribers.view'],
@@ -90,6 +94,7 @@ final class Permissions
         'manage-retention' => 'Retention cleanup',
         'manage-alerts' => 'Acknowledge alerts',
         'financial' => 'Financial figures',
+        'dietary' => 'Dietary wishes',
     ];
 
     /**
