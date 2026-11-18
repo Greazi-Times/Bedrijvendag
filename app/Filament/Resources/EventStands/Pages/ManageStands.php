@@ -53,6 +53,13 @@ class ManageStands extends Page implements HasForms, HasTable
                 ->url(fn (): string => route('stands-pdf', ['event' => $this->selectedEventId]))
                 ->openUrlInNewTab(),
 
+            Action::make('export_stands_csv')
+                ->label('Export CSV')
+                ->icon('heroicon-o-table-cells')
+                ->color('gray')
+                ->visible(fn (): bool => filled($this->selectedEventId))
+                ->url(fn (): string => route('stands-csv', ['event' => $this->selectedEventId])),
+
             Action::make('create_map_location')
                 ->authorize('update')
                 ->label('Add map location')

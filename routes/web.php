@@ -15,6 +15,7 @@ use App\Http\Controllers\InformationController;
 use App\Http\Controllers\NewsletterSubscriptionController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\PrivacyPolicyController;
+use App\Http\Controllers\StandAllocationCsvController;
 use App\Http\Controllers\TermsOfServiceController;
 use App\Models\BorrelEnrollment;
 use App\Models\NewsletterSubscriber;
@@ -158,7 +159,12 @@ Route::get('/newsletter/unsubscribe/{subscriber}', [NewsletterSubscriptionContro
 Route::post('/newsletter/unsubscribe/{subscriber}', [NewsletterSubscriptionController::class, 'unsubscribe'])->middleware(['signed', 'throttle:20,1'])->name('newsletter.unsubscribe.store');
 
 Route::get('/events/{event}/stands-pdf', [PdfController::class, 'standsPdf'])
+    ->middleware(['web', 'auth'])
     ->name('stands-pdf');
+
+Route::get('/events/{event}/stands-csv', StandAllocationCsvController::class)
+    ->middleware(['web', 'auth'])
+    ->name('stands-csv');
 
 Route::post('/borrel-signup', function (Request $request) {
     $eventId = $request->input('event_id');

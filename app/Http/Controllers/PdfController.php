@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\EventStand;
 use App\Support\RichText;
 use Barryvdh\Snappy\Facades\SnappyPdf;
+use Illuminate\Support\Facades\Gate;
 
 class PdfController extends Controller
 {
     public function standsPdf(Event $event)
     {
+        Gate::authorize('viewAny', EventStand::class); // same gate as the Event Map page
+
         $event->load('translations');
 
         $stands = $event->stands()
