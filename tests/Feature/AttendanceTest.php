@@ -171,3 +171,106 @@ test('permission sync hands the new attendance permissions to roles that already
 
     expect($role->hasPermissionTo('attendance.view'))->toBeTrue()->and($role->hasPermissionTo('attendance.update'))->toBeTrue()->and($role->hasPermissionTo('attendance.dietary'))->toBeTrue();
 });
+
+function lunchWorld(int $registered = 5): array
+{
+    $w = attendanceWorld();
+    $acme = Enrollment::query()->where('company_id', $w['acme']->id)->where('event_id', $w['event']->id)->first();
+    lunchInfo($acme, array_merge([['lunch_diet' => ['vegetarian']], ['lunch_diet' => ['halal']]], array_fill(0, $registered - 2, ['lunch_diet' => ['none']])));
+
+    return $w;
+}
+
+test('lunch attendance supports partial counts, corrections and shows progress and statistics', function () {
+    $w = lunchWorld();
+    $page = attendancePage($w['event'])->call('openLunch', $w['acme']->id)
+        ->assertSee('Registered participants')->assertSee('1× Vegetarisch')->assertSee('1× Halal')
+        ->set('lunchCount', 3)->call('saveLunch')->assertHasNoErrors();
+
+    expect(CompanyAttendance::query()->sole()->lunch_checked_in)->toBe(3)
+        ->and($page->viewData('lunchStats'))->toBe(['registered' => 5, 'in' => 3, 'remaining' => 2])
+        ->and($page->viewData('rows')->firstWhere('name', 'Acme')['lunch_in'])->toBe(3);
+    $page->assertSee('3 / 5')->assertSee('No lunch registration'); // Beta has no registration
+
+    $page->call('openLunch', $w['acme']->id)->set('lunchCount', 1)->call('saveLunch'); // correction downwards
+    expect(CompanyAttendance::query()->sole()->lunch_checked_in)->toBe(1);
+});
+
+test('lunch counts are validated against zero and the registered number', function () {
+    $w = lunchWorld();
+    $page = attendancePage($w['event'])->call('openLunch', $w['acme']->id);
+
+    $page->set('lunchCount', -1)->call('saveLunch')->assertHasErrors('lunchCount');
+    $page->set('lunchCount', 6)->call('saveLunch')->assertHasErrors('lunchCount');
+    expect(CompanyAttendance::query()->count())->toBe(0);
+});
+
+test('a stale lunch modal cannot overwrite a newer count', function () {
+    $w = lunchWorld();
+    $first = attendancePage($w['event'])->call('openLunch', $w['acme']->id);
+    $second = attendancePage($w['event'])->call('openLunch', $w['acme']->id);
+
+    $first->set('lunchCount', 2)->call('saveLunch');
+    $second->set('lunchCount', 4)->call('saveLunch')->assertSet('lunchCount', 2)->assertSet('lunchLoaded', 2);
+    expect(CompanyAttendance::query()->sole()->lunch_checked_in)->toBe(2);
+
+    $second->set('lunchCount', 4)->call('saveLunch'); // after seeing the current value it can save
+    expect(CompanyAttendance::query()->sole()->lunch_checked_in)->toBe(4);
+});
+
+test('lunch and company attendance are independent', function () {
+    $w = lunchWorld();
+    $page = attendancePage($w['event'])->call('openLunch', $w['acme']->id)->set('lunchCount', 2)->call('saveLunch');
+
+    expect($page->viewData('stats')['present'])->toBe(0); // a lunch count does not check the company in
+
+    $page->call('checkIn', $w['acme']->id)->call('reverse', $w['acme']->id);
+    $row = CompanyAttendance::query()->sole();
+    expect($row->checked_in_at)->toBeNull()->and($row->lunch_checked_in)->toBe(2); // reversing the company keeps the lunch count
+
+    $page->call('checkIn', $w['acme']->id);
+    expect(CompanyAttendance::query()->sole()->lunch_checked_in)->toBe(2);
+});
+
+test('lunch is isolated per edition and a company without registration cannot be checked in', function () {
+    $w = lunchWorld();
+    $other = attendancePage($w['other']);
+    expect($other->viewData('lunchStats'))->toBe(['registered' => 0, 'in' => 0, 'remaining' => 0]);
+
+    $page = attendancePage($w['event'])->call('openLunch', $w['beta']->id)->assertSet('lunchCompanyId', null);
+    $page->set('lunchCount', 1)->call('saveLunch');
+    expect(CompanyAttendance::query()->count())->toBe(0);
+});
+
+test('lunch permissions: updating needs attendance.update and diets need attendance.dietary', function () {
+    $w = lunchWorld();
+
+    $viewer = attendancePage($w['event'], ['attendance.view'])->call('openLunch', $w['acme']->id)->assertSee('Registered participants')->assertDontSee('Halal')->assertDontSee('Dietary wishes');
+    $viewer->set('lunchCount', 2)->call('saveLunch')->assertForbidden();
+    expect(CompanyAttendance::query()->count())->toBe(0);
+
+    attendancePage($w['event'], ['attendance.view', 'attendance.update'])->call('openLunch', $w['acme']->id)->set('lunchCount', 2)->call('saveLunch')->assertDontSee('Halal');
+    expect(CompanyAttendance::query()->sole()->lunch_checked_in)->toBe(2);
+});
+
+test('recorded lunch counts survive retention but the dietary wishes do not', function () {
+    $w = lunchWorld();
+    $page = attendancePage($w['event'])->call('openLunch', $w['acme']->id)->set('lunchCount', 3)->call('saveLunch');
+
+    (new App\Support\Privacy\PrivacyRetention(now()->parse('2027-03-01')->addDays(10)))->run(); // dietary entries removed
+    $page->call('openLunch', $w['acme']->id)->assertDontSee('Halal');
+
+    Enrollment::query()->where('company_id', $w['acme']->id)->delete(); // registration gone entirely
+    $page = attendancePage($w['event']);
+    expect(CompanyAttendance::query()->sole()->lunch_checked_in)->toBe(3)
+        ->and($page->viewData('rows')->firstWhere('name', 'Acme')['lunch_in'])->toBe(3);
+    $page->assertSee('No lunch registration')->assertSee('3 recorded');
+});
+
+test('lunch count changes are audited', function () {
+    $w = lunchWorld();
+    attendancePage($w['event'])->call('openLunch', $w['acme']->id)->set('lunchCount', 2)->call('saveLunch');
+
+    $log = Spatie\Activitylog\Models\Activity::query()->where('log_name', 'attendance')->latest('id')->first();
+    expect($log->causer_id)->toBe(auth()->id())->and($log->properties['attributes']['lunch_checked_in'])->toBe(2);
+});

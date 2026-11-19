@@ -12,7 +12,7 @@ class CompanyAttendance extends Model
 
     protected $auditCategory = 'attendance';
 
-    protected $fillable = ['event_id', 'company_id', 'checked_in_at', 'checked_in_by'];
+    protected $fillable = ['event_id', 'company_id', 'checked_in_at', 'checked_in_by', 'lunch_checked_in'];
 
     protected $casts = ['checked_in_at' => 'datetime'];
 

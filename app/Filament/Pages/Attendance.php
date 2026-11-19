@@ -15,6 +15,7 @@ use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use UnitEnum;
 
@@ -53,6 +54,15 @@ class Attendance extends Page
     public ?int $detailCompanyId = null;
 
     public bool $justCheckedIn = false;
+
+    /** Lunch modal. The loaded count is what the administrator saw; a save is refused when someone else changed it since. */
+    #[Locked]
+    public ?int $lunchCompanyId = null;
+
+    #[Locked]
+    public int $lunchLoaded = 0;
+
+    public ?int $lunchCount = 0;
 
     public static function canAccess(): bool
     {
@@ -107,8 +117,105 @@ class Attendance extends Page
         $this->closeDetails();
     }
 
+    public function openLunch(int $companyId): void
+    {
+        if (! ($this->registrations($companyId)[$companyId] ?? 0) || ! $this->standsOf($companyId)) {
+            return;
+        }
+
+        $this->closeDetails();
+        $this->lunchCompanyId = $companyId;
+        $this->lunchLoaded = $this->lunchCount = $this->recordedLunch($companyId);
+    }
+
+    public function closeLunch(): void
+    {
+        $this->lunchCompanyId = null;
+        $this->resetValidation();
+    }
+
+    public function saveLunch(): void
+    {
+        $this->authorizeUpdate();
+        $companyId = $this->lunchCompanyId;
+        $registered = $companyId ? ($this->registrations($companyId)[$companyId] ?? 0) : 0;
+
+        if (! $companyId || ! $registered || ! $this->standsOf($companyId)) {
+            $this->closeLunch();
+
+            return;
+        }
+
+        $this->validate(['lunchCount' => ['required', 'integer', 'min:0', "max:{$registered}"]], ['lunchCount.max' => "At most {$registered} participants are registered."]);
+
+        try {
+            $saved = DB::transaction(function () use ($companyId): bool {
+                CompanyAttendance::query()->insertOrIgnore(['event_id' => $this->eventId, 'company_id' => $companyId, 'created_at' => now(), 'updated_at' => now()]);
+                $row = CompanyAttendance::query()->where(['event_id' => $this->eventId, 'company_id' => $companyId])->lockForUpdate()->first();
+
+                if ($row->lunch_checked_in !== $this->lunchLoaded) {
+                    return false; // someone else changed it while this modal was open
+                }
+
+                return $row->forceFill(['lunch_checked_in' => $this->lunchCount])->save();
+            });
+        } catch (\Throwable $e) {
+            report($e);
+            Notification::make()->title('Saving failed. Nothing was changed, please try again.')->danger()->send();
+
+            return;
+        }
+
+        if (! $saved) {
+            $this->lunchLoaded = $this->lunchCount = $this->recordedLunch($companyId);
+            Notification::make()->title('Someone else just changed this count. The current value is shown; check it and save again.')->warning()->send();
+
+            return;
+        }
+
+        $this->closeLunch();
+        Notification::make()->title('Lunch check-in saved.')->success()->send();
+    }
+
+    private function recordedLunch(int $companyId): int
+    {
+        return (int) CompanyAttendance::query()->where(['event_id' => $this->eventId, 'company_id' => $companyId])->value('lunch_checked_in');
+    }
+
+    /**
+     * Registered lunch participants per company, from the latest submission of the approved enrollment (the count, never the
+     * diets). A company whose registration is gone, or never existed, is absent. Own check, so it also works without the dietary permission.
+     *
+     * @return array<int, int>
+     */
+    private function registrations(?int $companyId = null): array
+    {
+        $out = [];
+
+        Enrollment::query()->where(['event_id' => $this->eventId, 'status' => Enrollment::STATUS_APPROVED])->whereNotNull('company_id')
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->with('latestInfoSubmission.formVersion:id,schema')->get(['id', 'company_id'])
+            ->each(function (Enrollment $enrollment) use (&$out): void {
+                $submission = $enrollment->latestInfoSubmission;
+                $answers = $submission?->answers;
+
+                if (! is_array($answers)) {
+                    return;
+                }
+
+                $schema = $submission->formVersion?->schema ?? [];
+                $entries = $answers[FormSchema::mappedKey($schema, 'lunch.participants') ?? 'lunch_participants'] ?? [];
+                $declared = $answers[FormSchema::mappedKey($schema, 'lunch.count') ?? 'lunch_count'] ?? null;
+                $count = is_numeric($declared) ? (int) $declared : (is_array($entries) ? count($entries) : 0);
+                $count > 0 && $out[$enrollment->company_id] = $count;
+            });
+
+        return $out;
+    }
+
     public function showDetails(int $companyId): void
     {
+        $this->closeLunch();
         $this->detailCompanyId = $companyId;
         $this->justCheckedIn = false;
     }
@@ -130,7 +237,7 @@ class Attendance extends Page
         return $this->companies()->firstWhere('id', $companyId)['stands'] ?? null;
     }
 
-    /** @return Collection<int, array{id: int, name: string, stands: list<string>, checked_in_at: ?\Illuminate\Support\Carbon}> one entry per company */
+    /** @return Collection<int, array{id: int, name: string, stands: list<string>, checked_in_at: ?\Illuminate\Support\Carbon, lunch_in: int}> one entry per company */
     public function companies(): Collection
     {
         $attendance = CompanyAttendance::query()->where('event_id', $this->eventId)->get()->keyBy('company_id');
@@ -142,6 +249,7 @@ class Attendance extends Page
                 'name' => (string) $stands->first()->company?->name,
                 'stands' => $stands->pluck('stand_number')->map(fn ($n): string => (string) $n)->sortBy(fn (string $n): int => (int) $n)->values()->all(),
                 'checked_in_at' => $attendance[$companyId]->checked_in_at ?? null,
+                'lunch_in' => $attendance[$companyId]->lunch_checked_in ?? 0,
             ])->values();
     }
 
@@ -184,6 +292,10 @@ class Attendance extends Page
         $all = $this->companies();
         $present = $all->filter(fn (array $c): bool => $c['checked_in_at'] !== null)->count();
         $needle = mb_strtolower(trim($this->search));
+        $registrations = $this->registrations();
+        $all = $all->map(fn (array $c): array => $c + ['lunch_registered' => $registrations[$c['id']] ?? 0]);
+        $registered = $all->sum('lunch_registered');
+        $lunchIn = $all->sum('lunch_in');
 
         $rows = $all
             ->filter(fn (array $c): bool => $needle === '' || str_contains(mb_strtolower($c['name']), $needle) || in_array($needle, $c['stands'], true))
@@ -198,12 +310,16 @@ class Attendance extends Page
                 default => fn (array $c): string => mb_strtolower($c['name']),
             })->values();
 
+        $lunch = $this->lunchCompanyId ? $all->firstWhere('id', $this->lunchCompanyId) : null;
         $detail = $this->detailCompanyId ? $all->firstWhere('id', $this->detailCompanyId) : null;
 
         return [
             'editions' => Event::query()->orderByDesc('date')->orderByDesc('id')->get(['id', 'name']),
             'rows' => $rows,
             'stats' => ['total' => $all->count(), 'present' => $present, 'missing' => $all->count() - $present, 'percentage' => $all->isEmpty() ? 0 : (int) round($present / $all->count() * 100)],
+            'lunchStats' => ['registered' => $registered, 'in' => $lunchIn, 'remaining' => $all->sum(fn (array $c): int => max(0, $c['lunch_registered'] - $c['lunch_in']))],
+            'lunch' => $lunch,
+            'lunchDietary' => $lunch && auth()->user()?->can('attendance.dietary') ? $this->dietary($lunch['id']) : null,
             'detail' => $detail,
             'dietary' => $detail && auth()->user()?->can('attendance.dietary') ? $this->dietary($detail['id']) : null,
             'canUpdate' => auth()->user()?->can('attendance.update'),
